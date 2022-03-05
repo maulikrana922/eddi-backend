@@ -1,2 +1,2 @@
 from django.shortcuts import render
-from supplier.views import *
+from eddi_app.supplier.views import *
