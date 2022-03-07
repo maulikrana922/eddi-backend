@@ -1,3 +1,13 @@
+import imp
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+admin.site.register(utl_status)
+admin.site.register(UserSignup)
+admin.site.register(CourseCategoryDetails)
+admin.site.register(CourseType)
+admin.site.register(CourseLevel)
+admin.site.register(FeeType)
+admin.site.register(CourseDetails)
+
+admin.site.site_header = 'Eddi Admin'
