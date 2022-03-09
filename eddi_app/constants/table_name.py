@@ -1,2 +1,4 @@
 USERSIGNUP_TABLE = 'UserSignup'
 COURSEDETAILS_TABLE='CourseDetails'
+COURSE_SUBCATEGORY_TABLE = 'CourseSubCategoryDetails'
+COURSE_CATEGORY_TABLE = 'CourseCategoryDetails'

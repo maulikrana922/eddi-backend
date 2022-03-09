@@ -24,3 +24,9 @@ COURSE_TYPE_ID = 'course_type_id'
 FEE_TYPE_ID = 'fee_type_id'
 COURSE_PRICE='course_price'
 ADDITIONAL_INFORMATION='additional_information'
+
+CATEGORY_NAME_ID = 'category_name_id'
+SUBCATEGORY_NAME='subcategory_name'
+SUBCATEGORY_IMAGE = 'subcategory_image'
+CATEGORY_NAME = 'category_name'
+
