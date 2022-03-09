@@ -16,7 +16,20 @@ class utl_status(models.Model):
     def __str__(self):
         return self.value
 
+class approval_status(models.Model):
+    status = models.ManyToManyField(utl_status,null=True,blank=True)
+    value = models.CharField(max_length=60,blank=True)
 
+    created_by = models.CharField(max_length=100,blank=True)
+    created_date_time = models.DateTimeField(auto_now_add=True)
+    modified_by = models.CharField(max_length=100,blank=True)
+    modified_date_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Approval Status Table"
+
+    def __str__(self):
+        return self.value
 
 class UserSignup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
@@ -54,6 +67,7 @@ class CourseCategoryDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
+
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
@@ -61,6 +75,27 @@ class CourseCategoryDetails(models.Model):
 
     def __str__(self):
         return self.category_name
+
+class CourseSubCategoryDetails(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
+    category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Category Name',blank=True,null=True)
+    subcategory_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
+
+    subcategory_image = models.FileField(upload_to='category_image/',verbose_name='Category Image',blank=True,null=True)
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+    class Meta:
+        verbose_name = "Course Sub Category Table"
+
+    def __str__(self):
+        return self.subcategory_name
 
 
 class CourseType(models.Model):
@@ -122,16 +157,21 @@ class CourseDetails(models.Model):
     course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name='Course Level',blank=True,null=True)
     course_length = models.IntegerField(default=0,verbose_name='Course Length',blank=True,null=True)
     course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
+    course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
+
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
-    course_price = models.IntegerField(default=0,verbose_name='Course Price',blank=True,null=True)
+    course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
+    organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
+    sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
