@@ -1,0 +1,2 @@
+USERSIGNUP_TABLE = 'UserSignup'
+COURSEDETAILS_TABLE='CourseDetails'
