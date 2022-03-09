@@ -67,6 +67,7 @@ class CourseCategoryDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
+
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
@@ -87,6 +88,7 @@ class CourseSubCategoryDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
@@ -169,6 +171,7 @@ class CourseDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
