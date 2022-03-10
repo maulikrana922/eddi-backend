@@ -11,6 +11,8 @@ admin.site.register(FeeType)
 admin.site.register(CourseDetails)
 admin.site.register(CourseSubCategoryDetails)
 admin.site.register(approval_status)
+admin.site.register(UserType)
+
 
 
 admin.site.site_header = 'Eddi Admin'

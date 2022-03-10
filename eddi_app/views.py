@@ -11,20 +11,22 @@ from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
 
-
-
-
 class UserSignupView(APIView):
     def post(self, request):
+        record_map = {}
         if request.method == POST_METHOD:
             record_map = {
                 EMAIL_ID: request.POST.get(EMAIL_ID),
                 PASSWORD: make_password(request.POST.get(PASSWORD)),
+                USER_TYPE_ID: 2,
                 STATUS_ID:1
             }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = 'admin'
-            getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            try:
+                getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)

@@ -29,4 +29,8 @@ CATEGORY_NAME_ID = 'category_name_id'
 SUBCATEGORY_NAME='subcategory_name'
 SUBCATEGORY_IMAGE = 'subcategory_image'
 CATEGORY_NAME = 'category_name'
+TRUE = 'true'
+FALSE = 'false'
+OTP_EMAIL_HTML = 'email-password.html'
+USER_TYPE_ID = 'user_type_id'
 
