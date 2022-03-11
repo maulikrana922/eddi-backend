@@ -15,15 +15,19 @@ class AddCourseView(APIView):
     def post(self, request):
         if request.method == POST_METHOD:
             record_map = {
-                COURSE_IMAGE: request.FILES[COURSE_IMAGE],
+                SUPPLIER_ID: request.POST.get(SUPPLIER_ID,None),
+                COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
                 COURSE_NAME: request.POST.get(COURSE_NAME,None),
                 COURSE_LEVEL_ID : request.POST.get(COURSE_LEVEL_ID,None),
                 COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
                 COURSE_CATEGORY_ID : request.POST.get(COURSE_CATEGORY_ID,None),
+                COURSE_SUBCATEGORY_ID : request.POST.get(COURSE_SUBCATEGORY_ID,None),
                 COURSE_TYPE_ID : request.POST.get(COURSE_TYPE_ID,None),
                 FEE_TYPE_ID: request.POST.get(FEE_TYPE_ID,None),
                 COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
                 ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
+                ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
+                SUB_AREA:request.POST.get(SUB_AREA,None),
                 STATUS_ID:1
             }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -38,6 +42,7 @@ class AddSubCategoryView(APIView):
     def post(self, request):
         if request.method == POST_METHOD:
             record_map = {
+                SUPPLIER_ID:request.POST.get(SUPPLIER_ID,None),
                 CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME_ID,None),
                 SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
                 SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),

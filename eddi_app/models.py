@@ -132,6 +132,8 @@ class CourseCategoryDetails(models.Model):
 class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Category Name',blank=True,null=True)
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,limit_choices_to={'user_type_id': 1})
+
     subcategory_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
 
     subcategory_image = models.FileField(upload_to='category_image/',verbose_name='Category Image',blank=True,null=True)
