@@ -64,6 +64,7 @@ JAZZMIN_SETTINGS = {
 
     # Welcome text on the login screen
     "welcome_sign": "Welcome to Eddi",
+     "copyright": "Eddi",
 }
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

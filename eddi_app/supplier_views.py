@@ -38,7 +38,7 @@ class AddSubCategoryView(APIView):
     def post(self, request):
         if request.method == POST_METHOD:
             record_map = {
-                CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME,None),
+                CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME_ID,None),
                 SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
                 SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),
                 STATUS_ID:1

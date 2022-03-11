@@ -57,9 +57,7 @@ class GetUserDetails(APIView):
             record_map = {
                 EMAIL_ID: request.FILES.get(EMAIL_ID,data.email_id),
                 PASSWORD: request.POST.get(PASSWORD,data.password),
-                IS_STUDENT : request.POST.get(IS_STUDENT,data.is_student),
-                IS_SUPPLIER : request.POST.get(IS_SUPPLIER,data.is_supplier),
-                IS_ADMIN : request.POST.get(IS_ADMIN,data.is_admin),
+                USER_TYPE_ID: 2,
                 IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
                 STATUS_ID:request.POST.get(STATUS_ID,data.status)
             }
@@ -82,9 +80,7 @@ class GetUserDetails(APIView):
             record_map = {
                 EMAIL_ID: request.FILES.get(EMAIL_ID,data.email_id),
                 PASSWORD: request.POST.get(PASSWORD,data.password),
-                IS_STUDENT : request.POST.get(IS_STUDENT,data.is_student),
-                IS_SUPPLIER : request.POST.get(IS_SUPPLIER,data.is_supplier),
-                IS_ADMIN : request.POST.get(IS_ADMIN,data.is_admin),
+                USER_TYPE_ID: 2,
                 IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
                 STATUS_ID:2
             }
