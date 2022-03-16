@@ -146,6 +146,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'eddi_backend.wsgi.application'
 
+CKEDITOR_CONFIGS = {
+    'default': {
+        
+        
+        'width': '100%',
+        'toolbarCanCollapse': False,
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
