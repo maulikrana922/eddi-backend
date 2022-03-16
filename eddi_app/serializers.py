@@ -21,3 +21,17 @@ class CategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseCategoryDetails
         fields = '__all__'
+
+class HomePageCMSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HomePageCMS
+        depth = 1
+        fields = '__all__'
+
+class AboutUsCMSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AboutUsPageCMS
+        depth = 1
+        fields = '__all__'

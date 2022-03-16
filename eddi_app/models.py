@@ -1,3 +1,6 @@
+from distutils.command.upload import upload
+from tabnanny import verbose
+from django.utils.safestring import mark_safe
 from django.db import models
 import uuid
 from django.conf import settings
@@ -8,10 +11,11 @@ from django.dispatch import receiver
 import string
 import random
 from django.template.loader import get_template
-
-from eddi_app.constants.constants import OTP_EMAIL_HTML
+from ckeditor.fields import RichTextField
+from eddi_app.constants.constants import *
 from django.contrib.auth.hashers import make_password, check_password
-
+from django.db.models.signals import m2m_changed
+from django.core.exceptions import ValidationError
 
 
 otp = ''
@@ -21,7 +25,7 @@ otp = ''
 def PasswordView():
     global otp
     context = None
-    digits = "" + str(string.ascii_letters) + str(string.digits) + "!@#$%^&*()"
+    digits = f"{str(string.ascii_letters)}{str(string.digits)}!@#$%^&*()"
     otp = "".join(random.choices(digits, k=6))
     print(otp)
     return otp
@@ -95,20 +99,19 @@ class UserSignup(models.Model):
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-  if created:
-      if instance.user_type.user_type == 'Supplier':
-            html_path = OTP_EMAIL_HTML
-            otp = PasswordView()
-            context_data = {'final_otp':otp}
-            email_html_template = get_template(html_path).render(context_data)
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = (instance.email_id,)
-            data = UserSignup.objects.get(email_id = instance.email_id)
-            data.password = make_password(otp)
-            data.save()
-            email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-            email_msg.content_subtype = 'html'
-            email_msg.send(fail_silently=False)
+    if created and instance.user_type.user_type == SUPPLIER_S:
+        html_path = OTP_EMAIL_HTML
+        otp = PasswordView()
+        context_data = {'final_otp':otp}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
+        data = UserSignup.objects.get(email_id = instance.email_id)
+        data.password = make_password(otp)
+        data.save()
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        email_msg.send(fail_silently=False)
 
 class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
@@ -122,6 +125,11 @@ class CourseCategoryDetails(models.Model):
 
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+    # def  image_tag(self):
+    #     return mark_safe('<img src="/../../media/%s" width="150" height="150" />' % (self.category_image))
+
+    # image_tag.allow_tags = True
 
     class Meta:
         verbose_name = "Course Category Table"
@@ -183,7 +191,7 @@ class CourseLevel(models.Model):
 
     class Meta:
         verbose_name = "Course Level Table"
-    
+
     def __str__(self):
         return self.level_name
 
@@ -200,7 +208,7 @@ class FeeType(models.Model):
 
     class Meta:
         verbose_name = "Fee Type Table"
-    
+
     def __str__(self):
         return self.fee_type_name
 
@@ -232,8 +240,145 @@ class CourseDetails(models.Model):
     class Meta:
         verbose_name = "Course Details Table"
 
+
+################## CMS    ###################################
+class HomePageCMSBanner(models.Model):
+    image_title = models.CharField(max_length=50,blank=True,null=True)
+    banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name="Banner Image")
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+class HomePageCMSPartners(models.Model):
+    image_title = models.CharField(max_length=50,blank=True,null=True)
+    partner_logo = models.ImageField(upload_to = 'homepage_partner_logo/', verbose_name="Partner Logo")
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
     def __str__(self):
-        return self.course_name
+        return str(self.partner_logo.url)
+
+class BlogDetails(models.Model):
+    blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name="Blog Image")
+    blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name='Blog Title')
+    blog_description = RichTextField(verbose_name = 'Blog Description',blank = True)
+    written_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Written by')
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+class TestinomialsDetails(models.Model):
+    user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name='User Details')
+    review = RichTextField(blank=True,verbose_name = 'User Review')
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+
+class HomePageCMS(models.Model):
+
+    #section 1
+    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name='Banner Image')
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_2_left_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Left Button Text')
+    section_2_left_button_link = models.URLField(verbose_name='Left Button URL',blank=True,null=True)
+    section_2_right_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Right Button Text')
+    section_2_right_button_link = models.URLField(verbose_name='Right Button URL',blank=True,null=True)
+
+    #section 3
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_3_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 4
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_4_logo = models.ManyToManyField(HomePageCMSPartners,verbose_name='Partner Logo',blank=True,null=True)
+
+    #section 5
+    section_5_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_5_blog = models.ManyToManyField(BlogDetails,blank=True,null=True,verbose_name="Blog")
+
+    #section 6
+    section_6_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_6_description = models.CharField(max_length=80,blank=True,null=True,verbose_name="Description")
+    section_6_testinomials = models.ManyToManyField(TestinomialsDetails,blank=True,null=True,verbose_name='Testinomials')
+
+    #section 8
+    section_8_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_8_image = models.ImageField(upload_to = 'homepage/',blank=True,null=True,verbose_name='Image')
+    section_8_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_8_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_8_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+   
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
 
 
+
+    class Meta:
+        verbose_name = "Home Page"
+
+def regions_changed(sender, **kwargs):
+    if kwargs['instance'].section_5_blog.count() > 4:
+        raise ValidationError("You can't assign more than four regions")
+
+m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
+
+
+class AboutUsPageCMS(models.Model):
+
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Banner Image')
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_2_video = models.FileField(verbose_name='Video Upload',upload_to='about_us/',null=True,blank=True)
+
+    #section 3
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_3_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Image')
+    section_3_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_3_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 4
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_4_courses = models.ManyToManyField(CourseDetails,verbose_name='Newest Courses',blank=True,null=True)
+    section_4_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_4_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+   
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    class Meta:
+        verbose_name = "About Us Page"

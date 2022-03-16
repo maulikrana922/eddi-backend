@@ -32,17 +32,20 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
- 
-    'jazzmin',
+     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+ 
+
     'eddi_app',
+    'ckeditor',
     'rest_framework',
 ]
+
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "Eddi Admin",
@@ -58,13 +61,59 @@ JAZZMIN_SETTINGS = {
 
     # CSS classes that are applied to the logo above
     "site_logo_classes": "img-circle",
+     
+
+"custom_links": {
+        "eddi_app": [{
+            "name": "Home Page", 
+            "url": "/admin/eddi_app/homepagecms/1/change/", 
+            "icon": "fas fa-home",
+        },
+        {
+            "name": "About Us Page", 
+            "url": "/admin/eddi_app/aboutuspagecms/1/change/", 
+            "icon": "fas fa-info",
+        }
+        ],
+   
+       
+    },
+
 
     # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
     "site_icon": None,
+    "changeform_format": "collapsible",
+    "hide_models": ['eddi_app.HomePageCMSBanner',
+    'eddi_app.utl_status',
+    'eddi_app.UserType',
+    'eddi_app.approval_status',
+    'eddi_app.UserSignup',
+    'eddi_app.CourseCategoryDetails',
+    'eddi_app.CourseSubCategoryDetails',
+    'eddi_app.CourseType',
+    'eddi_app.CourseLevel',
+    'eddi_app.FeeType',
+    'eddi_app.CourseDetails',
+    'eddi_app.TestinomialsDetails',
+    'eddi_app.BlogDetails',
+    'eddi_app.HomePageCMSPartners',
+    'eddi_app.HomePageCMS',
+    'eddi_app.AboutUsPageCMS',
+
+
+    
+
+    
+
+
+    ],
+     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
+    
 
     # Welcome text on the login screen
     "welcome_sign": "Welcome to Eddi",
      "copyright": "Eddi",
+     "custom_js": "main.js"
 }
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -85,6 +134,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -130,7 +180,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -139,7 +189,9 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
+CMS_TEMPLATES = (
+    ('page.html', 'Page'),  # any name should work
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

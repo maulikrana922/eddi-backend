@@ -37,4 +37,5 @@ USER_TYPE_ID = 'user_type_id'
 ORGANIZATION_LOCATION = 'organization_location'
 SUB_AREA = 'sub_area'
 SUPPLIER_ID = 'supplier_id'
+SUPPLIER_S = 'Supplier'
 
