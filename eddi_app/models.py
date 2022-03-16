@@ -214,7 +214,7 @@ class FeeType(models.Model):
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,limit_choices_to={'user_type_id': 1})
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,limit_choices_to={'user_type_id': 1},blank=True,null=True)
     course_image = models.FileField(upload_to='course_image/',verbose_name='Course Image',blank=True,null=True)
     course_name = models.CharField(max_length=150,verbose_name='Course Name',blank=True,null=True)
     course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name='Course Level',blank=True,null=True)
