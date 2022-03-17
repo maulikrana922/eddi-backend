@@ -73,7 +73,12 @@ JAZZMIN_SETTINGS = {
             "name": "About Us Page", 
             "url": "/admin/eddi_app/aboutuspagecms/1/change/", 
             "icon": "fas fa-info",
-        }
+        },
+        {
+            "name": "Contact Us Page", 
+            "url": "/admin/eddi_app/contactuspagecms/1/change/", 
+            "icon": "fas fa-phone",
+        },
         ],
    
        
@@ -87,12 +92,9 @@ JAZZMIN_SETTINGS = {
     'eddi_app.utl_status',
     'eddi_app.UserType',
     'eddi_app.approval_status',
-    'eddi_app.UserSignup',
+    # 'eddi_app.UserSignup',
     'eddi_app.CourseCategoryDetails',
     'eddi_app.CourseSubCategoryDetails',
-    'eddi_app.CourseType',
-    'eddi_app.CourseLevel',
-    'eddi_app.FeeType',
     'eddi_app.CourseDetails',
     'eddi_app.TestinomialsDetails',
     'eddi_app.BlogDetails',

@@ -139,7 +139,7 @@ class CourseCategoryDetails(models.Model):
 
 class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Category Name',blank=True,null=True)
+    category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Sub Category Name',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,limit_choices_to={'user_type_id': 1})
 
     subcategory_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
@@ -267,7 +267,39 @@ class HomePageCMSPartners(models.Model):
     def __str__(self):
         return str(self.partner_logo.url)
 
+class ContactFormLead(models.Model):
+    fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name='Full Name')
+    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    phone_number = models.IntegerField(max_length=100,blank=True,null=True,verbose_name='Phone Number')
+    message = models.TextField(max_length=500,blank=True,null=True,verbose_name='Message')
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+    def __str__(self):
+        return self.email_id
+
+@receiver(post_save, sender=ContactFormLead)
+def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = (settings.EMAIL_HOST_USER,)
+    message = f'''Fullname: {instance.fullname}
+    Email ID: {instance.email_id}
+    Phone Number: {instance.phone_number}
+    Message: {instance.message}
+
+    '''
+    email_msg = EmailMessage('Welcome to Eddi',message,email_from,recipient_list)
+    email_msg.send(fail_silently=False)
+
+
 class BlogDetails(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
+
     blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name="Blog Image")
     blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name='Blog Title')
     blog_description = RichTextField(verbose_name = 'Blog Description',blank = True)
@@ -382,3 +414,26 @@ class AboutUsPageCMS(models.Model):
 
     class Meta:
         verbose_name = "About Us Page"
+
+
+class ContactUsPageCMS(models.Model):
+    
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Banner Image')
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_2_address = models.CharField(max_length=80,blank=True,null=True,verbose_name="Address")
+    section_2_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name="Contact Number")
+    section_2_email = models.EmailField(blank=True,null=True,verbose_name="Email ID")
+
+    section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+
+    class Meta:
+        verbose_name = "Contact Us Page"
+
+
+

@@ -19,7 +19,7 @@ class UserSignupView(APIView):
         record_map = {
             EMAIL_ID: request.POST.get(EMAIL_ID),
             PASSWORD: make_password(request.POST.get(PASSWORD)),
-            USER_TYPE_ID: 2,
+            USER_TYPE_ID: 1,
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -109,6 +109,7 @@ class UserLoginView(APIView):
         password = request.POST.get(PASSWORD)
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            print(data.user_type)
         except:
             data = None
         serializer = UserSignupSerializer(data)
@@ -117,7 +118,7 @@ class UserLoginView(APIView):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_first_time_login:
                 return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True}, status=status.HTTP_200_OK)
-            return Response({STATUS: SUCCESS, DATA: True}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: True,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -163,3 +164,41 @@ class GetAboutUsPageDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
  
+class GetBlogDetails(APIView):
+    def get(self, request,uuid = None):
+        if uuid:
+            data = getattr(models,BLOGDETAILS_TABLE).objects.get(**{UUID:uuid})
+            if serializer := BlogDetailsSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = getattr(models,BLOGDETAILS_TABLE).objects.all()
+            if serializer := BlogDetailsSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactFormView(APIView):
+    def post(self, request):
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {
+                FULLNAME : request.POST.get(FULLNAME),
+                EMAIL_ID : request.POST.get(EMAIL_ID),
+                PHONE_NUMBER : request.POST.get(PHONE_NUMBER),
+                MESSAGE : request.POST.get(MESSAGE)
+            }
+
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[CREATED_BY] = 'admin'
+            try:
+                getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
+            except:
+                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)

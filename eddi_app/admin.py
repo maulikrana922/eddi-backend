@@ -136,6 +136,20 @@ class HomePageCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(HomePageCMS, HomePageCMSAdmin)
 
+class ContactUsPageCMSAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Get In Touch', {
+            'classes': ('collapse',),
+            'fields': ('section_2_heading','section_2_address','section_2_contact','section_2_email','section_2_button_text'),
+        }),
+       )
+
+admin.site.register(ContactUsPageCMS, ContactUsPageCMSAdmin)
 
 
 

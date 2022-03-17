@@ -19,8 +19,12 @@ urlpatterns = [
     path('get-category-details/',GetCategoryDetails.as_view()),
     path('get-category-details/<str:uuid>/',GetCategoryDetails.as_view()),
 
+    path('get-blog-details/',GetBlogDetails.as_view()),
+    path('get-blog-details/<str:uuid>/',GetBlogDetails.as_view()),
+
     path('get-home-page-data/',GetHomePageDetails.as_view()),
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
+    path('contactus-form/',ContactFormView.as_view())
 
 
 
