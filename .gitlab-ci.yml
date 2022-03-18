@@ -7,9 +7,9 @@ deploy-job:
   #  TARGET_DIR: "/var/www/html/Skillism-beta"
   script:
     - echo "Deploying application..."
-    - rsync -P -av $BUILD_DIR/* $TARGET_DIR
+   # - rsync -P -av $BUILD_DIR/* $TARGET_DIR
     #- sudo systemctl restart skillism.service
     - echo "Application successfully deployed."
-    - rm -rf /var/www/html/builds/
+    #- rm -rf /var/www/html/builds/
   only:
     - master-beta
