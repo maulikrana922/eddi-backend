@@ -1,0 +1,15 @@
+deploy-job:      
+  stage: deploy  
+  tags:
+    - "Eddi-backend"
+  #variables:
+  #  BUILD_DIR: "/var/www/html/builds/edzy56xJ/0/parth.p3/Skillism/"
+  #  TARGET_DIR: "/var/www/html/Skillism-beta"
+  script:
+    - echo "Deploying application..."
+    - rsync -P -av $BUILD_DIR/* $TARGET_DIR
+    #- sudo systemctl restart skillism.service
+    - echo "Application successfully deployed."
+    - rm -rf /var/www/html/builds/
+  only:
+    - master-beta
