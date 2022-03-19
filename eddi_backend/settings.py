@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online']
 
+CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
+
 # Application definition
 
 INSTALLED_APPS = [
