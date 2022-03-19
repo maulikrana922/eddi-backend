@@ -26,7 +26,10 @@ SECRET_KEY = '56bly)en(6j7r2!f5z_g-uo&rjclo9@irwvx1thds5xe*d2n$h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+
+
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -45,7 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger'
 ]
-SECURE_SSL_REDIRECT = True
+
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "Eddi Admin",
