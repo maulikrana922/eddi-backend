@@ -9,7 +9,7 @@ deploy-job:
     - echo "Deploying application..."
     - rsync -P -av $BUILD_DIR/* $TARGET_DIR
     - cd $TARGET_DIR
-    - pip3.9 install -r requirement.txt
+    - pip3.9 install -r requirements.txt
     - echo "Application successfully deployed."
     - rm -rf /var/www/html/builds/
   only:
