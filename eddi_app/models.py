@@ -432,6 +432,9 @@ class ContactUsPageCMS(models.Model):
 
     section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
 
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
     class Meta:
         verbose_name = "Contact Us Page"
 

@@ -24,6 +24,9 @@ urlpatterns = [
 
     path('get-home-page-data/',GetHomePageDetails.as_view()),
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
+    path('get-contactus-page-data/',GetContactUsPageDetails.as_view()),
+
+    
     path('contactus-form/',ContactFormView.as_view())
 
 
