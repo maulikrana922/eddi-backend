@@ -29,7 +29,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online']
 
 # Application definition
 
