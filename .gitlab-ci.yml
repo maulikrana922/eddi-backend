@@ -11,6 +11,6 @@ deploy-job:
     - cd $TARGET_DIR
     - pip3.9 install -r requirements.txt
     - echo "Application successfully deployed."
-    - rm -rf /var/www/html/builds/
+    - rm -rf /home/admin/builds/
   only:
     - supplier-dev
