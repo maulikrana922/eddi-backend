@@ -30,7 +30,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online']
+ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online'] 
 
 CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
 
