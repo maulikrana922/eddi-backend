@@ -30,6 +30,4 @@ urlpatterns = [
     path('contactus-form/',ContactFormView.as_view())
 
 
-
-
 ]

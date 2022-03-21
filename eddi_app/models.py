@@ -79,6 +79,9 @@ class approval_status(models.Model):
 
 class UserSignup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
+    first_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='First Name')
+    last_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='Last Name')
+    password = models.CharField(max_length=150,blank=True,null=True,)
     email_id = models.EmailField(unique=True)
     password = models.CharField(max_length=150,blank=True,null=True,)
 

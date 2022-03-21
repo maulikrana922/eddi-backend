@@ -16,7 +16,12 @@ class UserSignupView(APIView):
         record_map = {}
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+        # print(request.POST.get(FIRST_NAME),"first")
+        # print(request.POST.get(LAST_NAME),"last")
+        # print(request.POST.get(EMAIL_ID),"email")
         record_map = {
+            FIRST_NAME: request.POST.get(FIRST_NAME),
+            LAST_NAME: request.POST.get(LAST_NAME),
             EMAIL_ID: request.POST.get(EMAIL_ID),
             PASSWORD: make_password(request.POST.get(PASSWORD)),
             USER_TYPE_ID: 1,
@@ -24,9 +29,15 @@ class UserSignupView(APIView):
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
         record_map[CREATED_BY] = 'admin'
+        print(record_map, "record mappppp")
         try:
             getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
         except Exception as ex:
+
+            # a = models.UserSignup.objects.get(email_id = str(request.POST.get(EMAIL_ID)))
+            # print(a, "aaaaaaaaaaa")
+            # print(a.first_name, "first")
+            # print(a.last_name, "last")
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -113,13 +124,12 @@ class UserLoginView(APIView):
         except:
             data = None
         serializer = UserSignupSerializer(data)
-        # print(serializer, "serializerrrrrrrrrrr")
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_first_time_login:
-                return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True}, status=status.HTTP_200_OK)
-            return Response({STATUS: SUCCESS, DATA: True,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name}}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -153,6 +163,7 @@ class GetHomePageDetails(APIView):
     def get(self, request):
             data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
             if serializer := HomePageCMSSerializer(data):
+                print(serializer, "serializeerrrrrrrrrr")
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
