@@ -148,7 +148,7 @@ class ChangePasswordView(APIView):
 
 
 
-class GetHomePageDetails(APIView):
+class GetHomePageDetails(APIView): 
     def get(self, request):
             data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
             if serializer := HomePageCMSSerializer(data):

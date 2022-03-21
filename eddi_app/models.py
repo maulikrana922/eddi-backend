@@ -16,6 +16,8 @@ from eddi_app.constants.constants import *
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from rest_framework.authtoken.models import Token
 
 
 otp = ''
