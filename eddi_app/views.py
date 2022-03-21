@@ -19,6 +19,7 @@ class UserSignupView(APIView):
         record_map = {
             EMAIL_ID: request.POST.get(EMAIL_ID),
             PASSWORD: make_password(request.POST.get(PASSWORD)),
+            
             USER_TYPE_ID: 1,
             STATUS_ID:1
         }
