@@ -16,6 +16,8 @@ from eddi_app.constants.constants import *
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from rest_framework.authtoken.models import Token
 
 
 otp = ''
@@ -77,6 +79,9 @@ class approval_status(models.Model):
 
 class UserSignup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
+    first_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='First Name')
+    last_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='Last Name')
+    password = models.CharField(max_length=150,blank=True,null=True,)
     email_id = models.EmailField(unique=True)
     password = models.CharField(max_length=150,blank=True,null=True,)
 
