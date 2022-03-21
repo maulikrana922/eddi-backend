@@ -308,6 +308,7 @@ class BlogDetails(models.Model):
     blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name="Blog Image")
     blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name='Blog Title')
     blog_description = RichTextField(verbose_name = 'Blog Description',blank = True)
+    blog_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Blog Category")
     written_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Written by')
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
@@ -316,6 +317,10 @@ class BlogDetails(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+
+    class Meta:
+        verbose_name = "Blog Table"
 
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name='User Details')
@@ -327,6 +332,11 @@ class TestinomialsDetails(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+
+
+
+
 
 
 class HomePageCMS(models.Model):

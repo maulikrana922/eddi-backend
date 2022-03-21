@@ -7,6 +7,7 @@ FEE_TYPE_TABLE='FeeType'
 COURSE_LEVEL_TABLE='CourseLevel'
 BLOGDETAILS_TABLE='BlogDetails'
 CONTACT_FORM_TABLE='ContactFormLead'
+USER_TYPE_TALE = 'UserType'
 
 
 # CMS

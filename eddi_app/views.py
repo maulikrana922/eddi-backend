@@ -16,29 +16,25 @@ class UserSignupView(APIView):
         record_map = {}
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
-        # print(request.POST.get(FIRST_NAME),"first")
-        # print(request.POST.get(LAST_NAME),"last")
-        # print(request.POST.get(EMAIL_ID),"email")
+        try:
+            user_type_id = getattr(models,USER_TYPE_TALE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
+        except:
+            return Response({STATUS:ERROR, DATA: "Error Getting User Type"}, status=status.HTTP_400_BAD_REQUEST)
+        
         record_map = {
-            FIRST_NAME: request.POST.get(FIRST_NAME),
-            LAST_NAME: request.POST.get(LAST_NAME),
-            EMAIL_ID: request.POST.get(EMAIL_ID),
+            FIRST_NAME: request.POST.get(FIRST_NAME,None),
+            LAST_NAME: request.POST.get(LAST_NAME,None),
+            EMAIL_ID: request.POST.get(EMAIL_ID,None),
             PASSWORD: make_password(request.POST.get(PASSWORD)),
             
-            USER_TYPE_ID: 1,
+            USER_TYPE_ID: user_type_id.id,
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
         record_map[CREATED_BY] = 'admin'
-        print(record_map, "record mappppp")
         try:
             getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
         except Exception as ex:
-
-            # a = models.UserSignup.objects.get(email_id = str(request.POST.get(EMAIL_ID)))
-            # print(a, "aaaaaaaaaaa")
-            # print(a.first_name, "first")
-            # print(a.last_name, "last")
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -189,8 +185,10 @@ class GetBlogDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
             data = getattr(models,BLOGDETAILS_TABLE).objects.get(**{UUID:uuid})
+            related_blog = list(getattr(models,BLOGDETAILS_TABLE).objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+            # print(related_blog)
             if serializer := BlogDetailsSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data, 'related_blog':related_blog}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:

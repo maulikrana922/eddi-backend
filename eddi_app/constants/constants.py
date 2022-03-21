@@ -46,6 +46,8 @@ SUB_AREA = 'sub_area'
 SUPPLIER_ID = 'supplier_id'
 SUPPLIER_S = 'Supplier'
 FULLNAME = 'fullname'
+USER_TYPE='user_type'
+BLOG_CATEGORY_ID='blog_category_id'
 PHONE_NUMBER = 'phone_number'
 MESSAGE = 'message'
 
