@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'eddi_app',
     'ckeditor',
     'rest_framework',
+    'rest_framework.authtoken',
     'rest_framework_swagger'
 ]
 

@@ -113,6 +113,7 @@ class UserLoginView(APIView):
         except:
             data = None
         serializer = UserSignupSerializer(data)
+        # print(serializer, "serializerrrrrrrrrrr")
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
