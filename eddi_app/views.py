@@ -158,12 +158,11 @@ class ChangePasswordView(APIView):
 
 class GetHomePageDetails(APIView): 
     def get(self, request):
-            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
-            if serializer := HomePageCMSSerializer(data):
-                print(serializer, "serializeerrrrrrrrrr")
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
+        if not (serializer := HomePageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer, "serializeerrrrrrrrrr")
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
        
 class GetAboutUsPageDetails(APIView):
     def get(self, request):
