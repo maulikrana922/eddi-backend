@@ -163,6 +163,22 @@ class GetHomePageDetails(APIView):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+class GetPrivacyPolicyDetails(APIView): 
+    def get(self, request):
+        data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest('created_date_time')
+        if not (serializer := PrivacyPolicyPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer, "serializeerrrrrrrrrr")
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+class GetTermsConditionDetails(APIView): 
+    def get(self, request):
+        data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest('created_date_time')
+        if not (serializer := TermsConditionPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer, "serializeerrrrrrrrrr")
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
        
 class GetAboutUsPageDetails(APIView):
     def get(self, request):

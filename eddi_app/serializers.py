@@ -37,6 +37,20 @@ class HomePageCMSSerializer(serializers.ModelSerializer):
         depth = 1
         fields = '__all__'
 
+class PrivacyPolicyPageCMSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PrivacyPolicyCMS
+        depth = 1
+        fields = '__all__'
+
+class TermsConditionPageCMSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TermsConditionCMS
+        depth = 1
+        fields = '__all__'
+
 class AboutUsCMSSerializer(serializers.ModelSerializer):
 
     class Meta:
