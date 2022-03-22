@@ -157,13 +157,10 @@ class ForgetPasswordView(APIView):
                 recipient_list = (email_id,)
                 email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                 email_msg.content_subtype = 'html'
+                print("ok")
                 email_msg.send(fail_silently=False)
             return Response({STATUS: ERROR, DATA: "ex"}, status=status.HTTP_400_BAD_REQUEST)
                 
-                # html_path = OTP_EMAIL_HTML
-                # email_html_template = get_template(html_path).render(context_data)
-                # email_from = settings.EMAIL_HOST_USER
-                # HandleOtpEmail('Password Successfully Changed',email_html_template,email_from,email_id).start()
     
     # def get(self,request,uuid):
     #     email_id = request.POST.get(EMAIL_ID)
