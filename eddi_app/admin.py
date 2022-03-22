@@ -34,9 +34,12 @@ class HomePageCMSBannerAdmin(admin.ModelAdmin):
 admin.site.register(HomePageCMSBanner,HomePageCMSBannerAdmin)
 
 class BlogDetailsAdmin(admin.ModelAdmin):
+    list_display = ('blog_title','written_by')
+    list_filter = ('written_by',)
+
     fieldsets = (
         (None, {
-            'fields': ('blog_image','blog_title','blog_description','written_by')
+            'fields': ('blog_image','blog_title','blog_description','blog_category','written_by')
         }),
         ('Advanced', {
             'classes': ('collapse',),

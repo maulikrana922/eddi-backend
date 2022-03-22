@@ -100,7 +100,7 @@ JAZZMIN_SETTINGS = {
     'eddi_app.CourseSubCategoryDetails',
     'eddi_app.CourseDetails',
     'eddi_app.TestinomialsDetails',
-    'eddi_app.BlogDetails',
+    # 'eddi_app.BlogDetails',
     'eddi_app.HomePageCMSPartners',
     'eddi_app.HomePageCMS',
     'eddi_app.AboutUsPageCMS',
