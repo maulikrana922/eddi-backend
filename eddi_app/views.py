@@ -124,8 +124,10 @@ class UserLoginView(APIView):
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
-            if data.is_first_time_login:
-                return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name}}, status=status.HTTP_200_OK)
+            if data.user_type == SUPPLIER_S:
+                if data.is_first_time_login:
+                    return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name}}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
             return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
