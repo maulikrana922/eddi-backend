@@ -154,7 +154,37 @@ class ContactUsPageCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(ContactUsPageCMS, ContactUsPageCMSAdmin)
 
+class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Privacy Policy', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description','section_2_sub_heading','section_2_sub_description','section_2_last_heading','section_2_last_description'),
+        })
+    )
+   
 
+admin.site.register(PrivacyPolicyCMS, PrivacyPolicyCMSAdmin)
+
+class TermsConditionCMSAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Terms & Conditions', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description'),
+        })
+    )
+   
+
+admin.site.register(TermsConditionCMS, TermsConditionCMSAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
     list_display = ('email_id','user_type','status')

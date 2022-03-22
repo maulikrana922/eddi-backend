@@ -82,6 +82,16 @@ JAZZMIN_SETTINGS = {
             "url": "/admin/eddi_app/contactuspagecms/1/change/", 
             "icon": "fas fa-phone",
         },
+        {
+            "name": "Privacy Policy Page", 
+            "url": "/admin/eddi_app/privacypolicycms/1/change/", 
+            "icon": "fas fa-file-contract",
+        },
+        {
+            "name": "Terms & Conditions Page", 
+            "url": "/admin/eddi_app/termsconditioncms/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
         ],
    
        
@@ -104,6 +114,9 @@ JAZZMIN_SETTINGS = {
     'eddi_app.HomePageCMSPartners',
     'eddi_app.HomePageCMS',
     'eddi_app.AboutUsPageCMS',
+    'eddi_app.PrivacyPolicyCMS',
+    'eddi_app.TermsConditionCMS',
+
 
 
     
