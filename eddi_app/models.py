@@ -325,7 +325,7 @@ class BlogDetails(models.Model):
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name='User Details')
     review = RichTextField(blank=True,verbose_name = 'User Review')
-
+    # profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
