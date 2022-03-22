@@ -5,8 +5,8 @@ urlpatterns = [
     path('signup/',UserSignupView.as_view()),
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),
-    path('forgot/<str:uuid>/',ForgetPasswordView.as_view()),
-    path('changepassword/<str:uuid>/',ChangePasswordView.as_view()),
+    path('changepassword/<str:uuid>/',ChangePasswordView.as_view(), name="changepassword"),
+    path('resetpassword/',ResetPasswordView.as_view(), name="resetpassword"),
     path('get-user-details/<str:uuid>/',GetUserDetails.as_view()),
     path('get-user-details/',GetUserDetails.as_view()),
 
@@ -28,11 +28,7 @@ urlpatterns = [
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
     path('get-contactus-page-data/',GetContactUsPageDetails.as_view()),
     path('get-privacy-page-data/',GetPrivacyPolicyDetails.as_view()),
-    path('get-terms-page-data/',GetTermsConditionDetails.as_view()),
-
-
-
-    
+    path('get-terms-page-data/',GetTermsConditionDetails.as_view()),    
     path('contactus-form/',ContactFormView.as_view())
 
 

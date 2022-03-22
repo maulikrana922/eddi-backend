@@ -134,92 +134,57 @@ class UserLoginView(APIView):
 
 class ForgetPasswordView(APIView):
     def post(self, request,uuid = None):
-        if uuid:
-            try:
-                data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
-            except:
-                data = None
-            try:
-                if data:
-                    return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            email_id = request.POST.get(EMAIL_ID)
-            request.session['forget-password'] = email_id
-            if request.session.has_key('forget-password'):
-                html_path = OTP_EMAIL_HTML
-                context_data = {'final_link':"link..."}
-                email_html_template = get_template(html_path).render(context_data)
-                email_from = settings.EMAIL_HOST_USER
-                recipient_list = (email_id,)
-                email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-                email_msg.content_subtype = 'html'
-                print("ok")
-                email_msg.send(fail_silently=False)
-            return Response({STATUS: ERROR, DATA: "ex"}, status=status.HTTP_400_BAD_REQUEST)
+        email_id = request.POST.get(EMAIL_ID)
+        request.session['forget-password'] = email_id
+        try:
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+        except:
+            data = None
+        try:
+            if data:
+                if request.session.has_key('forget-password'):
+                    html_path = RESETPASSWORD_HTML
+                    context_data = {'final_uuid':uuid, 'final_email': email_id}
+                    email_html_template = get_template(html_path).render(context_data)
+                    email_from = settings.EMAIL_HOST_USER
+                    recipient_list = (email_id,)
+                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    email_msg.content_subtype = 'html'
+                    print("ok")
+                    email_msg.send(fail_silently=False)
+                    return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
+            else:
+                return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
                 
-    
-    # def get(self,request,uuid):
-    #     email_id = request.POST.get(EMAIL_ID)
-    #     try:
-    #         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
-    #     except:
-    #         data = None
-    #     try:
-    #         if data:
-    #             request.session['forget-password'] = email_id
-    #             # sending Email link...
-
-    #     except Exception as ex:
-    #         return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
         
 class ResetPasswordView(APIView):
-    def post(self,request,uuid):
-        password = request.POST.get(PASSWORD)
-        confirm_password = request.POST.get("confirm_password")
-        
-        if password != confirm_password:
-            return Response({STATUS: ERROR, DATA: "Password does not match"}, status=status.HTTP_400_BAD_REQUEST)
-            
-        else:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-            record_map = {
-            PASSWORD: request.POST.get(PASSWORD,data.password)
-        }
-        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-        record_map[MODIFIED_BY] = 'admin'
-        record_map[UUID] = uuid4()
-        for key,value in record_map.items():
-            setattr(data,key,value)
-        data.save()
-        return Response({STATUS: SUCCESS, DATA: "Password Succesfully Changed"}, status=status.HTTP_200_OK)
+    def post(self,request,slug=None):
+        email_id = request.POST.get(EMAIL_ID)
+        try:
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            password = request.POST.get(PASSWORD)
+        except:
+            data = None
+        try:
+            if data:
+                setattr(data,PASSWORD,make_password(password))
+                setattr(data,IS_FIRST_TIME_LOGIN,False)
 
-            
-        
-    
-    # context = None
-    # if request.method == POST_METHOD:
-    #     email_id = request.POST.get(EMAIL_ID)
-    #     try:
-           
-    #         getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID: ACTIVE})
-    #         request.session['reset_password'] = email_id
-    #         return redirect(OTP)
-    #     except:
-    #         context = {
-    #             'message':"You are not a registered user."
-    #             }
-    # return render(request, RESET_PASSWORD_HTML,context)
+                setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
+                setattr(data,MODIFIED_BY,'admin')
+                data.save()
+                return Response({STATUS: SUCCESS, DATA: "Password Changed Successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "Invalid Request"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 class ChangePasswordView(APIView):
     def post(self,request,uuid):
-        # sourcery skip: extract-method, remove-unnecessary-else, swap-if-else-branches
-
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
             password = request.POST.get(PASSWORD)
