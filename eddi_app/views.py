@@ -252,12 +252,15 @@ class GetBlogDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
             data = getattr(models,BLOGDETAILS_TABLE).objects.get(**{UUID:uuid})
-            related_blog = list(getattr(models,BLOGDETAILS_TABLE).objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+            try:
+                related_blog = list(getattr(models,BLOGDETAILS_TABLE).objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+                for i in related_blog:
+                    for key,value in i.items():
+                        if key == 'blog_image':
+                            i[key] = "/media/" + value
+            except:
+                related_blog = None
             
-            for i in related_blog:
-                for key,value in i.items():
-                    if key == 'blog_image':
-                        i[key] = "/media/" + value
             if serializer := BlogDetailsSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, 'related_blog':related_blog}, status=status.HTTP_200_OK)
             else:
