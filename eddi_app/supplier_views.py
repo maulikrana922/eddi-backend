@@ -106,11 +106,13 @@ class GetSubCategoryDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.PUT.get(CATEGORY_NAME)})
-        except:
+            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME)})
+        except Exception as ex:
+            print(ex)
+
             return Response({STATUS: ERROR, DATA: "Category Error"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            CATEGORY_NAME_ID: request.POST.get(data.id,data.category_name_id),
+            CATEGORY_NAME_ID: request.POST.get(dataa.id,data.category_name_id),
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image.url),
             STATUS_ID:request.POST.get(STATUS,data.status)
