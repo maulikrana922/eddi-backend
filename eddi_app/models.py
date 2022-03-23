@@ -292,13 +292,13 @@ class ContactFormLead(models.Model):
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     email_from = settings.EMAIL_HOST_USER
     recipient_list = (settings.EMAIL_HOST_USER,)
-    message = f'''Fullname: {instance.fullname}
+    message = f'''Full Name: {instance.fullname}
     Email ID: {instance.email_id}
     Phone Number: {instance.phone_number}
     Message: {instance.message}
 
     '''
-    email_msg = EmailMessage('Welcome to Eddi',message,email_from,recipient_list)
+    email_msg = EmailMessage('Contact Us Email',message,email_from,recipient_list)
     email_msg.send(fail_silently=False)
 
 
