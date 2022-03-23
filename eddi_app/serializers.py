@@ -55,7 +55,7 @@ class AboutUsCMSSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AboutUsPageCMS
-        depth = 1
+        depth = 2
         fields = '__all__'
 
 class ContactUsCMSSerializer(serializers.ModelSerializer):
