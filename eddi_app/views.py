@@ -282,7 +282,8 @@ class ContactFormView(APIView):
             record_map[CREATED_BY] = 'admin'
             try:
                 getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
-            except:
+            except Exception as ex:
+                print(ex)
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
