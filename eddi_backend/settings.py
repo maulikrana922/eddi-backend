@@ -117,6 +117,10 @@ JAZZMIN_SETTINGS = {
     'eddi_app.AboutUsPageCMS',
     'eddi_app.PrivacyPolicyCMS',
     'eddi_app.TermsConditionCMS',
+    'eddi_app.FeeType',
+    'eddi_app.ContactUsPageCMS',
+    'eddi_app.CourseLevel',
+    'eddi_app.CourseType',
 
 
 
