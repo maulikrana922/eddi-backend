@@ -275,7 +275,7 @@ class HomePageCMSPartners(models.Model):
 class ContactFormLead(models.Model):
     fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name='Full Name')
     email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    phone_number = models.IntegerField(max_length=100,blank=True,null=True,verbose_name='Phone Number')
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name='Phone Number')
     message = models.TextField(max_length=500,blank=True,null=True,verbose_name='Message')
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
