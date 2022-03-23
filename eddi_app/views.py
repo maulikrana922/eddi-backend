@@ -259,7 +259,7 @@ class GetBlogDetails(APIView):
                         if key == 'blog_image':
                             i[key] = "/media/" + value
             except:
-                related_blog = None
+                related_blog = []
             
             if serializer := BlogDetailsSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, 'related_blog':related_blog}, status=status.HTTP_200_OK)
