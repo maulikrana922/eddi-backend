@@ -496,7 +496,13 @@ class TermsConditionCMS(models.Model):
 
 
 
+class UserProfile(models.Model):
+    email_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
 
+    #personal information
+    first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
+    last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="Last Name")
+    
 
 
 
