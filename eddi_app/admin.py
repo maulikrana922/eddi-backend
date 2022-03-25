@@ -1,14 +1,24 @@
+from dataclasses import fields
 import imp
 from django.contrib import admin
 from .models import *
 from  django.contrib.auth.models  import  Group 
+from .forms import CategoryForm
 
 admin.site.register(utl_status)
 
-admin.site.register(CourseCategoryDetails)
+class CourseCategoryAdmin(admin.ModelAdmin):
+    form = CategoryForm
+    list_display = ('category_name','category_image','color')
+admin.site.register(CourseCategoryDetails,CourseCategoryAdmin)
 admin.site.register(CourseType)
 admin.site.register(CourseLevel)
 admin.site.register(FeeType)
+
+
+
+
+
 admin.site.register(CourseDetails)
 admin.site.register(CourseSubCategoryDetails)
 admin.site.register(approval_status)

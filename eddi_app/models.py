@@ -1,5 +1,6 @@
 from distutils.command.upload import upload
 from tabnanny import verbose
+from django.forms import CharField
 from django.utils.safestring import mark_safe
 from django.db import models
 import uuid
@@ -18,6 +19,7 @@ from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.authtoken.models import Token
+
 
 
 otp = ''
@@ -122,6 +124,7 @@ class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     category_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
     category_image = models.FileField(upload_to='category_image/',verbose_name='Category Image',blank=True,null=True)
+    color = models.CharField(max_length=100,blank=True,null=True,verbose_name='Color')
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
