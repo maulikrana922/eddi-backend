@@ -210,3 +210,5 @@ admin.site.site_header = 'Eddi Admin'
 #             'fields': ('status',),
 #         }),
 #     )
+
+admin.site.register(UserProfile)
