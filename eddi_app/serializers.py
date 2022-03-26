@@ -72,3 +72,12 @@ class BlogDetailsSerializer(serializers.ModelSerializer):
         depth = 1
 
         fields = '__all__'
+
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        depth = 1
+
+        fields = '__all__'

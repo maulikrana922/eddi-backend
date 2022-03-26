@@ -18,7 +18,7 @@ class UserSignupView(APIView):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user_type_id = getattr(models,USER_TYPE_TALE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
+            user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
         except:
             return Response({STATUS:ERROR, DATA: "Error Getting User Type"}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -114,6 +114,7 @@ class GetUserDetails(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
+        # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
         try:
@@ -125,11 +126,9 @@ class UserLoginView(APIView):
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
-            if data.user_type == SUPPLIER_S:
-                if data.is_first_time_login:
-                    return Response({STATUS: SUCCESS, IS_FIRST_TIME_LOGIN: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name}}, status=status.HTTP_200_OK)
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
-            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type)}, status=status.HTTP_200_OK)
+ 
+            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login}, status=status.HTTP_200_OK)
+           
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -297,3 +296,34 @@ class ContactFormView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+class UserProfileView(APIView):
+    def post(self, request):
+
+        # sourcery skip: remove-unnecessary-else, swap-if-else-branches
+        serializer = UserProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        if request.POST:
+            email_id = request.POST.get(EMAIL_ID)
+            data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if serializer := UserProfileSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        if request.POST:
+            email_id = request.POST.get(EMAIL_ID)
+            instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            serializer = UserProfileSerializer(instance,data = request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "Error While editing data"}, status=status.HTTP_400_BAD_REQUEST)
