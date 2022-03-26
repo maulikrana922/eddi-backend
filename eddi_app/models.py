@@ -236,6 +236,7 @@ class CourseDetails(models.Model):
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
+    
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
@@ -500,7 +501,7 @@ class TermsConditionCMS(models.Model):
 
 
 class UserProfile(models.Model):
-    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id")
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
 
     #personal information
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
@@ -537,6 +538,9 @@ class UserProfile(models.Model):
 
     class Meta:
         verbose_name = "User Profile Table"
+
+    def __str__(self):
+        return self.email_id
 
 
 

@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
-
+from django.conf.global_settings import LANGUAGES as DJANGO_LANGUAGES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 JAZZMIN_SETTINGS = {
+    "language_chooser": True,
     # title of the window (Will default to current_admin_site.site_title if absent or None)
     "site_title": "Eddi Admin",
 
@@ -141,6 +142,7 @@ JAZZMIN_SETTINGS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -230,6 +232,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+LANGUAGES = DJANGO_LANGUAGES
 CMS_TEMPLATES = (
     ('page.html', 'Page'),  # any name should work
 )
