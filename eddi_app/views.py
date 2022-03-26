@@ -11,6 +11,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
 
+
 class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
