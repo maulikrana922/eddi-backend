@@ -96,7 +96,7 @@ class UserSignup(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
     class Meta:
         verbose_name = "User Signup Table"
@@ -229,7 +229,9 @@ class CourseDetails(models.Model):
     course_length = models.IntegerField(default=0,verbose_name='Course Length',blank=True,null=True)
     course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
     course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
+    course_language = models.CharField(max_length=100,blank=True,null=True)
 
+    course_for_organization = models.BooleanField(default=False)
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
     course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
