@@ -14,12 +14,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 from django.conf.global_settings import LANGUAGES as DJANGO_LANGUAGES
-from django.utils.translation import ugettext_lazy as _
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-SITE_ROOT = os.path.dirname(os.path.realpath(__name__))
-LOCALE_PATHS = ( os.path.join(SITE_ROOT, 'locale'), )
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -238,8 +237,8 @@ USE_L10N = True
 
 USE_TZ = True
 LANGUAGES = [
-    ('sv', _('Swedish')),
-    ('en', _('English')),
+    ('sv', ('Swedish')),
+    ('en', ('English')),
 ]
 CMS_TEMPLATES = (
     ('page.html', 'Page'),  # any name should work
