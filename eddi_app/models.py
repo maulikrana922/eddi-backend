@@ -19,7 +19,7 @@ from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.authtoken.models import Token
-
+from django.utils.translation import ugettext_lazy as _
 
 
 otp = ''
@@ -65,7 +65,7 @@ class UserType(models.Model):
 
 
 class approval_status(models.Model):
-    status = models.ManyToManyField(utl_status,null=True,blank=True)
+    status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name=_('Status'))
     value = models.CharField(max_length=60,blank=True)
 
     created_by = models.CharField(max_length=100,blank=True)
@@ -74,7 +74,7 @@ class approval_status(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Approval Status Table"
+        verbose_name = _('Approval Status Table')
 
     def __str__(self):
         return self.value
