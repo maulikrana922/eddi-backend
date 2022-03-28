@@ -154,6 +154,7 @@ class GetCourseDetails(APIView):
     res = None
     domain_data = None
     def get(self, request,uuid = None):
+        res = None
         if uuid:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             if serializer := CourseDetailsSerializer(data):
@@ -170,7 +171,7 @@ class GetCourseDetails(APIView):
                 data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).order_by('-organization_domain')
             else:
 
-                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1})
+                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
             if serializer := CourseDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
