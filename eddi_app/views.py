@@ -11,6 +11,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
 
+
+
 class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
@@ -222,6 +224,7 @@ class GetHomePageDetails(APIView):
         print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
+
 class GetPrivacyPolicyDetails(APIView): 
     def get(self, request):
         data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest('created_date_time')
@@ -268,10 +271,12 @@ class GetBlogDetails(APIView):
                 related_blog = []
             
             if serializer := BlogDetailsSerializer(data):
+                
                 return Response({STATUS: SUCCESS, DATA: serializer.data, 'related_blog':related_blog}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
+            
             data = getattr(models,BLOGDETAILS_TABLE).objects.all()
             if serializer := BlogDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)

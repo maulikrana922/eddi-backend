@@ -106,7 +106,7 @@ class UserSignup(models.Model):
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    if created and instance.user_type.user_type == SUPPLIER_S:
+    if created and instance.user_type.user_type == SUPPLIER_S or instance.user_type.user_type == ADMIN_S:
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         context_data = {'final_otp':otp}
@@ -232,12 +232,14 @@ class CourseDetails(models.Model):
     course_language = models.CharField(max_length=100,blank=True,null=True)
 
     course_for_organization = models.BooleanField(default=False)
+    organization_domain = models.CharField(max_length=100,blank=True,null=True)
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
     course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
+    course_checkout_link = models.CharField(max_length=255,verbose_name='Checkout Link',blank=True,null=True)
     
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
@@ -251,6 +253,16 @@ class CourseDetails(models.Model):
     class Meta:
         verbose_name = "Course Details Table"
 
+@receiver(post_save, sender=CourseDetails)
+def add_organization_domain(sender, instance, created, **kwargs):
+    if created and instance.course_for_organization == True:
+        
+        test_str = instance.supplier.email_id
+        res = test_str.split('@')[1]
+        print(res)
+        CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
+
+       
 
 ################## CMS    ###################################
 class HomePageCMSBanner(models.Model):
@@ -350,7 +362,11 @@ class HomePageCMS(models.Model):
     #section 1
     section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name='Banner Image')
     section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+
+
     section_1_description = RichTextField(verbose_name = 'Description',blank=True)
+
+
     section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
     section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
 
