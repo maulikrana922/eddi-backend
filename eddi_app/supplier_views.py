@@ -162,12 +162,7 @@ class GetCourseDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if request.POST:
-                print("TRUE")
-                email_id = request.POST.get(EMAIL_ID)
-                res = email_id.split('@')[1]
-                # domain_data = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'organization_domain':res}).values())
-
+            if request.headers.get('email') != 'undefined':
                 data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).order_by('-organization_domain')
             else:
 
