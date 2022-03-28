@@ -152,6 +152,7 @@ class GetSubCategoryDetails(APIView):
 
 class GetCourseDetails(APIView):
     res = None
+    domain_data = None
     def get(self, request,uuid = None):
         if uuid:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
@@ -160,7 +161,16 @@ class GetCourseDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1})
+            if request.POST:
+                print("TRUE")
+                email_id = request.POST.get(EMAIL_ID)
+                res = email_id.split('@')[1]
+                # domain_data = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'organization_domain':res}).values())
+
+                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).order_by('-organization_domain')
+            else:
+
+                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1})
             if serializer := CourseDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
