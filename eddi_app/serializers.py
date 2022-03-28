@@ -12,7 +12,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class CourseDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseDetails
-        depth = 1
+        depth = 2
 
         fields = '__all__'
 
