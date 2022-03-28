@@ -39,6 +39,7 @@ class UserSignupView(APIView):
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
+
 class GetUserDetails(APIView):
     def post(self, request):
         record_map = {}

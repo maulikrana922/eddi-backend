@@ -225,3 +225,4 @@ class GetCourseDetails(APIView):
             setattr(data,key,value)
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
+    
