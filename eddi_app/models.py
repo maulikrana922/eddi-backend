@@ -65,7 +65,7 @@ class UserType(models.Model):
 
 
 class approval_status(models.Model):
-    status = models.ManyToManyField(utl_status,null=True,blank=True)
+    status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name='Status')
     value = models.CharField(max_length=60,blank=True)
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
@@ -73,7 +73,7 @@ class approval_status(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Approval Status Table"
+        verbose_name = 'Approval Status Table'
 
     def __str__(self):
         return self.value
@@ -95,7 +95,7 @@ class UserSignup(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
     class Meta:
         verbose_name = "User Signup Table"
@@ -228,13 +228,16 @@ class CourseDetails(models.Model):
     course_length = models.IntegerField(default=0,verbose_name='Course Length',blank=True,null=True)
     course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
     course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
+    course_language = models.CharField(max_length=100,blank=True,null=True)
 
+    course_for_organization = models.BooleanField(default=False)
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
     course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
+    
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
@@ -499,7 +502,7 @@ class TermsConditionCMS(models.Model):
 
 
 class UserProfile(models.Model):
-    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id")
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
 
     #personal information
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
@@ -536,6 +539,9 @@ class UserProfile(models.Model):
 
     class Meta:
         verbose_name = "User Profile Table"
+
+    def __str__(self):
+        return self.email_id
 
 
 

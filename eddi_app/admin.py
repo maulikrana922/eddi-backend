@@ -197,9 +197,15 @@ class TermsConditionCMSAdmin(admin.ModelAdmin):
 admin.site.register(TermsConditionCMS, TermsConditionCMSAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
+    exclude = ('password','is_first_time_login','created_by','modified_by','status','uuid')
     list_display = ('email_id','user_type','status')
 
     list_filter = ('user_type','status')
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+         if db_field.name == "user_type":
+                 kwargs["queryset"] = UserType.objects.all().exclude(user_type='User')
+         return super(UserSignupAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 # class  authorAdmin(admin.ModelAdmin):
 #     list_display=['image_tag','category_name']

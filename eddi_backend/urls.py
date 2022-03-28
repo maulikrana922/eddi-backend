@@ -20,10 +20,12 @@ from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework.schemas import get_schema_view
 from django.views.generic import TemplateView
+from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+   
     path('',include('eddi_app.urls')),
+    path("i18n/", include("django.conf.urls.i18n")),
     path('openapi/', get_schema_view(
         title="Eddi Api Service",
         description="API developers hpoing to use our service"
@@ -35,3 +37,8 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns +=staticfiles_urlpatterns()
+
+urlpatterns += i18n_patterns(
+    path('admin/', admin.site.urls),
+
+)

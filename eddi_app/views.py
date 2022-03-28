@@ -123,12 +123,19 @@ class UserLoginView(APIView):
             print(data.user_type)
         except:
             data = None
+        try:
+            user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if user_profile:
+                user_profile = True
+        except Exception as ex:
+            print(ex)
+            user_profile = False
         serializer = UserSignupSerializer(data)
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
  
-            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,"user_profile":user_profile}, status=status.HTTP_200_OK)
            
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
