@@ -30,10 +30,10 @@ urlpatterns = [
         title="Eddi Api Service",
         description="API developers hpoing to use our service"
     ), name='openapi-schema'),
-    path('docs/<str:uuid>/', TemplateView.as_view(
+    path('docs/7e3f7124d67d0b6471842d311388b818/', TemplateView.as_view(
         template_name='documentation.html',
         extra_context={'schema_url':'openapi-schema'}
-    ),{'uuid':'7e3f7124d67d0b6471842d311388b818'}, name='swagger-ui'),
+    ), name='swagger-ui'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns +=staticfiles_urlpatterns()
