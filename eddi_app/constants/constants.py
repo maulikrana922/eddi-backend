@@ -1,6 +1,8 @@
 FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'
 EMAIL_ID = 'email_id'
+CARD_TYPE = 'card_type'
+AMOUNT = 'amount'
 STATUS_ID = 'status_id'
 UUID = 'uuid'
 PASSWORD = 'password'

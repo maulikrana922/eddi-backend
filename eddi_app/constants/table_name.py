@@ -9,6 +9,7 @@ BLOGDETAILS_TABLE='BlogDetails'
 CONTACT_FORM_TABLE='ContactFormLead'
 USER_TYPE_TABLE = 'UserType'
 USER_PROFILE_TABLE='UserProfile'
+USER_PAYMENT_DETAIL ='UserPaymentDetail'
 
 
 # CMS

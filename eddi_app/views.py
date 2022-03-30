@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import os
-
+import json
 from eddi_app.permissions import IsValid
 from .serializers import *
 from eddi_app import models
@@ -15,77 +15,71 @@ from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
 import stripe # 2.68.0
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-
+@permission_classes([AllowAny])
 class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):
-        # data = request.data
-        email = request.POST.get("email_id")
-        card_type = request.POST.get("card_brand")
-        amount = request.POST.get("price")
-        payment_method_id = request.POST.get("payment_method_id")
-        
-        print(email,card_type, amount, "detailssssssdsssssssssssssssss")
-        extra_msg = ''
-        # checking if customer with provided email already exists
-        try:
-            customer_data = stripe.Customer.list(email=email).data
+            if request.method == "POST":
+                # data = request.data
+                email_id = request.POST.get("email_id")
+                card_type = request.POST.get("card_brand")
+                amount = request.POST.get("price")
+                payment_method_id = request.POST.get("payment_method_id")
+                
+                # print(email_id,card_type, amount, "detailssssssdsssssssssssssssss")
+                extra_msg = ''
+                # checking if customer with provided email already exists
+                try:
+                    customer_data = stripe.Customer.list(email=email_id).data
+                    if len(customer_data) == 0:
+                        # creating customer
+                        customer = stripe.Customer.create(email=email_id, payment_method=payment_method_id)
+                    else:
+                        customer = customer_data[0]
+                        extra_msg = "Customer already existed."
+                        
+                    # creating paymentIntent
+                    try:
+                        intent = stripe.PaymentIntent.create(
+                        amount=int(amount)*100,
+                        currency='usd',
+                        description='helllo',
+                        customer=customer['id'],
+                        payment_method_types=["card"],
+                        payment_method=payment_method_id,
+                        confirm=True)
+                        # print(intent, "intenttttt")
+                    except Exception as e:
+                        # print(e)
+                        return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                    record_map = {}
+                    record_map = {
+                    EMAIL_ID: email_id,
+                    CARD_TYPE : card_type,
+                    AMOUNT: float(amount),
+                    CREATED_AT : make_aware(datetime.datetime.now())
+                    }
+                    print(record_map, "recordddd")
+                    try:
+                        getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
+                    except Exception as e:
+                        # print(e)
+                        return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                        # return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
+                    print("okkkkk")
+                    return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
+                except Exception as e:
+                    # print(e)
+                    return Response({MESSAGE: e, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if len(customer_data) == 0:
+   
 
-                # creating customer
-                customer = stripe.Customer.create(
-                    # address={
-                    #     "line1": "510 Townsend St",
-                    #     "postal_code": "98140",
-                    #     "city": "San Francisco",
-                    #             "state": "CA",
-                    #             "country": "US",
-                    # },
-                    email=email,
-                    payment_method=payment_method_id,
-                )
-            else:
-                customer = customer_data[0]
-                extra_msg = "Customer already existed."
-
-            # creating paymentIntent
-
-            intent = stripe.PaymentIntent.create(
-
-                # shipping={
-                #     "name": "Jenny Rosen",
-                #     "address": {
-                #         "line1": "510 Townsend St",
-                #         "postal_code": "98140",
-                #         "city": "San Francisco",
-                #         "state": "CA",
-                #         "country": "US",
-                #     },
-                # },
-                amount=int(course_price)*100,
-                currency='usd',
-                description='helloo',
-                customer=customer['id'],
-                # metadata={
-                #     "product_id": random.randint(0, 100)
-                # },
-                payment_method_types=["card"],
-                payment_method=payment_method_id,
-                confirm=True)
-
-            # print(intent.id, " payment success")
-            return Response(status=status.HTTP_200_OK, data={'message': 'Success', 'data': {'payment_intent':intent, 'extra_msg': extra_msg}})
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Failed', 'data': e })
-
-
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 
 
 
@@ -218,7 +212,7 @@ class UserLoginView(APIView):
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
  
-            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,"user_profile":user_profile}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,"user_profile":user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
            
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)

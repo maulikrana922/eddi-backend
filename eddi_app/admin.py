@@ -230,3 +230,10 @@ admin.site.site_header = 'Eddi Admin'
 #     )
 
 admin.site.register(UserProfile)
+
+
+
+
+
+
+admin.site.register(UserPaymentDetail)
