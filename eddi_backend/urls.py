@@ -38,7 +38,7 @@ urlpatterns = [
 
 urlpatterns +=staticfiles_urlpatterns()
 
-urlpatterns += (
+urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
 
 )
