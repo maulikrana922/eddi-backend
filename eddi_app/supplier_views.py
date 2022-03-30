@@ -8,6 +8,8 @@ from eddi_app.constants.table_name import *
 import datetime
 from django.utils.timezone import make_aware
 from uuid import uuid4
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 
 
@@ -149,7 +151,7 @@ class GetSubCategoryDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
 
-
+@permission_classes([AllowAny])
 class GetCourseDetails(APIView):
     res = None
     domain_data = None
@@ -190,7 +192,7 @@ class GetCourseDetails(APIView):
         except:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if request.POST.get(COURSE_FOR_ORGANIZATION) == 'True':
+        if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
         
             test_str = data.supplier.email_id
             res = test_str.split('@')[1]
@@ -211,7 +213,7 @@ class GetCourseDetails(APIView):
             FEE_TYPE_ID: fee_type_id.id,
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
-            STATUS_ID:request.POST.get(STATUS,data.status),
+            STATUS_ID:1,
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'

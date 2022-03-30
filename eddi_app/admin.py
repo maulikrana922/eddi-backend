@@ -179,6 +179,8 @@ class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
    
 
 admin.site.register(PrivacyPolicyCMS, PrivacyPolicyCMSAdmin)
+admin.site.register(NonBuiltInUserToken)
+
 
 class TermsConditionCMSAdmin(admin.ModelAdmin):
     
@@ -197,7 +199,7 @@ class TermsConditionCMSAdmin(admin.ModelAdmin):
 admin.site.register(TermsConditionCMS, TermsConditionCMSAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
-    exclude = ('password','is_first_time_login','created_by','modified_by','status','uuid')
+    exclude = ('is_first_time_login','created_by','modified_by','status','uuid')
     list_display = ('email_id','user_type','status')
 
     list_filter = ('user_type','status')

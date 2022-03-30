@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 from django.conf.global_settings import LANGUAGES as DJANGO_LANGUAGES
+import datetime
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -152,7 +153,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+REST_AUTH_TOKEN_MODEL = "eddi_app.models.NonBuiltInUserToken"
+REST_AUTH_TOKEN_CREATOR = "eddi_app.utils.custom_create_token"
 ROOT_URLCONF = 'eddi_backend.urls'
 
 TEMPLATES = [
@@ -174,7 +176,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'eddi_backend.wsgi.application'
-
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+       
+        "eddi_app.authentication.ExpiringTokenAuthentication", # <-- with this line 
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'eddi_app.permissions.IsValid', )
+ # ...
+}
 CKEDITOR_CONFIGS = {
     'default': {
         
@@ -252,7 +263,7 @@ STATIC_URL = '/static/'
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-
+TOKEN_TTL = datetime.timedelta(minutes=1)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
