@@ -118,7 +118,7 @@ class HomePageCMSAdmin(admin.ModelAdmin):
        fieldsets = (
         ('Section 1 - Main', {
             'classes': ('collapse',),
-            'fields': ('section_1_image','section_1_heading','section_1_heading_sv','section_1_description','section_1_description_sv','section_1_button_text','section_1_button_link')
+            'fields': ('section_1_image','section_1_heading','section_1_description','section_1_button_text','section_1_button_link')
         }),
         ('Section 2 - About Eddi', {
             'classes': ('collapse',),
@@ -179,6 +179,8 @@ class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
    
 
 admin.site.register(PrivacyPolicyCMS, PrivacyPolicyCMSAdmin)
+admin.site.register(NonBuiltInUserToken)
+
 
 class TermsConditionCMSAdmin(admin.ModelAdmin):
     
@@ -197,7 +199,7 @@ class TermsConditionCMSAdmin(admin.ModelAdmin):
 admin.site.register(TermsConditionCMS, TermsConditionCMSAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
-    exclude = ('password','is_first_time_login','created_by','modified_by','status','uuid')
+    exclude = ('is_first_time_login','created_by','modified_by','status','uuid')
     list_display = ('email_id','user_type','status')
 
     list_filter = ('user_type','status')

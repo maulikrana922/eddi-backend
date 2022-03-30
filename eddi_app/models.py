@@ -95,18 +95,18 @@ class UserSignup(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    is_authenticated = models.BooleanField(default=False)
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
-    class Meta:
-        verbose_name = "User Signup Table"
 
-    def __str__(self):
-        return self.email_id
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    if created and instance.user_type.user_type == SUPPLIER_S or instance.user_type.user_type == ADMIN_S:
+    print("OUTER")
+    if created and instance.user_type.user_type == SUPPLIER_S:
+        print("INNER")
+
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         context_data = {'final_otp':otp}
@@ -118,7 +118,23 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data.save()
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
+        print("TRUE")
         email_msg.send(fail_silently=False)
+        print("TRUE")
+
+    
+class NonBuiltInUserToken(Token):
+        """
+        Overrides the Token model to use the
+        non-built-in user model
+        """
+        user = models.ForeignKey(
+            UserSignup, related_name='auth_token',
+            on_delete=models.CASCADE, 
+            verbose_name=("email_id")
+        )
+
+
 
 class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
@@ -307,7 +323,7 @@ class ContactFormLead(models.Model):
         return self.email_id
 
 @receiver(post_save, sender=ContactFormLead)
-def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+def send_contact_usl(sender, instance, created, **kwargs):
     email_from = settings.EMAIL_HOST_USER
     recipient_list = (settings.EMAIL_HOST_USER,)
     message = f'''Full Name: {instance.fullname}

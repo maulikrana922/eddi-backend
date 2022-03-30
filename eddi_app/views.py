@@ -1,6 +1,10 @@
+from email.mime.image import MIMEImage
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+import os
+
+from eddi_app.permissions import IsValid
 from .serializers import *
 from eddi_app import models
 from eddi_app.constants.constants import *
@@ -10,6 +14,8 @@ from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 
 
@@ -112,7 +118,7 @@ class GetUserDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
    
-
+@permission_classes([AllowAny])
 class UserLoginView(APIView):
     def post(self, request):
         # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
@@ -120,8 +126,14 @@ class UserLoginView(APIView):
         password = request.POST.get(PASSWORD)
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            token = NonBuiltInUserToken.objects.create(user_id = data.id)
+            print(token.key)
+
+            
+
             print(data.user_type)
-        except:
+        except Exception as ex:
+            print(ex)
             data = None
         try:
             user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -141,7 +153,7 @@ class UserLoginView(APIView):
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+@permission_classes([AllowAny])
 class ForgetPasswordView(APIView):
     def post(self, request,uuid = None):
         email_id = request.POST.get(EMAIL_ID)
@@ -154,19 +166,30 @@ class ForgetPasswordView(APIView):
             if data:
                 if request.session.has_key('forget-password'):
                     html_path = RESETPASSWORD_HTML
-                    context_data = {'final_uuid':uuid, 'final_email': email_id}
+                    context_data = {"final_email": email_id}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (email_id,)
                     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                     email_msg.content_subtype = 'html'
+
+                    path = 'eddi_app'
+                    img_dir = 'static'
+                    image = 'Logo.jpg'
+                    file_path = os.path.join(path,img_dir,image)
+                    with open(file_path,'rb') as f:
+                        img = MIMEImage(f.read())
+                        img.add_header('Content-ID', '<{name}>'.format(name=image))
+                        img.add_header('Content-Disposition', 'inline', filename=image)
+                    email_msg.attach(img)
                     print("ok")
                     email_msg.send(fail_silently=False)
                     return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
             else:
                 return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
+            print(ex)
+            return Response({STATUS: ERROR, DATA: 'error'}, status=status.HTTP_400_BAD_REQUEST)
                 
         
 class ResetPasswordView(APIView):
@@ -215,13 +238,14 @@ class ChangePasswordView(APIView):
             return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsValid])
+class GetHomePageDetails(APIView):
 
-class GetHomePageDetails(APIView): 
     def get(self, request):
         data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
         if not (serializer := HomePageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer, "serializeerrrrrrrrrr")
+
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 
