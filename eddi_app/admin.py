@@ -118,7 +118,7 @@ class HomePageCMSAdmin(admin.ModelAdmin):
        fieldsets = (
         ('Section 1 - Main', {
             'classes': ('collapse',),
-            'fields': ('section_1_image','section_1_heading','section_1_heading_sv','section_1_description','section_1_description_sv','section_1_button_text','section_1_button_link')
+            'fields': ('section_1_image','section_1_heading','section_1_description','section_1_button_text','section_1_button_link')
         }),
         ('Section 2 - About Eddi', {
             'classes': ('collapse',),

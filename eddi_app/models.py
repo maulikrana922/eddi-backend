@@ -105,7 +105,9 @@ class UserSignup(models.Model):
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    print("outside iff")
     if created and instance.user_type.user_type == SUPPLIER_S or instance.user_type.user_type == ADMIN_S:
+        print("inside iff")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         context_data = {'final_otp':otp}
