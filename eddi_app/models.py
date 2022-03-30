@@ -105,7 +105,9 @@ class UserSignup(models.Model):
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    print("before if")
     if created and instance.user_type.user_type == SUPPLIER_S:
+        print("inside iff")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         context_data = {'final_otp':otp}
@@ -117,7 +119,9 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data.save()
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
+        print("last to second")
         email_msg.send(fail_silently=False)
+        print("lasttttt")
 
 class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)

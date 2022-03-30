@@ -2,6 +2,9 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # Stripe Link
+    path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
+
     path('signup/',UserSignupView.as_view()),
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),

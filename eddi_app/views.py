@@ -10,6 +10,76 @@ from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
+import stripe # 2.68.0
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+
+class Save_stripe_info(APIView):
+    def post(self, request, *args, **kwargs):
+        # data = request.data
+        email = request.POST.get("email_id")
+        card_name = request.POST.get("card_brand")
+        course_price = request.POST.get("price")
+        name = request.POST.get("name")
+        payment_method_id = request.POST.get("payment_method_id")
+        
+        print(email,card_name, course_price, name, "detailssssssdsssssssssssssssssssssssssssss")
+        extra_msg = ''
+        # checking if customer with provided email already exists
+        try:
+            customer_data = stripe.Customer.list(email=email).data
+
+            if len(customer_data) == 0:
+
+                # creating customer
+                customer = stripe.Customer.create(
+                    # address={
+                    #     "line1": "510 Townsend St",
+                    #     "postal_code": "98140",
+                    #     "city": "San Francisco",
+                    #             "state": "CA",
+                    #             "country": "US",
+                    # },
+                    email=email,
+                    payment_method=payment_method_id,
+                )
+            else:
+                customer = customer_data[0]
+                extra_msg = "Customer already existed."
+
+            # creating paymentIntent
+
+            intent = stripe.PaymentIntent.create(
+
+                # shipping={
+                #     "name": "Jenny Rosen",
+                #     "address": {
+                #         "line1": "510 Townsend St",
+                #         "postal_code": "98140",
+                #         "city": "San Francisco",
+                #         "state": "CA",
+                #         "country": "US",
+                #     },
+                # },
+                amount=int(course_price)*100,
+                currency='usd',
+                description='helloo',
+                customer=customer['id'],
+                # metadata={
+                #     "product_id": random.randint(0, 100)
+                # },
+                payment_method_types=["card"],
+                payment_method=payment_method_id,
+                confirm=True)
+
+            # print(intent.id, " payment success")
+            return Response(status=status.HTTP_200_OK, data={'message': 'Success', 'data': {'payment_intent':intent, 'extra_msg': extra_msg}})
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'message': 'Failed', 'data': e })
+
+
 
 
 class UserSignupView(APIView):
