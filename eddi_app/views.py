@@ -24,12 +24,11 @@ class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):
         # data = request.data
         email = request.POST.get("email_id")
-        card_name = request.POST.get("card_brand")
-        course_price = request.POST.get("price")
-        name = request.POST.get("name")
+        card_type = request.POST.get("card_brand")
+        amount = request.POST.get("price")
         payment_method_id = request.POST.get("payment_method_id")
         
-        print(email,card_name, course_price, name, "detailssssssdsssssssssssssssssssssssssssss")
+        print(email,card_type, amount, "detailssssssdsssssssssssssssss")
         extra_msg = ''
         # checking if customer with provided email already exists
         try:

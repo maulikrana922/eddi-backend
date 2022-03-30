@@ -578,7 +578,16 @@ class UserProfile(models.Model):
 
 
 
+class UserPaymentDetail(models.Model):
+    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
+    amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
+    
 
+    def __str__(self):
+        return self.email_id
 
 
 

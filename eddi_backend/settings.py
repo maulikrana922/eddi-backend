@@ -263,7 +263,8 @@ STATIC_URL = '/static/'
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-TOKEN_TTL = datetime.timedelta(minutes=1)
+TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
