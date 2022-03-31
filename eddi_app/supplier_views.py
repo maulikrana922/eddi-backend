@@ -17,7 +17,12 @@ class AddCourseView(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
         
+        #     test_str = data.supplier.email_id
+        #     res = test_str.split('@')[1]
+        #     print(res)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
             sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
@@ -36,7 +41,8 @@ class AddCourseView(APIView):
             COURSE_SUBCATEGORY_ID : sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             FEE_TYPE_ID: fee_type_id.id,
-            COURSE_FOR_ORGANIZATION:request.POST.get(COURSE_FOR_ORGANIZATION),
+            COURSE_FOR_ORGANIZATION:eval(request.POST.get(COURSE_FOR_ORGANIZATION).title(),False),
+            # ORGANIZATION_DOMAIN:res,
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
@@ -111,7 +117,7 @@ class GetSubCategoryDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME)})
+            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID)})
         except Exception as ex:
             print(ex)
 
@@ -228,7 +234,7 @@ class GetCourseDetails(APIView):
             COURSE_CATEGORY_ID : category_id.id,
             COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
-            COURSE_FOR_ORGANIZATION:request.POST.get(COURSE_FOR_ORGANIZATION),
+            COURSE_FOR_ORGANIZATION:eval(request.POST.get(COURSE_FOR_ORGANIZATION).title(),False),
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
             ORGANIZATION_DOMAIN:res,
