@@ -593,10 +593,11 @@ class UserPaymentDetail(models.Model):
 
 
 
-
-
-
+class FavouriteCourse(models.Model):
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Name")
+    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    is_favourite = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
     
-
-
-
+    def __str__(self):
+        return self.course_name
