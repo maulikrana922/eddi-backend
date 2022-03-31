@@ -155,12 +155,34 @@ class GetSubCategoryDetails(APIView):
 class GetCourseDetails(APIView):
     res = None
     domain_data = None
+    email_id = None
+    course_data = None
+    fav_data = None
     def get(self, request,uuid = None):
         res = None
         if uuid:
+            token_data = request.headers.get('Authorization')
+            token = token_data.split()[1]
+            try:
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            except:
+                course_data = None
+            try:
+                data_token = getattr(models,TOKEN_TABLE).objects.get(key = token)
+                email_id = data_token.user.email_id
+            except Exception as ex:
+                email_id = None
+                return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{'course_name':course_data.course_name}).get(**{EMAIL_ID:email_id})
+                fav_dataa = fav_data.is_favourite
+            except Exception as ex:
+                fav_data = None
+                fav_dataa = None
+            
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             if serializer := CourseDetailsSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
