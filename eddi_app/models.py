@@ -537,6 +537,7 @@ class UserProfile(models.Model):
     email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
 
     #personal information
+    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
     last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="Last Name")
     gender = models.CharField(max_length=50,blank=True,null=True,verbose_name="Gender")
@@ -579,6 +580,7 @@ class UserProfile(models.Model):
 
 
 class UserPaymentDetail(models.Model):
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course name")
     email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
     amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
@@ -601,3 +603,15 @@ class FavouriteCourse(models.Model):
     
     def __str__(self):
         return self.course_name
+    
+
+
+class CourseEnroll(models.Model):
+    payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
+    
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+ 
+  
+    
+    
