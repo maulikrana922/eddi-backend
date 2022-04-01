@@ -9,7 +9,9 @@ BLOGDETAILS_TABLE='BlogDetails'
 CONTACT_FORM_TABLE='ContactFormLead'
 USER_TYPE_TABLE = 'UserType'
 USER_PROFILE_TABLE='UserProfile'
-USER_PAYMENT_DETAIL ='UserPaymentDetail'
+USER_PAYMENT_DETAIL ='UserPaymentDetail' # Add table
+FAVOURITE_COURSE_TABLE = "FavouriteCourse"
+TOKEN_TABLE = 'NonBuiltInUserToken'
 
 
 # CMS

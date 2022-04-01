@@ -237,3 +237,4 @@ admin.site.register(UserProfile)
 
 
 admin.site.register(UserPaymentDetail)
+admin.site.register(FavouriteCourse)

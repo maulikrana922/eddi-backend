@@ -1,3 +1,5 @@
+from doctest import FAIL_FAST
+import email
 from email.mime.image import MIMEImage
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -35,6 +37,7 @@ class Save_stripe_info(APIView):
                 extra_msg = ''
                 # checking if customer with provided email already exists
                 try:
+                    print("inside first try")
                     customer_data = stripe.Customer.list(email=email_id).data
                     if len(customer_data) == 0:
                         # creating customer
@@ -45,37 +48,41 @@ class Save_stripe_info(APIView):
                         
                     # creating paymentIntent
                     try:
+                        print("inside second try")
+
                         intent = stripe.PaymentIntent.create(
-                        amount=int(amount)*100,
+                        amount=int(1)*100,
                         currency='usd',
                         description='helllo',
                         customer=customer['id'],
                         payment_method_types=["card"],
                         payment_method=payment_method_id,
                         confirm=True)
-                        # print(intent, "intenttttt")
+                        print(intent, "intenttttt")
+                        print("inside second try last")
+
                     except Exception as e:
-                        # print(e)
+                        print(e)
                         return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-                    record_map = {}
-                    record_map = {
-                    EMAIL_ID: email_id,
-                    CARD_TYPE : card_type,
-                    AMOUNT: float(amount),
-                    CREATED_AT : make_aware(datetime.datetime.now())
-                    }
-                    print(record_map, "recordddd")
-                    try:
-                        getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
-                    except Exception as e:
-                        # print(e)
-                        return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                    # record_map = {}
+                    # record_map = {
+                    # EMAIL_ID: email_id,
+                    # CARD_TYPE : card_type,
+                    # AMOUNT: float(amount),
+                    # CREATED_AT : make_aware(datetime.datetime.now())
+                    # }
+                    # print(record_map, "recordddd")
+                    # try:
+                    #     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
+                    # except Exception as e:
+                    #     # print(e)
+                    #     return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                         # return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
                     print("okkkkk")
                     return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     # print(e)
-                    return Response({MESSAGE: e, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
 
    
@@ -427,3 +434,139 @@ class UserProfileView(APIView):
                 return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: "Error While editing data"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+@permission_classes([AllowAny])
+class UserPaymentDetail_info(APIView):
+      def post(self, request):
+        try:
+            email_id = request.POST.get("email_id")
+            card_type = request.POST.get("card_brand")
+            amount = request.POST.get("price")
+            status_s = request.POST.get("status")
+            record_map = {}
+            record_map = {
+                EMAIL_ID: email_id,
+                CARD_TYPE : card_type,
+                AMOUNT: float(amount),
+                STATUS: status_s,
+                CREATED_AT : make_aware(datetime.datetime.now())
+                }
+            print(record_map, "recordddd")
+            try:
+                getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
+            except Exception as e:
+                # print(e)
+                return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            print("created")
+            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e, "eeeee")
+            return Response({DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                
+              
+              
+            
+class FavCourseDetails(APIView):
+    def post(self, request):
+        data = None
+        email_id = None
+        user_data_fav = None
+        is_favourite_data = None
+        record_map = {}
+        token_data = request.headers.get('Authorization')
+        token = token_data.split()[1]
+
+        
+        try:
+            data = getattr(models,TOKEN_TABLE).objects.get(key = token)
+            email_id = data.user.email_id
+            print(data.key)
+        except Exception as ex:
+            print(ex)
+            email_id = None
+            return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            course_name = request.POST.get('course_name')
+            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{'course_name':course_name}).get(**{EMAIL_ID:email_id})
+            print(user_data_fav)
+        except Exception as ex:
+            print(ex)
+            user_data_fav = None
+            
+        if user_data_fav:
+            fav_data = request.POST.get("is_favourite")
+            print(fav_data)
+            
+            if fav_data == 'true':
+                setattr(user_data_fav,'is_favourite',True)
+                user_data_fav.save()
+            else:
+                setattr(user_data_fav,'is_favourite',False)
+                user_data_fav.save()
+        else:
+            course_name = request.POST.get("course_name")
+            fav_data = request.POST.get("is_favourite")
+            
+            if fav_data == 'true':
+                print("TRUE")
+                is_favourite_data = True
+            else:
+                print("FALSE")
+                is_favourite_data = False
+                
+            record_map = {
+                EMAIL_ID: email_id,
+                "course_name" : course_name,
+                "is_favourite": is_favourite_data,
+                CREATED_AT : make_aware(datetime.datetime.now())
+                }
+            try:
+                getattr(models,FAVOURITE_COURSE_TABLE).objects.update_or_create(**record_map)
+                print("TRUEEEEEE")
+                return Response({MESSAGE: SUCCESS, DATA: "Created"}, status=status.HTTP_200_OK)
+                
+            except Exception as e:
+                print(e)
+                return Response({MESSAGE: "Error", DATA: "ERROR creating data"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                
+        return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
+            
+            
+            
+
+
+        # is_fav = request.POST.get("fav_status")
+        # if is_fav == "true":
+            
+        #     record_map = {
+        #         EMAIL_ID: email_id,
+        #         "course_name" : course_name,
+        #         "is_favourite": True,
+        #         CREATED_AT : make_aware(datetime.datetime.now())
+        #         }
+        #     print(record_map, "recordddd fav is true")
+        # else:
+        #     record_map = {
+        #         EMAIL_ID: email_id,
+        #         "course_name" : course_name,
+        #         "is_favourite": False,
+        #         CREATED_AT : make_aware(datetime.datetime.now())
+        #         }
+        #     print(record_map, "recordddd fav is false")
+
+        #     try:
+        #         getattr(models,FAVOURITE_COURSE_TABLE).objects.update_or_create(**record_map)
+        #     except Exception as e:
+        #         # print(e)
+        #         return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+        # data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        # if serializer := UserProfileSerializer(data):
+        #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        # else:
+        #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
