@@ -167,8 +167,11 @@ class GetCourseDetails(APIView):
     def get(self, request,uuid = None):
         res = None
         if uuid:
-            token_data = request.headers.get('Authorization')
-            token = token_data.split()[1]
+            try:
+                token_data = request.headers.get('Authorization')
+                token = token_data.split()[1]
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
