@@ -32,10 +32,19 @@ class Save_stripe_info(APIView):
                 card_type = request.POST.get("card_brand")
                 amount = request.POST.get("price")
                 payment_method_id = request.POST.get("payment_method_id")
+                course_name = request.POST.get("course_name")
                 
-                # print(email_id,card_type, amount, "detailssssssdsssssssssssssssss")
                 extra_msg = ''
                 # checking if customer with provided email already exists
+                try:
+                    var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                    print(var, "varrrrrrr")
+                    if var is not None:
+                        return Response({MESSAGE: "ERROR", DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as ex:
+                    print(ex, "exxxxxxxxxxxxxxxxx")
+                    pass
+                
                 try:
                     print("inside first try")
                     customer_data = stripe.Customer.list(email=email_id).data
@@ -64,20 +73,9 @@ class Save_stripe_info(APIView):
                     except Exception as e:
                         print(e)
                         return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-                    # record_map = {}
-                    # record_map = {
-                    # EMAIL_ID: email_id,
-                    # CARD_TYPE : card_type,
-                    # AMOUNT: float(amount),
-                    # CREATED_AT : make_aware(datetime.datetime.now())
-                    # }
-                    # print(record_map, "recordddd")
-                    # try:
-                    #     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
-                    # except Exception as e:
-                    #     # print(e)
-                    #     return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-                        # return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
+                    
+                    
+                    
                     print("okkkkk")
                     return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
@@ -86,10 +84,6 @@ class Save_stripe_info(APIView):
             return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
 
    
-
-
-
-
 class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
@@ -438,14 +432,18 @@ class UserProfileView(APIView):
             
 @permission_classes([AllowAny])
 class UserPaymentDetail_info(APIView):
-      def post(self, request):
+    def post(self, request):
         try:
             email_id = request.POST.get("email_id")
             card_type = request.POST.get("card_brand")
             amount = request.POST.get("price")
             status_s = request.POST.get("status")
+            course_name = request.POST.get("course_name")
+           
+                
             record_map = {}
             record_map = {
+                COURSE_NAME : course_name,
                 EMAIL_ID: email_id,
                 CARD_TYPE : card_type,
                 AMOUNT: float(amount),
@@ -454,18 +452,42 @@ class UserPaymentDetail_info(APIView):
                 }
             print(record_map, "recordddd")
             try:
-                getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
-            except Exception as e:
-                # print(e)
-                return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-            print("created")
-            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(e, "eeeee")
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                print(var, "varrrrrr")
+            except Exception as ex:
+                print("Data not found")
+                var = None
+            if not var:
+                try:
+                    getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
+                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                    print("profile dataaaaaa")
+                    record_map = {}
+                    record_map = {
+                    "payment_detail_id": var.id,
+                    "user_profile_id" : profile_data.id,
+                    CREATED_AT : make_aware(datetime.datetime.now())
+                    }
+                    print(record_map, "mapppppppppppp")
+                    getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
+                    print("Enrolll createdddd")
+                    print("created")
+                    return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+                except Exception as e:
+                    print(e)
+                    
+                    return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                
+
+        except Exception as ex:
+            print(ex, "eeeee")
             return Response({DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                 
-              
               
             
 class FavCourseDetails(APIView):
@@ -536,37 +558,4 @@ class FavCourseDetails(APIView):
         return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
             
             
-            
-
-
-        # is_fav = request.POST.get("fav_status")
-        # if is_fav == "true":
-            
-        #     record_map = {
-        #         EMAIL_ID: email_id,
-        #         "course_name" : course_name,
-        #         "is_favourite": True,
-        #         CREATED_AT : make_aware(datetime.datetime.now())
-        #         }
-        #     print(record_map, "recordddd fav is true")
-        # else:
-        #     record_map = {
-        #         EMAIL_ID: email_id,
-        #         "course_name" : course_name,
-        #         "is_favourite": False,
-        #         CREATED_AT : make_aware(datetime.datetime.now())
-        #         }
-        #     print(record_map, "recordddd fav is false")
-
-        #     try:
-        #         getattr(models,FAVOURITE_COURSE_TABLE).objects.update_or_create(**record_map)
-        #     except Exception as e:
-        #         # print(e)
-        #         return Response({MESSAGE: "Error", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            
-        # data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-        # if serializer := UserProfileSerializer(data):
-        #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-        # else:
-        #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        

@@ -15,7 +15,20 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         depth = 2
 
         fields = '__all__'
+class UerPaymentSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = UserPaymentDetail
+        depth = 1
 
+        fields = '__all__'
+        
+class CourseEnrollSerializer(serializers.ModelSerializer):
+     class Meta:
+        model = CourseEnroll
+        depth = 2
+
+        fields = '__all__'
+    
 class SubCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseSubCategoryDetails

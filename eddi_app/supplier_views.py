@@ -170,12 +170,9 @@ class GetCourseDetails(APIView):
             token_data = request.headers.get('Authorization')
             token = token_data.split()[1]
             try:
-                print("2222")
-
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
                 course_data = None
-            print(course_data, "courseeeeeeeeeeeee")
             try:
                 data_token = getattr(models,TOKEN_TABLE).objects.get(key = token)
                 email_id = data_token.user.email_id
@@ -188,17 +185,17 @@ class GetCourseDetails(APIView):
             except Exception as ex:
                 fav_data = None
                 fav_dataa = None
-            print("1111")
             try:
-                # course_data.course_name
-                individuals = models.UserPaymentDetail.objects.filter(course_name=course_data.course_name, email_id=email_id, status="Success")
-                print(individuals, "indiiii")
+                individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
             except Exception as e:
                 print(e, "ererererer")
                 individuals = None
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             if serializer := CourseDetailsSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                if serializer1 := CourseEnrollSerializer(individuals, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:

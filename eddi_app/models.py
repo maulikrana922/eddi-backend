@@ -268,6 +268,9 @@ class CourseDetails(models.Model):
     class Meta:
         verbose_name = "Course Details Table"
 
+    def __str__(self):
+        return self.course_name
+    
 @receiver(post_save, sender=CourseDetails)
 def add_organization_domain(sender, instance, created, **kwargs):
     if created and instance.course_for_organization == True:
@@ -573,8 +576,7 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = "User Profile Table"
 
-    def __str__(self):
-        return self.email_id
+
 
 
 
@@ -587,9 +589,9 @@ class UserPaymentDetail(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
     
-
     def __str__(self):
-        return self.email_id
+        return self.course_name
+
 
 
 
@@ -611,7 +613,10 @@ class CourseEnroll(models.Model):
     user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
     
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
- 
+
+
+    def __str__(self):
+        return self.payment_detail.course_name
   
     
     
