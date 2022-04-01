@@ -1,6 +1,7 @@
 from doctest import FAIL_FAST
 import email
 from email.mime.image import MIMEImage
+from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,6 +13,7 @@ from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 import datetime
+from django.db.models import Q
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
@@ -558,4 +560,69 @@ class FavCourseDetails(APIView):
         return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
             
             
+class ViewIndividualProfile(APIView):
+    def post(self, request):
+        user_email_id = request.POST.get("email_id")
+        supplier_email_id = request.POST.get("supplier_email_id")
+        token_data = request.headers.get('Authorization')
+        token = token_data.split()[1]
         
+        try:
+            data = getattr(models,TOKEN_TABLE).objects.get(key = token)
+            email_id = data.user.email_id
+            print(data.key)
+        except Exception as ex:
+            print(ex)
+            email_id = None
+            return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # try:
+        #     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+        #     print("TRUEEEEEE")
+        #     # return Response({MESSAGE: SUCCESS, DATA: "Created"}, status=status.HTTP_200_OK)
+                
+        # except Exception as ex:
+        #     print(ex, "Exxxxxxxxxxxxxxx")
+        #     return Response({MESSAGE: "Error", DATA: "ERROR getting profile data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id": supplier_email_id})
+            # print(supplier_course, "courseeeeeee")
+            # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "payment_detail__course_name":supplier_course.course_name})
+            # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id})
+            # course_list = models.CourseEnroll.objects.filter(payment_detail__course_name__in=models.CourseDetails.objects.all())
+            course_list = models.CourseDetails.objects.filter(course_name__in=models.CourseEnroll.objects.all())
+            print(course_list, "cooooooooo")
+            
+            # for i in supplier_course:
+            #     if i.course_name in [j.payment_detail.course_name for j in course_list]:
+            #         print("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
+                # print(i.course_name, "iiiii")
+        except Exception as ex:
+            print(ex, "exxx")
+        
+        try:
+            profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+            try:
+                # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"user_profile__email_id":user_email_id})
+                # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "payment_detail__course_name":supplier_course.course_name})
+                # print(course_list, "cooooooooo")
+                # course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":user_email_id})
+                pass
+            except Exception as ex:
+                print(ex, "exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+                return Response({STATUS: ERROR, DATA: "course list Error"}, status=status.HTTP_400_BAD_REQUEST)
+                
+            # print(profile_data, "profilllllll")
+            # data = getattr(models,BLOGDETAILS_TABLE).objects.all()
+            # if serializer := BlogDetailsSerializer(data, many=True):
+            #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            if serializer := UserProfileSerializer(profile_data):
+                if serializer1 := CourseEnrollSerializer(course_list, many=True):
+                # if serializer1 := CourseDetailsSerializer(course_list, many=True):
+                    # print(serializer, "seeeeee")
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "Course":serializer1.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "Serializing data Error"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            print(ex, "exxxxx")
+        return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
