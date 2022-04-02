@@ -590,7 +590,8 @@ class ViewIndividualProfile(APIView):
             # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "payment_detail__course_name":supplier_course.course_name})
             # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id})
             # course_list = models.CourseEnroll.objects.filter(payment_detail__course_name__in=models.CourseDetails.objects.all())
-            course_list = models.CourseDetails.objects.filter(course_name__in=models.CourseEnroll.objects.all())
+            # course_list = models.CourseDetails.objects.filter(course_name__in=models.CourseEnroll.objects.all())
+            course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "supplier_email":supplier_email_id})
             print(course_list, "cooooooooo")
             
             # for i in supplier_course:

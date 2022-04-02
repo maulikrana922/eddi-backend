@@ -611,6 +611,7 @@ class FavouriteCourse(models.Model):
 
 
 class CourseEnroll(models.Model):
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
     supplier_email = models.EmailField(blank=True,null=True,verbose_name='supplier email')
     payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
     user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)

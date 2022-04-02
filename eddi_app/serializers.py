@@ -23,10 +23,16 @@ class UerPaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class CourseEnrollSerializer(serializers.ModelSerializer):
-     class Meta:
+    # my_field = serializers.SerializerMethodField('is_named_bar')
+
+    # def is_named_bar(self, foo):
+    #     return foo.name == "bar"
+
+    class Meta:
         model = CourseEnroll
         depth = 2
 
+        # fields = ["supplier_email", "payment_detail", "user_profile"]
         fields = '__all__'
     
 class SubCategoryDetailsSerializer(serializers.ModelSerializer):
