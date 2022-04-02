@@ -455,7 +455,7 @@ class UserPaymentDetail_info(APIView):
             print(record_map, "recordddd")
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
-                print(var, "varrrrrr")
+                # print(var, "varrrrrr")
             except Exception as ex:
                 print("Data not found")
                 var = None
@@ -464,9 +464,11 @@ class UserPaymentDetail_info(APIView):
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
-                    print("profile dataaaaaa")
+                    courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     record_map = {}
                     record_map = {
+                    "course_category" : courseobj.course_category,
+                    "supplier_email" : courseobj.supplier.email_id,
                     "payment_detail_id": var.id,
                     "user_profile_id" : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
@@ -565,65 +567,32 @@ class ViewIndividualProfile(APIView):
         user_email_id = request.POST.get("email_id")
         supplier_email_id = request.POST.get("supplier_email_id")
         token_data = request.headers.get('Authorization')
-        token = token_data.split()[1]
+        
         
         try:
+            token = token_data.split()[1]
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
             email_id = data.user.email_id
-            print(data.key)
+            # print(data.key)
         except Exception as ex:
-            print(ex)
+            # print(ex)
             email_id = None
             return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # try:
-        #     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
-        #     print("TRUEEEEEE")
-        #     # return Response({MESSAGE: SUCCESS, DATA: "Created"}, status=status.HTTP_200_OK)
-                
-        # except Exception as ex:
-        #     print(ex, "Exxxxxxxxxxxxxxx")
-        #     return Response({MESSAGE: "Error", DATA: "ERROR getting profile data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id": supplier_email_id})
-            # print(supplier_course, "courseeeeeee")
-            # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "payment_detail__course_name":supplier_course.course_name})
-            # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id})
-            # course_list = models.CourseEnroll.objects.filter(payment_detail__course_name__in=models.CourseDetails.objects.all())
-            # course_list = models.CourseDetails.objects.filter(course_name__in=models.CourseEnroll.objects.all())
             course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "supplier_email":supplier_email_id})
-            print(course_list, "cooooooooo")
-            
-            # for i in supplier_course:
-            #     if i.course_name in [j.payment_detail.course_name for j in course_list]:
-            #         print("okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
-                # print(i.course_name, "iiiii")
         except Exception as ex:
-            print(ex, "exxx")
-        
+            # print(ex, "exxx")
+            return Response({STATUS: ERROR, DATA: "Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
-            try:
-                # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"user_profile__email_id":user_email_id})
-                # course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "payment_detail__course_name":supplier_course.course_name})
-                # print(course_list, "cooooooooo")
-                # course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":user_email_id})
-                pass
-            except Exception as ex:
-                print(ex, "exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-                return Response({STATUS: ERROR, DATA: "course list Error"}, status=status.HTTP_400_BAD_REQUEST)
-                
-            # print(profile_data, "profilllllll")
-            # data = getattr(models,BLOGDETAILS_TABLE).objects.all()
-            # if serializer := BlogDetailsSerializer(data, many=True):
-            #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})          
             if serializer := UserProfileSerializer(profile_data):
                 if serializer1 := CourseEnrollSerializer(course_list, many=True):
-                # if serializer1 := CourseDetailsSerializer(course_list, many=True):
-                    # print(serializer, "seeeeee")
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "Course":serializer1.data}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "Course":serializer1.data, "Ongoing_Course":course_list.count()}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: "Serializing CourseEnrolled data Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({STATUS: ERROR, DATA: "Serializing data Error"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Serializing userprofile data Error"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             print(ex, "exxxxx")
-        return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+
