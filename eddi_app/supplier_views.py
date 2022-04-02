@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+
 from .serializers import *
 from eddi_app import models
 from eddi_app.constants.constants import *
@@ -10,19 +12,41 @@ from django.utils.timezone import make_aware
 from uuid import uuid4
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.db.models import Q 
 
 
+@permission_classes([AllowAny])
+def get_user_email_by_token(request):
+    token_data = request.headers.get('Authorization')
+    token = token_data.split()[1]
+
+    try:
+        data = getattr(models,TOKEN_TABLE).objects.get(key = token)
+        return data.user.email_id
+    except Exception as ex:
+        print(ex)
+        data = None
+        return data
 
 class AddCourseView(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
-        
-        #     test_str = data.supplier.email_id
-        #     res = test_str.split('@')[1]
-        #     print(res)
+        email_id = get_user_email_by_token(request)
+        course_organization = None
+
+        if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
+            course_organization = True
+            test_str = email_id
+            res = test_str.split('@')[1]
+            print(res)
+        else:
+            course_organization = False
+        try:    
+            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
             sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
@@ -32,7 +56,7 @@ class AddCourseView(APIView):
         except Exception as ex:
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            SUPPLIER_ID: request.POST.get(SUPPLIER_ID,None),
+            SUPPLIER_ID: supplier_id.id,
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
             COURSE_NAME: request.POST.get(COURSE_NAME,None),
             COURSE_LEVEL_ID : course_level_id.id,
@@ -41,8 +65,8 @@ class AddCourseView(APIView):
             COURSE_SUBCATEGORY_ID : sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             FEE_TYPE_ID: fee_type_id.id,
-            COURSE_FOR_ORGANIZATION:eval(request.POST.get(COURSE_FOR_ORGANIZATION).title()),
-            # ORGANIZATION_DOMAIN:res,
+            COURSE_FOR_ORGANIZATION:course_organization,
+            ORGANIZATION_DOMAIN:res,
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
@@ -61,12 +85,17 @@ class AddSubCategoryView(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+        email_id = get_user_email_by_token(request)
+        try:    
+            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:    
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,None)})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "error Getting Category Name"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            SUPPLIER_ID:request.POST.get(SUPPLIER_ID,None),
+            SUPPLIER_ID:supplier_id.id,
             CATEGORY_NAME_ID: category_id.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),
@@ -102,7 +131,8 @@ class GetSubCategoryDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all()
+            email_id = get_user_email_by_token(request)
+            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id,STATUS_ID:1})
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -123,6 +153,7 @@ class GetSubCategoryDetails(APIView):
 
             return Response({STATUS: ERROR, DATA: "Category Error"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
+
             CATEGORY_NAME_ID: request.POST.get(dataa.id,data.category_name_id),
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
@@ -147,7 +178,7 @@ class GetSubCategoryDetails(APIView):
             CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME,data.category_name_id),
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
-            STATUS_ID:request.POST.get(STATUS,data.status)
+            STATUS_ID:2
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
@@ -167,18 +198,11 @@ class GetCourseDetails(APIView):
     def get(self, request,uuid = None):
         res = None
         if uuid:
-            token_data = request.headers.get('Authorization')
-            token = token_data.split()[1]
+            email_id = get_user_email_by_token(request)
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
                 course_data = None
-            try:
-                data_token = getattr(models,TOKEN_TABLE).objects.get(key = token)
-                email_id = data_token.user.email_id
-            except Exception as ex:
-                email_id = None
-                return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{'course_name':course_data.course_name}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
@@ -186,14 +210,19 @@ class GetCourseDetails(APIView):
                 fav_data = None
                 fav_dataa = None
             
-            data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-            if serializer := CourseDetailsSerializer(data):
+            
+            if serializer := CourseDetailsSerializer(course_data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            if request.headers.get('email') != 'undefined':
-                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).order_by('-organization_domain')
+            email_id =  get_user_email_by_token(request)
+            if email_id:
+                organization_domain = email_id.split('@')[1]
+                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                # for i in data:
+                   
+                #     print(i.organization_domain)
             else:
 
                 data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})

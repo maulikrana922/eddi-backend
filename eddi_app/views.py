@@ -23,6 +23,8 @@ from rest_framework.permissions import AllowAny
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+
+
 @permission_classes([AllowAny])
 class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):
@@ -200,8 +202,6 @@ class UserLoginView(APIView):
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
             print(token.key)
-
-            
 
             print(data.user_type)
         except Exception as ex:
@@ -475,18 +475,7 @@ class FavCourseDetails(APIView):
         user_data_fav = None
         is_favourite_data = None
         record_map = {}
-        token_data = request.headers.get('Authorization')
-        token = token_data.split()[1]
-
-        
-        try:
-            data = getattr(models,TOKEN_TABLE).objects.get(key = token)
-            email_id = data.user.email_id
-            print(data.key)
-        except Exception as ex:
-            print(ex)
-            email_id = None
-            return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
+        email_id = get_user_email_by_token(request)
         
         try:
             course_name = request.POST.get('course_name')
