@@ -224,12 +224,21 @@ class GetCourseDetails(APIView):
                    
                 #     print(i.organization_domain)
             else:
-
                 data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
-            if serializer := CourseDetailsSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            try:
+                individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
+            except Exception as e:
+                print(e, "ererererer")
+                individuals = None
+            data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            if serializer := CourseDetailsSerializer(data):
+                if serializer1 := CourseEnrollSerializer(individuals, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+       
 
     def put(self,request,uuid = None):
         res = None
@@ -307,3 +316,4 @@ class GetCourseDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
     
+

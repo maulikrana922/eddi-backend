@@ -28,6 +28,10 @@ urlpatterns = [
 
     path('get-blog-details/',GetBlogDetails.as_view()),
     path('get-blog-details/<str:uuid>/',GetBlogDetails.as_view()),
+    
+    
+    path('view-individual-profile_User/',ViewIndividualProfile.as_view()),
+    
 
     path('get-home-page-data/',GetHomePageDetails.as_view()),
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
