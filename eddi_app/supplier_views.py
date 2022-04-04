@@ -198,6 +198,7 @@ class GetCourseDetails(APIView):
     fav_data = None
     def get(self, request,uuid = None):
         res = None
+        fav_dataa = None
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
@@ -210,8 +211,7 @@ class GetCourseDetails(APIView):
             except Exception as ex:
                 fav_data = None
                 fav_dataa = None
-            
-            
+
             if serializer := CourseDetailsSerializer(course_data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
@@ -231,7 +231,7 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 print(e, "ererererer")
                 individuals = None
-            data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            data = getattr(models,COURSEDETAILS_TABLE).objects.all()
             if serializer := CourseDetailsSerializer(data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
