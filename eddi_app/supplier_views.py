@@ -106,6 +106,7 @@ class AddSubCategoryView(APIView):
         getattr(models,COURSE_SUBCATEGORY_TABLE).objects.update_or_create(**record_map)
         return Response({STATUS: SUCCESS, DATA: "Sub Category Created successfully"}, status=status.HTTP_200_OK)
 
+@permission_classes([AllowAny])
 class GetCategoryDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:

@@ -34,10 +34,10 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online'] 
+ALLOWED_HOSTS = ['https://eddi-backend.testyourapp.online','127.0.0.1'] 
 
 CORS_ALLOWED_ORIGINS = [
-    'eddi-backend.testyourapp.online'
+    'https://eddi-backend.testyourapp.online',
 ]
 CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
 
@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'corsheaders'
 ]
-# LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
+# LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
 JAZZMIN_SETTINGS = {
     "language_chooser": True,
     # title of the window (Will default to current_admin_site.site_title if absent or None)
