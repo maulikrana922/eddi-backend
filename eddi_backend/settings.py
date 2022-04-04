@@ -36,8 +36,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online'] 
 
-CORS_ALLOWED_ORIGINS = [
-    'eddi-backend.testyourapp.online',
+CORS_ALLOWED_ORIGINS = ['*',
+    'eddi-backend.testyourapp.online'
 ]
 CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
 
