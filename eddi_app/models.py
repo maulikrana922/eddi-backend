@@ -108,7 +108,8 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
 
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
-        context_data = {'final_otp':otp}
+        fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'final_otp':otp,'fullname':fullname}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
