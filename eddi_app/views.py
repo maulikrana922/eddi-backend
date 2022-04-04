@@ -88,7 +88,7 @@ class Save_stripe_info(APIView):
                     return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-   
+@permission_classes([AllowAny])   
 class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
