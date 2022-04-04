@@ -36,6 +36,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online'] 
 
+CORS_ALLOWED_ORIGINS = [
+    'eddi-backend.testyourapp.online',
+]
 CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
 
 # Application definition
@@ -50,7 +53,8 @@ INSTALLED_APPS = [
     'eddi_app',
     'ckeditor',
     'rest_framework',
-    'rest_framework_swagger'
+    'rest_framework_swagger',
+    'corsheaders'
 ]
 # LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 JAZZMIN_SETTINGS = {
@@ -147,6 +151,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware', #added here
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

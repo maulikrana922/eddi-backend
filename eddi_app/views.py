@@ -1,6 +1,7 @@
 from doctest import FAIL_FAST
 import email
 from email.mime.image import MIMEImage
+from string import printable
 from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -556,7 +557,7 @@ class ViewIndividualProfile(APIView):
         user_email_id = request.POST.get("email_id")
         supplier_email_id = request.POST.get("supplier_email_id")
         token_data = request.headers.get('Authorization')
-        
+
         
         try:
             token = token_data.split()[1]
