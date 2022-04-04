@@ -446,6 +446,7 @@ class UserPaymentDetail_info(APIView):
             amount = request.POST.get("price")
             status_s = request.POST.get("status")
             course_name = request.POST.get("course_name")
+            print(email_id)
            
                 
             record_map = {}
@@ -484,8 +485,8 @@ class UserPaymentDetail_info(APIView):
                     print("created")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
-                except Exception as e:
-                    print(e)
+                except Exception as ex:
+                    print(ex, "exxxxxxxxxxxxxxx")
                     
                     return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
