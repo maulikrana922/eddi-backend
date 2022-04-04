@@ -231,7 +231,7 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 print(e, "ererererer")
                 individuals = None
-            data = getattr(models,COURSEDETAILS_TABLE).objects.all()
+            
             if serializer := CourseDetailsSerializer(data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
