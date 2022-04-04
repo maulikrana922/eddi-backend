@@ -80,9 +80,9 @@ production_models = [
     'eddi_app.CourseType',
     'eddi_app.CourseEnroll',
     'eddi_app.FavouriteCourse',
-    'eddi_app.NonBuiltInUserToken'
-    'eddi_app.UserProfile'
-    'eddi_app.UserPaymentDetail'
+    'eddi_app.NonBuiltInUserToken',
+    'eddi_app.UserProfile',
+    'eddi_app.UserPaymentDetail',
 
     ]
 local_models = []
