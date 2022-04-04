@@ -34,7 +34,7 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['*','eddi-backend.testyourapp.online'] 
+ALLOWED_HOSTS = ['https://eddi-backend.testyourapp.online'] 
 
 CORS_ALLOWED_ORIGINS = [
     'eddi-backend.testyourapp.online',
