@@ -343,6 +343,31 @@ class SupplierDashboardView(APIView):
 
     def post(self, request,uuid = None):
         supplier_email = request.POST.get("supplier_email")
+        time_period = request.POST.get("time_period")
+        if time_period == "weekly":
+            date = datetime.datetime.today()
+            week = date.strftime("%V")
+            print(week, "weekkkkkk")
+            weekly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__week":week})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__week":week}).count()
+            print(weekly_data, "wekkkkkkkk")
+        elif time_period == "monthly":
+            date = datetime.datetime.today()
+            month = date.strftime("%m")
+            print(month, "monthlyyyy")
+            monthly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__month":month})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__month":month}).count()
+            print(monthly_data, "monthlyyyy")
+        elif time_period == "yearly":
+            date = datetime.datetime.today()
+            year = date.strftime("%Y")
+            print(year, "yearrrrr")
+            yearly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__year":year})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__year":year}).count()
+            print(yearly_data, "yearlyyyyy")
+
+
+
         try:
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
