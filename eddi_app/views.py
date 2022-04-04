@@ -307,7 +307,7 @@ class ChangePasswordView(APIView):
             return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@permission_classes([IsValid])
+@permission_classes([AllowAny])
 class GetHomePageDetails(APIView):
 
     def get(self, request):
