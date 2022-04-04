@@ -34,12 +34,12 @@ DEBUG = True
 
 
 
-ALLOWED_HOSTS = ['https://eddi-backend.testyourapp.online','127.0.0.1'] 
+ALLOWED_HOSTS = ['https://eddi-backend.testyourapp.online','127.0.0.1','https://eddi-frontend.testyourapp.online'] 
 
 CORS_ALLOWED_ORIGINS = [
-    'https://eddi-backend.testyourapp.online',
+    'https://eddi-backend.testyourapp.online','https://eddi-frontend.testyourapp.online'
 ]
-CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online'] 
+CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online','https://eddi-frontend.testyourapp.online'] 
 
 # Application definition
 INSTALLED_APPS = [
