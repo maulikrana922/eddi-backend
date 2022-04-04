@@ -235,7 +235,8 @@ class ForgetPasswordView(APIView):
             if data:
                 if request.session.has_key('forget-password'):
                     html_path = RESETPASSWORD_HTML
-                    context_data = {"final_email": email_id}
+                    fullname = data.first_name + " " + data.last_name
+                    context_data = {"final_email": email_id,"fullname":fullname}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (email_id,)
