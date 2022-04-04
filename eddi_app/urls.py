@@ -39,7 +39,10 @@ urlpatterns = [
     path('get-privacy-page-data/',GetPrivacyPolicyDetails.as_view()),
     path('get-terms-page-data/',GetTermsConditionDetails.as_view()),    
     path('contactus-form/',ContactFormView.as_view()),
-    path('add-user-profile/',UserProfileView.as_view())
+    path('add-user-profile/',UserProfileView.as_view()),
 
 
+# Supplier Dashboard
+
+    path('supplier-dashboard/',SupplierDashboardView.as_view()),
 ]
