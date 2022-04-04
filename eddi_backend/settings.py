@@ -57,6 +57,52 @@ INSTALLED_APPS = [
     'corsheaders'
 ]
 # LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
+
+production_models = [
+    'eddi_app.HomePageCMSBanner',
+    'eddi_app.utl_status',
+    'eddi_app.UserType',
+    'eddi_app.approval_status',
+    'eddi_app.UserSignup',
+    'eddi_app.CourseCategoryDetails',
+    'eddi_app.CourseSubCategoryDetails',
+    'eddi_app.CourseDetails',
+    'eddi_app.TestinomialsDetails',
+    'eddi_app.BlogDetails',
+    'eddi_app.HomePageCMSPartners',
+    'eddi_app.HomePageCMS',
+    'eddi_app.AboutUsPageCMS',
+    'eddi_app.PrivacyPolicyCMS',
+    'eddi_app.TermsConditionCMS',
+    'eddi_app.FeeType',
+    'eddi_app.ContactUsPageCMS',
+    'eddi_app.CourseLevel',
+    'eddi_app.CourseType',
+
+    ]
+local_models = [
+    # 'eddi_app.HomePageCMSBanner',
+    # 'eddi_app.utl_status',
+    # 'eddi_app.UserType',
+    # 'eddi_app.approval_status',
+    # 'eddi_app.UserSignup',
+    # 'eddi_app.CourseCategoryDetails',
+    # 'eddi_app.CourseSubCategoryDetails',
+    # 'eddi_app.CourseDetails',
+    # 'eddi_app.TestinomialsDetails',
+    # 'eddi_app.BlogDetails',
+    # 'eddi_app.HomePageCMSPartners',
+    # 'eddi_app.HomePageCMS',
+    # 'eddi_app.AboutUsPageCMS',
+    # 'eddi_app.PrivacyPolicyCMS',
+    # 'eddi_app.TermsConditionCMS',
+    # 'eddi_app.FeeType',
+    # 'eddi_app.ContactUsPageCMS',
+    # 'eddi_app.CourseLevel',
+    # 'eddi_app.CourseType',
+
+
+    ]
 JAZZMIN_SETTINGS = {
     "language_chooser": True,
     # title of the window (Will default to current_admin_site.site_title if absent or None)
@@ -110,35 +156,9 @@ JAZZMIN_SETTINGS = {
     # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
     "site_icon": None,
     "changeform_format": "collapsible",
-    "hide_models": [
-    # 'eddi_app.HomePageCMSBanner',
-    # 'eddi_app.utl_status',
-    # 'eddi_app.UserType',
-    # 'eddi_app.approval_status',
-    # 'eddi_app.UserSignup',
-    # 'eddi_app.CourseCategoryDetails',
-    # 'eddi_app.CourseSubCategoryDetails',
-    # 'eddi_app.CourseDetails',
-    # 'eddi_app.TestinomialsDetails',
-    # 'eddi_app.BlogDetails',
-    # 'eddi_app.HomePageCMSPartners',
-    # 'eddi_app.HomePageCMS',
-    # 'eddi_app.AboutUsPageCMS',
-    # 'eddi_app.PrivacyPolicyCMS',
-    # 'eddi_app.TermsConditionCMS',
-    # 'eddi_app.FeeType',
-    # 'eddi_app.ContactUsPageCMS',
-    # 'eddi_app.CourseLevel',
-    # 'eddi_app.CourseType',
+    # "hide_models": local_models,
 
-
-
-    
-
-    
-
-
-    ],
+    "hide_models": production_models,
      "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 

@@ -590,9 +590,7 @@ class UserPaymentDetail(models.Model):
     amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
-    
-    def __str__(self):
-        return self.course_name
+
 
 
 
