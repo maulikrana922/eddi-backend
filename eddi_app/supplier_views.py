@@ -17,8 +17,11 @@ from django.db.models import Q
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
-    token_data = request.headers.get('Authorization')
-    token = token_data.split()[1]
+    try:
+        token_data = request.headers.get('Authorization')
+        token = token_data.split()[1]
+    except:
+        return Response({STATUS:"Auth Token not found"})
 
     try:
         data = getattr(models,TOKEN_TABLE).objects.get(key = token)
@@ -194,11 +197,15 @@ class GetCourseDetails(APIView):
     res = None
     domain_data = None
     email_id = None
-    course_data = None
+
     fav_data = None
     fav_dataa = None
     def get(self, request,uuid = None):
         res = None
+        fav_dataa = None
+        course_name = None
+        course_data = None
+        individuals = None
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
@@ -211,40 +218,45 @@ class GetCourseDetails(APIView):
             except Exception as ex:
                 fav_data = None
                 fav_dataa = None
+
+            try:
+                individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
+              
+            except Exception as e:
+                print(e, "ererererer")
+                individuals = None
             
             
             if serializer := CourseDetailsSerializer(course_data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                if serializer1 := CourseEnrollSerializer(individuals, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: serializer.errors,"Enrolled": "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             # print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
             email_id =  get_user_email_by_token(request)
             if email_id:
+                print(email_id)
                 organization_domain = email_id.split('@')[1]
-                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+           
                 # for i in data:
+                if serializer := CourseDetailsSerializer(data_s,many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    
                 #     print(i.organization_domain)
             else:
-                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
-            # print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+                data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
+           
+             
+            # print(data)
+            if serializer := CourseDetailsSerializer(data_s):
+                return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
 
-            try:
-                individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
-            except Exception as e:
-                print(e, "ererererer")
-                individuals = None
-
-            data = getattr(models,COURSEDETAILS_TABLE).objects.all()
-            if serializer := CourseDetailsSerializer(data, many=True):
-                print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-                # fav_dataa = None
-                if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
-                else:
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
-
+                # if serializer1 := CourseEnrollSerializer(individuals, many=True):
+                #     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                # else:
+                #     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
        
