@@ -317,7 +317,7 @@ class GetHomePageDetails(APIView):
 
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
-
+@permission_classes([AllowAny])
 class GetPrivacyPolicyDetails(APIView): 
     def get(self, request):
         data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest('created_date_time')
@@ -326,6 +326,7 @@ class GetPrivacyPolicyDetails(APIView):
         print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
+@permission_classes([AllowAny])
 class GetTermsConditionDetails(APIView): 
     def get(self, request):
         data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest('created_date_time')
@@ -333,7 +334,8 @@ class GetTermsConditionDetails(APIView):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-       
+
+@permission_classes([AllowAny])   
 class GetAboutUsPageDetails(APIView):
     def get(self, request):
             data = getattr(models,ABOUTUSCMS_TABLE).objects.latest('created_date_time')
@@ -342,6 +344,7 @@ class GetAboutUsPageDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])
 class GetContactUsPageDetails(APIView):
     def get(self, request):
             data = getattr(models,CONTACTUSCMS_TABLE).objects.latest('created_date_time')
@@ -350,6 +353,7 @@ class GetContactUsPageDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
  
+@permission_classes([AllowAny])
 class GetBlogDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
@@ -376,7 +380,7 @@ class GetBlogDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@permission_classes([AllowAny])
 class ContactFormView(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
