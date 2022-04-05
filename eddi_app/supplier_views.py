@@ -342,29 +342,38 @@ class GetCourseDetails(APIView):
 class SupplierDashboardView(APIView):
 
     def post(self, request,uuid = None):
-        supplier_email = request.POST.get("supplier_email")
+        supplier_email = get_user_email_by_token(request)
         time_period = request.POST.get("time_period")
+        date = datetime.datetime.today()
+
         if time_period == "weekly":
-            date = datetime.datetime.today()
             week = date.strftime("%V")
-            print(week, "weekkkkkk")
-            weekly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__week":week})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__week":week}).count()
-            print(weekly_data, "wekkkkkkkk")
+            # print(week, "weekkkkkk")
+            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
+            # purchased = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"created_date_time__week":week, "status":"Success"})
+            # print(data, "wekkkkkkkk")
         elif time_period == "monthly":
-            date = datetime.datetime.today()
             month = date.strftime("%m")
-            print(month, "monthlyyyy")
-            monthly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__month":month})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__month":month}).count()
-            print(monthly_data, "monthlyyyy")
+            # print(month, "monthlyyyy")
+            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
+            # print(data, "monthlyyyy")
         elif time_period == "yearly":
-            date = datetime.datetime.today()
             year = date.strftime("%Y")
-            print(year, "yearrrrr")
-            yearly_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__year":year})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"created_date_time__year":year}).count()
-            print(yearly_data, "yearlyyyyy")
+            # print(year, "yearrrrr")
+            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
+            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
+            course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
+            purchased = set(getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values('payment_detail__course_name'))
+ 
+
+            # for count,i in enumerate(course, 1):
+            #     data_get = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{"supplier__email_id":supplier_email,"created_date_time__year":year, i.course_name:})
+
+
+            # purchased = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
+            # print(data, "yearlyyyyy")
 
 
 
