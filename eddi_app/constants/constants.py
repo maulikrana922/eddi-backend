@@ -42,6 +42,8 @@ CATEGORY_NAME = 'category_name'
 TRUE = 'true'
 FALSE = 'false'
 OTP_EMAIL_HTML = 'email-password.html'
+USER_WELCOME_HTML = 'user-welcome.html'
+
 RESETPASSWORD_HTML = 'email-link.html'
 USER_TYPE_ID = 'user_type_id'
 ORGANIZATION_LOCATION = 'organization_location'

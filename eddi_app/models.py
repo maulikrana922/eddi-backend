@@ -103,7 +103,7 @@ class UserSignup(models.Model):
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     print("OUTER")
-    if created and instance.user_type.user_type == SUPPLIER_S:
+    if created and instance.user_type.user_type == SUPPLIER_S or instance.user_type.user_type == ADMIN_S:
         print("INNER")
 
         html_path = OTP_EMAIL_HTML
@@ -116,6 +116,21 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data = UserSignup.objects.get(email_id = instance.email_id)
         data.password = make_password(otp)
         data.save()
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        print("TRUE")
+        email_msg.send(fail_silently=False)
+        print("TRUE")
+    
+    if created and instance.user_type.user_type == 'User':
+        print("User")
+
+        html_path = USER_WELCOME_HTML
+        fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'fullname':fullname}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         print("TRUE")
