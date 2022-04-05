@@ -460,18 +460,23 @@ class UserPaymentDetail_info(APIView):
                 CREATED_AT : make_aware(datetime.datetime.now())
                 }
             print(record_map, "recordddd")
+            # getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
                 # print(var, "varrrrrr")
             except Exception as ex:
+                print(ex, "exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                 print("Data not found")
                 var = None
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    print(profile_data, "prifile_data")
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                    print(var, "varr")
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    print(courseobj, "courseobjjjj")
                     record_map = {}
                     record_map = {
                     "course_category" : courseobj.course_category,
@@ -492,7 +497,6 @@ class UserPaymentDetail_info(APIView):
                     return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
-                
                 
 
         except Exception as ex:
