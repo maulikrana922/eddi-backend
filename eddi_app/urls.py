@@ -45,4 +45,6 @@ urlpatterns = [
 # Supplier Dashboard
 
     path('supplier-dashboard/',SupplierDashboardView.as_view()),
+    path('supplier-dashboard-courseGraph/',SupplierDashboard_courseGraphView.as_view()),
+    # path('supplier-dashboard-earningGraph/',SupplierDashboard_earningGraphView.as_view()),
 ]
