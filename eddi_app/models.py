@@ -638,3 +638,26 @@ class CourseEnroll(models.Model):
   
     
     
+
+    class Event(models.Model):
+        uuid = models.UUIDField(default=uuid.uuid4,unique=True)
+        event_image = models.FileField(upload_to='event_image/',verbose_name='Event Image',blank=True,null=True)
+        event_publish_on = models.DateTimeField(auto_now_add=True,verbose_name='Event Publish On')
+        event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
+        event_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Category")
+        # event_subcategory = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Category")
+        banner_video_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Banner Link")
+        start_date = models.DateTimeField(auto_now_add=True,verbose_name='Event Start Date')
+        start_time = models.TimeField(auto_now_add=True,verbose_name='Event Start Time')
+        fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Fees Type")
+        event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Type")
+        event_price = models.FloatField(default=0,verbose_name='Event Price',blank=True,null=True)
+        checkout_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Checkout Link")
+        event_small_description = RichTextField(verbose_name = 'Event Small Description', blank = True)
+        event_description = RichTextField(verbose_name = 'Event Description', blank = True)
+        event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name="Location")
+        event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name="Organizer")
+        event_subscriber = models.IntegerField(default=0,verbose_name='Course Subscriber',blank=True,null=True)
+        is_featured = models.BooleanField(default=False)
+
+        created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')

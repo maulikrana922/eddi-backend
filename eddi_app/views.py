@@ -153,7 +153,7 @@ class GetUserDetails(APIView):
         except:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            EMAIL_ID: request.FILES.get(EMAIL_ID,data.email_id),
+            EMAIL_ID: data.email_id,
             PASSWORD: request.POST.get(PASSWORD,data.password),
             USER_TYPE_ID: 2,
             IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
@@ -175,7 +175,7 @@ class GetUserDetails(APIView):
         except:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            EMAIL_ID: request.FILES.get(EMAIL_ID,data.email_id),
+            EMAIL_ID: data.email_id,
             PASSWORD: request.POST.get(PASSWORD,data.password),
             USER_TYPE_ID: 2,
             IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
@@ -596,3 +596,46 @@ class ViewIndividualProfile(APIView):
             print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
+class EventView(APIView):
+
+    def post(self, request):
+        record_map = {}
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
+        # except:
+        #     return Response({STATUS:ERROR, DATA: "Error Getting User Type"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {
+            "event_image": request.FILES.get("event_image",None),
+            "event_publish_on": request.POST.get("event_publish_on",None),
+            "event_name": request.POST.get("event_name",None),
+            "event_category": request.POST.get("event_category",None),
+            "banner_video_link": request.POST.get("banner_video_link",None),
+            "start_date": request.POST.get("start_date",None),
+            "start_time": request.POST.get("start_time",None),
+            "fees_type": request.POST.get("fees_type",None),
+            "event_type": request.POST.get("event_type",None),
+            "event_price": request.POST.get("event_price",None),
+            "checkout_link": request.POST.get("checkout_link",None),
+            "event_small_description": request.POST.get("event_small_description",None),
+            "event_description": request.POST.get("event_description",None),
+            "event_location": request.POST.get("event_location",None),
+            "event_organizer": request.POST.get("event_organizer",None),
+            "event_subscriber": request.POST.get("event_subscriber",None),
+            "is_featured": request.POST.get("is_featured",False)
+           
+        }
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[UUID] = uuid4()
+            # getattr(models,Event).objects.update_or_create(**record_map)
+        except Exception as ex:
+            print(ex,"exxxxxxxxxxxxxxxxxxxx")
+        # try:
+        #     getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+        # except Exception as ex:
+        #     return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+    
