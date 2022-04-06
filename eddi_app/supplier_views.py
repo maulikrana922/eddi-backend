@@ -1,3 +1,4 @@
+from calendar import TUESDAY
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -423,36 +424,6 @@ class SupplierDashboardView(APIView):
                 return Response({STATUS: ERROR, DATA: "Error in Individual user data"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-    # def put(self,request):
-    #     supplier_email = request.POST.get("supplier_email")
-    #     status_s = request.POST.get("status")
-    #     course_name = request.POST.get("course_name")
-    #     try:
-    #         data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-    #     except Exception as ex:
-    #         print(ex, "exxxxx")
-    #         return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
-    #     record_map = {}
-    #     if status_s == "Active":
-    #         record_map = {
-    #             STATUS_ID: 1,
-    #         }
-    #     else:
-    #         record_map = {
-    #             STATUS_ID: 2,
-    #         }
-
-    #     record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-    #     record_map[MODIFIED_BY] = 'admin'
-    #     print(record_map, "recorddddddddddddddddddddddd")
-    #     for key,value in record_map.items():
-    #         setattr(data,key,value)
-    #     data.save()
-    #     return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
-
        
 
 class SupplierDashboard_Active_InActiveView(APIView):
@@ -612,34 +583,53 @@ class SupplierDashboard_earningGraphView(APIView):
             day = date.strftime("%A")
             print(week, "weekkkkkk")
             print(day, "dayyyyyyyyyyyyyyy")
+            from django.db.models.functions import TruncDay
+
             try:
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                print(data, "datttttt")
+                # print(data, "datttttt")
                 total_earning = int(sum(list(data)))
                 print(total_earning, "earninnnnnnnnnn")
+                # data1 = COURSE_ENROLL_TABLE.objects.filter(created_date_time__gte = day,).annotate(day=TruncDay('created_date_time'),).values('day','created_count')
+                from django.utils import timezone as tz
+                # d = datetime.now() - datetime.timedelta(days=100)
+                d = datetime.datetime.now() - datetime.timedelta(days=30)
+                # print(d,"Dddddddddddddddddddddddddd")
+                # data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__day__gte":1})
+                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__day":2})
+                print(data1, "data1111111111")
                 # course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
+                return Response({STATUS: SUCCESS,
+                "total_earning": total_earning}, status=status.HTTP_200_OK)
+            except Exception as ex: 
+                print(ex, "exxxxxxxxxxxxxxxxxxxxxxx")
+                return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif time_period == "monthly":
+            month = date.strftime("%m")
+            try:
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
+                # print(data, "datttttt")
+                total_earning = int(sum(list(data)))
+                return Response({STATUS: SUCCESS,
+                "total_earning": total_earning}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # try:
+        
+        elif time_period == "yearly":
+            try:
+                year = date.strftime("%Y")
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
+                    # print(data, "datttttt")
+                total_earning = int(sum(list(data)))
+                return Response({STATUS: SUCCESS,
+                "total_earning": total_earning}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
 
-            #     purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
-            # except Exception as ex:
-            #     return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
-            # print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            # set1 = set(purchased)
-            # print(set1, "set111111")
-            # purchased_course = len(set1)
-            # # print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            # # set1 = set(purchased)
-            # # print(set1, "set111111")
-            # # purchased_course = len(set1)
-            # try:
-            #     all_supplier_course =  course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list("course_name", flat=True)
-            # except Exception as ex:
-            #     return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: "Not entered in anu loop", DATA: "OK"}, status=status.HTTP_200_OK)
 
-            # set_all = set(all_supplier_course)
-            # non_purchased = len(set_all-set1)
+
+       
 
 
