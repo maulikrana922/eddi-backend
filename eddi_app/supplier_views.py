@@ -342,7 +342,6 @@ class GetCourseDetails(APIView):
 
 
 class SupplierDashboardView(APIView):
-
     def post(self, request,uuid = None):
         supplier_email = get_user_email_by_token(request)
         print(supplier_email, "emmmmm")
@@ -400,13 +399,14 @@ class SupplierDashboardView(APIView):
             purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).count()
             print("2")
 
-            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email, STATUS:1})
+            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email})
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             Individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email})
+            # course_type = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: " Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         
