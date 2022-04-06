@@ -13,6 +13,7 @@ COURSE_ENROLL_TABLE='CourseEnroll'
 USER_PAYMENT_DETAIL ='UserPaymentDetail' # Add table
 FAVOURITE_COURSE_TABLE = "FavouriteCourse"
 TOKEN_TABLE = 'NonBuiltInUserToken'
+EVENT_AD_TABLE = "EventAd"
 
 
 # CMS

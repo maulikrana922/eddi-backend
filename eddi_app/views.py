@@ -596,8 +596,9 @@ class ViewIndividualProfile(APIView):
             print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
-class EventView(APIView):
 
+
+class EventView(APIView):
     def post(self, request):
         record_map = {}
         if request.method != POST_METHOD:
@@ -629,20 +630,20 @@ class EventView(APIView):
             else:
                 featured_data = False
             record_map[IS_FEATURED] = featured_data
-            getattr(models,"EventAd").objects.update_or_create(**record_map)
+            getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
         if uuid:
-            data = getattr(models,"EventAd").objects.get(**{UUID:uuid})
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
             if serializer := EventAdSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,"EventAd").objects.all()
+            data = getattr(models,EVENT_AD_TABLE).objects.all()
             if serializer := EventAdSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
