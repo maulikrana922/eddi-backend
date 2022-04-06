@@ -230,6 +230,7 @@ admin.site.site_header = 'Eddi Admin'
 #         }),
 #     )
 
+admin.site.register(EventAd)
 admin.site.register(UserProfile)
 
 
@@ -239,4 +240,3 @@ admin.site.register(UserProfile)
 admin.site.register(UserPaymentDetail)
 admin.site.register(FavouriteCourse)
 admin.site.register(CourseEnroll)
-# admin.site.register(EventAd)

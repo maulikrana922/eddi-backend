@@ -51,6 +51,6 @@ urlpatterns = [
 
 
 # Event
-    path('event/',EventView.as_view()),
+    # path('event/',EventView.as_view()),
 
 ]
