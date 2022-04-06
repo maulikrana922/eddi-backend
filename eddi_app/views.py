@@ -602,40 +602,51 @@ class EventView(APIView):
         record_map = {}
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
-        # try:
-        #     user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
-        # except:
-        #     return Response({STATUS:ERROR, DATA: "Error Getting User Type"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
-            "event_image": request.FILES.get("event_image",None),
-            "event_publish_on": request.POST.get("event_publish_on",None),
-            "event_name": request.POST.get("event_name",None),
-            "event_category": request.POST.get("event_category",None),
-            "banner_video_link": request.POST.get("banner_video_link",None),
-            "start_date": request.POST.get("start_date",None),
-            "start_time": request.POST.get("start_time",None),
-            "fees_type": request.POST.get("fees_type",None),
-            "event_type": request.POST.get("event_type",None),
-            "event_price": request.POST.get("event_price",None),
-            "checkout_link": request.POST.get("checkout_link",None),
-            "event_small_description": request.POST.get("event_small_description",None),
-            "event_description": request.POST.get("event_description",None),
-            "event_location": request.POST.get("event_location",None),
-            "event_organizer": request.POST.get("event_organizer",None),
-            "event_subscriber": request.POST.get("event_subscriber",None),
-            "is_featured": request.POST.get("is_featured",False)
+            EVENT_IMAGE : request.FILES.get("event_image",None),
+            EVENT_PUBLISH_ON : request.POST.get("event_publish_on",None),
+            EVENT_NAME : request.POST.get("event_name",None),
+            EVENT_CATEGORY : request.POST.get("event_category",None),
+            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",None),
+            START_DATE : request.POST.get("start_date",None),
+            START_TIME : request.POST.get("start_time",None),
+            FEES_TYPE : request.POST.get("fees_type",None),
+            EVENT_TYPE : request.POST.get("event_type",None),
+            EVENT_PRICE : request.POST.get("event_price",None),
+            CHECKOUT_LINK : request.POST.get("checkout_link",None),
+            EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",None),
+            EVENT_DESCRIPTION : request.POST.get("event_description",None),
+            EVENT_LOCATION: request.POST.get("event_location",None),
+            EVENT_ORGANIZER : request.POST.get("event_organizer",None),
+            EVENT_SUBSCRIBER : request.POST.get("event_subscriber",None),
            
         }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
-            # getattr(models,Event).objects.update_or_create(**record_map)
+            if request.POST.get("is_featured") == "true":
+                featured_data = True
+            else:
+                featured_data = False
+            record_map[IS_FEATURED] = featured_data
+            getattr(models,"EventAd").objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex,"exxxxxxxxxxxxxxxxxxxx")
-        # try:
-        #     getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
-        # except Exception as ex:
-        #     return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, uuid = None):
+        if uuid:
+            data = getattr(models,"EventAd").objects.get(**{UUID:uuid})
+            if serializer := EventAdSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = getattr(models,"EventAd").objects.all()
+            if serializer := EventAdSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+      
 
     

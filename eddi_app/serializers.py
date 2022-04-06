@@ -98,3 +98,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         depth = 1
 
         fields = '__all__'
+
+class EventAdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventAd
+        depth = 1
+
+        fields = '__all__'
