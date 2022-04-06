@@ -639,7 +639,7 @@ class CourseEnroll(models.Model):
     
     
 
-    class Event(models.Model):
+    class EventAd(models.Model):
         uuid = models.UUIDField(default=uuid.uuid4,unique=True)
         event_image = models.FileField(upload_to='event_image/',verbose_name='Event Image',blank=True,null=True)
         event_publish_on = models.DateTimeField(auto_now_add=True,verbose_name='Event Publish On')

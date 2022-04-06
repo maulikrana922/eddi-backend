@@ -1,5 +1,6 @@
 from dataclasses import fields
 import imp
+from multiprocessing import Event
 from django.contrib import admin
 from .models import *
 from  django.contrib.auth.models  import  Group 
@@ -235,7 +236,7 @@ admin.site.register(UserProfile)
 
 
 
-
 admin.site.register(UserPaymentDetail)
 admin.site.register(FavouriteCourse)
 admin.site.register(CourseEnroll)
+# admin.site.register(EventAd)
