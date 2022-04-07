@@ -681,8 +681,8 @@ class EventView(APIView):
             EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
             }
 
-            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-            record_map[MODIFIED_BY] = 'admin'
+            # record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            # record_map[MODIFIED_BY] = 'admin'
             record_map[UUID] = uuid4()
             if request.POST.get("is_featured") == "true":
                 featured_data = True
