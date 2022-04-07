@@ -64,6 +64,7 @@ ORGANIZATION_DOMAIN = 'organization_domain'
 EVENT_IMAGE = "event_image"
 EVENT_PUBLISH_ON = "event_publish_on"
 EVENT_NAME = "event_name"
+EVENT_CHOOSE_TYPE = "event_choose_type"
 EVENT_CATEGORY = "event_category"
 BANNER_VIDEO_LINK = "banner_video_link"
 START_DATE = "start_date"

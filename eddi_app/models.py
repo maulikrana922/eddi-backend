@@ -639,7 +639,7 @@ class CourseEnroll(models.Model):
     
     
 
-class EventAd(models.Model):
+class EventAd(models.Model):    
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     event_image = models.FileField(upload_to='event_image/',verbose_name='Event Image',blank=True,null=True)
     event_choose_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Choose Type")
