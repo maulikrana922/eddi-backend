@@ -622,6 +622,7 @@ class EventView(APIView):
             EVENT_LOCATION: request.POST.get("event_location",None),
             EVENT_ORGANIZER : request.POST.get("event_organizer",None),
             EVENT_SUBSCRIBER : request.POST.get("event_subscriber",None),
+            STATUS_ID:1
            
         }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -675,6 +676,7 @@ class EventView(APIView):
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             EVENT_PRICE : request.POST.get("event_price",data.event_price),
+            EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
@@ -682,7 +684,13 @@ class EventView(APIView):
             EVENT_ORGANIZER : request.POST.get("event_organizer",data.event_organizer),
             EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
             }
-
+            if request.POST.get("status"):
+                if request.POST.get("status") == "Active":
+                    record_map[STATUS_ID] = 1
+                else:
+                    record_map[STATUS_ID] = 2
+            else:
+                record_map[STATUS_ID] = data.status
             # record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             # record_map[MODIFIED_BY] = 'admin'
             record_map[UUID] = uuid4()
@@ -701,3 +709,20 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     
+    def delete(self,request,uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
+        except:
+            return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {}
+            record_map[STATUS_ID] = 2
+            record_map[UUID] = uuid4()
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()
+            return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)
