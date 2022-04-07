@@ -105,3 +105,9 @@ class EventAdSerializer(serializers.ModelSerializer):
         depth = 1
 
         fields = '__all__'
+
+class HeaderFooterCMSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Header_FooterCMS
+        depth = 2
+        fields = '__all__'

@@ -387,9 +387,36 @@ class TestinomialsDetails(models.Model):
 
 
 
+class Header_FooterCMS(models.Model):
+    # Header
+    eddi_logo_header = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name="Eddi Logo Header")
+    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 1 Text')
+    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 2 Text')
+    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 3 Text')
+    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 4 Text')
+    login_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Login Button Text')
 
+    # Footer
+    eddi_logo_footer = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name="Eddi Logo Footer")
+    description = RichTextField(verbose_name = 'Footer Description',blank=True)
+    follow_us_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Follow Us Text')
+    social_media_icon1 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 1")
+    social_media_icon2 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 2")
+    social_media_icon3 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 3")
+    copyright_text = models.CharField(max_length=100,blank=True,null=True,verbose_name='Copyright Text')
 
+    quick_link_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Text')
+    quick_link_button_text1 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text1')
+    quick_link_button_text2 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text2')
+    quick_link_button_text3 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text3')
+    quick_link_button_text4 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text4')
+    quick_link_button_text5 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text5')
+    quick_link_button_text6 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text6')
+    
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
+    class Meta:
+        verbose_name = "Header_FooterCMS"
 
 class HomePageCMS(models.Model):
 

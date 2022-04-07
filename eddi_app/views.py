@@ -307,6 +307,10 @@ class ChangePasswordView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
 
+            
+@permission_classes([AllowAny])
+class Header_FooterCMSDetails(APIView):
+    pass
 
 @permission_classes([AllowAny])
 class GetHomePageDetails(APIView):
