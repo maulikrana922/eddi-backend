@@ -650,6 +650,52 @@ class EventView(APIView):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-      
+
+    
+    def put(self, request, uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            record_map = {
+            EVENT_IMAGE : request.FILES.get("event_image",data.event_image),
+            EVENT_PUBLISH_ON : request.POST.get("event_publish_on",data.event_publish_on),
+            EVENT_NAME : request.POST.get("event_name",data.event_name),
+            EVENT_CATEGORY : request.POST.get("event_category",data.event_category),
+            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),
+            START_DATE : request.POST.get("start_date",data.start_date),
+            START_TIME : request.POST.get("start_time",data.start_time),   
+            FEES_TYPE : request.POST.get("fees_type",data.fees_type),
+            EVENT_TYPE : request.POST.get("event_type",data.event_type),
+            EVENT_PRICE : request.POST.get("event_price",data.event_price),
+            CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
+            EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
+            EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
+            EVENT_LOCATION: request.POST.get("event_location",data.event_location),
+            EVENT_ORGANIZER : request.POST.get("event_organizer",data.event_organizer),
+            EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
+            }
+
+            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            record_map[MODIFIED_BY] = 'admin'
+            record_map[UUID] = uuid4()
+            if request.POST.get("is_featured") == "true":
+                featured_data = True
+            else:
+                featured_data = False
+            record_map[IS_FEATURED] = featured_data
+            print(record_map, "recorddddddddddd")
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()
+            return Response({STATUS: SUCCESS, DATA: "Edited Successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     

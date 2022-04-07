@@ -659,7 +659,15 @@ class EventAd(models.Model):
     event_subscriber = models.IntegerField(default=0,verbose_name='Course Subscriber',blank=True,null=True)
     is_featured = models.BooleanField(default=False)
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='EventAd Created Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='EventAd Created By')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='EventAd Modified Date Time')
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='EventAd Modified By')
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+
+
+    class Meta:
+        verbose_name = "EventAd Table"
 
     def __str__(self):
         return self.event_name
