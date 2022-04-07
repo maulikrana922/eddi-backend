@@ -664,7 +664,7 @@ class EventAd(models.Model):
     # created_by = models.CharField(max_length=100,blank=True,null=True,default=None,verbose_name='EventAd Created By')
     # modified_date_time = models.DateTimeField(auto_now_add=True,default=None,verbose_name='EventAd Modified Date Time')
     # modified_by = models.CharField(max_length=100,blank=True,default=None, null=True,verbose_name='EventAd Modified By')
-    # status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
 
     class Meta:
