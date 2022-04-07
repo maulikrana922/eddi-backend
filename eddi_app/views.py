@@ -611,7 +611,7 @@ class EventView(APIView):
             EVENT_CATEGORY : request.POST.get("event_category",None),
             BANNER_VIDEO_LINK : request.POST.get("banner_video_link",None),
             START_DATE : request.POST.get("start_date",None),
-            START_TIME : request.POST.get("start_time",None),
+            START_TIME : request.POST.get("start_time",None),   
             FEES_TYPE : request.POST.get("fees_type",None),
             EVENT_TYPE : request.POST.get("event_type",None),
             EVENT_PRICE : request.POST.get("event_price",None),
@@ -630,9 +630,11 @@ class EventView(APIView):
             else:
                 featured_data = False
             record_map[IS_FEATURED] = featured_data
+            print(record_map, "recorddddddddddd")
             getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex, "Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):

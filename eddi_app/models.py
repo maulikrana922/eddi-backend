@@ -646,7 +646,7 @@ class EventAd(models.Model):
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
     event_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Category")
     banner_video_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Banner Link")
-    start_date = models.DateTimeField(verbose_name='Event Start Date', blank=True,null=True)
+    start_date = models.DateField(verbose_name='Event Start Date', blank=True,null=True)
     start_time = models.TimeField(verbose_name='Event Start Time', blank=True,null=True)
     fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Fees Type")
     event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Type")
@@ -663,3 +663,15 @@ class EventAd(models.Model):
 
     def __str__(self):
         return self.event_name
+
+
+class CourseMaterial(models.Model):
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
+    video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="Video Title")
+    video_files = models.FileField(upload_to='course_video/',verbose_name='Video Files',blank=True,null=True)
+    file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Title")
+    document_files = models.FileField(upload_to='document_files/',verbose_name='Document Files',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+
+    def __str__(self):
+        return self.course

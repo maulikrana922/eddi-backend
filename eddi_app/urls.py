@@ -51,7 +51,7 @@ urlpatterns = [
 
 
 # Event
-    path('event/',EventView.as_view()),
+    path('add-event/',EventView.as_view()),
     path('get-event/',EventView.as_view()),
     path('get-event/<str:uuid>/',EventView.as_view()),
 
