@@ -83,6 +83,7 @@ production_models = [
     'eddi_app.NonBuiltInUserToken',
     'eddi_app.UserProfile',
     'eddi_app.UserPaymentDetail',
+    'eddi_app.Header_FooterCMS',
 
     ]
 local_models = []

@@ -307,10 +307,18 @@ class ChangePasswordView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
 
-            
+
 @permission_classes([AllowAny])
 class Header_FooterCMSDetails(APIView):
-    pass
+    try:
+        def get(self, request):
+            data = getattr(models,HEADER_FOOTERCMS_TABLE).objects.latest('created_date_time')
+            if not (serializer := Header_FooterCMSSerializer(data)):
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+    except Exception as ex:
+        print(ex, "exxxxxxxxxxxxxxxxxxx")
 
 @permission_classes([AllowAny])
 class GetHomePageDetails(APIView):

@@ -165,6 +165,22 @@ class ContactUsPageCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(ContactUsPageCMS, ContactUsPageCMSAdmin)
 
+
+class Header_FooterCMSAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Header', {
+            'classes': ('collapse',),
+            'fields': ('eddi_logo_header','button_1_text','button_2_text','button_3_text','button_4_text','login_button_text')
+        }),
+        ('Footer', {
+            'classes': ('collapse',),
+            'fields': ('eddi_logo_footer','description','follow_us_text','social_media_icon1','social_media_icon2','social_media_icon3','copyright_text','quick_link_text','quick_link_button_text1','quick_link_button_text2','quick_link_button_text3','quick_link_button_text4','quick_link_button_text5','quick_link_button_text6'),
+        }),
+       )
+
+admin.site.register(Header_FooterCMS, Header_FooterCMSAdmin)
+
 class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
