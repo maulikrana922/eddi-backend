@@ -1,7 +1,3 @@
-from distutils.command.upload import upload
-from tabnanny import verbose
-from django.forms import CharField
-from django.utils.safestring import mark_safe
 from django.db import models
 import uuid
 from django.conf import settings
@@ -698,13 +694,28 @@ class EventAd(models.Model):
         return self.event_name
 
 
+
+class MaterialVideoMaterial(models.Model):
+    video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.video_file
+
+class MaterialDocumentMaterial(models.Model):
+    document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.document_file
+
 class CourseMaterial(models.Model):
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
     video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="Video Title")
-    video_files = models.FileField(upload_to='course_video/',verbose_name='Video Files',blank=True,null=True)
+    video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name='Video Files',blank=True,null=True)
     file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Title")
-    document_files = models.FileField(upload_to='document_files/',verbose_name='Document Files',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+    document_files = models.ManyToManyField(MaterialDocumentMaterial,verbose_name='Document Files',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.course

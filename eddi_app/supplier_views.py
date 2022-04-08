@@ -471,7 +471,7 @@ class SupplierDashboard_courseGraphView(APIView):
 
 
 class SupplierDashboard_earningGraphView(APIView):
-    def post(self, request,uuid = None):
+    def post(self, request):
         supplier_email = get_user_email_by_token(request)
         time_period = request.POST.get("time_period")
         date = datetime.datetime.now()
