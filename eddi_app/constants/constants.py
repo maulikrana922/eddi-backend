@@ -79,4 +79,10 @@ EVENT_LOCATION = "event_location"
 EVENT_ORGANIZER = "event_organizer" 
 EVENT_SUBSCRIBER = "event_subscriber"
 IS_FEATURED = "is_featured"
+VIDEO_TITLE = 'video_title'
+VIDEO_FILES = 'video_files'
+VIDEO_FILES_ID = 'video_files_id'
+FILE_TITLE = 'file_title'
+DOCUMENT_FILES  = 'document_files'
+DOCUMENT_FILES_ID = 'document_files_id'
 

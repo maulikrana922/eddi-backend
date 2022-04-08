@@ -1,4 +1,5 @@
 from calendar import TUESDAY
+from typing import final
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -357,26 +358,39 @@ class SupplierDashboardView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name","user_profile__first_name")
-            print(Individuals11, "indi11")
-            print(list(Individuals11), "indi11list")
-            Individuals = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":list(Individuals11)})
-            print(Individuals, "indiiiiiiiiiiiiiiiiiiiiiiiiiii")
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name')
+          
+            user_name = [x[1] for x in Individuals11]
+            course_name = [x[0] for x in Individuals11]
+            print(course_name)
+            print(user_name)
+            individual_details = {}
+            final_dict = {}
+            individual_details ['username'] = user_name
+            individual_details ['coursename'] = course_name
+            print(individual_details ['username'])
+            counter = 0
+            for v in individual_details['coursename']:
+                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":v})
+                final_dict[str(Individuals.uuid)+"-"+str(counter)] = {
+                    'username':individual_details ['username'][counter],
+                    'coursename':v,
+                    'coursetype':Individuals.course_type.type_name,
+                }
+                counter +=1
+            print(final_dict)
         except Exception as ex:
             print(ex, "exxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
-            if Individuls := CourseDetailsSerializer(Individuals, many=True): 
-                return Response({STATUS: SUCCESS,
-                "total_course_count": total_course,
-                "total_user_count":total_user,
-                "supplier_course_count":supplier_course_count,
-                "purchased_course_count":purchased_course,
-                "Course_Offered":course_offer_serializer.data,
-                "Individuals": Individuls.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: "Error in Individual user data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: SUCCESS,
+            "total_course_count": total_course,
+            "total_user_count":total_user,
+            "supplier_course_count":supplier_course_count,
+            "purchased_course_count":purchased_course,
+            "Course_Offered":course_offer_serializer.data,
+            "Individuals": final_dict}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
        
@@ -515,6 +529,16 @@ class SupplierDashboard_earningGraphView(APIView):
         return Response({STATUS: "Not entered in anu loop", DATA: "OK"}, status=status.HTTP_200_OK)
 
 
-       
+class CourseMaterialUpload(APIView):
+    def post(self, request):
+        video_title = request.POST.get(VIDEO_TITLE,None)
+        video_files = request.POST.getlist(VIDEO_FILES,None)
+        file_title = request.POST.get(FILE_TITLE,None)
+        document_files = request.POST.getlist(DOCUMENT_FILES,None)
 
+        try:
+            course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
+        except Exception as ex:
+            print(ex)
 
+        
