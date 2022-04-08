@@ -324,11 +324,17 @@ class Header_FooterCMSDetails(APIView):
 class GetHomePageDetails(APIView):
 
     def get(self, request):
-        data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
-        if not (serializer := HomePageCMSSerializer(data)):
-            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
+            event_data = EventAd.objects.filter(Q(event_publish_on="Landing Page") | Q(event_publish_on="Both"))
+            if not (serializer := HomePageCMSSerializer(data)):
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif not (event_serializer := EventAdSerializer(event_data, many=True)):
+                return Response({STATUS: ERROR, DATA: event_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: serializer.data, "event_data":event_serializer.data}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])
 class GetPrivacyPolicyDetails(APIView): 
