@@ -278,11 +278,11 @@ class GetCourseDetails(APIView):
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
-        except:
+        except Exception:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
-        
+
             test_str = data.supplier.email_id
             res = test_str.split('@')[1]
             print(res)
@@ -317,7 +317,7 @@ class GetCourseDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
-        except:
+        except Exception:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
@@ -385,14 +385,7 @@ class SupplierDashboard_Active_InActiveView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {}
-        if status_s == "Active":
-            record_map = {
-                STATUS_ID: 1,
-            }
-        else:
-            record_map = {
-                STATUS_ID: 2,
-            }
+        record_map = {STATUS_ID: 1,} if status_s == "Active" else {STATUS_ID: 2,}
 
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
@@ -404,10 +397,10 @@ class SupplierDashboard_Active_InActiveView(APIView):
 
 
 class SupplierDashboard_courseGraphView(APIView):
-     def post(self, request,uuid = None):
+    def post(self, request):
         supplier_email = get_user_email_by_token(request)
         time_period = request.POST.get("time_period")
-        date = datetime.datetime.today()
+        date = datetime.datetime.now()
 
         if time_period == "weekly":
             week = date.strftime("%V")
@@ -415,7 +408,7 @@ class SupplierDashboard_courseGraphView(APIView):
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
-                
+
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
@@ -478,10 +471,10 @@ class SupplierDashboard_courseGraphView(APIView):
 
 
 class SupplierDashboard_earningGraphView(APIView):
-    def post(self, request,uuid = None):
+    def post(self, request):
         supplier_email = get_user_email_by_token(request)
         time_period = request.POST.get("time_period")
-        date = datetime.datetime.today()
+        date = datetime.datetime.now()
 
         if time_period == "weekly":
             week = date.strftime("%V")
