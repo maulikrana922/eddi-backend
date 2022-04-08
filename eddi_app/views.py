@@ -629,8 +629,6 @@ class EventView(APIView):
             EVENT_CATEGORY : request.POST.get("event_category",None),
             EVENT_CHOOSE_TYPE : request.POST.get("event_choose_type",None),
             BANNER_VIDEO_LINK : request.POST.get("banner_video_link",None),
-            START_DATE : request.POST.get("start_date",None),
-            START_TIME : request.POST.get("start_time",None),   
             FEES_TYPE : request.POST.get("fees_type",None),
             EVENT_TYPE : request.POST.get("event_type",None),
             EVENT_PRICE : request.POST.get("event_price",None),
@@ -645,6 +643,14 @@ class EventView(APIView):
         }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
+            if request.POST.get("start_date") == "":
+                record_map[START_DATE] = None
+            else:
+                record_map[START_DATE] = request.POST.get("start_date")
+            if request.POST.get("start_time") == "":
+                record_map[START_TIME] = None
+            else:
+                record_map[START_TIME] = request.POST.get("start_time")
             if request.POST.get("is_featured") == "true":
                 featured_data = True
             else:
