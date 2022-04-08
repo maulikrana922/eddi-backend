@@ -656,11 +656,9 @@ class EventView(APIView):
             else:
                 featured_data = False
             record_map[IS_FEATURED] = featured_data
-            print(record_map, "recorddddddddddd")
             getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
