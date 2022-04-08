@@ -510,6 +510,16 @@ class SupplierDashboard_earningGraphView(APIView):
         return Response({STATUS: "Not entered in anu loop", DATA: "OK"}, status=status.HTTP_200_OK)
 
 
-       
+class CourseMaterialUpload(APIView):
+    def post(self, request):
+        video_title = request.POST.get(VIDEO_TITLE,None)
+        video_files = request.POST.getlist(VIDEO_FILES,None)
+        file_title = request.POST.get(FILE_TITLE,None)
+        document_files = request.POST.getlist(DOCUMENT_FILES,None)
 
+        try:
+            course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
+        except Exception as ex:
+            print(ex)
 
+        
