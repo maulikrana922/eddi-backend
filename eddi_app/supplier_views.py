@@ -317,7 +317,7 @@ class GetCourseDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
-        except:
+        except Exception:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
@@ -344,75 +344,25 @@ class GetCourseDetails(APIView):
 class SupplierDashboardView(APIView):
     def post(self, request,uuid = None):
         supplier_email = get_user_email_by_token(request)
-        print(supplier_email, "emmmmm")
-        time_period = request.POST.get("time_period")
-        date = datetime.datetime.today()
-
-        if time_period == "weekly":
-            week = date.strftime("%V")
-            # print(week, "weekkkkkk")
-            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
-            # purchased = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"created_date_time__week":week, "status":"Success"})
-            # print(data, "wekkkkkkkk")
-        elif time_period == "monthly":
-            month = date.strftime("%m")
-            # print(month, "monthlyyyy")
-            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
-            # print(data, "monthlyyyy")
-        elif time_period == "yearly":
-            year = date.strftime("%Y")
-            # print(year, "yearrrrr")
-            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
-            course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
-            course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
-            # purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values("payment_detail__course_name")
-            purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
-            print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            set1 = set(purchased)
-            print(set1, "set111111")
-            purchased_course = len(set1)
-            # print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            # set1 = set(purchased)
-            # print(set1, "set111111")
-            # purchased_course = len(set1)
-            all_supplier_course =  course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list("course_name", flat=True)
-            set_all = set(all_supplier_course)
-            non_purchased = len(set_all-set1)
-            # print(all_course, "alllllll")
-                # for count,i in enumerate(course, 1):
-            #     data_get = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{"supplier__email_id":supplier_email,"created_date_time__year":year, i.course_name:})
-
-
-            # purchased = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
-            # print(data, "yearlyyyyy")
-
-
 
         try:
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
-            print("1")
 
             purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).count()
-            print("2")
 
             Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email, STATUS:1})
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             Individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email})
-            # course_type = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: " Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             if Individuls := CourseEnrollSerializer(Individuals, many=True): 
-                print(Courses_Offered, "offerrrr")
                 return Response({STATUS: SUCCESS,
                 "total_course_count": total_course,
                 "total_user_count":total_user,
@@ -428,27 +378,17 @@ class SupplierDashboardView(APIView):
 
 class SupplierDashboard_Active_InActiveView(APIView):
     def put(self,request):
-        supplier_email = request.POST.get("supplier_email")
         status_s = request.POST.get("status")
         course_name = request.POST.get("course_name")
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
         except Exception as ex:
-            print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {}
-        if status_s == "Active":
-            record_map = {
-                STATUS_ID: 1,
-            }
-        else:
-            record_map = {
-                STATUS_ID: 2,
-            }
+        record_map = {STATUS_ID: 1,} if status_s == "Active" else {STATUS_ID: 2,}
 
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
-        print(record_map, "recorddddddddddddddddddddddd")
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
@@ -459,65 +399,46 @@ class SupplierDashboard_Active_InActiveView(APIView):
 class SupplierDashboard_courseGraphView(APIView):
     def post(self, request):
         supplier_email = get_user_email_by_token(request)
-        # print(supplier_email, "emmmmm")
         time_period = request.POST.get("time_period")
         date = datetime.datetime.now()
 
         if time_period == "weekly":
             week = date.strftime("%V")
-            # print(week, "weekkkkkk")
             try:
-                data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week})
-                print(data, "datttttt")
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
-            print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
             set1 = set(purchased)
-            print(set1, "set111111")
             purchased_course = len(set1)
-            # print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-            # set1 = set(purchased)
-            # print(set1, "set111111")
-            # purchased_course = len(set1)
             try:
-                all_supplier_course =  course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list("course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
 
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
-            # purchased = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"created_date_time__week":week, "status":"Success"})
-            # print(data, "wekkkkkkkk")
+
         elif time_period == "monthly":
             month = date.strftime("%m")
-            # print(month, "monthlyyyy")
-            # data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month})
             try:
-                # data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week})
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
-            # print(data, "monthlyyyy")
 
             try:
-
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
-            print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
             set1 = set(purchased)
-            print(set1, "set111111")
             purchased_course = len(set1)
             try:
-                all_supplier_course =  course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list("course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
@@ -525,23 +446,19 @@ class SupplierDashboard_courseGraphView(APIView):
 
         elif time_period == "yearly":
             year = date.strftime("%Y")
-            data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
-            course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year})
             try:
 
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
-            print(purchased, "purrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
             set1 = set(purchased)
-            print(set1, "set111111")
             purchased_course = len(set1)
             try:
-                all_supplier_course =  course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list("course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
@@ -553,7 +470,6 @@ class SupplierDashboard_courseGraphView(APIView):
                 "Not_Purchased":non_purchased}, status=status.HTTP_200_OK)
 
 
-
 class SupplierDashboard_earningGraphView(APIView):
     def post(self, request,uuid = None):
         supplier_email = get_user_email_by_token(request)
@@ -563,28 +479,18 @@ class SupplierDashboard_earningGraphView(APIView):
         if time_period == "weekly":
             week = date.strftime("%V")
             day = date.strftime("%A")
-            print(week, "weekkkkkk")
-            print(day, "dayyyyyyyyyyyyyyy")
 
             try:
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
                 total_earning = int(sum(list(data)))
-                print(total_earning, "earninnnnnnnnnn")
-                from django.utils import timezone as tz
-                d = datetime.datetime.now() - datetime.timedelta(days=30)
-                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__day":2})
-                print(data1, "data1111111111")
-                return Response({STATUS: SUCCESS,
-                "total_earning": total_earning}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS,"total_earning": total_earning}, status=status.HTTP_200_OK)
             except Exception as ex: 
-                print(ex, "exxxxxxxxxxxxxxxxxxxxxxx")
                 return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == "monthly":
             month = date.strftime("%m")
             try:
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
-       
                 total_earning = int(sum(list(data)))
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning}, status=status.HTTP_200_OK)
