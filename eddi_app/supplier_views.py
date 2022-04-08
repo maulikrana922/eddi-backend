@@ -357,12 +357,17 @@ class SupplierDashboardView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email})
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name","user_profile__first_name")
+            print(Individuals11, "indi11")
+            print(list(Individuals11), "indi11list")
+            Individuals = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":list(Individuals11)})
+            print(Individuals, "indiiiiiiiiiiiiiiiiiiiiiiiiiii")
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: " Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
+            print(ex, "exxxxxxxxxxxx")
+            return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
-            if Individuls := CourseEnrollSerializer(Individuals, many=True): 
+            if Individuls := CourseDetailsSerializer(Individuals, many=True): 
                 return Response({STATUS: SUCCESS,
                 "total_course_count": total_course,
                 "total_user_count":total_user,
