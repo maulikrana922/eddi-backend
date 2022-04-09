@@ -5,6 +5,7 @@ urlpatterns = [
     # Stripe Link
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
+    path('free-courseEnroll/',Free_courseEnroll.as_view(), name="UserPaymentDetail"),   
 
     path('signup/',UserSignupView.as_view()),
     path('login/',UserLoginView.as_view()),
