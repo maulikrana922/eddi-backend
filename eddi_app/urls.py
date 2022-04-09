@@ -60,4 +60,11 @@ urlpatterns = [
     path('delete-event/<str:uuid>/',EventView.as_view()),
 
 
+# RecruitmentAd
+    path('add-recruitment/',EventView.as_view()),
+    path('get-recruitment/',EventView.as_view()),
+    path('get-recruitment/<str:uuid>/',EventView.as_view()),
+    path('edit-recruitment/<str:uuid>/',EventView.as_view()),
+    path('delete-recruitment/<str:uuid>/',EventView.as_view()),
+
 ]

@@ -779,3 +779,103 @@ class Free_courseEnroll(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+class RecruitmentAdAdView(APIView):
+
+    def post(self, request):
+
+        record_map = {}
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {
+            "recruitmentAd_File" : request.FILES.get("recruitmentAd_file",None),
+            "recruitmentAd_title" : request.POST.get("recruitmentAd_title",None),
+            "recruitmentAd_description" : request.POST.get("recruitmentAd_description",None),
+            "recruitmentAd_banner_video_link" : request.POST.get("recruitmentAd_banner_video_link",None),
+            "supplier_email" : request.POST.get("supplier_email",None),
+            "recruitmentAd_Expiry" : request.POST.get("recruitmentAd_Expiry",None),
+            "subscriber_count" : request.POST.get("subscriber_count",None),
+            STATUS_ID:1
+           
+        }
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[CREATED_BY] = request.POST.get("supplier_email")
+            record_map[UUID] = uuid4()
+            
+            getattr(models,"RecruitmentAd").objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exxxxxxxxxxxxxxxxxxxxx")
+            return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def get(self, request, uuid = None):
+        if uuid:
+            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+            if serializer := RecruitmentAdSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = getattr(models,"RecruitmentAd").objects.all()
+            if serializer := RecruitmentAdSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+        except Exception as ex:
+                print(ex, "exxxxx")
+                return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            record_map = {
+            "recruitmentAd_File" : request.FILES.get("recruitmentAd_file",data.recruitmentAd_File),
+            "recruitmentAd_title" : request.POST.get("recruitmentAd_title",data.recruitmentAd_title),
+            "recruitmentAd_description" : request.POST.get("recruitmentAd_description",data.recruitmentAd_description),
+            "recruitmentAd_banner_video_link" : request.POST.get("recruitmentAd_banner_video_link",data.recruitmentAd_banner_video_link),
+            "supplier_email" : request.POST.get("supplier_email",data.supplier_email),
+            "recruitmentAd_Expiry" : request.POST.get("recruitmentAd_Expiry",data.recruitmentAd_Expiry),
+            "subscriber_count" : request.POST.get("subscriber_count",data.subscriber_count),
+            "created_by" : request.POST.get("supplier_email",data.created_by),
+            
+        }
+            if request.POST.get("status"):
+                if request.POST.get("status") == "Active":
+                    record_map[STATUS_ID] = 1
+                else:
+                    record_map[STATUS_ID] = 2
+            else:
+                record_map[STATUS_ID] = data.status
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[UUID] = uuid4()
+            
+            getattr(models,"RecruitmentAd").objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "Edited Data successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exxxxxxxxxxxxxxxxxxxxx")
+            return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+    def delete(self,request,uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+        except:
+            return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {}
+            record_map[STATUS_ID] = 2
+            record_map[UUID] = uuid4()
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()
+            return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)

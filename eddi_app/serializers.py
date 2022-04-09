@@ -118,3 +118,9 @@ class HeaderFooterCMSSerializer(serializers.ModelSerializer):
         model = Header_FooterCMS
         depth = 2
         fields = '__all__'
+
+class RecruitmentAdSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecruitmentAd
+        depth = 1
+        fields = '__all__'

@@ -726,6 +726,7 @@ class CourseMaterial(models.Model):
 
 
 class RecruitmentAd(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     recruitmentAd_File = models.FileField(upload_to='recruitment_file/',verbose_name='Recruitment File',blank=True,null=True)
     recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="RecruitmentAd Title")
     recruitmentAd_description = RichTextField(verbose_name = 'RecruitmentAd Description', blank = True, null=True)
