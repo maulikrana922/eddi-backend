@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 import uuid
 from django.conf import settings
@@ -722,3 +723,29 @@ class CourseMaterial(models.Model):
 
     def __str__(self):
         return self.course.course_name
+
+
+class RecruitmentAd(models.Model):
+    recruitmentAd_File = models.FileField(upload_to='recruitment_file/',verbose_name='Recruitment File',blank=True,null=True)
+    recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="RecruitmentAd Title")
+    recruitmentAd_description = RichTextField(verbose_name = 'RecruitmentAd Description', blank = True, null=True)
+    recruitmentAd_banner_video_link =  models.CharField(max_length=500,blank=True,null=True,verbose_name="RecruitmentAd Banner Link")
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    recruitmentAd_Expiry =  models.DateField(verbose_name='RecruitmentAd Expiry Date', blank=True,null=True)
+    subscriber_count = models.IntegerField(default=0,verbose_name='Subscriber Count',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
+    approval = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
+
+
+
+# class RecruitmentAdEnrollment(models.Model):
+#     subscriber_image = models.ImageField(upload_to='recruitment_subscriber_image/',verbose_name='Subscriber Image',blank=True,null=True)
+#     subscriber_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Subscriber Name")
+#     subscriber_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+#     subscriber_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name="Contact Number")
+#     created_date_time = models.DateTimeField(auto_now_add=True)
+#     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
+
+
