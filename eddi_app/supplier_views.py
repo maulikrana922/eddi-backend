@@ -362,18 +362,16 @@ class SupplierDashboardView(APIView):
           
             user_name = [x[1] for x in Individuals11]
             course_name = [x[0] for x in Individuals11]
-            print(course_name)
-            print(user_name)
             individual_details = {}
             final_dict = {}
             individual_details ['username'] = user_name
             individual_details ['coursename'] = course_name
-            print(individual_details ['username'])
             counter = 0
             for v in individual_details['coursename']:
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":v})
-                final_dict[str(Individuals.uuid)+"-"+str(counter)] = {
+                final_dict[counter] = {
                     'username':individual_details ['username'][counter],
+                    'course_id':str(Individuals.uuid),
                     'coursename':v,
                     'coursetype':Individuals.course_type.type_name,
                 }
