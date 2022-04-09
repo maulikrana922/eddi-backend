@@ -698,7 +698,6 @@ class EventView(APIView):
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             EVENT_PRICE : request.POST.get("event_price",data.event_price),
-            # EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
