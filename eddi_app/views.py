@@ -460,11 +460,11 @@ class UserProfileView(APIView):
 class UserPaymentDetail_info(APIView):
     def post(self, request):
         try:
+            course_name = request.POST.get("course_name")
             email_id = request.POST.get("email_id")
             card_type = request.POST.get("card_brand")
             amount = request.POST.get("price")
             status_s = request.POST.get("status")
-            course_name = request.POST.get("course_name")
             print(email_id)
            
                 
@@ -499,7 +499,7 @@ class UserPaymentDetail_info(APIView):
                     record_map = {
                     "course_category" : courseobj.course_category,
                     "supplier_email" : courseobj.supplier.email_id,
-                    "payment_detail_id": var.id,
+                    "payment_detail_id" : var.id,
                     "user_profile_id" : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
@@ -698,7 +698,6 @@ class EventView(APIView):
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             EVENT_PRICE : request.POST.get("event_price",data.event_price),
-            EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
@@ -748,3 +747,34 @@ class EventView(APIView):
             return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)
+
+
+class Free_courseEnroll(APIView):
+    def post(self, request):
+        record_map = {}
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            course_name = request.POST.get("course_name")
+            email_id = request.POST.get("email_id")
+            # amount = request.POST.get("price")
+            # status_s = request.POST.get("status")
+            profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+            record_map = {}
+            record_map = {
+                    "course_category" : courseobj.course_category,
+                    "supplier_email" : courseobj.supplier.email_id,
+                    "user_profile_id" : profile_data.id,
+                    CREATED_AT : make_aware(datetime.datetime.now())
+                    }
+            print(record_map, "mapppppppppppp")
+            getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
+            print("Enrolll createdddd")
+            print("created")
+            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exxxxxxxxxxxxxxxxxxx")
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
