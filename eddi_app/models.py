@@ -659,7 +659,8 @@ class CourseEnroll(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
 
 
-
+    def __str__(self):
+        return self.payment_detail.course_name
   
     
     
