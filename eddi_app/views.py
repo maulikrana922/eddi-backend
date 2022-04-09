@@ -664,12 +664,13 @@ class EventView(APIView):
     def get(self, request, uuid = None):
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
+           
             if serializer := EventAdSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,EVENT_AD_TABLE).objects.all()
+            data = getattr(models,EVENT_AD_TABLE).objects.all().order_by("-created_date_time")
             if serializer := EventAdSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
