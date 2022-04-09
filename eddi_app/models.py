@@ -739,7 +739,7 @@ class RecruitmentAd(models.Model):
     approval = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
-
+        
 
 # class RecruitmentAdEnrollment(models.Model):
 #     subscriber_image = models.ImageField(upload_to='recruitment_subscriber_image/',verbose_name='Subscriber Image',blank=True,null=True)

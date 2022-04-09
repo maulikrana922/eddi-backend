@@ -462,9 +462,19 @@ class UserPaymentDetail_info(APIView):
         try:
             course_name = request.POST.get("course_name")
             email_id = request.POST.get("email_id")
-            card_type = request.POST.get("card_brand")
-            amount = request.POST.get("price")
-            status_s = request.POST.get("status")
+            if request.POST.get("card_brand"):
+                card_type = request.POST.get("card_brand")
+            else:
+                card_type = None
+            if request.POST.get("price"):
+                amount = request.POST.get("price")
+            else:
+                amount = 0
+            if request.POST.get("status"):
+                status_s = request.POST.get("status")
+            else:
+                status_s = "Success"
+            
             print(email_id)
            
                 
@@ -478,23 +488,16 @@ class UserPaymentDetail_info(APIView):
                 CREATED_AT : make_aware(datetime.datetime.now())
                 }
             print(record_map, "recordddd")
-            # getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
-                # print(var, "varrrrrr")
             except Exception as ex:
-                print(ex, "exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-                print("Data not found")
                 var = None
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    print(profile_data, "prifile_data")
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
-                    print(var, "varr")
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-                    print(courseobj, "courseobjjjj")
                     record_map = {}
                     record_map = {
                     "course_category" : courseobj.course_category,
@@ -503,23 +506,17 @@ class UserPaymentDetail_info(APIView):
                     "user_profile_id" : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
-                    print(record_map, "mapppppppppppp")
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
                     print("Enrolll createdddd")
-                    print("created")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
-                    print(ex, "exxxxxxxxxxxxxxx")
-                    
                     return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 
-
         except Exception as ex:
-            print(ex, "eeeee")
-            return Response({DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                 
               
             
@@ -783,7 +780,6 @@ class Free_courseEnroll(APIView):
 class RecruitmentAdAdView(APIView):
 
     def post(self, request):
-
         record_map = {}
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -806,7 +802,6 @@ class RecruitmentAdAdView(APIView):
             getattr(models,"RecruitmentAd").objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "exxxxxxxxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -830,7 +825,6 @@ class RecruitmentAdAdView(APIView):
         try:
             data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
         except Exception as ex:
-                print(ex, "exxxxx")
                 return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -854,11 +848,12 @@ class RecruitmentAdAdView(APIView):
                 record_map[STATUS_ID] = data.status
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
-            
-            getattr(models,"RecruitmentAd").objects.update_or_create(**record_map)
+            print(record_map, "recorddddddddddddd")
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()            
             return Response({STATUS: SUCCESS, DATA: "Edited Data successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "exxxxxxxxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
         
 
