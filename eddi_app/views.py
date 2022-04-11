@@ -261,7 +261,7 @@ class ForgetPasswordView(APIView):
             print(ex)
             return Response({STATUS: ERROR, DATA: 'error'}, status=status.HTTP_400_BAD_REQUEST)
                 
-                
+
 @permission_classes([AllowAny])
 class ResetPasswordView(APIView):
     def post(self,request,slug=None):
@@ -520,7 +520,73 @@ class UserPaymentDetail_info(APIView):
             return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                 
               
+
+@permission_classes([AllowAny])
+class EventPaymentDetail_info(APIView):
+    def post(self, request):
+        try:
+            event_name = request.POST.get("event_name")
+            user_email_id = request.POST.get("email_id")
+            if request.POST.get("card_brand"):
+                card_type = request.POST.get("card_brand")
+            else:
+                card_type = None
+            if request.POST.get("price"):
+                amount = request.POST.get("price")
+            else:
+                amount = 0
+            if request.POST.get("status"):
+                status_s = request.POST.get("status")
+            else:
+                status_s = "Success"
             
+            print(user_email_id)
+           
+                
+            record_map = {}
+            record_map = {
+                "event_name" : event_name,
+                EMAIL_ID: user_email_id,
+                CARD_TYPE : card_type,
+                AMOUNT: float(amount),
+                STATUS: status_s,
+                CREATED_AT : make_aware(datetime.datetime.now())
+                }
+            print(record_map, "recordddd")
+            try:
+                var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+            except Exception as ex:
+                var = None
+            if not var:
+                try:
+                    getattr(models,"EventAdPaymentDetail").objects.update_or_create(**record_map)
+                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+                    var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+                    print(user_email_id, "adminnnnnnnnnnnnnnnnnnnnnnn")
+                    admin_email_id = request.POST.get("admin_email_id")
+                    record_map = {}
+                    record_map = {
+                    "event_name" : event_name,
+                    "admin_email" : admin_email_id,
+                    "payment_detail_id" : var.id,
+                    "user_profile_id" : profile_data.id,
+                    CREATED_AT : make_aware(datetime.datetime.now())
+                    }
+                    getattr(models,"EventAdEnroll").objects.update_or_create(**record_map)
+                    print("Enrolll createdddd")
+                    return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+                except Exception as ex:
+                    print(ex, "exxxxxxxxxxxxxxxxxxxxxxxx")
+                    return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as ex:
+            return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class FavCourseDetails(APIView):
     def post(self, request):
         data = None
