@@ -261,7 +261,8 @@ class ForgetPasswordView(APIView):
             print(ex)
             return Response({STATUS: ERROR, DATA: 'error'}, status=status.HTTP_400_BAD_REQUEST)
                 
-        
+                
+@permission_classes([AllowAny])
 class ResetPasswordView(APIView):
     def post(self,request,slug=None):
         email_id = request.POST.get(EMAIL_ID)
