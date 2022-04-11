@@ -382,7 +382,6 @@ class SupplierDashboardView(APIView):
                 counter +=1
             print(final_dict)
         except Exception as ex:
-            print(ex, "exxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
@@ -499,20 +498,8 @@ class SupplierDashboard_earningGraphView(APIView):
 
         if time_period == "weekly":
             week = datee.strftime("%V")
-            # day = date.strftime("%A")
             today = datetime.datetime.now()
             week_list = {}
-            # for i in range(0, 7):
-            #     past = today - timedelta(days = i)
-            #     data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
-            #     var = list(data)
-            #     final = sum(var)
-            #     if var == "":
-            #         final = 0
-            #     week_list[past.strftime("%A")] = final
-            # print(week_list)
-            # print(data, "datatatatata")
-            # return
             try:
                 for i in range(0, 7):
                     past = today - timedelta(days = i)
@@ -526,7 +513,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 total_earning = sum(list(data))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, "weekly_earning":week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
-                return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == "monthly":
             month_list = {}
@@ -550,22 +537,11 @@ class SupplierDashboard_earningGraphView(APIView):
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning, "monthly_earning":month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
-                print(ex, "exxxxxxxxxxxxxxxxxxx")
-                return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif time_period == "yearly":
             month = datee.strftime("%m")
-            # noww = datetime.datetime.now()
             try:
-                # todayy = datetime.now()
-                # lastyear = todayy.year-1
-                # print(lastyear.month)
-                # for i in range(1, 13):
-                #     month_starting = datetime.datetime(noww.year, noww.month - i, 1)
-                #     print(month_starting, "month starting")
-                #     month_ending = month_starting + timedelta(days=30) 
-                #     print(month_ending, "month endinggg")
-
                 today = datetime.datetime.now()
                 # Get next month and year using relativedelta
                 next_month = today + relativedelta(months=+1)
@@ -581,7 +557,6 @@ class SupplierDashboard_earningGraphView(APIView):
                         deque_months.append(next_month.strftime('%B %Y'))
 
                     i = i+1
-
                 # Convert deque to list
                 month_List = list(deque_months)
                 year = datee.strftime("%Y")
@@ -591,14 +566,12 @@ class SupplierDashboard_earningGraphView(APIView):
                 for i in range(0, 12):
                     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
                     final_data[month_List[i].split()[0]] = float(sum(list(data1)))
-                print(data1, "dataaaaaaaaaaa")
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning, "final_list":final_data}, status=status.HTTP_200_OK)
             except Exception as ex:
-                print(ex,"exxxxxxxxxxxxxxxxxxx")
-                return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({STATUS: "Not entered in anu loop", DATA: "OK"}, status=status.HTTP_200_OK)
+        return Response({STATUS: "Invalid time_period added", DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CourseMaterialUpload(APIView):
