@@ -1,11 +1,12 @@
 from calendar import TUESDAY
 from typing import final
+from pytz import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-
+from datetime import datetime, timedelta
 from .serializers import *
+from datetime import timezone
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
@@ -15,7 +16,10 @@ from uuid import uuid4
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.db.models import Q 
-
+from datetime import timedelta
+from time import strptime
+from dateutil.relativedelta import *
+from collections import deque
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -491,37 +495,107 @@ class SupplierDashboard_earningGraphView(APIView):
     def post(self, request):
         supplier_email = get_user_email_by_token(request)
         time_period = request.POST.get("time_period")
-        date = datetime.datetime.now()
+        datee = datetime.datetime.now()
 
         if time_period == "weekly":
-            week = date.strftime("%V")
-            day = date.strftime("%A")
-
+            week = datee.strftime("%V")
+            # day = date.strftime("%A")
+            today = datetime.datetime.now()
+            week_list = {}
+            # for i in range(0, 7):
+            #     past = today - timedelta(days = i)
+            #     data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+            #     var = list(data)
+            #     final = sum(var)
+            #     if var == "":
+            #         final = 0
+            #     week_list[past.strftime("%A")] = final
+            # print(week_list)
+            # print(data, "datatatatata")
+            # return
             try:
+                for i in range(0, 7):
+                    past = today - timedelta(days = i)
+                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+                    var = list(data)
+                    final = float(sum(var))
+                    if var == "":
+                        final = 0.0
+                    week_list[past.strftime("%A")] = final
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                total_earning = int(sum(list(data)))
-                return Response({STATUS: SUCCESS,"total_earning": total_earning}, status=status.HTTP_200_OK)
+                total_earning = sum(list(data))
+                return Response({STATUS: SUCCESS,"total_earning": total_earning, "weekly_earning":week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
                 return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == "monthly":
-            month = date.strftime("%m")
+            month_list = {}
+            month = datee.strftime("%m")
+            first = datetime.datetime.today() - timedelta(days=30)
+            second = first + timedelta(days=10)
+            third = second + timedelta(days=10)
             try:
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
+
+                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(first, second)}).values_list("payment_detail__amount", flat=True)
+                month_list[str(first.date()) + " to " + str(second.date())] = float(sum(list(data1)))
+
+                data2 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(second, third)}).values_list("payment_detail__amount", flat=True)
+                month_list[str(second.date())+ " to " +str(third.date())] = float(sum(list(data2)))
+
+                data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
+                month_list[str(third.date())+" to "+str(datetime.date.today())] = float(sum(list(data3)))
+
                 total_earning = int(sum(list(data)))
                 return Response({STATUS: SUCCESS,
-                "total_earning": total_earning}, status=status.HTTP_200_OK)
+                "total_earning": total_earning, "monthly_earning":month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
+                print(ex, "exxxxxxxxxxxxxxxxxxx")
                 return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif time_period == "yearly":
+            month = datee.strftime("%m")
+            # noww = datetime.datetime.now()
             try:
-                year = date.strftime("%Y")
+                # todayy = datetime.now()
+                # lastyear = todayy.year-1
+                # print(lastyear.month)
+                # for i in range(1, 13):
+                #     month_starting = datetime.datetime(noww.year, noww.month - i, 1)
+                #     print(month_starting, "month starting")
+                #     month_ending = month_starting + timedelta(days=30) 
+                #     print(month_ending, "month endinggg")
+
+                today = datetime.datetime.now()
+                # Get next month and year using relativedelta
+                next_month = today + relativedelta(months=+1)
+                # How many months do you want to go back?
+                num_months_back = 12
+                i = 0
+                deque_months = deque()
+                while i < num_months_back:
+                    curr_date = today + relativedelta(months=-i)
+                    deque_months.appendleft(curr_date.strftime('%B %Y'))
+
+                    if i == num_months_back:
+                        deque_months.append(next_month.strftime('%B %Y'))
+
+                    i = i+1
+
+                # Convert deque to list
+                month_List = list(deque_months)
+                year = datee.strftime("%Y")
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
                 total_earning = int(sum(list(data)))
+                final_data = {}
+                for i in range(0, 12):
+                    data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
+                    final_data[month_List[i].split()[0]] = float(sum(list(data1)))
+                print(data1, "dataaaaaaaaaaa")
                 return Response({STATUS: SUCCESS,
-                "total_earning": total_earning}, status=status.HTTP_200_OK)
+                "total_earning": total_earning, "final_list":final_data}, status=status.HTTP_200_OK)
             except Exception as ex:
+                print(ex,"exxxxxxxxxxxxxxxxxxx")
                 return Response({STATUS: ERROR, DATA: "Error in getting total earning"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({STATUS: "Not entered in anu loop", DATA: "OK"}, status=status.HTTP_200_OK)
