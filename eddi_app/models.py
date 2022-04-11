@@ -714,6 +714,27 @@ class EventAd(models.Model):
         return self.event_name
 
 
+class EventAdPaymentDetail(models.Model):
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
+    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
+    amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
+
+
+    def __str__(self):
+        return self.event_name
+
+
+class EventAdEnroll(models.Model):
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event name")
+    admin_email = models.EmailField(blank=True,null=True,verbose_name='Admin Email')
+    payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
+    
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 
 class MaterialVideoMaterial(models.Model):
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
