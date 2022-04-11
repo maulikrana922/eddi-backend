@@ -86,6 +86,8 @@ production_models = [
     'eddi_app.Header_FooterCMS',
     'eddi_app.EventAd',
     'eddi_app.RecruitmentAd',
+    'eddi_app.EventAdPaymentDetail',
+    'eddi_app.EventAdEnroll',
 
     ]
 local_models = []
