@@ -95,9 +95,6 @@ class UserSignup(models.Model):
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
-    def __str__(self):
-        return self.first_name
-    
 
 
 @receiver(post_save, sender=UserSignup)

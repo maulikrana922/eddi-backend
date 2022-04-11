@@ -39,6 +39,7 @@ def get_user_email_by_token(request):
 
 class AddCourseView(APIView):
     def post(self, request):
+        res = None
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -63,6 +64,7 @@ class AddCourseView(APIView):
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
         except Exception as ex:
+            print(ex,"exxxxxxxxxxxxxxxx")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SUPPLIER_ID: supplier_id.id,
@@ -243,12 +245,15 @@ class GetCourseDetails(APIView):
             # print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
             email_id =  get_user_email_by_token(request)
             if email_id:
+                d = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1, CREATED_BY:email_id})
+                print(d, "dddddddddddddd")
                 print(email_id)
                 organization_domain = email_id.split('@')[1]
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
            
                 # for i in data:
                 if serializer := CourseDetailsSerializer(data_s,many=True):
+                    print("1111111111111111111111")
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    
                 #     print(i.organization_domain)
@@ -258,6 +263,8 @@ class GetCourseDetails(APIView):
              
             # print(data)
             if serializer := CourseDetailsSerializer(data_s):
+                print("222222222222222222222222")
+
                 return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
 
                 # if serializer1 := CourseEnrollSerializer(individuals, many=True):
