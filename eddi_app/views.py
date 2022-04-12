@@ -726,11 +726,13 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
+        event_name = request.POST.get("event_name")
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
+            subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":event_name}).count()
            
             if serializer := EventAdSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "subscriber_count":subscriber}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
