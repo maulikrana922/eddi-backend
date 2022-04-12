@@ -246,8 +246,11 @@ class GetCourseDetails(APIView):
             email_id =  get_user_email_by_token(request)
             if email_id:
                 print(email_id)
-                organization_domain = email_id.split('@')[1]
-                data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,'supplier__email_id':email_id})
+                else:
+                    organization_domain = email_id.split('@')[1]
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
            
                 # for i in data:
                 if serializer := CourseDetailsSerializer(data_s,many=True):
@@ -257,6 +260,7 @@ class GetCourseDetails(APIView):
                 #     print(i.organization_domain)
             else:
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
+                
            
              
             # print(data)
@@ -580,6 +584,8 @@ class SupplierDashboard_earningGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({STATUS: "Invalid time_period added", DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class CourseMaterialUpload(APIView):

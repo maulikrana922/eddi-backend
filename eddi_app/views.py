@@ -614,6 +614,7 @@ class EventPaymentDetail_info(APIView):
             try:
                 var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
             except Exception as ex:
+                print(ex, "exxxxxxxxxxxxxxxx")
                 var = None
             if not var:
                 try:

@@ -56,7 +56,6 @@ urlpatterns = [
     path('supplier-dashboard-courseGraph/',SupplierDashboard_courseGraphView.as_view()),
     path('supplier-dashboard-earningGraph/',SupplierDashboard_earningGraphView.as_view()),
 
-
 # Event
     path('add-event/',EventView.as_view()),
     path('get-event/',EventView.as_view()),
