@@ -8,6 +8,7 @@ urlpatterns = [
     # path('free-courseEnroll/',Free_courseEnroll.as_view(), name="UserPaymentDetail"),   
 
     # Event Payment Flow
+    path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   
     path('event-payment-detail/',EventPaymentDetail_info.as_view(), name="EventPaymentDetail"),   
 
 

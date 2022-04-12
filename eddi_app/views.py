@@ -88,6 +88,63 @@ class Save_stripe_info(APIView):
                     return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])
+class Save_stripe_infoEvent(APIView):
+    def post(self, request, *args, **kwargs):
+            if request.method == "POST":
+                # data = request.data
+                user_email_id = request.POST.get("email_id")
+                # card_type = request.POST.get("card_brand")
+                # amount = request.POST.get("price")
+                payment_method_id = request.POST.get("payment_method_id")
+                event_name = request.POST.get("event_name")
+                
+                extra_msg = ''
+                # checking if customer with provided email already exists
+                try:
+                    var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+                    print(var, "varrrrrrr")
+                    if var is not None:
+                        return Response({MESSAGE: "ERROR", DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as ex:
+                    print(ex, "exxxxxxxxxxxxxxxxx")
+                    pass
+                
+                try:
+                    print("inside first try")
+                    customer_data = stripe.Customer.list(email=user_email_id).data
+                    if len(customer_data) == 0:
+                        # creating customer
+                        customer = stripe.Customer.create(email=user_email_id, payment_method=payment_method_id)
+                    else:
+                        customer = customer_data[0]
+                        extra_msg = "Customer already existed."
+                        
+                    # creating paymentIntent
+                    try:
+                        print("inside second try")
+
+                        intent = stripe.PaymentIntent.create(
+                        amount=int(1)*100,
+                        currency='usd',
+                        description='helllo',
+                        customer=customer['id'],
+                        payment_method_types=["card"],
+                        payment_method=payment_method_id,
+                        confirm=True)
+                        print(intent, "intenttttt")
+                        print("inside second try last")
+
+                    except Exception as e:
+                        print(e)
+                        return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                    print("okkkkk")
+                    return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
+                except Exception as e:
+                    # print(e)
+                    return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
+
 @permission_classes([AllowAny])   
 class UserSignupView(APIView):
     def post(self, request):
@@ -524,6 +581,7 @@ class UserPaymentDetail_info(APIView):
 @permission_classes([AllowAny])
 class EventPaymentDetail_info(APIView):
     def post(self, request):
+        admin_email_id = get_user_email_by_token(request)
         try:
             event_name = request.POST.get("event_name")
             user_email_id = request.POST.get("email_id")
@@ -563,7 +621,7 @@ class EventPaymentDetail_info(APIView):
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
                     var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
                     print(user_email_id, "adminnnnnnnnnnnnnnnnnnnnnnn")
-                    admin_email_id = request.POST.get("admin_email_id")
+                    
                     record_map = {}
                     record_map = {
                     "event_name" : event_name,

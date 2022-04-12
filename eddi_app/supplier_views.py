@@ -245,8 +245,6 @@ class GetCourseDetails(APIView):
             # print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
             email_id =  get_user_email_by_token(request)
             if email_id:
-                d = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1, CREATED_BY:email_id})
-                print(d, "dddddddddddddd")
                 print(email_id)
                 organization_domain = email_id.split('@')[1]
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
@@ -369,19 +367,22 @@ class SupplierDashboardView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name')
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
           
             user_name = [x[1] for x in Individuals11]
+            user_email = [x[2] for x in Individuals11]
             course_name = [x[0] for x in Individuals11]
             individual_details = {}
             final_dict = {}
             individual_details ['username'] = user_name
             individual_details ['coursename'] = course_name
+            individual_details['user_email'] = user_email
             counter = 0
             for v in individual_details['coursename']:
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":v})
                 final_dict[counter] = {
-                    'username':individual_details ['username'][counter],
+                    'username':individual_details['username'][counter],
+                    'user_email':individual_details['user_email'][counter],
                     'course_id':str(Individuals.uuid),
                     'coursename':v,
                     'coursetype':Individuals.course_type.type_name,
