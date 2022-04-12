@@ -715,6 +715,7 @@ class EventAd(models.Model):
 
 
 class EventAdPaymentDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
     email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
@@ -728,6 +729,7 @@ class EventAdPaymentDetail(models.Model):
 
 
 class EventAdEnroll(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event name")
     admin_email = models.EmailField(blank=True,null=True,verbose_name='Admin Email')
     payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)

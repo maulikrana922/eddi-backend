@@ -1,7 +1,7 @@
 from doctest import FAIL_FAST
 import email
 from email.mime.image import MIMEImage
-from string import printable
+# from string import printable
 from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -581,10 +581,10 @@ class UserPaymentDetail_info(APIView):
 @permission_classes([AllowAny])
 class EventPaymentDetail_info(APIView):
     def post(self, request):
-        admin_email_id = get_user_email_by_token(request)
+        user_email_id = get_user_email_by_token(request)
         try:
             event_name = request.POST.get("event_name")
-            user_email_id = request.POST.get("email_id")
+            # user_email_id = request.POST.get("email_id")
             if request.POST.get("card_brand"):
                 card_type = request.POST.get("card_brand")
             else:
@@ -626,7 +626,7 @@ class EventPaymentDetail_info(APIView):
                     record_map = {}
                     record_map = {
                     "event_name" : event_name,
-                    "admin_email" : admin_email_id,
+                    "admin_email" : None,
                     "payment_detail_id" : var.id,
                     "user_profile_id" : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
@@ -774,6 +774,7 @@ class EventView(APIView):
                 record_map[START_TIME] = None
             else:
                 record_map[START_TIME] = request.POST.get("start_time")
+
             if request.POST.get("is_featured") == "true":
                 featured_data = True
             else:
@@ -818,9 +819,7 @@ class EventView(APIView):
             EVENT_NAME : request.POST.get("event_name",data.event_name),
             EVENT_CHOOSE_TYPE : request.POST.get("event_choose_type",data.event_choose_type),
             EVENT_CATEGORY : request.POST.get("event_category",data.event_category),
-            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),
-            START_DATE : request.POST.get("start_date",data.start_date),
-            START_TIME : request.POST.get("start_time",data.start_time),   
+            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),  
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             EVENT_PRICE : request.POST.get("event_price",data.event_price),
@@ -831,11 +830,24 @@ class EventView(APIView):
             EVENT_ORGANIZER : request.POST.get("event_organizer",data.event_organizer),
             EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
             }
+            if request.POST.get("start_date") == "":
+                record_map[START_DATE] = None
+            else:
+                record_map[START_DATE] = request.POST.get("start_date", data.start_date)
+            if request.POST.get("start_time") == "":
+                record_map[START_TIME] = None
+            else:
+                record_map[START_TIME] = request.POST.get("start_time", data.start_time)
+
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
                     record_map[STATUS_ID] = 1
                 else:
-                    record_map[STATUS_ID] = 2
+                    data = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+                    if data:
+                        return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Event"}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        record_map[STATUS_ID] = 2
             else:
                 record_map[STATUS_ID] = data.status
             # record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
