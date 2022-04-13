@@ -739,6 +739,24 @@ class ViewIndividualProfile(APIView):
 
 
 
+
+class IncreaseAdCount(APIView):
+       
+    def put(self, request, uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "not get uuid"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map = {
+            "event_subscriber" : data.event_subscriber + 1,
+        }
+        getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
+        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        
+
 class EventView(APIView):
     def post(self, request):
         record_map = {}
@@ -786,10 +804,9 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
-        event_name = request.POST.get("event_name")
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":event_name}).count()
+            subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name}).count()
            
             if serializer := EventAdSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, "subscriber_count":subscriber}, status=status.HTTP_200_OK)
@@ -822,7 +839,7 @@ class EventView(APIView):
             BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),  
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
-            EVENT_PRICE : request.POST.get("event_price",data.event_price),
+            # EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
@@ -839,11 +856,24 @@ class EventView(APIView):
             else:
                 record_map[START_TIME] = request.POST.get("start_time", data.start_time)
 
+
+            try:
+                data = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+            except Exception as ex:
+                print(ex, "exxxxxxxxx")
+                return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if request.POST.get("event_price"):
+                if data:
+                    return Response({STATUS: ERROR, DATA: "Someone Already Enrolled You can not change event date"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                record_map[EVENT_PRICE] = data.event_price
+
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
                     record_map[STATUS_ID] = 1
                 else:
-                    data = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+                    # data = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
                     if data:
                         return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Event"}, status=status.HTTP_400_BAD_REQUEST)
                     else:

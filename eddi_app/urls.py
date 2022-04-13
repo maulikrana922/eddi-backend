@@ -70,5 +70,6 @@ urlpatterns = [
     path('get-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
     path('edit-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
     path('delete-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
+    path('increase-Adcount/<str:uuid>/',IncreaseAdCount.as_view()),
 
 ]

@@ -246,13 +246,21 @@ class GetCourseDetails(APIView):
             email_id =  get_user_email_by_token(request)
             if email_id:
                 print(email_id)
+              
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,'supplier__email_id':email_id})
+                    print("44444444444444")
                 else:
+                    cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    print(cat, "cattttttttttttttt")
+                    a = cat.course_category.split(",")
+                    print(a, "listtttttt")
+                    # print("555555555555555")
                     organization_domain = email_id.split('@')[1]
                     data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                    # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
+                    # print(data_s, "data_ssssssssssssssss")
            
-                # for i in data:
                 if serializer := CourseDetailsSerializer(data_s,many=True):
                     print("1111111111111111111111")
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)

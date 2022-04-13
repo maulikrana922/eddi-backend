@@ -1,4 +1,3 @@
-from tabnanny import verbose
 from django.db import models
 import uuid
 from django.conf import settings
@@ -596,9 +595,9 @@ class TermsConditionCMS(models.Model):
 
 
 class UserProfile(models.Model):
-    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
 
     #personal information
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
     last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="Last Name")
@@ -696,6 +695,8 @@ class EventAd(models.Model):
     event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Type")
     event_price = models.FloatField(default=0,verbose_name='Event Price',blank=True,null=True)
     checkout_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Checkout Link")
+    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name="Meeting Link")
+    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name="Passcode")
     event_small_description = RichTextField(verbose_name = 'Event Small Description', blank = True, null=True)
     event_description = RichTextField(verbose_name = 'Event Description', blank = True, null=True)
     event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name="Location")
