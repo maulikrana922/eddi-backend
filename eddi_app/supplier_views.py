@@ -144,7 +144,15 @@ class GetSubCategoryDetails(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             email_id = get_user_email_by_token(request)
-            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id,STATUS_ID:1})
+            try:
+                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type
+            except Exception:
+                user_type_data = None
+            if user_type_data:
+                if user_type_data == ADMIN_S:
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all()
+                else:
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id,STATUS_ID:1})
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
