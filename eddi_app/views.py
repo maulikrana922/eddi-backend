@@ -738,8 +738,7 @@ class ViewIndividualProfile(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
+@permission_classes([AllowAny])
 class IncreaseAdCount(APIView):
        
     def put(self, request, uuid = None):
@@ -774,6 +773,8 @@ class EventView(APIView):
             EVENT_TYPE : request.POST.get("event_type",None),
             EVENT_PRICE : request.POST.get("event_price",None),
             CHECKOUT_LINK : request.POST.get("checkout_link",None),
+            "meeting_link" : request.POST.get("meeting_link",None),
+            "meeting_passcode" : request.POST.get("meeting_passcode",None),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",None),
             EVENT_DESCRIPTION : request.POST.get("event_description",None),
             EVENT_LOCATION: request.POST.get("event_location",None),
@@ -841,6 +842,8 @@ class EventView(APIView):
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             # EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
+            "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
+            "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
             EVENT_LOCATION: request.POST.get("event_location",data.event_location),
