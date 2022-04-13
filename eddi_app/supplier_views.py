@@ -145,7 +145,7 @@ class GetSubCategoryDetails(APIView):
         else:
             email_id = get_user_email_by_token(request)
             try:
-                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type
+                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
             except Exception:
                 user_type_data = None
             if user_type_data:
