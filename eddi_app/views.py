@@ -842,7 +842,7 @@ class EventView(APIView):
             BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),  
             FEES_TYPE : request.POST.get("fees_type",data.fees_type),
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
-            # EVENT_PRICE : request.POST.get("event_price",data.event_price),
+            EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
             "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
             "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
@@ -851,6 +851,7 @@ class EventView(APIView):
             EVENT_LOCATION: request.POST.get("event_location",data.event_location),
             EVENT_ORGANIZER : request.POST.get("event_organizer",data.event_organizer),
             EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
+            
             }
         
             if request.POST.get("start_date") == "":
