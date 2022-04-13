@@ -862,28 +862,29 @@ class EventView(APIView):
             else:
                 record_map[START_TIME] = request.POST.get("start_time", data.start_time)
 
-            try:
-                dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
-            except Exception as ex:
-                print(ex, "exxxxxxxxx")
-                dataa = None
+            # try:
+            #     dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+            # except Exception as ex:
+            #     print(ex, "exxxxxxxxx")
+            #     dataa = None
+            #     return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if request.POST.get("event_price"):
-                if dataa is not None:
-                    return Response({STATUS: ERROR, DATA: "Someone Already Enrolled You can not change event date"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                record_map[EVENT_PRICE] = data.event_price
+            # if request.POST.get("event_price"):
+            #     if dataa is not None:
+            #         return Response({STATUS: ERROR, DATA: "Someone Already Enrolled You can not change event date"}, status=status.HTTP_400_BAD_REQUEST)
+            # else:
+            #     record_map[EVENT_PRICE] = data.event_price
 
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
                     record_map[STATUS_ID] = 1
                 else:
-                    # try:
-                    #     dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
-                    # except Exception as ex:
-                    #     print(ex, "exxxx")
-                    #     # record_map[STATUS_ID] = 2
-                    #     dataa = None
+                    try:
+                        dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+                    except Exception as ex:
+                        print(ex, "exxxx")
+                        # record_map[STATUS_ID] = 2
+                        dataa = None
                     if dataa is not None:
                         return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Event"}, status=status.HTTP_400_BAD_REQUEST)
                     else:
