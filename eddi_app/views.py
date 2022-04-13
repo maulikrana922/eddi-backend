@@ -1,8 +1,8 @@
-from doctest import FAIL_FAST
-import email
+# from doctest import FAIL_FAST
+# import email
 from email.mime.image import MIMEImage
 # from string import printable
-from django.urls import is_valid_path
+# from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
