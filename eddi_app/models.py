@@ -705,7 +705,7 @@ class EventAd(models.Model):
     is_featured = models.BooleanField(default=False)
 
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='EventAd Created Date Time')
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=1)
 
 
     class Meta:
