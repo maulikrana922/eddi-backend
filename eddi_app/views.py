@@ -749,10 +749,18 @@ class IncreaseAdCount(APIView):
         except Exception as ex:
             print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        print(data.event_subscriber, "eveneneneasjdfguna")
+        if data.event_subscriber == None:
+            data.event_subscriber = 1
+        else:
+            data.event_subscriber += 1
         record_map = {
-            "event_subscriber" : data.event_subscriber + 1,
+            "event_subscriber" : data.event_subscriber,
         }
-        getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
+        print(record_map, "recorddd")
+        for key,value in record_map.items():
+                setattr(data,key,value)
+        data.save()
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         
 
