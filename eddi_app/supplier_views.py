@@ -85,7 +85,7 @@ class AddCourseView(APIView):
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
-            "approval_status_id" : 2,
+            "is_approved_id" : 2,
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
