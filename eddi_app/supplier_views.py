@@ -283,6 +283,7 @@ class GetCourseDetails(APIView):
 
             try:
                 individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
+                lerner_count = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success").count()
               
             except Exception as e:
                 print(e, "ererererer")
@@ -291,7 +292,7 @@ class GetCourseDetails(APIView):
             
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,"Enrolled": "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
