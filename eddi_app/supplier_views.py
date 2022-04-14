@@ -112,6 +112,7 @@ class AddSubCategoryView(APIView):
             CATEGORY_NAME_ID: category_id.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),
+            "is_approved_id" : 2,
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -327,7 +328,7 @@ class GetCourseDetails(APIView):
                     # print(a, "listtttttt")
                     # print("555555555555555")
                     organization_domain = email_id.split('@')[1]
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).order_by("-organization_domain")
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
                     print(data_s, "datassssss")
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
