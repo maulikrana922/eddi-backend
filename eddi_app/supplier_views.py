@@ -301,29 +301,32 @@ class GetCourseDetails(APIView):
                 print(email_id)
               
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,'supplier__email_id':email_id})
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
                     print("44444444444444")
-                    for i in data_s:
-                        print(i.course_name, "iiiiiiiiiiiiii")
-                        total_individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":i.course_name}).count()
-                        print(total_individuals, "totallllllllllll")
+                    # for i in data_s:
+                    #     print(i.course_name, "iiiiiiiiiiiiii")
+                    #     total_individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":i.course_name}).count()
+                        # print(total_individuals, "totallllllllllll")
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
                     print("adddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.all()
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
 
 
                 else:
                     try:
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                         print(cat, "cattttttttttttttt")
-                        a = cat.course_category.split(",")
+                        try:
+                            a = cat.course_category.split(",")
+                        except Exception as ex:
+                            a = cat.course_category.split()
                     except Exception as ex:
                         print(ex, "exxxxxxxxx")
 
                     # print(a, "listtttttt")
                     # print("555555555555555")
                     organization_domain = email_id.split('@')[1]
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False))
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
                     print(data_s, "datassssss")
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
