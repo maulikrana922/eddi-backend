@@ -61,7 +61,7 @@ class UserType(models.Model):
 
 
 class approval_status(models.Model):
-    status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name='Status')
+    # status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name='Status')
     value = models.CharField(max_length=60,blank=True)
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
