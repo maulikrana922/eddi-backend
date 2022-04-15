@@ -69,10 +69,12 @@ class AddCourseView(APIView):
         except Exception as ex:
             print(ex,"exxxxxxxxxxxxxxxx")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        record_map = {
+        try:
+            record_map = {
             SUPPLIER_ID: supplier_id.id,
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
             COURSE_NAME: request.POST.get(COURSE_NAME,None),
+            "course_start_date": request.POST.get("course_start_date",None),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
             COURSE_CATEGORY_ID :category_id.id ,
@@ -89,11 +91,15 @@ class AddCourseView(APIView):
             SUB_AREA:request.POST.get(SUB_AREA,None),
             "is_approved_id" : 2,
             STATUS_ID:1
-        }
-        record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-        record_map[CREATED_BY] = 'admin'
-        getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
-        return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+            }
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[CREATED_BY] = 'admin'
+            getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class AddSubCategoryView(APIView):
@@ -427,6 +433,7 @@ class GetCourseDetails(APIView):
             record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
             COURSE_NAME: request.POST.get(COURSE_NAME,data.course_name),
+            "course_start_date" : request.POST.get("course_start_date",data.course_start_date),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,data.course_length),
             COURSE_CATEGORY_ID : category_id.id,
