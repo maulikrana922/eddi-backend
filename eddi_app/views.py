@@ -1076,7 +1076,7 @@ class CourseEnrollView(APIView):
             enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
         except Exception as ex:
             enroll_data = None
-
+        
         try:
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
         except:

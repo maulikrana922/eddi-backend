@@ -371,23 +371,16 @@ class GetCourseDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:data.course_category.category_name})
-            sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:data.course_subcategory.subcategory_name})
-            course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:data.course_type.type_name})
-            fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :data.fee_type.fee_type_name})
-            course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : data.course_level.level_name})
+            category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
+            sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID.course_subcategory.subcategory_name)})
+            course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
+            fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
+            course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
         except Exception as ex:
             print(ex, "ex")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        # try:
-        #     data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
-        # except Exception:
-        #     print(ex, "exx")
-
-        #     return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
-
             test_str = data.supplier.email_id
             res = test_str.split('@')[1]
             print(res)
@@ -402,13 +395,12 @@ class GetCourseDetails(APIView):
             COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             # COURSE_FOR_ORGANIZATION:eval(request.POST.get(COURSE_FOR_ORGANIZATION).title()),
-            COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
-            COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
+            COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE.data.course_language),
+            COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
             ORGANIZATION_DOMAIN:res,
             FEE_TYPE_ID: fee_type_id.id,
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
-            # STATUS_ID:1,
         }
             if user_type_data:
                 if user_type_data == ADMIN_S:
@@ -421,7 +413,6 @@ class GetCourseDetails(APIView):
                         record_map["status"] = data.status
                         
                     if request.POST.get("approval_status"):
-                        print("apppprovedd")
                         if request.POST.get("approval_status") == "Approved":
                             record_map["is_approved_id"] = 1
                         if request.POST.get("approval_status") == "Pending":
@@ -432,8 +423,6 @@ class GetCourseDetails(APIView):
                         record_map["is_approved"] = data.is_approved
 
                 elif user_type_data == SUPPLIER_S:
-                    record_map["is_approved_id"] = 2
-
                     if request.POST.get("status"):
                         if request.POST.get("status") == "Active":
                             record_map[STATUS_ID] = 1
@@ -447,9 +436,9 @@ class GetCourseDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
-
                     else:
                         record_map["status"] = data.status
+                        record_map["is_approved_id"] = 2
 
 
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
