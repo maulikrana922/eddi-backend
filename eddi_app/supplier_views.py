@@ -1,4 +1,5 @@
 from calendar import TUESDAY
+from posixpath import split
 from typing import final
 from wsgiref.handlers import read_environ
 from pytz import timezone
@@ -155,7 +156,7 @@ class GetSubCategoryDetails(APIView):
                 if user_type_data == ADMIN_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all().order_by("-created_date_time")
                 else:
-                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id,STATUS_ID:1}).order_by("-created_date_time")
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -328,7 +329,7 @@ class GetCourseDetails(APIView):
                     # print(a, "listtttttt")
                     # print("555555555555555")
                     organization_domain = email_id.split('@')[1]
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).order_by("-organization_domain")
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain__in = organization_domain) | Q(course_for_organization = False)).order_by("-organization_domain")
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
                     print(data_s, "datassssss")
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
