@@ -1064,3 +1064,25 @@ class RecruitmentAdAdView(APIView):
             return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)
+
+
+
+
+class CourseEnrollView(APIView):
+
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+        except Exception as ex:
+            enroll_data = None
+
+        try:
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+        except:
+            course_data = None
+
+        if serializer := CourseDetailsSerializer(course_data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

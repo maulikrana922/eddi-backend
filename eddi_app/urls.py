@@ -72,4 +72,7 @@ urlpatterns = [
     path('delete-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
     path('increase-Adcount/<str:uuid>/',IncreaseAdCount.as_view()),
 
+
+    path('get-courseenrolldetail/',CourseEnrollView.as_view()),
+
 ]

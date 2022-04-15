@@ -1,5 +1,6 @@
 from calendar import TUESDAY
 from posixpath import split
+from select import select
 from typing import final
 from wsgiref.handlers import read_environ
 from pytz import timezone
@@ -316,13 +317,18 @@ class GetCourseDetails(APIView):
                             a = cat.course_category.split(",")
                         except Exception as ex:
                             a = cat.course_category.split()
+                        print(a)
                     except Exception as ex:
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
                     data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).order_by("-organization_domain")
+
+                    
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
                     print(data_s, "datassssss")
+                   
+                 
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
                     # print(data_s, "data_ssssssssssssssss")
            
