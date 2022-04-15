@@ -197,6 +197,13 @@ class GetSubCategoryDetails(APIView):
         }
 
 
+
+
+
+
+
+
+
         if user_type_data:
             if user_type_data == ADMIN_S:
                 if request.POST.get("status"):
@@ -222,11 +229,42 @@ class GetSubCategoryDetails(APIView):
                     if request.POST.get("status") == "Active":
                         record_map[STATUS_ID] = 1
                     else:
-                        record_map[STATUS_ID] = 2
+                        try:
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"course_category":data.category_name})
+                        except Exception as ex:
+                            print(ex, "exxxx")
+                            data1 = None
+                        if data1 is not None:
+                            return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            record_map[STATUS_ID] = 2
                 else:
                     record_map["status"] = data.status
-                record_map["is_approved_id"] = 2
+                    record_map["is_approved_id"] = 2
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
         record_map[UUID] = uuid4()
