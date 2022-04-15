@@ -322,7 +322,7 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).order_by("-organization_domain")
+                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False) | Q( course_category__category_name__in= a)).order_by("-organization_domain","-course_category__category_name")
 
                     
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
