@@ -341,11 +341,18 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 print(e, "ererererer")
                 individuals = None
-            
-            
+            print(email_id, "emaillllll")
+            print(course_data, "coursedatatata")
+            try:
+                var = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__email_id":email_id, "payment_detail__course_name":course_data.course_name})
+            except Exception as ex:
+                var = None
+            print(var, "varrrrrrrr")
+            var1 = True if var is not None else False
+
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,"Enrolled": "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -355,9 +362,26 @@ class GetCourseDetails(APIView):
                 print(email_id)
               
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+                    try:
+                        data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Error in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
+                    print("insidesupplier")
+                    if serializer := CourseDetailsSerializer(data_s,many=True):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
+                    try:
+                        data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Error in getting Admin data"}, status=status.HTTP_400_BAD_REQUEST)
+                    print("insideadmin")
+
+                    if serializer := CourseDetailsSerializer(data_a,many=True):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+
 
                 else:
                     try:
@@ -371,17 +395,24 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
-                    data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False) | Q( course_category__category_name__in= a)).order_by("-organization_domain","-course_category__category_name")
+                    # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False) | Q( course_category__category_name__in= a)).order_by("-organization_domain","-course_category__category_name")
 
-                    
-                    # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False)).extra(select={"cate_order":"course_category__category_name__in = a"})
-                    print(data_s, "datassssss")
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).order_by("organization_domain")
+
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
+
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list)
+                    # data_final = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,"is_approved_id":1}).filter((Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)) |  ).order_by("organization_domain")
+                    print(data_category, "datacategoryyyy")
+                    print(data_all, "all_datatatata")
                    
                  
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
                     # print(data_s, "data_ssssssssssssssss")
            
-                if serializer := CourseDetailsSerializer(data_s,many=True):
+                if serializer := CourseDetailsSerializer(data_category,many=True):
+                    if serializer_all := CourseDetailsSerializer(data_all, many=True):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
                     print("1111111111111111111111")
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    

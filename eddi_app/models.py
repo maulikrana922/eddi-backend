@@ -574,6 +574,29 @@ class PrivacyPolicyCMS(models.Model):
     class Meta:
         verbose_name = "Privacy Policy Page"
 
+
+class PrivacyPolicyCMSSupplier(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name='Banner Image')
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
+    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Sub Heading")
+    section_2_sub_description = RichTextField(verbose_name = 'Sub Description',blank=True)
+    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Last Heading")
+    section_2_last_description = RichTextField(verbose_name = 'Last Description',blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    class Meta:
+        verbose_name = "Privacy Policy Page Supplier"
+
 class TermsConditionCMS(models.Model):
     #section 1
     section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name='Banner Image')
@@ -591,6 +614,25 @@ class TermsConditionCMS(models.Model):
 
     class Meta:
         verbose_name = "Terms & Condition Page"
+
+
+class TermsConditionCMSSupplier(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name='Banner Image')
+
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
+    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    class Meta:
+        verbose_name = "Terms & Condition Page Supplier"
 
 
 
