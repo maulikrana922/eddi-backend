@@ -832,11 +832,18 @@ class EventView(APIView):
 
     def get(self, request, uuid = None):
         if uuid:
+            email_id = get_user_email_by_token(request)
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
             subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name}).count()
+            try:
+                var = getattr(models,"EventAdEnroll").objects.get(**{"user_profile__email_id":email_id})
+            except Exception as ex:
+                var = None
+            print(var, "varrrrrrrr")
+            var1 = True if var is not None else False
            
             if serializer := EventAdSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data, "subscriber_count":subscriber}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "subscriber_count":subscriber, "is_enrolled":var1}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
