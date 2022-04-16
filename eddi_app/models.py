@@ -286,6 +286,8 @@ class CourseDetails(models.Model):
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
     course_checkout_link = models.CharField(max_length=255,verbose_name='Checkout Link',blank=True,null=True)
+    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name="Meeting Link")
+    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name="Passcode")
     
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
