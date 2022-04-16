@@ -755,6 +755,9 @@ class EventAd(models.Model):
     class Meta:
         verbose_name = "EventAd Table"
 
+    def __str__(self):
+        return self.event_name
+
 
 
 class EventAdPaymentDetail(models.Model):

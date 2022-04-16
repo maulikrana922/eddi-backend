@@ -401,7 +401,7 @@ class GetCourseDetails(APIView):
 
                     data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list)
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list).order_by("organization_domain")
                     # data_final = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,"is_approved_id":1}).filter((Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)) |  ).order_by("organization_domain")
                     print(data_category, "datacategoryyyy")
                     print(data_all, "all_datatatata")

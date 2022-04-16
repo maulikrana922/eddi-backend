@@ -831,8 +831,8 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
+        email_id = get_user_email_by_token(request)
         if uuid:
-            email_id = get_user_email_by_token(request)
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
             subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name}).count()
             try:
@@ -847,8 +847,24 @@ class EventView(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,EVENT_AD_TABLE).objects.all().order_by("-created_date_time")
-            if serializer := EventAdSerializer(data, many=True):
+            try:
+                cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                try:
+                    a = cat.course_category.split(",")
+                except Exception as ex:
+                    a = cat.course_category.split()
+                print(a)
+            except Exception as ex:
+                print(ex, "exxxxxxxxx")
+            category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).order_by("-created_date_time")
+
+            category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).values_list("event_name", flat=True)
+
+            all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
+
+            if serializer := EventAdSerializer(category_event, many=True):
+                if serializer1 := EventAdSerializer(all_event_data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "all_event":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
