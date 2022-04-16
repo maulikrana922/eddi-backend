@@ -1,6 +1,7 @@
 from calendar import TUESDAY
 from posixpath import split
 from select import select
+import json
 from typing import final
 from wsgiref.handlers import read_environ
 from pytz import timezone
@@ -74,7 +75,7 @@ class AddCourseView(APIView):
             SUPPLIER_ID: supplier_id.id,
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
             COURSE_NAME: request.POST.get(COURSE_NAME,None),
-            "course_start_date": request.POST.get("course_start_date",None),
+            # "course_start_date": request.POST.get("course_start_date",None),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
             COURSE_CATEGORY_ID :category_id.id ,
@@ -92,6 +93,10 @@ class AddCourseView(APIView):
             "is_approved_id" : 2,
             STATUS_ID:1
             }
+            if request.POST.get("course_starting_date") == "":
+                record_map["course_starting_date"] = None
+            else:
+                record_map["course_starting_date"] = request.POST.get("course_starting_date")
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = 'admin'
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
@@ -186,22 +191,22 @@ class GetSubCategoryDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            ''' old code '''
-            # dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID)})
-            '''new code'''
-            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:data.category_name.category_name})
-            print(dataa.id)
+            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
         except Exception as ex:
             print(ex, "exxx")
             return Response({STATUS: ERROR, DATA: "Category Error"}, status=status.HTTP_400_BAD_REQUEST)
-        record_map = {
+        try:
+            record_map = {
 
             'category_name_id': dataa.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
             # STATUS_ID:1
-        }
-
+         }
+            print(record_map, "recordddddd")
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return
 
 
 
@@ -416,37 +421,64 @@ class GetCourseDetails(APIView):
 
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
-            sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID.course_subcategory.subcategory_name)})
+
+            sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,data.course_subcategory.subcategory_name)})
+
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
+
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
+
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
         except Exception as ex:
             print(ex, "ex")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
-            test_str = data.supplier.email_id
-            res = test_str.split('@')[1]
-            print(res)
-        print("ooooooooooooooooooo")
+        # if request.POST.get(COURSE_FOR_ORGANIZATION):
+        #     if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
+        #         test_str = data.supplier.email_id
+        #         res = test_str.split('@')[1]
+        #         print(res)
+        # else:
+        #     res = data.organization_domain
+        # if request.POST.get(ORGANIZATION_DOMAIN):
+        #     if request.POST.get(ORGANIZATION_DOMAIN) == 'true':
+        #         test_str = data.supplier.email_id
+        #         res = test_str.split('@')[1]
+        #         print(res)
+        # else:
+        #     res = data.organization_domain
+        print(data.course_for_organization, "datatatatatatAT")
         try:
             record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
             COURSE_NAME: request.POST.get(COURSE_NAME,data.course_name),
-            "course_start_date" : request.POST.get("course_start_date",data.course_start_date),
+            "course_starting_date" : request.POST.get("course_starting_date",data.course_starting_date),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,data.course_length),
             COURSE_CATEGORY_ID : category_id.id,
             COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
-            # COURSE_FOR_ORGANIZATION:eval(request.POST.get(COURSE_FOR_ORGANIZATION).title()),
-            COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE.data.course_language),
+            # COURSE_FOR_ORGANIZATION:request.POST.get((COURSE_FOR_ORGANIZATION),data.course_for_organization),
+            COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
-            ORGANIZATION_DOMAIN:res,
+            # ORGANIZATION_DOMAIN:res,
             FEE_TYPE_ID: fee_type_id.id,
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
+            if request.POST.get(COURSE_FOR_ORGANIZATION):
+                if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
+                    record_map[COURSE_FOR_ORGANIZATION] = json.loads(request.POST.get(COURSE_FOR_ORGANIZATION))
+                    test_str = data.supplier.email_id
+                    res = test_str.split('@')[1]
+                    record_map[ORGANIZATION_DOMAIN] = res
+                    print(res)
+                elif request.POST.get(COURSE_FOR_ORGANIZATION) == 'false':
+                    record_map[COURSE_FOR_ORGANIZATION] = json.loads(request.POST.get(COURSE_FOR_ORGANIZATION))
+                    record_map[ORGANIZATION_DOMAIN] = None
+            else:
+                record_map[COURSE_FOR_ORGANIZATION] = data.course_for_organization
+                res = data.organization_domain
+
             if user_type_data:
                 if user_type_data == ADMIN_S:
                     if request.POST.get("status"):
