@@ -404,10 +404,28 @@ class GetPrivacyPolicyDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
+class GetPrivacyPolicySupplierDetails(APIView): 
+    def get(self, request):
+        data = getattr(models,"PrivacyPolicyCMSSupplier").objects.latest('created_date_time')
+        if not (serializer := PrivacyPolicySupplierPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer, "serializeerrrrrrrrrr")
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
 class GetTermsConditionDetails(APIView): 
     def get(self, request):
         data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest('created_date_time')
         if not (serializer := TermsConditionPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        print(serializer, "serializeerrrrrrrrrr")
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
+class GetTermsConditionSupplierDetails(APIView): 
+    def get(self, request):
+        data = getattr(models,"TermsConditionCMSSupplier").objects.latest('created_date_time')
+        if not (serializer := TermsConditionSupplierPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1069,20 +1087,44 @@ class RecruitmentAdAdView(APIView):
 
 
 class CourseEnrollView(APIView):
-
     def get(self, request):
-        email_id = get_user_email_by_token(request)
-        try:
-            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
-        except Exception as ex:
-            enroll_data = None
-        
-        try:
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
-        except:
-            course_data = None
+        email_id =  get_user_email_by_token(request)
+        if email_id:
+            print(email_id)
+            email_id = get_user_email_by_token(request)
+            
+            try:
+                enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+            except Exception as ex:
+                enroll_data = None
+            
+            try:
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+                print(course_data, "course_dataaa")
+            except:
+                course_data = None
 
-        if serializer := CourseDetailsSerializer(course_data, many=True):
-            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                try:
+                    a = cat.course_category.split(",")
+                except Exception as ex:
+                    a = cat.course_category.split()
+                print(a)
+            except Exception as ex:
+                print(ex, "exxxxxxxxx")
+
+            organization_domain = email_id.split('@')[1]
+            try:
+                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("organization_domain")
+                print(data_category, "data category")
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
+
+            if serializer := CourseDetailsSerializer(course_data, many=True):
+                if serializer1 := CourseDetailsSerializer(data_category, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

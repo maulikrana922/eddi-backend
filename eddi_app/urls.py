@@ -45,6 +45,8 @@ urlpatterns = [
     path('get-contactus-page-data/',GetContactUsPageDetails.as_view()),
     path('get-privacy-page-data/',GetPrivacyPolicyDetails.as_view()),
     path('get-terms-page-data/',GetTermsConditionDetails.as_view()),    
+    path('get-privacySupplier-page-data/',GetPrivacyPolicySupplierDetails.as_view()),
+    path('get-termsSupplier-page-data/',GetTermsConditionSupplierDetails.as_view()),    
     path('contactus-form/',ContactFormView.as_view()),
     path('add-user-profile/',UserProfileView.as_view()),
 
