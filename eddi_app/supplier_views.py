@@ -397,9 +397,9 @@ class GetCourseDetails(APIView):
                     organization_domain = email_id.split('@')[1]
                     # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False) | Q( course_category__category_name__in= a)).order_by("-organization_domain","-course_category__category_name")
 
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).order_by("organization_domain")
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).order_by("organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).values_list("course_name", flat=True)
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list).order_by("organization_domain")
                     # data_final = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,"is_approved_id":1}).filter((Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)) |  ).order_by("organization_domain")
