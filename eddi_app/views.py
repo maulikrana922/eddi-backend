@@ -864,7 +864,7 @@ class EventView(APIView):
 
                 if serializer := EventAdSerializer(category_event, many=True):
                     if serializer1 := EventAdSerializer(all_event_data, many=True):
-                        return Response({STATUS: SUCCESS, DATA: serializer1.data, "all_event":serializer1.data}, status=status.HTTP_200_OK)
+                        return Response({STATUS: SUCCESS, DATA: serializer.data, "all_event":serializer1.data}, status=status.HTTP_200_OK)
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
