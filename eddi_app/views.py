@@ -930,12 +930,12 @@ class EventView(APIView):
                     record_map[STATUS_ID] = 1
                 else:
                     try:
-                        dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
+                        dataa = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name})
+                        print(dataa, "datatatatatata")
                     except Exception as ex:
                         print(ex, "exxxx")
-                        # record_map[STATUS_ID] = 2
                         dataa = None
-                    if dataa is not None:
+                    if dataa.exists():
                         return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Event"}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         record_map[STATUS_ID] = 2
@@ -955,7 +955,7 @@ class EventView(APIView):
             data.save()
             return Response({STATUS: SUCCESS, DATA: "Edited Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "Exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+            print(ex, "Exxxxxxxxxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
     
