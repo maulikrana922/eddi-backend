@@ -1,5 +1,6 @@
 # from doctest import FAIL_FAST
 # import email
+from copy import Error
 from email.mime.image import MIMEImage
 # from string import printable
 # from django.urls import is_valid_path
@@ -92,13 +93,10 @@ class Save_stripe_info(APIView):
 class Save_stripe_infoEvent(APIView):
     def post(self, request, *args, **kwargs):
             if request.method == "POST":
-                # data = request.data
                 user_email_id = request.POST.get("email_id")
-                # card_type = request.POST.get("card_brand")
-                # amount = request.POST.get("price")
+                amount = request.POST.get("price")
                 payment_method_id = request.POST.get("payment_method_id")
                 event_name = request.POST.get("event_name")
-                
                 extra_msg = ''
                 # checking if customer with provided email already exists
                 try:
@@ -125,7 +123,7 @@ class Save_stripe_infoEvent(APIView):
                         print("inside second try")
 
                         intent = stripe.PaymentIntent.create(
-                        amount=int(1)*100,
+                        amount=int(amount)*100,
                         currency='usd',
                         description='helllo',
                         customer=customer['id'],
@@ -136,14 +134,11 @@ class Save_stripe_infoEvent(APIView):
                         print("inside second try last")
 
                     except Exception as e:
-                        print(e)
-                        return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-                    print("okkkkk")
+                        return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                     return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
-                    # print(e)
-                    return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({MESSAGE: 'Invalid Method Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])   
 class UserSignupView(APIView):
@@ -836,7 +831,7 @@ class EventView(APIView):
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
             subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name}).count()
             try:
-                var = getattr(models,"EventAdEnroll").objects.get(**{"user_profile__email_id":email_id})
+                var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:email_id, "event_name":data.event_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
             print(var, "varrrrrrrr")
