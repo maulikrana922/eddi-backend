@@ -206,22 +206,22 @@ class GetSubCategoryDetails(APIView):
             print(record_map, "recordddddd")
         except Exception as ex:
             print(ex, "exxxxx")
-            return
-
-
-
-
-
-
-
-
         if user_type_data:
             if user_type_data == ADMIN_S:
                 if request.POST.get("status"):
                     if request.POST.get("status") == "Active":
                         record_map[STATUS_ID] = 1
                     else:
-                        record_map[STATUS_ID] = 2
+                        try:
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"course_category":data.category_name})
+                        except Exception as ex:
+                            print(ex, "exxxx")
+                            data1 = None
+                        if data1 is not None:
+                            return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            record_map[STATUS_ID] = 2
+                        
                 else:
                     record_map["status"] = data.status
                     
@@ -229,9 +229,25 @@ class GetSubCategoryDetails(APIView):
                     if request.POST.get("approval_status") == "Approved":
                         record_map["is_approved_id"] = 1
                     if request.POST.get("approval_status") == "Pending":
-                        record_map["is_approved_id"] = 2
+                        try:
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"course_category":data.category_name})
+                        except Exception as ex:
+                            print(ex, "exxxx")
+                            data1 = None
+                        if data1 is not None:
+                            return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            record_map["is_approved_id"] = 2
                     if request.POST.get("approval_status") == "Rejected":
-                        record_map["is_approved_id"] = 3
+                        try:
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"course_category":data.category_name})
+                        except Exception as ex:
+                            print(ex, "exxxx")
+                            data1 = None
+                        if data1 is not None:
+                            return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            record_map["is_approved_id"] = 3
                 else:
                     record_map["is_approved"] = data.is_approved
 
@@ -524,9 +540,25 @@ class GetCourseDetails(APIView):
                         if request.POST.get("approval_status") == "Approved":
                             record_map["is_approved_id"] = 1
                         if request.POST.get("approval_status") == "Pending":
-                            record_map["is_approved_id"] = 2
+                            try:
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__course_name":data.course_name})
+                            except Exception as ex:
+                                print(ex, "exxxx")
+                                data1 = None
+                            if data1 is not None:
+                                return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map["is_approved_id"] = 2
                         if request.POST.get("approval_status") == "Rejected":
-                            record_map["is_approved_id"] = 3
+                            try:
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__course_name":data.course_name})
+                            except Exception as ex:
+                                print(ex, "exxxx")
+                                data1 = None
+                            if data1 is not None:
+                                return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map["is_approved_id"] = 3
                     else:
                         record_map["is_approved"] = data.is_approved
 

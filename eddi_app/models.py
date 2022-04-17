@@ -781,6 +781,9 @@ class EventAdEnroll(models.Model):
     
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
+    def __str__(self):
+        return self.event_name
+    
 
 class MaterialVideoMaterial(models.Model):
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
