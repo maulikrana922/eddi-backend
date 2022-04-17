@@ -35,7 +35,7 @@ class Save_stripe_info(APIView):
             if request.method == "POST":
                 # data = request.data
                 email_id = request.POST.get("email_id")
-                card_type = request.POST.get("card_brand")
+                # card_type = request.POST.get("card_brand")
                 amount = request.POST.get("price")
                 payment_method_id = request.POST.get("payment_method_id")
                 course_name = request.POST.get("course_name")
@@ -46,7 +46,7 @@ class Save_stripe_info(APIView):
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
                     print(var, "varrrrrrr")
                     if var is not None:
-                        return Response({MESSAGE: "ERROR", DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({MESSAGE: ERROR, DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as ex:
                     print(ex, "exxxxxxxxxxxxxxxxx")
                     pass
@@ -78,7 +78,7 @@ class Save_stripe_info(APIView):
 
                     except Exception as e:
                         print(e)
-                        return Response({MESSAGE: "ERROR", DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                     
                     
                     
@@ -86,8 +86,8 @@ class Save_stripe_info(APIView):
                     return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     # print(e)
-                    return Response({MESSAGE: ERROR, DATA: "ERROR"}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({MESSAGE: 'Invalid Request', DATA: "error"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])
 class Save_stripe_infoEvent(APIView):
