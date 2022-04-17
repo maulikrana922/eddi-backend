@@ -474,7 +474,7 @@ class GetCourseDetails(APIView):
             record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
             COURSE_NAME: request.POST.get(COURSE_NAME,data.course_name),
-            "course_starting_date" : request.POST.get("course_starting_date",data.course_starting_date),
+            # "course_starting_date" : request.POST.get("course_starting_date",data.course_starting_date),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,data.course_length),
             COURSE_CATEGORY_ID : category_id.id,
@@ -488,6 +488,10 @@ class GetCourseDetails(APIView):
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
+            if request.POST.get("course_starting_date") == "":
+                record_map["course_starting_date"] = None
+            else:
+                record_map["course_starting_date"] = request.POST.get("course_starting_date",data.course_starting_date)
             if request.POST.get(COURSE_FOR_ORGANIZATION):
                 if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
                     record_map[COURSE_FOR_ORGANIZATION] = json.loads(request.POST.get(COURSE_FOR_ORGANIZATION))
