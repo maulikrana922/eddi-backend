@@ -758,7 +758,7 @@ class SupplierDashboard_earningGraphView(APIView):
                         final = 0.0
                     week_list[past.strftime("%A")] = final
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                total_earning = sum(list(data))
+                total_earning = float(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, "data":week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -781,7 +781,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
                 month_list[str(third.date())+" to "+str(datetime.date.today())] = float(sum(list(data3)))
 
-                total_earning = int(sum(list(data)))
+                total_earning = float(sum(list(data)))
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning, "data":month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
@@ -809,7 +809,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 month_List = list(deque_months)
                 year = datee.strftime("%Y")
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
-                total_earning = int(sum(list(data)))
+                total_earning = float(sum(list(data)))
                 final_data = {}
                 for i in range(0, 12):
                     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
