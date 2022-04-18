@@ -145,8 +145,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    # "hide_models": production_models,
-    "hide_models": local_models,
+    "hide_models": production_models,
+    # "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 
@@ -208,15 +208,6 @@ CKEDITOR_CONFIGS = {
     },
 }
 
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 DATABASES = {
     'default': {
