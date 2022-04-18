@@ -225,6 +225,8 @@ class GetSubCategoryDetails(APIView):
                 if request.POST.get("approval_status"):
                     if request.POST.get("approval_status") == "Approved":
                         record_map["is_approved_id"] = 1
+                        print("1111111111111111111111111111111111111")
+
                     if request.POST.get("approval_status") == "Pending":
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"course_category":data.category_name})
@@ -615,7 +617,7 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all(**{STATUS_ID:1, "is_approved_id":1})
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1})
         except Exception as ex:
             all_subcategory = None
         try:
@@ -623,7 +625,6 @@ class SupplierDashboardView(APIView):
                 newvar = all_subcategory_serializer.data
         except Exception as ex:
             newvar = None
-        
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
             "total_course_count": total_course,

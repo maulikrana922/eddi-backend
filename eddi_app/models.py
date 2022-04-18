@@ -723,7 +723,29 @@ class CourseEnroll(models.Model):
         return self.payment_detail.course_name
   
     
-    
+@receiver(post_save, sender=CourseEnroll)
+def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    print("OUTER")
+    if created:
+        print("INNER")
+        html_path = OTP_EMAIL_HTML
+        # otp = PasswordView()
+        fullname = f'{instance.first_name} {instance.last_name}'
+        category = f'{instance.course_category}'
+        context_data = {'fullname':fullname, "course_category":category}
+        email_html_template = get_template({"course_enroll.html"}).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.user_profile__email_id,)
+        # data = UserSignup.objects.get(email_id = instance.email_id)
+        # data.password = make_password(otp)
+        # data.save()
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        print("TRUE")
+        email_msg.send(fail_silently=False)
+        print("TRUE")
+
+
 
 class EventAd(models.Model):    
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
