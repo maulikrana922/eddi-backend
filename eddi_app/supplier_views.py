@@ -185,7 +185,6 @@ class GetSubCategoryDetails(APIView):
 
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
-            # data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except Exception as ex:
             print(ex, "ex")
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -201,7 +200,6 @@ class GetSubCategoryDetails(APIView):
             'category_name_id': dataa.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
-            # STATUS_ID:1
          }
             print(record_map, "recordddddd")
         except Exception as ex:
@@ -221,7 +219,6 @@ class GetSubCategoryDetails(APIView):
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[STATUS_ID] = 2
-                        
                 else:
                     record_map["status"] = data.status
                     
@@ -299,7 +296,6 @@ class GetSubCategoryDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
 
-# @permission_classes([AllowAny])
 class GetCourseDetails(APIView):
     res = None
     domain_data = None
@@ -327,19 +323,15 @@ class GetCourseDetails(APIView):
                 fav_dataa = None
 
             try:
-                individuals = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
-                lerner_count = models.CourseEnroll.objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success").count()
+                individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
+                lerner_count = getattr(models,COURSE_ENROLL_TABLE).objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success").count()
               
             except Exception as e:
-                print(e, "ererererer")
                 individuals = None
-            print(email_id, "emaillllll")
-            print(course_data, "coursedatatata")
             try:
                 var = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__email_id":email_id, "payment_detail__course_name":course_data.course_name})
             except Exception as ex:
                 var = None
-            print(var, "varrrrrrrr")
             var1 = True if var is not None else False
 
             if serializer := CourseDetailsSerializer(course_data):
@@ -348,11 +340,8 @@ class GetCourseDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,"Enrolled": "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            print("hiiiiiiiiiiiiiiiiiiiiii")
             email_id =  get_user_email_by_token(request)
             if email_id:
-                print(email_id)
-              
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     try:
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
@@ -361,7 +350,6 @@ class GetCourseDetails(APIView):
                     print("insidesupplier")
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-
 
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
                     try:
@@ -372,8 +360,6 @@ class GetCourseDetails(APIView):
 
                     if serializer := CourseDetailsSerializer(data_a,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-
-
 
                 else:
                     try:
@@ -387,20 +373,15 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
-                    # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_for_organization = False) | Q( course_category__category_name__in= a)).order_by("-organization_domain","-course_category__category_name")
 
                     data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).order_by("organization_domain")
 
                     data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list).order_by("organization_domain")
-                    # data_final = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1,"is_approved_id":1}).filter((Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)) |  ).order_by("organization_domain")
+                    
                     print(data_category, "datacategoryyyy")
                     print(data_all, "all_datatatata")
-                   
-                 
-                    # data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category__category_name__in":a})
-                    # print(data_s, "data_ssssssssssssssss")
            
                 if serializer := CourseDetailsSerializer(data_category,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
@@ -412,7 +393,6 @@ class GetCourseDetails(APIView):
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
                 
            
-             
             if serializer := CourseDetailsSerializer(data_s):
                 print("222222222222222222222222")
 
@@ -455,35 +435,17 @@ class GetCourseDetails(APIView):
         except Exception as ex:
             print(ex, "ex")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        # if request.POST.get(COURSE_FOR_ORGANIZATION):
-        #     if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
-        #         test_str = data.supplier.email_id
-        #         res = test_str.split('@')[1]
-        #         print(res)
-        # else:
-        #     res = data.organization_domain
-        # if request.POST.get(ORGANIZATION_DOMAIN):
-        #     if request.POST.get(ORGANIZATION_DOMAIN) == 'true':
-        #         test_str = data.supplier.email_id
-        #         res = test_str.split('@')[1]
-        #         print(res)
-        # else:
-        #     res = data.organization_domain
-        print(data.course_for_organization, "datatatatatatAT")
         try:
             record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
             COURSE_NAME: request.POST.get(COURSE_NAME,data.course_name),
-            # "course_starting_date" : request.POST.get("course_starting_date",data.course_starting_date),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,data.course_length),
             COURSE_CATEGORY_ID : category_id.id,
             COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
-            # COURSE_FOR_ORGANIZATION:request.POST.get((COURSE_FOR_ORGANIZATION),data.course_for_organization),
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
-            # ORGANIZATION_DOMAIN:res,
             FEE_TYPE_ID: fee_type_id.id,
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
@@ -514,12 +476,9 @@ class GetCourseDetails(APIView):
                         else:
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
-                                # print(data1, "dataaaa1")
-                                # print(type(data1), "typeeeeeedataaaa1")
                             except Exception as ex:
                                 print(ex, "exxxx")
                                 data1 = None
-                            # print(data1, "tpyeeeee")
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
@@ -625,7 +584,7 @@ class SupplierDashboardView(APIView):
 
             purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).count()
 
-            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email})
+            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).order_by("-created_date_time")
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)

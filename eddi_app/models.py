@@ -94,7 +94,7 @@ class UserSignup(models.Model):
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
-
+    
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):

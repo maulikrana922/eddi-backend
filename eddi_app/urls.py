@@ -5,7 +5,6 @@ urlpatterns = [
     # Stripe Link
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
-    # path('free-courseEnroll/',Free_courseEnroll.as_view(), name="UserPaymentDetail"),   
 
     # Event Payment Flow
     path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   
@@ -19,6 +18,7 @@ urlpatterns = [
     path('resetpassword/',ResetPasswordView.as_view(), name="resetpassword"),
     path('get-user-details/<str:uuid>/',GetUserDetails.as_view()),
     path('get-user-details/',GetUserDetails.as_view()),
+    # path('get-user-profile/',GetUserProfileDetails.as_view()),
 
     path('add-course/',AddCourseView.as_view()), 
     path('get-course-details/<str:uuid>/',GetCourseDetails.as_view()),

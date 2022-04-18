@@ -241,6 +241,21 @@ class GetUserDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
    
+
+# class GetUserProfileDetails(APIView):
+#     def get(self, request):
+#         email_id =  get_user_email_by_token(request)
+#         if email_id:
+#             try:
+#                 user_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{'email_id':email_id})
+#             except Exception as ex:
+#                 user_data = None
+#             if user_data is not None:
+                
+
+
+
+
 @permission_classes([AllowAny])
 class UserLoginView(APIView):
     def post(self, request):
@@ -823,7 +838,7 @@ class EventView(APIView):
             getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
         email_id = get_user_email_by_token(request)
@@ -834,7 +849,6 @@ class EventView(APIView):
                 var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:email_id, "event_name":data.event_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
-            print(var, "varrrrrrrr")
             var1 = True if var is not None else False
            
             if serializer := EventAdSerializer(data):
@@ -855,7 +869,6 @@ class EventView(APIView):
                     a = cat.course_category.split(",")
                 except Exception as ex:
                     a = cat.course_category.split()
-                print(a)
                 category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).order_by("-created_date_time")
 
                 category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).values_list("event_name", flat=True)
@@ -874,11 +887,8 @@ class EventView(APIView):
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            # print(data,"aaaaaaaaaaaaaa")
-            
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})            
         except Exception as ex:
-            print(ex, "exxxxx") 
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
@@ -893,8 +903,8 @@ class EventView(APIView):
             EVENT_TYPE : request.POST.get("event_type",data.event_type),
             EVENT_PRICE : request.POST.get("event_price",data.event_price),
             CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
-            "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
-            "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
+            MEETING_LINK : request.POST.get("meeting_link",data.meeting_link),
+            MEETING_PASSCODE : request.POST.get("meeting_passcode",data.meeting_passcode),
             EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
             EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
             EVENT_LOCATION: request.POST.get("event_location",data.event_location),
@@ -911,19 +921,6 @@ class EventView(APIView):
                 record_map[START_TIME] = None
             else:
                 record_map[START_TIME] = request.POST.get("start_time", data.start_time)
-
-            # try:
-            #     dataa = getattr(models,"EventAdEnroll").objects.get(**{"event_name":request.POST.get("event_name",data.event_name)})
-            # except Exception as ex:
-            #     print(ex, "exxxxxxxxx")
-            #     dataa = None
-            #     return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # if request.POST.get("event_price"):
-            #     if dataa is not None:
-            #         return Response({STATUS: ERROR, DATA: "Someone Already Enrolled You can not change event date"}, status=status.HTTP_400_BAD_REQUEST)
-            # else:
-            #     record_map[EVENT_PRICE] = data.event_price
 
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
@@ -978,38 +975,7 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)
 
 
-class Free_courseEnroll(APIView):
-    def post(self, request):
-        record_map = {}
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            course_name = request.POST.get("course_name")
-            email_id = request.POST.get("email_id")
-            # amount = request.POST.get("price")
-            # status_s = request.POST.get("status")
-            profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-            courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-            record_map = {}
-            record_map = {
-                    "course_category" : courseobj.course_category,
-                    "supplier_email" : courseobj.supplier.email_id,
-                    "user_profile_id" : profile_data.id,
-                    CREATED_AT : make_aware(datetime.datetime.now())
-                    }
-            print(record_map, "mapppppppppppp")
-            getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
-            print("Enrolll createdddd")
-            print("created")
-            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            print(ex, "exxxxxxxxxxxxxxxxxxx")
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 class RecruitmentAdAdView(APIView):
-
     def post(self, request):
         record_map = {}
         if request.method != POST_METHOD:
@@ -1108,26 +1074,21 @@ class RecruitmentAdAdView(APIView):
 
 
 
-
+# For My Course Page
 class CourseEnrollView(APIView):
     def get(self, request):
         email_id =  get_user_email_by_token(request)
         if email_id:
-            print(email_id)
             email_id = get_user_email_by_token(request)
-            
             try:
                 enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
             except Exception as ex:
                 enroll_data = None
-            
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
                 print(course_data, "course_dataaa")
             except:
                 course_data = None
-
-
             try:
                 cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                 try:
@@ -1137,7 +1098,6 @@ class CourseEnrollView(APIView):
                 print(a)
             except Exception as ex:
                 print(ex, "exxxxxxxxx")
-
             organization_domain = email_id.split('@')[1]
             try:
                 data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("organization_domain")
