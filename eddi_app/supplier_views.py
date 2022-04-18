@@ -607,7 +607,7 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all(**{STATUS_ID:1, IS_APPROVED_ID:1})
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1})
         except Exception as ex:
             all_subcategory = None
         try:
@@ -615,7 +615,6 @@ class SupplierDashboardView(APIView):
                 newvar = all_subcategory_serializer.data
         except Exception as ex:
             newvar = None
-        
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
             TOTAL_COURSE_COUNT: total_course,
