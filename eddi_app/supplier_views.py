@@ -70,6 +70,7 @@ class AddCourseView(APIView):
         except Exception as ex:
             print(ex,"exxxxxxxxxxxxxxxx")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
+        print(request.POST.get("organization_location"), "locationnonononononon")
         try:
             record_map = {
             SUPPLIER_ID: supplier_id.id,
@@ -447,8 +448,10 @@ class GetCourseDetails(APIView):
             COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
+            ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,data.organization_location),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
             FEE_TYPE_ID: fee_type_id.id,
+            SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
