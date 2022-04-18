@@ -1100,7 +1100,7 @@ class CourseEnrollView(APIView):
                 print(ex, "exxxxxxxxx")
             organization_domain = email_id.split('@')[1]
             try:
-                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("organization_domain")
+                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("organization_domain")
                 print(data_category, "data category")
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)

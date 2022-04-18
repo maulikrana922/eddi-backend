@@ -374,9 +374,9 @@ class GetCourseDetails(APIView):
 
                     organization_domain = email_id.split('@')[1]
 
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).order_by("organization_domain")
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).order_by("organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) & Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list).order_by("organization_domain")
                     
@@ -627,12 +627,12 @@ class SupplierDashboardView(APIView):
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
             "total_course_count": total_course,
-            "total_user_count":total_user,
-            "supplier_course_count":supplier_course_count,
-            "purchased_course_count":purchased_course,
-            "Course_Offered":course_offer_serializer.data,
+            "total_user_count": total_user,
+            "supplier_course_count": supplier_course_count,
+            "purchased_course_count": purchased_course,
+            "Course_Offered": course_offer_serializer.data,
             "Individuals": final_dict,
-            "all_subcategory":newvar}, status=status.HTTP_200_OK)
+            "all_subcategory": newvar}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
        
