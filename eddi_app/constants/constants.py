@@ -44,6 +44,10 @@ CATEGORY_NAME = 'category_name'
 TRUE = 'true'
 FALSE = 'false'
 OTP_EMAIL_HTML = 'email-password.html'
+COURSE_ENROLL_HTML_TO_S = "course_enroll_to_supplier.html"
+APPROVE_COURSE_HTML = "approve_course.html"
+INACTIVE_COURSE = "inactive_course.html"
+COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 USER_WELCOME_HTML = 'user-welcome.html'
 
 RESETPASSWORD_HTML = 'email-link.html'

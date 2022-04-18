@@ -5,7 +5,11 @@ from django.core.mail import EmailMessage
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from email.mime.image import MIMEImage
+import os
 import string
+from eddi_app.constants.constants import *
+from eddi_app.constants.table_name import *
 import random
 from django.template.loader import get_template
 from ckeditor.fields import RichTextField
@@ -312,6 +316,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
         res = test_str.split('@')[1]
         print(res)
         CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
+
 
        
 
@@ -722,28 +727,38 @@ class CourseEnroll(models.Model):
     def __str__(self):
         return self.payment_detail.course_name
   
-    
+
 @receiver(post_save, sender=CourseEnroll)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    print("OUTER")
     if created:
-        print("INNER")
-        html_path = OTP_EMAIL_HTML
-        # otp = PasswordView()
-        fullname = f'{instance.first_name} {instance.last_name}'
+        html_path = COURSE_ENROLL_HTML_TO_S
+        fullname = f'{instance.user_profile.first_name} {instance.user_profile.last_name}'
         category = f'{instance.course_category}'
         context_data = {'fullname':fullname, "course_category":category}
-        email_html_template = get_template({"course_enroll.html"}).render(context_data)
+        email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.user_profile__email_id,)
-        # data = UserSignup.objects.get(email_id = instance.email_id)
-        # data.password = make_password(otp)
-        # data.save()
+        recipient_list = (instance.supplier_email,)
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
-        print("TRUE")
+        email_msg.send(fail_silently=False)
+
+        html_path1 = COURSE_ENROLL_HTML_TO_U
+        email_html_template = get_template(html_path1).render(context_data)
+        recipient_list = (instance.user_profile.email_id,)
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        # path = 'eddi_app'
+        # img_dir = 'static'
+        # image = 'Logo.jpg'
+        # file_path = os.path.join(path,img_dir,image)
+        # with open(file_path,'rb') as f:
+        #     img = MIMEImage(f.read())
+        #     img.add_header('Content-ID', '<{name}>'.format(name=image))
+        #     img.add_header('Content-Disposition', 'inline', filename=image)
+        # email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
+
 
 
 
