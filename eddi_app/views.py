@@ -32,27 +32,24 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 @permission_classes([AllowAny])
 class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):
-            if request.method == "POST":
+            if request.method == POST_METHOD:
                 # data = request.data
-                email_id = request.POST.get("email_id")
-                # card_type = request.POST.get("card_brand")
-                amount = request.POST.get("price")
-                payment_method_id = request.POST.get("payment_method_id")
-                course_name = request.POST.get("course_name")
+                email_id = request.POST.get(EMAIL_ID)
+                # card_type = request.POST.get(CARD_BRAND)
+                amount = request.POST.get(PRICE)
+                payment_method_id = request.POST.get(PAYMENT_METHOD_ID)
+                course_name = request.POST.get(COURSE_NAME)
                 
                 extra_msg = ''
                 # checking if customer with provided email already exists
                 try:
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
-                    print(var, "varrrrrrr")
                     if var is not None:
                         return Response({MESSAGE: ERROR, DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as ex:
-                    print(ex, "exxxxxxxxxxxxxxxxx")
                     pass
                 
                 try:
-                    print("inside first try")
                     customer_data = stripe.Customer.list(email=email_id).data
                     if len(customer_data) == 0:
                         # creating customer
@@ -63,8 +60,6 @@ class Save_stripe_info(APIView):
                         
                     # creating paymentIntent
                     try:
-                        print("inside second try")
-
                         intent = stripe.PaymentIntent.create(
                         amount=int(amount)*100,
                         currency='usd',
@@ -79,11 +74,7 @@ class Save_stripe_info(APIView):
                     except Exception as e:
                         print(e)
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
-                    
-                    
-                    
-                    print("okkkkk")
-                    return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
+                    return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     # print(e)
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
@@ -92,18 +83,18 @@ class Save_stripe_info(APIView):
 @permission_classes([AllowAny])
 class Save_stripe_infoEvent(APIView):
     def post(self, request, *args, **kwargs):
-            if request.method == "POST":
-                user_email_id = request.POST.get("email_id")
-                amount = request.POST.get("price")
-                payment_method_id = request.POST.get("payment_method_id")
-                event_name = request.POST.get("event_name")
+            if request.method == POST_METHOD:
+                user_email_id = request.POST.get(EMAIL_ID)
+                amount = request.POST.get(PRICE)
+                payment_method_id = request.POST.get(PAYMENT_METHOD_ID)
+                event_name = request.POST.get(EVENT_NAME)
                 extra_msg = ''
                 # checking if customer with provided email already exists
                 try:
-                    var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+                    var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:user_email_id, EVENT_NAME:event_name,STATUS:'Success'})
                     print(var, "varrrrrrr")
                     if var is not None:
-                        return Response({MESSAGE: "ERROR", DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({MESSAGE: ERROR, DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as ex:
                     print(ex, "exxxxxxxxxxxxxxxxx")
                     pass
@@ -135,7 +126,7 @@ class Save_stripe_infoEvent(APIView):
 
                     except Exception as e:
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
-                    return Response({MESSAGE: SUCCESS, DATA: {'payment_intent':intent, 'extra_msg': extra_msg}}, status=status.HTTP_200_OK,)
+                    return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Method Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
@@ -247,7 +238,7 @@ class GetUserDetails(APIView):
 #         email_id =  get_user_email_by_token(request)
 #         if email_id:
 #             try:
-#                 user_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{'email_id':email_id})
+#                 user_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
 #             except Exception as ex:
 #                 user_data = None
 #             if user_data is not None:
@@ -265,25 +256,21 @@ class UserLoginView(APIView):
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
-            print(token.key)
-
-            print(data.user_type)
+            
         except Exception as ex:
-            print(ex)
             data = None
         try:
             user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
             if user_profile:
                 user_profile = True
         except Exception as ex:
-            print(ex)
             user_profile = False
         serializer = UserSignupSerializer(data)
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
  
-            return Response({STATUS: SUCCESS, DATA: True, DATA: {"FIRST_NAME":data.first_name, "LAST_NAME":data.last_name} ,"user_type":str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,"user_profile":user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
            
         else:
             return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -380,7 +367,7 @@ class ChangePasswordView(APIView):
 class Header_FooterCMSDetails(APIView):
     try:
         def get(self, request):
-            data = getattr(models,HEADER_FOOTERCMS_TABLE).objects.latest('created_date_time')
+            data = getattr(models,HEADER_FOOTERCMS_TABLE).objects.latest(CREATED_AT)
             if not (serializer := Header_FooterCMSSerializer(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -393,48 +380,45 @@ class GetHomePageDetails(APIView):
 
     def get(self, request):
         try:
-            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest('created_date_time')
+            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest(CREATED_AT)
             event_data = EventAd.objects.filter(Q(event_publish_on="Landing Page") | Q(event_publish_on="Both"))
             if not (serializer := HomePageCMSSerializer(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             elif not (event_serializer := EventAdSerializer(event_data, many=True)):
                 return Response({STATUS: ERROR, DATA: event_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({STATUS: SUCCESS, DATA: serializer.data, "event_data":event_serializer.data}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: serializer.data, EVENT_DATA:event_serializer.data}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])
 class GetPrivacyPolicyDetails(APIView): 
     def get(self, request):
-        data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest('created_date_time')
+        data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest(CREATED_AT)
         if not (serializer := PrivacyPolicyPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class GetPrivacyPolicySupplierDetails(APIView): 
     def get(self, request):
-        data = getattr(models,"PrivacyPolicyCMSSupplier").objects.latest('created_date_time')
+        data = getattr(models,PRIVACY_POLICY_CMS_SUPPLIER_TABLE).objects.latest(CREATED_AT)
         if not (serializer := PrivacyPolicySupplierPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class GetTermsConditionDetails(APIView): 
     def get(self, request):
-        data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest('created_date_time')
+        data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest(CREATED_AT)
         if not (serializer := TermsConditionPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        print(serializer, "serializeerrrrrrrrrr")
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class GetTermsConditionSupplierDetails(APIView): 
     def get(self, request):
-        data = getattr(models,"TermsConditionCMSSupplier").objects.latest('created_date_time')
+        data = getattr(models,TERMS_CONDITION_CMS_SUPPLIER_TABLE).objects.latest(CREATED_AT)
         if not (serializer := TermsConditionSupplierPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         print(serializer, "serializeerrrrrrrrrr")
@@ -443,7 +427,7 @@ class GetTermsConditionSupplierDetails(APIView):
 @permission_classes([AllowAny])   
 class GetAboutUsPageDetails(APIView):
     def get(self, request):
-            data = getattr(models,ABOUTUSCMS_TABLE).objects.latest('created_date_time')
+            data = getattr(models,ABOUTUSCMS_TABLE).objects.latest(CREATED_AT)
             if serializer := AboutUsCMSSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -452,7 +436,7 @@ class GetAboutUsPageDetails(APIView):
 @permission_classes([AllowAny])
 class GetContactUsPageDetails(APIView):
     def get(self, request):
-            data = getattr(models,CONTACTUSCMS_TABLE).objects.latest('created_date_time')
+            data = getattr(models,CONTACTUSCMS_TABLE).objects.latest(CREATED_AT)
             if serializer := ContactUsCMSSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -474,7 +458,7 @@ class GetBlogDetails(APIView):
             
             if serializer := BlogDetailsSerializer(data):
                 
-                return Response({STATUS: SUCCESS, DATA: serializer.data, 'related_blog':related_blog}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data, RELATED_BLOG:related_blog}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -546,18 +530,18 @@ class UserProfileView(APIView):
 class UserPaymentDetail_info(APIView):
     def post(self, request):
         try:
-            course_name = request.POST.get("course_name")
-            email_id = request.POST.get("email_id")
-            if request.POST.get("card_brand"):
-                card_type = request.POST.get("card_brand")
+            course_name = request.POST.get(COURSE_NAME)
+            email_id = request.POST.get(EMAIL_ID)
+            if request.POST.get(CARD_BRAND):
+                card_type = request.POST.get(CARD_BRAND)
             else:
                 card_type = None
-            if request.POST.get("price"):
-                amount = request.POST.get("price")
+            if request.POST.get(PRICE):
+                amount = request.POST.get(PRICE)
             else:
                 amount = 0
-            if request.POST.get("status"):
-                status_s = request.POST.get("status")
+            if request.POST.get(STATUS):
+                status_s = request.POST.get(STATUS)
             else:
                 status_s = "Success"
             
@@ -586,10 +570,10 @@ class UserPaymentDetail_info(APIView):
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     record_map = {}
                     record_map = {
-                    "course_category" : courseobj.course_category,
-                    "supplier_email" : courseobj.supplier.email_id,
-                    "payment_detail_id" : var.id,
-                    "user_profile_id" : profile_data.id,
+                    COURSE_CATEGORY : courseobj.course_category,
+                    SUPPLIER_EMAIL : courseobj.supplier.email_id,
+                    PAYMENT_DETAIL_ID : var.id,
+                    USER_PROFILE_ID : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
@@ -611,18 +595,18 @@ class EventPaymentDetail_info(APIView):
     def post(self, request):
         user_email_id = get_user_email_by_token(request)
         try:
-            event_name = request.POST.get("event_name")
-            # user_email_id = request.POST.get("email_id")
-            if request.POST.get("card_brand"):
-                card_type = request.POST.get("card_brand")
+            event_name = request.POST.get(EVENT_NAME)
+            # user_email_id = request.POST.get(EMAIL_ID)
+            if request.POST.get(CARD_BRAND):
+                card_type = request.POST.get(CARD_BRAND)
             else:
                 card_type = None
-            if request.POST.get("price"):
-                amount = request.POST.get("price")
+            if request.POST.get(PRICE):
+                amount = request.POST.get(PRICE)
             else:
                 amount = 0
-            if request.POST.get("status"):
-                status_s = request.POST.get("status")
+            if request.POST.get(STATUS):
+                status_s = request.POST.get(STATUS)
             else:
                 status_s = "Success"
             
@@ -631,7 +615,7 @@ class EventPaymentDetail_info(APIView):
                 
             record_map = {}
             record_map = {
-                "event_name" : event_name,
+                EVENT_NAME : event_name,
                 EMAIL_ID: user_email_id,
                 CARD_TYPE : card_type,
                 AMOUNT: float(amount),
@@ -640,26 +624,26 @@ class EventPaymentDetail_info(APIView):
                 }
             print(record_map, "recordddd")
             try:
-                var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+                var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:user_email_id, EVENT_NAME:event_name,STATUS:'Success'})
             except Exception as ex:
                 print(ex, "exxxxxxxxxxxxxxxx")
                 var = None
             if not var:
                 try:
-                    getattr(models,"EventAdPaymentDetail").objects.update_or_create(**record_map)
+                    getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
-                    var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:user_email_id, "event_name":event_name,STATUS:'Success'})
+                    var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:user_email_id, EVENT_NAME:event_name,STATUS:'Success'})
                     print(user_email_id, "adminnnnnnnnnnnnnnnnnnnnnnn")
                     
                     record_map = {}
                     record_map = {
-                    "event_name" : event_name,
-                    "admin_email" : user_email_id,
-                    "payment_detail_id" : var.id,
-                    "user_profile_id" : profile_data.id,
+                    EVENT_NAME : event_name,
+                    ADMIN_EMAIL : user_email_id,
+                    PAYMENT_DETAIL_ID : var.id,
+                    USER_PROFILE_ID : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
-                    getattr(models,"EventAdEnroll").objects.update_or_create(**record_map)
+                    getattr(models,EVENTAD_ENROLL_TABLE).objects.update_or_create(**record_map)
                     print("Enrolll createdddd")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -684,26 +668,26 @@ class FavCourseDetails(APIView):
         email_id = get_user_email_by_token(request)
         
         try:
-            course_name = request.POST.get('course_name')
-            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{'course_name':course_name}).get(**{EMAIL_ID:email_id})
+            course_name = request.POST.get(COURSE_NAME)
+            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_name}).get(**{EMAIL_ID:email_id})
             print(user_data_fav)
         except Exception as ex:
             print(ex)
             user_data_fav = None
             
         if user_data_fav:
-            fav_data = request.POST.get("is_favourite")
+            fav_data = request.POST.get(IS_FAVOURITE)
             print(fav_data)
             
             if fav_data == 'true':
-                setattr(user_data_fav,'is_favourite',True)
+                setattr(user_data_fav,IS_FAVOURITE,True)
                 user_data_fav.save()
             else:
-                setattr(user_data_fav,'is_favourite',False)
+                setattr(user_data_fav,IS_FAVOURITE,False)
                 user_data_fav.save()
         else:
-            course_name = request.POST.get("course_name")
-            fav_data = request.POST.get("is_favourite")
+            course_name = request.POST.get(COURSE_NAME)
+            fav_data = request.POST.get(IS_FAVOURITE)
             
             if fav_data == 'true':
                 print("TRUE")
@@ -714,8 +698,8 @@ class FavCourseDetails(APIView):
                 
             record_map = {
                 EMAIL_ID: email_id,
-                "course_name" : course_name,
-                "is_favourite": is_favourite_data,
+                COURSE_NAME : course_name,
+                IS_FAVOURITE: is_favourite_data,
                 CREATED_AT : make_aware(datetime.datetime.now())
                 }
             try:
@@ -733,8 +717,8 @@ class FavCourseDetails(APIView):
             
 class ViewIndividualProfile(APIView):
     def post(self, request):
-        user_email_id = request.POST.get("email_id")
-        supplier_email_id = request.POST.get("supplier_email_id")
+        user_email_id = request.POST.get(EMAIL_ID)
+        supplier_email_id = request.POST.get(SUPPLIER_EMAIL_ID)
         token_data = request.headers.get('Authorization')
 
         
@@ -748,7 +732,7 @@ class ViewIndividualProfile(APIView):
             email_id = None
             return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, "supplier_email":supplier_email_id})
+            course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, SUPPLIER_EMAIL:supplier_email_id})
         except Exception as ex:
             # print(ex, "exxx")
             return Response({STATUS: ERROR, DATA: "Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -777,13 +761,12 @@ class IncreaseAdCount(APIView):
         except Exception as ex:
             print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
-        print(data.event_subscriber, "eveneneneasjdfguna")
         if data.event_subscriber == None:
             data.event_subscriber = 1
         else:
             data.event_subscriber += 1
         record_map = {
-            "event_subscriber" : data.event_subscriber,
+            EVENT_SUBSCRIBER : data.event_subscriber,
         }
         print(record_map, "recorddd")
         for key,value in record_map.items():
@@ -799,38 +782,39 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
-            EVENT_IMAGE : request.FILES.get("event_image",None),
-            EVENT_PUBLISH_ON : request.POST.get("event_publish_on",None),
-            EVENT_NAME : request.POST.get("event_name",None),
-            EVENT_CATEGORY : request.POST.get("event_category",None),
-            EVENT_CHOOSE_TYPE : request.POST.get("event_choose_type",None),
-            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",None),
-            FEES_TYPE : request.POST.get("fees_type",None),
-            EVENT_TYPE : request.POST.get("event_type",None),
-            EVENT_PRICE : request.POST.get("event_price",None),
-            CHECKOUT_LINK : request.POST.get("checkout_link",None),
-            "meeting_link" : request.POST.get("meeting_link",None),
-            "meeting_passcode" : request.POST.get("meeting_passcode",None),
-            EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",None),
-            EVENT_DESCRIPTION : request.POST.get("event_description",None),
-            EVENT_LOCATION: request.POST.get("event_location",None),
-            EVENT_ORGANIZER : request.POST.get("event_organizer",None),
-            EVENT_SUBSCRIBER : request.POST.get("event_subscriber",None),
+            EVENT_IMAGE : request.FILES.get(EVENT_IMAGE,None),
+            EVENT_PUBLISH_ON : request.POST.get(EVENT_PUBLISH_ON,None),
+            EVENT_NAME : request.POST.get(EVENT_NAME,None),
+            EVENT_CATEGORY : request.POST.get(EVENT_CATEGORY,None),
+            EVENT_CHOOSE_TYPE : request.POST.get(EVENT_CHOOSE_TYPE,None),
+            BANNER_VIDEO_LINK : request.POST.get(BANNER_VIDEO_LINK,None),
+            FEES_TYPE : request.POST.get(FEES_TYPE,None),
+            EVENT_TYPE : request.POST.get(EVENT_TYPE,None),
+            EVENT_PRICE : request.POST.get(EVENT_PRICE,None),
+            CHECKOUT_LINK : request.POST.get(CHECKOUT_LINK,None),
+            MEETING_LINK : request.POST.get(MEETING_LINK,None),
+            MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
+            EVENT_SMALL_DESCRIPTION : request.POST.get(EVENT_SMALL_DESCRIPTION,None),
+            EVENT_DESCRIPTION : request.POST.get(EVENT_DESCRIPTION,None),
+            EVENT_LOCATION: request.POST.get(EVENT_LOCATION,None),
+            EVENT_ORGANIZER : request.POST.get(EVENT_ORGANIZER,None),
+            EVENT_SUBSCRIBER : request.POST.get(EVENT_SUBSCRIBER,None),
             STATUS_ID:1
            
         }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
-            if request.POST.get("start_date") == "":
+            if request.POST.get(START_DATE) == "":
                 record_map[START_DATE] = None
             else:
-                record_map[START_DATE] = request.POST.get("start_date")
-            if request.POST.get("start_time") == "":
+                record_map[START_DATE] = request.POST.get(START_DATE)
+
+            if request.POST.get(START_TIME) == "":
                 record_map[START_TIME] = None
             else:
-                record_map[START_TIME] = request.POST.get("start_time")
+                record_map[START_TIME] = request.POST.get(START_TIME)
 
-            if request.POST.get("is_featured") == "true":
+            if request.POST.get(IS_FEATURED) == "true":
                 featured_data = True
             else:
                 featured_data = False
@@ -844,15 +828,15 @@ class EventView(APIView):
         email_id = get_user_email_by_token(request)
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            subscriber = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name}).count()
+            subscriber = getattr(models,EVENTAD_ENROLL_TABLE).objects.filter(**{EVENT_NAME:data.event_name}).count()
             try:
-                var = getattr(models,"EventAdPaymentDetail").objects.get(**{EMAIL_ID:email_id, "event_name":data.event_name,STATUS:'Success'})
+                var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:email_id, EVENT_NAME:data.event_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
            
             if serializer := EventAdSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data, "subscriber_count":subscriber, "is_enrolled":var1}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data, SUBSCRIBER_COUNT:subscriber, "is_enrolled":var1}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -871,7 +855,7 @@ class EventView(APIView):
                     a = cat.course_category.split()
                 category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).order_by("-created_date_time")
 
-                category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).values_list("event_name", flat=True)
+                category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).values_list(EVENT_NAME, flat=True)
 
                 all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
 
@@ -893,41 +877,42 @@ class EventView(APIView):
         
         try:
             record_map = {
-            EVENT_IMAGE : request.FILES.get("event_image",data.event_image),
-            EVENT_PUBLISH_ON : request.POST.get("event_publish_on",data.event_publish_on),
-            EVENT_NAME : request.POST.get("event_name",data.event_name),
-            EVENT_CHOOSE_TYPE : request.POST.get("event_choose_type",data.event_choose_type),
-            EVENT_CATEGORY : request.POST.get("event_category",data.event_category),
-            BANNER_VIDEO_LINK : request.POST.get("banner_video_link",data.banner_video_link),  
-            FEES_TYPE : request.POST.get("fees_type",data.fees_type),
-            EVENT_TYPE : request.POST.get("event_type",data.event_type),
-            EVENT_PRICE : request.POST.get("event_price",data.event_price),
-            CHECKOUT_LINK : request.POST.get("checkout_link",data.checkout_link),
-            MEETING_LINK : request.POST.get("meeting_link",data.meeting_link),
-            MEETING_PASSCODE : request.POST.get("meeting_passcode",data.meeting_passcode),
-            EVENT_SMALL_DESCRIPTION : request.POST.get("event_small_description",data.event_small_description),
-            EVENT_DESCRIPTION : request.POST.get("event_description",data.event_description),
-            EVENT_LOCATION: request.POST.get("event_location",data.event_location),
-            EVENT_ORGANIZER : request.POST.get("event_organizer",data.event_organizer),
-            EVENT_SUBSCRIBER : request.POST.get("event_subscriber",data.event_subscriber),
+            EVENT_IMAGE : request.FILES.get(EVENT_IMAGE,data.event_image),
+            EVENT_PUBLISH_ON : request.POST.get(EVENT_PUBLISH_ON,data.event_publish_on),
+            EVENT_NAME : request.POST.get(EVENT_NAME,data.event_name),
+            EVENT_CHOOSE_TYPE : request.POST.get(EVENT_CHOOSE_TYPE,data.event_choose_type),
+            EVENT_CATEGORY : request.POST.get(EVENT_CATEGORY,data.event_category),
+            BANNER_VIDEO_LINK : request.POST.get(BANNER_VIDEO_LINK,data.banner_video_link),  
+            FEES_TYPE : request.POST.get(FEES_TYPE,data.fees_type),
+            EVENT_TYPE : request.POST.get(EVENT_TYPE,data.event_type),
+            EVENT_PRICE : request.POST.get(EVENT_PRICE,data.event_price),
+            CHECKOUT_LINK : request.POST.get(CHECKOUT_LINK,data.checkout_link),
+            MEETING_LINK : request.POST.get(MEETING_LINK,data.meeting_link),
+            MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,data.meeting_passcode),
+            EVENT_SMALL_DESCRIPTION : request.POST.get(EVENT_SMALL_DESCRIPTION,data.event_small_description),
+            EVENT_DESCRIPTION : request.POST.get(EVENT_DESCRIPTION,data.event_description),
+            EVENT_LOCATION: request.POST.get(EVENT_LOCATION,data.event_location),
+            EVENT_ORGANIZER : request.POST.get(EVENT_ORGANIZER,data.event_organizer),
+            EVENT_SUBSCRIBER : request.POST.get(EVENT_SUBSCRIBER,data.event_subscriber),
             
             }
         
-            if request.POST.get("start_date") == "":
+            if request.POST.get(START_DATE) == "":
                 record_map[START_DATE] = None
             else:
-                record_map[START_DATE] = request.POST.get("start_date", data.start_date)
-            if request.POST.get("start_time") == "":
+                record_map[START_DATE] = request.POST.get(START_DATE, data.start_date)
+
+            if request.POST.get(START_TIME) == "":
                 record_map[START_TIME] = None
             else:
-                record_map[START_TIME] = request.POST.get("start_time", data.start_time)
+                record_map[START_TIME] = request.POST.get(START_TIME, data.start_time)
 
-            if request.POST.get("status"):
-                if request.POST.get("status") == "Active":
+            if request.POST.get(STATUS):
+                if request.POST.get(STATUS) == "Active":
                     record_map[STATUS_ID] = 1
                 else:
                     try:
-                        dataa = getattr(models,"EventAdEnroll").objects.filter(**{"event_name":data.event_name})
+                        dataa = getattr(models,EVENTAD_ENROLL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
                         print(dataa, "datatatatatata")
                     except Exception as ex:
                         print(ex, "exxxx")
@@ -941,7 +926,7 @@ class EventView(APIView):
             # record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             # record_map[MODIFIED_BY] = 'admin'
             record_map[UUID] = uuid4()
-            if request.POST.get("is_featured") == "true":
+            if request.POST.get(IS_FEATURED) == "true":
                 featured_data = True
             else:
                 featured_data = False
@@ -982,21 +967,21 @@ class RecruitmentAdAdView(APIView):
             return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
-            "recruitmentAd_File" : request.FILES.get("recruitmentAd_file",None),
-            "recruitmentAd_title" : request.POST.get("recruitmentAd_title",None),
-            "recruitmentAd_description" : request.POST.get("recruitmentAd_description",None),
-            "recruitmentAd_banner_video_link" : request.POST.get("recruitmentAd_banner_video_link",None),
-            "supplier_email" : request.POST.get("supplier_email",None),
-            "recruitmentAd_Expiry" : request.POST.get("recruitmentAd_Expiry",None),
-            "subscriber_count" : request.POST.get("subscriber_count",None),
+            RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
+            RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,None),
+            RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
+            RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
+            SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,None),
+            RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
+            SUBSCRIBER_COUNT : request.POST.get(SUBSCRIBER_COUNT,None),
             STATUS_ID:1
            
         }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            record_map[CREATED_BY] = request.POST.get("supplier_email")
+            record_map[CREATED_BY] = request.POST.get(SUPPLIER_EMAIL)
             record_map[UUID] = uuid4()
             
-            getattr(models,"RecruitmentAd").objects.update_or_create(**record_map)
+            getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1004,13 +989,13 @@ class RecruitmentAdAdView(APIView):
 
     def get(self, request, uuid = None):
         if uuid:
-            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+            data = getattr(models,RECRUITMENTAD_TABLE).objects.get(**{UUID:uuid})
             if serializer := RecruitmentAdSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,"RecruitmentAd").objects.all()
+            data = getattr(models,RECRUITMENTAD_TABLE).objects.all()
             if serializer := RecruitmentAdSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -1020,24 +1005,24 @@ class RecruitmentAdAdView(APIView):
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+            data = getattr(models,RECRUITMENTAD_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             record_map = {
-            "recruitmentAd_File" : request.FILES.get("recruitmentAd_file",data.recruitmentAd_File),
-            "recruitmentAd_title" : request.POST.get("recruitmentAd_title",data.recruitmentAd_title),
-            "recruitmentAd_description" : request.POST.get("recruitmentAd_description",data.recruitmentAd_description),
-            "recruitmentAd_banner_video_link" : request.POST.get("recruitmentAd_banner_video_link",data.recruitmentAd_banner_video_link),
-            "supplier_email" : request.POST.get("supplier_email",data.supplier_email),
-            "recruitmentAd_Expiry" : request.POST.get("recruitmentAd_Expiry",data.recruitmentAd_Expiry),
-            "subscriber_count" : request.POST.get("subscriber_count",data.subscriber_count),
-            "created_by" : request.POST.get("supplier_email",data.created_by),
+            RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,data.recruitmentAd_File),
+            RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,data.recruitmentAd_title),
+            RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,data.recruitmentAd_description),
+            RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,data.recruitmentAd_banner_video_link),
+            SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,data.supplier_email),
+            RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,data.recruitmentAd_Expiry),
+            SUBSCRIBER_COUNT : request.POST.get(SUBSCRIBER_COUNT,data.subscriber_count),
+            CREATED_BY : request.POST.get(SUPPLIER_EMAIL,data.created_by),
             
         }
-            if request.POST.get("status"):
-                if request.POST.get("status") == "Active":
+            if request.POST.get(STATUS):
+                if request.POST.get(STATUS) == "Active":
                     record_map[STATUS_ID] = 1
                 else:
                     record_map[STATUS_ID] = 2
@@ -1058,7 +1043,7 @@ class RecruitmentAdAdView(APIView):
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+            data = getattr(models,RECRUITMENTAD_TABLE).objects.get(**{UUID:uuid})
         except:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1100,7 +1085,7 @@ class CourseEnrollView(APIView):
                 print(ex, "exxxxxxxxx")
             organization_domain = email_id.split('@')[1]
             try:
-                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
+                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
                 print(data_category, "data category")
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)

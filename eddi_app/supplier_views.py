@@ -90,13 +90,13 @@ class AddCourseView(APIView):
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
-            "is_approved_id" : 2,
+            IS_APPROVED_ID : 2,
             STATUS_ID:1
             }
-            if request.POST.get("course_starting_date") == "":
-                record_map["course_starting_date"] = None
+            if request.POST.get(COURSE_STARTING_DATE) == "":
+                record_map[COURSE_STARTING_DATE] = None
             else:
-                record_map["course_starting_date"] = request.POST.get("course_starting_date")
+                record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = 'admin'
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
@@ -125,7 +125,7 @@ class AddSubCategoryView(APIView):
             CATEGORY_NAME_ID: category_id.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),
-            "is_approved_id" : 2,
+            IS_APPROVED_ID : 2,
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -197,7 +197,7 @@ class GetSubCategoryDetails(APIView):
         try:
             record_map = {
 
-            'category_name_id': dataa.id,
+            CATEGORY_NAME_ID: dataa.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
          }
@@ -206,12 +206,12 @@ class GetSubCategoryDetails(APIView):
             print(ex, "exxxxx")
         if user_type_data:
             if user_type_data == ADMIN_S:
-                if request.POST.get("status"):
-                    if request.POST.get("status") == "Active":
+                if request.POST.get(STATUS):
+                    if request.POST.get(STATUS) == "Active":
                         record_map[STATUS_ID] = 1
                     else:
                         try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"course_category":data.category_name})
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
                             print(ex, "exxxx")
                             data1 = None
@@ -220,41 +220,41 @@ class GetSubCategoryDetails(APIView):
                         else:
                             record_map[STATUS_ID] = 2
                 else:
-                    record_map["status"] = data.status
+                    record_map[STATUS] = data.status
                     
-                if request.POST.get("approval_status"):
-                    if request.POST.get("approval_status") == "Approved":
-                        record_map["is_approved_id"] = 1
-                    if request.POST.get("approval_status") == "Pending":
+                if request.POST.get(APPROVAL_STATUS):
+                    if request.POST.get(APPROVAL_STATUS) == "Approved":
+                        record_map[IS_APPROVED_ID] = 1
+                    if request.POST.get(APPROVAL_STATUS) == "Pending":
                         try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"course_category":data.category_name})
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
                             print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
-                            record_map["is_approved_id"] = 2
-                    if request.POST.get("approval_status") == "Rejected":
+                            record_map[IS_APPROVED_ID] = 2
+                    if request.POST.get(APPROVAL_STATUS) == "Rejected":
                         try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"course_category":data.category_name})
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
                             print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
-                            record_map["is_approved_id"] = 3
+                            record_map[IS_APPROVED_ID] = 3
                 else:
-                    record_map["is_approved"] = data.is_approved
+                    record_map[IS_APPROVED] = data.is_approved
 
             elif user_type_data == SUPPLIER_S:
-                if request.POST.get("status"):
-                    if request.POST.get("status") == "Active":
+                if request.POST.get(STATUS):
+                    if request.POST.get(STATUS) == "Active":
                         record_map[STATUS_ID] = 1
                     else:
                         try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"course_category":data.category_name})
+                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
                             print(ex, "exxxx")
                             data1 = None
@@ -263,8 +263,8 @@ class GetSubCategoryDetails(APIView):
                         else:
                             record_map[STATUS_ID] = 2
                 else:
-                    record_map["status"] = data.status
-                    record_map["is_approved_id"] = 2
+                    record_map[STATUS] = data.status
+                    record_map[IS_APPROVED_ID] = 2
 
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
@@ -316,7 +316,7 @@ class GetCourseDetails(APIView):
             except:
                 course_data = None
             try:
-                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{'course_name':course_data.course_name}).get(**{EMAIL_ID:email_id})
+                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_data.course_name}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
             except Exception as ex:
                 fav_data = None
@@ -336,9 +336,9 @@ class GetCourseDetails(APIView):
 
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1}, status=status.HTTP_200_OK)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors,"Enrolled": "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: serializer.errors,ENROLLED: "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             email_id =  get_user_email_by_token(request)
             if email_id:
@@ -374,19 +374,14 @@ class GetCourseDetails(APIView):
 
                     organization_domain = email_id.split('@')[1]
 
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, "is_approved_id":1}).order_by("-organization_domain")
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).order_by("-organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list("course_name", flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, "is_approved_id":1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
-                    
-                    print(data_category, "datacategoryyyy")
-                    print(data_all, "all_datatatata")
-           
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
                 if serializer := CourseDetailsSerializer(data_category,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
-                    print("1111111111111111111111")
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    
             else:
@@ -394,14 +389,12 @@ class GetCourseDetails(APIView):
                 
            
             if serializer := CourseDetailsSerializer(data_s):
-                print("222222222222222222222222")
-
                 return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
 
                 # if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                #     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                #     return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
                 # else:
-                #     return Response({STATUS: SUCCESS, DATA: serializer.data,"Enrolled": "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
+                #     return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
        
@@ -419,7 +412,6 @@ class GetCourseDetails(APIView):
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
-            print(ex, "exxxxx")
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -450,10 +442,10 @@ class GetCourseDetails(APIView):
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
-            if request.POST.get("course_starting_date") == "":
-                record_map["course_starting_date"] = None
+            if request.POST.get(COURSE_STARTING_DATE) == "":
+                record_map[COURSE_STARTING_DATE] = None
             else:
-                record_map["course_starting_date"] = request.POST.get("course_starting_date",data.course_starting_date)
+                record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE,data.course_starting_date)
             if request.POST.get(COURSE_FOR_ORGANIZATION):
                 if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
                     record_map[COURSE_FOR_ORGANIZATION] = json.loads(request.POST.get(COURSE_FOR_ORGANIZATION))
@@ -470,8 +462,8 @@ class GetCourseDetails(APIView):
 
             if user_type_data:
                 if user_type_data == ADMIN_S:
-                    if request.POST.get("status"):
-                        if request.POST.get("status") == "Active":
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
                             record_map[STATUS_ID] = 1
                         else:
                             try:
@@ -484,12 +476,12 @@ class GetCourseDetails(APIView):
                             else:
                                 record_map[STATUS_ID] = 2
                     else:
-                        record_map["status"] = data.status
+                        record_map[STATUS] = data.status
                         
-                    if request.POST.get("approval_status"):
-                        if request.POST.get("approval_status") == "Approved":
-                            record_map["is_approved_id"] = 1
-                        if request.POST.get("approval_status") == "Pending":
+                    if request.POST.get(APPROVAL_STATUS):
+                        if request.POST.get(APPROVAL_STATUS) == "Approved":
+                            record_map[IS_APPROVED_ID] = 1
+                        if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
@@ -498,8 +490,8 @@ class GetCourseDetails(APIView):
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
-                                record_map["is_approved_id"] = 2
-                        if request.POST.get("approval_status") == "Rejected":
+                                record_map[IS_APPROVED_ID] = 2
+                        if request.POST.get(APPROVAL_STATUS) == "Rejected":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
@@ -508,13 +500,13 @@ class GetCourseDetails(APIView):
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
-                                record_map["is_approved_id"] = 3
+                                record_map[IS_APPROVED_ID] = 3
                     else:
-                        record_map["is_approved"] = data.is_approved
+                        record_map[IS_APPROVED] = data.is_approved
 
                 elif user_type_data == SUPPLIER_S:
-                    if request.POST.get("status"):
-                        if request.POST.get("status") == "Active":
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
                             record_map[STATUS_ID] = 1
                         else:
                             try:
@@ -527,8 +519,8 @@ class GetCourseDetails(APIView):
                             else:
                                 record_map[STATUS_ID] = 2
                     else:
-                        record_map["status"] = data.status
-                        record_map["is_approved_id"] = 2
+                        record_map[STATUS] = data.status
+                        record_map[IS_APPROVED_ID] = 2
 
 
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
@@ -582,32 +574,32 @@ class SupplierDashboardView(APIView):
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
 
-            purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).count()
+            purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).count()
 
             Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).order_by("-created_date_time")
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
           
             user_name = [x[1] for x in Individuals11]
             user_email = [x[2] for x in Individuals11]
             course_name = [x[0] for x in Individuals11]
             individual_details = {}
             final_dict = {}
-            individual_details ['username'] = user_name
-            individual_details ['coursename'] = course_name
-            individual_details['user_email'] = user_email
+            individual_details [USERNAME] = user_name
+            individual_details [COURSENAME] = course_name
+            individual_details[USER_EMAIL] = user_email
             counter = 0
-            for v in individual_details['coursename']:
-                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":v})
+            for v in individual_details[COURSENAME]:
+                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
                 final_dict[counter] = {
-                    'username':individual_details['username'][counter],
-                    'user_email':individual_details['user_email'][counter],
-                    'course_id':str(Individuals.uuid),
-                    'coursename':v,
-                    'coursetype':Individuals.course_type.type_name,
+                    USERNAME:individual_details[USERNAME][counter],
+                    USER_EMAIL:individual_details[USER_EMAIL][counter],
+                    COURSE_ID:str(Individuals.uuid),
+                    COURSENAME:v,
+                    COURSETYPE:Individuals.course_type.type_name,
                 }
                 counter +=1
             print(final_dict)
@@ -615,7 +607,7 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all(**{STATUS_ID:1, "is_approved_id":1})
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all(**{STATUS_ID:1, IS_APPROVED_ID:1})
         except Exception as ex:
             all_subcategory = None
         try:
@@ -626,21 +618,21 @@ class SupplierDashboardView(APIView):
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
-            "total_course_count": total_course,
-            "total_user_count": total_user,
-            "supplier_course_count": supplier_course_count,
-            "purchased_course_count": purchased_course,
-            "Course_Offered": course_offer_serializer.data,
-            "Individuals": final_dict,
-            "all_subcategory": newvar}, status=status.HTTP_200_OK)
+            TOTAL_COURSE_COUNT: total_course,
+            TOTAL_USER_COUNT: total_user,
+            SUPPLIER_COURSE_COUNT: supplier_course_count,
+            PURCHASED_COURSE_COUNT: purchased_course,
+            COURSE_OFFERED: course_offer_serializer.data,
+            INDIVIDUALS: final_dict,
+            ALL_SUBCATEGORY: newvar}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
        
 
 class SupplierDashboard_Active_InActiveView(APIView):
     def put(self,request):
-        status_s = request.POST.get("status")
-        course_name = request.POST.get("course_name")
+        status_s = request.POST.get(STATUS)
+        course_name = request.POST.get(COURSE_NAME)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
         except Exception as ex:
@@ -660,10 +652,10 @@ class SupplierDashboard_Active_InActiveView(APIView):
 class SupplierDashboard_courseGraphView(APIView):
     def post(self, request):
         supplier_email = get_user_email_by_token(request)
-        time_period = request.POST.get("time_period")
+        time_period = request.POST.get(TIME_PERIOD)
         date = datetime.datetime.now()
 
-        if time_period == "weekly":
+        if time_period == WEEKLY:
             week = date.strftime("%V")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
@@ -671,13 +663,13 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
-                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list(COURSE_NAME, flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -685,7 +677,7 @@ class SupplierDashboard_courseGraphView(APIView):
             non_purchased = len(set_all-set1)
 
 
-        elif time_period == "monthly":
+        elif time_period == MONTHLY:
             month = date.strftime("%m")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
@@ -693,19 +685,19 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
-                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list(COURSE_NAME, flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
-        elif time_period == "yearly":
+        elif time_period == YEARLY:
             year = date.strftime("%Y")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
@@ -713,74 +705,73 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
             try:
 
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
-                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list("course_name", flat=True)
+                all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list(COURSE_NAME, flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "all supplier course error"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
         return Response({STATUS: SUCCESS,
-                "Course_Offered": course_offered,
-                "Purchased":purchased_course,
-                "Not_Purchased":non_purchased}, status=status.HTTP_200_OK)
+                COURSE_OFFERED: course_offered,
+                PURCHASED:purchased_course,
+                NOT_PURCHASED:non_purchased}, status=status.HTTP_200_OK)
 
 
 class SupplierDashboard_earningGraphView(APIView):
     def post(self, request):
         supplier_email = get_user_email_by_token(request)
-        time_period = request.POST.get("time_period")
+        time_period = request.POST.get(TIME_PERIOD)
         datee = datetime.datetime.now()
 
-        if time_period == "weekly":
+        if time_period == WEEKLY:
             week = datee.strftime("%V")
             today = datetime.datetime.now()
             week_list = {}
             try:
                 for i in range(0, 7):
                     past = today - timedelta(days = i)
-                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
                     var = list(data)
                     final = float(sum(var))
                     if var == "":
                         final = 0.0
                     week_list[past.strftime("%A")] = final
-                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
                 total_earning = float(sum(list(data)))
-                return Response({STATUS: SUCCESS,"total_earning": total_earning, "data":week_list}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        elif time_period == "monthly":
+        elif time_period == MONTHLY:
             month_list = {}
             month = datee.strftime("%m")
             first = datetime.datetime.today() - timedelta(days=30)
             second = first + timedelta(days=10)
             third = second + timedelta(days=10)
             try:
-                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
 
-                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(first, second)}).values_list("payment_detail__amount", flat=True)
+                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(first, second)}).values_list("payment_detail__amount", flat=True)
                 month_list[str(first.date()) + " to " + str(second.date())] = float(sum(list(data1)))
 
-                data2 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(second, third)}).values_list("payment_detail__amount", flat=True)
+                data2 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(second, third)}).values_list("payment_detail__amount", flat=True)
                 month_list[str(second.date())+ " to " +str(third.date())] = float(sum(list(data2)))
 
-                data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
+                data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
                 month_list[str(third.date())+" to "+str(datetime.date.today())] = float(sum(list(data3)))
 
                 total_earning = float(sum(list(data)))
-                return Response({STATUS: SUCCESS,
-                "total_earning": total_earning, "data":month_list}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
         
-        elif time_period == "yearly":
+        elif time_period == YEARLY:
             month = datee.strftime("%m")
             try:
                 today = datetime.datetime.now()
@@ -801,14 +792,14 @@ class SupplierDashboard_earningGraphView(APIView):
                 # Convert deque to list
                 month_List = list(deque_months)
                 year = datee.strftime("%Y")
-                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
                 total_earning = float(sum(list(data)))
                 final_data = {}
                 for i in range(0, 12):
-                    data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"supplier_email":supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
+                    data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
                     final_data[month_List[i].split()[0]] = float(sum(list(data1)))
                 return Response({STATUS: SUCCESS,
-                "total_earning": total_earning, "data":final_data}, status=status.HTTP_200_OK)
+                "total_earning": total_earning, DATA:final_data}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
