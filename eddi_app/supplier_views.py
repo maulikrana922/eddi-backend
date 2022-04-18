@@ -613,6 +613,16 @@ class SupplierDashboardView(APIView):
             print(final_dict)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all(**{STATUS_ID:1, "is_approved_id":1})
+        except Exception as ex:
+            all_subcategory = None
+        try:
+            if all_subcategory_serializer := SubCategoryDetailsSerializer(all_subcategory, many=True):
+                newvar = all_subcategory_serializer.data
+        except Exception as ex:
+            newvar = None
         
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
@@ -621,7 +631,8 @@ class SupplierDashboardView(APIView):
             "supplier_course_count":supplier_course_count,
             "purchased_course_count":purchased_course,
             "Course_Offered":course_offer_serializer.data,
-            "Individuals": final_dict}, status=status.HTTP_200_OK)
+            "Individuals": final_dict,
+            "all_subcategory":newvar}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
        
