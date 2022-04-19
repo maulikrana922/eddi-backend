@@ -3,6 +3,7 @@
 from copy import Error
 from email.mime.image import MIMEImage
 import os
+import profile
 # from string import printable
 # from django.urls import is_valid_path
 from rest_framework.views import APIView
@@ -494,10 +495,10 @@ class ContactFormView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
+
 class UserProfileView(APIView):
     def post(self, request):
-
-        # sourcery skip: remove-unnecessary-else, swap-if-else-branches
+        email_id = get_user_email_by_token(request)
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -506,24 +507,60 @@ class UserProfileView(APIView):
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        if request.POST:
-            email_id = request.POST.get(EMAIL_ID)
+        email_id = get_user_email_by_token(request)
+        try:
             data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-            if serializer := UserProfileSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            # print(ex,"exxxxxxxx")
+            data= None
+        if serializer := UserProfileSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
-        if request.POST:
-            email_id = request.POST.get(EMAIL_ID)
-            instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-            serializer = UserProfileSerializer(instance,data = request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: "Error While editing data"}, status=status.HTTP_400_BAD_REQUEST)
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Not Able to get userprofile data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            record_map = {
+            "profile_image" : request.FILES.get("profile_image",data.profile_image),
+            "first_name" : request.POST.get("first_name",data.first_name),
+            "last_name" : request.POST.get("last_name",data.last_name),
+            "gender" : request.POST.get("gender",data.gender),
+            "dob" : request.POST.get("dob",data.dob),
+            "personal_number" : int(request.POST.get("personal_number",data.personal_number)),
+            "phone_number" : int(request.POST.get("phone_number",data.phone_number)),
+            "highest_education" : request.POST.get("highest_education",data.highest_education),
+            "university_name" : request.POST.get("university_name",data.university_name),
+            "highest_degree" : request.POST.get("highest_degree",data.highest_degree),
+            "educational_area" : request.POST.get("educational_area",data.educational_area),
+            "other_education" : request.POST.get("other_education",data.other_education),
+            "diplomas_certificates" : request.POST.get("diplomas_certificates",data.diplomas_certificates),
+            "current_professional_role" : request.POST.get("current_professional_role",data.current_professional_role),
+            "additional_role" : request.POST.get("additional_role",data.additional_role),
+            "extra_curricular" : request.POST.get("extra_curricular",data.extra_curricular),
+            "extra_curricular_competence" : request.POST.get("extra_curricular_competence",data.extra_curricular_competence),
+            "core_responsibilities" : request.POST.get("core_responsibilities",data.core_responsibilities),
+            "level_of_role" : request.POST.get("level_of_role",data.level_of_role),
+            "future_professional_role" : request.POST.get("future_professional_role",data.future_professional_role),
+            "course_category" : request.POST.get("course_category",data.course_category),
+            "area_of_interest" : request.POST.get("area_of_interest",data.area_of_interest),
+            "agree_ads_terms" : request.POST.get("agree_ads_terms",data.agree_ads_terms),
+            
+        }
+            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            # print(record_map, "recorddddddddddddd")
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()            
+            return Response({STATUS: SUCCESS, DATA: "Edited Profile Data successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            # print(ex, "exexexexexe")
+            return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
             
             
 @permission_classes([AllowAny])
@@ -645,7 +682,20 @@ class EventPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,EVENTAD_ENROLL_TABLE).objects.update_or_create(**record_map)
-                    print("Enrolll createdddd")
+                    try:
+                        print("INNER")
+                        html_path = EVENT_ENROLL_HTML
+                        context_data = {"event_name": event_name, "fullname":profile_data.first_name + " " + profile_data.last_name}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (user_email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        email_msg.send(fail_silently=False)
+                        print("TRUE")
+                        print("Enrolll createdddd")
+                    except Exception as ex:
+                        print(ex, "exxexexexe")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:

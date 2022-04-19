@@ -330,7 +330,7 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 individuals = None
             try:
-                var = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__email_id":email_id, "payment_detail__course_name":course_data.course_name})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{"email_id":email_id, "course_name":course_data.course_name, "status":"Success"})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
@@ -478,16 +478,19 @@ class GetCourseDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
-                                print("INNER")
-                                html_path = INACTIVE_COURSE
-                                context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
-                                email_html_template = get_template(html_path).render(context_data)
-                                email_from = settings.EMAIL_HOST_USER
-                                recipient_list = (data.supplier.email_id,)
-                                email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-                                email_msg.content_subtype = 'html'
-                                email_msg.send(fail_silently=False)
-                                print("TRUE")
+                                try:
+                                    print("INNER")
+                                    html_path = INACTIVE_COURSE
+                                    context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                    email_html_template = get_template(html_path).render(context_data)
+                                    email_from = settings.EMAIL_HOST_USER
+                                    recipient_list = (data.supplier.email_id,)
+                                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                                    email_msg.content_subtype = 'html'
+                                    email_msg.send(fail_silently=False)
+                                    print("TRUE")
+                                except Exception as ex:
+                                    print(ex, "exexexexexe")
                     else:
                         record_map[STATUS] = data.status
                         

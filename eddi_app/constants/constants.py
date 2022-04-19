@@ -47,6 +47,7 @@ OTP_EMAIL_HTML = 'email-password.html'
 COURSE_ENROLL_HTML_TO_S = "course_enroll_to_supplier.html"
 APPROVE_COURSE_HTML = "approve_course.html"
 INACTIVE_COURSE = "inactive_course.html"
+EVENT_ENROLL_HTML = "event_enroll.html"
 COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 USER_WELCOME_HTML = 'user-welcome.html'
 
