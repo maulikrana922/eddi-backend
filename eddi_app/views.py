@@ -2,12 +2,12 @@
 # import email
 from copy import Error
 from email.mime.image import MIMEImage
+import os
 # from string import printable
 # from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import os
 import json
 from eddi_app.permissions import IsValid
 from .serializers import *
@@ -581,6 +581,7 @@ class UserPaymentDetail_info(APIView):
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
+                    print(ex, "exxxxxxxxxxxxx")
                     return Response({MESSAGE: "Error", DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)

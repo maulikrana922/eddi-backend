@@ -478,12 +478,33 @@ class GetCourseDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
+                                print("INNER")
+                                html_path = INACTIVE_COURSE
+                                context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                email_html_template = get_template(html_path).render(context_data)
+                                email_from = settings.EMAIL_HOST_USER
+                                recipient_list = (data.supplier.email_id,)
+                                email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                                email_msg.content_subtype = 'html'
+                                email_msg.send(fail_silently=False)
+                                print("TRUE")
                     else:
                         record_map[STATUS] = data.status
                         
                     if request.POST.get(APPROVAL_STATUS):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
                             record_map[IS_APPROVED_ID] = 1
+                            print("INNER")
+                            html_path = APPROVE_COURSE_HTML
+                            context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                            email_html_template = get_template(html_path).render(context_data)
+                            email_from = settings.EMAIL_HOST_USER
+                            recipient_list = (data.supplier.email_id,)
+                            email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                            email_msg.content_subtype = 'html'
+                            email_msg.send(fail_silently=False)
+                            print("TRUE")
+
                         if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
