@@ -499,6 +499,7 @@ class ContactFormView(APIView):
 class UserProfileView(APIView):
     def post(self, request):
         email_id = get_user_email_by_token(request)
+        print(request.data, "request.datatatatataat")
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -511,7 +512,6 @@ class UserProfileView(APIView):
         try:
             data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
         except Exception as ex:
-            # print(ex,"exxxxxxxx")
             data= None
         if serializer := UserProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -533,7 +533,7 @@ class UserProfileView(APIView):
             "gender" : request.POST.get("gender",data.gender),
             "dob" : request.POST.get("dob",data.dob),
             "personal_number" : int(request.POST.get("personal_number",data.personal_number)),
-            "phone_number" : int(request.POST.get("phone_number",data.phone_number)),
+            "phone_number" : request.POST.get("phone_number",data.phone_number),
             "highest_education" : request.POST.get("highest_education",data.highest_education),
             "university_name" : request.POST.get("university_name",data.university_name),
             "highest_degree" : request.POST.get("highest_degree",data.highest_degree),
@@ -552,14 +552,18 @@ class UserProfileView(APIView):
             "agree_ads_terms" : request.POST.get("agree_ads_terms",data.agree_ads_terms),
             
         }
+            if request.POST.get("agree_ads_terms"):
+                record_map["agree_ads_terms"] = json.loads(request.POST.get("agree_ads_terms"))
+            else:
+                record_map["agree_ads_terms"] = data.agree_ads_terms
+
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-            # print(record_map, "recorddddddddddddd")
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
             return Response({STATUS: SUCCESS, DATA: "Edited Profile Data successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            # print(ex, "exexexexexe")
+            print(ex, "exexexexexe")
             return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
             
             

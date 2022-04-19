@@ -684,8 +684,8 @@ class UserProfile(models.Model):
         verbose_name = "User Profile Table"
 
 
-    def __str__(self):
-        return self.email_id
+    # def __str__(self):
+    #     return self.email_id
     
 
 
