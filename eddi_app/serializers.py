@@ -33,6 +33,9 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
 
 
 
+
+
+
 class SubCategoryDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseSubCategoryDetails
@@ -126,6 +129,8 @@ class EventAdSerializer(serializers.ModelSerializer):
         depth = 1
 
         fields = '__all__'
+
+
 
 class HeaderFooterCMSSerializer(serializers.ModelSerializer):
     class Meta:

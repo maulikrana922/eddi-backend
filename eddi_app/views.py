@@ -1065,7 +1065,7 @@ class CourseEnrollView(APIView):
     def get(self, request):
         email_id =  get_user_email_by_token(request)
         if email_id:
-            email_id = get_user_email_by_token(request)
+            # email_id = get_user_email_by_token(request)
             try:
                 enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
             except Exception as ex:
@@ -1097,3 +1097,44 @@ class CourseEnrollView(APIView):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EventEnrollView(APIView):
+    def get(self, request):
+        email_id =  get_user_email_by_token(request)
+        if email_id:
+            try:
+                enroll_data = getattr(models,EVENTAD_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("event_name", flat = True)
+            except Exception as ex:
+                enroll_data = None
+
+            try:
+                event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{'event_name__in':list(enroll_data)}).order_by("-created_date_time")
+            except:
+                event_data = None
+
+            try:
+                category = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                a = category.course_category.split(",")
+            except Exception as ex:
+                a = category.course_category.split()
+            try:
+                category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = enroll_data).order_by("-created_date_time")
+            except:
+                category_event = None
+
+            if serializer := EventAdSerializer(event_data, many=True):
+                if serializer1 := EventAdSerializer(category_event, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_event":serializer1.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({STATUS: ERROR, DATA: "Cound not find email Id from token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    
+
+        

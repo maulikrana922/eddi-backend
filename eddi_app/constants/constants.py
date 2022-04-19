@@ -137,4 +137,5 @@ ALL_SUBCATEGORY = 'all_subcategory'
 PURCHASED = 'Purchased'
 NOT_PURCHASED = 'Not_Purchased'
 ENROLLED = 'Enrolled'
+COURSE = 'course'
 
