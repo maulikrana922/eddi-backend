@@ -812,14 +812,35 @@ class SupplierDashboard_earningGraphView(APIView):
 
 class CourseMaterialUpload(APIView):
     def post(self, request):
-        video_title = request.POST.get(VIDEO_TITLE,None)
-        video_files = request.POST.getlist(VIDEO_FILES,None)
-        file_title = request.POST.get(FILE_TITLE,None)
-        document_files = request.POST.getlist(DOCUMENT_FILES,None)
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
 
+        email_id = get_user_email_by_token(request)   
         try:
             course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
+            print(course_id,'*****************************************************')
         except Exception as ex:
-            print(ex)
+            print(ex,"exxxxxxxxxxxxxxxx")
+            return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            model = CourseMaterial()
+            model.course = course_id.id,
+            model.video_title = request.POST.get(VIDEO_TITLE,None),
+            model.video_files = request.POST.getlist(VIDEO_FILES,None),
+            model.file_title = request.POST.get(FILE_TITLE,None),
+            model.document_files = request.POST.getlist(DOCUMENT_FILES,None),
+            model.save()
+
+            
+            
+            for i in request.POST.getlist(VIDEO_FILES,None):
+                obj = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**i)
+
+            return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
+
+       
 
         

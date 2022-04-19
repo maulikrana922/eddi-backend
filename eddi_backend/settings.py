@@ -146,7 +146,7 @@ JAZZMIN_SETTINGS = {
     "changeform_format": "collapsible",
 
     "hide_models": production_models,
-    # "hide_models": local_models,
+    "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 
