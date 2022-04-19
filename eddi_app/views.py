@@ -3,6 +3,7 @@
 from copy import Error
 from email.mime.image import MIMEImage
 import os
+import profile
 # from string import printable
 # from django.urls import is_valid_path
 from rest_framework.views import APIView
@@ -645,7 +646,20 @@ class EventPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,EVENTAD_ENROLL_TABLE).objects.update_or_create(**record_map)
-                    print("Enrolll createdddd")
+                    try:
+                        print("INNER")
+                        html_path = EVENT_ENROLL_HTML
+                        context_data = {"event_name": event_name, "fullname":profile_data.first_name + " " + profile_data.last_name}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (user_email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        email_msg.send(fail_silently=False)
+                        print("TRUE")
+                        print("Enrolll createdddd")
+                    except Exception as ex:
+                        print(ex, "exxexexexe")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
