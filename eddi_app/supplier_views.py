@@ -330,7 +330,7 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 individuals = None
             try:
-                var = getattr(models,COURSE_ENROLL_TABLE).objects.get(**{"payment_detail__email_id":email_id, "payment_detail__course_name":course_data.course_name})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{"email_id":email_id, "course_name":course_data.course_name, "status":"Success"})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
