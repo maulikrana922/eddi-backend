@@ -847,8 +847,7 @@ class CourseMaterialUpload(APIView):
         #     print(ex,"exxxxxxxxxxxxxxxx")
         #     return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            
-            
+        
             record_map = {
                 # COURSE : course_id.id,
                 VIDEO_TITLE : request.POST.get(VIDEO_TITLE,None),
@@ -859,11 +858,16 @@ class CourseMaterialUpload(APIView):
             print(record_map,"record-----------------------map")
             record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
             for i in record_map.document_files:
-                doc = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**i)
+                record_1 = {}
+                record_1['document_file'] = i
+                doc = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**record_1)
+                
                 doc.save()
             for j in record_map.video_files:
+                print(j,'-------------jjjj**********************jjjj')
                 file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**j)
                 file.save()
+            # getattr(models,"CourseMaterial").objects.update_or_create(**record_map)
 
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
