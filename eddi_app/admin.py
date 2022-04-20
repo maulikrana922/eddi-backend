@@ -16,8 +16,8 @@ admin.site.register(CourseType)
 admin.site.register(CourseLevel)
 admin.site.register(FeeType)
 
-
-
+admin.site.register(SupplierOrganizationProfile)
+admin.site.register(SupplierProfile)
 
 
 admin.site.register(CourseDetails)

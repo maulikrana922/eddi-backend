@@ -877,4 +877,83 @@ class CourseMaterialUpload(APIView):
 
        
 
-        
+class SupplierOrganizationProfileview(APIView):
+    def post(self, request):
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+        email_id = get_user_email_by_token(request)
+        print(email_id,'^^^^^^^^^^^^^^^^^^email Id')
+        try:
+            record_map = {
+                ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,None),
+                ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,None),
+                ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,None),
+                ORGANIZATION_ADDRESS : request.POST.get(ORGANIZATION_ADDRESS,None),
+                COUNTRY : request.POST.get(COUNTRY,None),
+                CITY : request.POST.get(CITY,None),
+                BRIF_INFORMATION : request.POST.get(BRIF_INFORMATION,None),
+                ORGANIZATION_PHONE_NUMBER : request.POST.get(ORGANIZATION_PHONE_NUMBER,None),
+                CONTECT_PERSON : request.POST.get(CONTECT_PERSON,None),
+                COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,None),
+                SUB_CATEGORY : request.POST.get(SUB_CATEGORY,None),
+                ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,None),
+            }
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            try:
+                getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
+            except Exception as ex:
+                print(ex)
+                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: "Profile Created successfully"}, status=status.HTTP_200_OK)
+
+
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{ORGANIZATION_EMAIL:email_id})
+        except Exception as ex:
+            data= None
+        if serializer := SupplierOrganizationProfileSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    def put(self, request):
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{ORGANIZATION_EMAIL:email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Not Able to get organization profile data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            record_map = {
+                ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,data.organizational_name),
+                ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,data.organization_email),
+                ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,data.organization_website),
+                ORGANIZATION_ADDRESS : request.POST.get(ORGANIZATION_ADDRESS,data.organization_address),
+                COUNTRY : request.POST.get(COUNTRY,data.country),
+                CITY : request.POST.get(CITY,data.city),
+                BRIF_INFORMATION : request.POST.get(BRIF_INFORMATION,data.brif_information),
+                ORGANIZATION_PHONE_NUMBER : request.POST.get(ORGANIZATION_PHONE_NUMBER,data.organization_phone_number),
+                CONTECT_PERSON : request.POST.get(CONTECT_PERSON,data.contact_person),
+                COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),
+                SUB_CATEGORY : request.POST.get(SUB_CATEGORY,data.sub_category),
+                ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,data.organization_logo),
+            }
+
+            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()            
+            return Response({STATUS: SUCCESS, DATA: "Edited Organization Profile Data successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            print(ex, "exexexexexe")
+            return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)

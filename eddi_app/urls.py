@@ -79,4 +79,6 @@ urlpatterns = [
 
     path('get-courseenrolldetail/',CourseEnrollView.as_view()),
 
+    path('supplier-organization-profile/',SupplierOrganizationProfileview.as_view())
+
 ]
