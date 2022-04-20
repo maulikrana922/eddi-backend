@@ -324,13 +324,14 @@ class GetCourseDetails(APIView):
                 fav_dataa = None
 
             try:
-                individuals = getattr(models,COURSE_ENROLL_TABLE).objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success")
-                lerner_count = getattr(models,COURSE_ENROLL_TABLE).objects.filter(payment_detail__course_name = course_data.course_name, payment_detail__status="Success").count()
+                individuals = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:course_data.course_name, STATUS:"Success"})
+                # lerner_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(course_name = course_data.course_name, status="Success").count()
+                lerner_count = len(individuals)
               
             except Exception as e:
                 individuals = None
             try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{"email_id":email_id, "course_name":course_data.course_name, "status":"Success"})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_data.course_name, STATUS:"Success"})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
