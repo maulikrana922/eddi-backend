@@ -75,6 +75,29 @@ class Save_stripe_info(APIView):
                     except Exception as e:
                         print(e)
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+                    # try:
+                    #     html_path = RESETPASSWORD_HTML
+                    #     fullname = data.first_name + " " + data.last_name
+                    #     context_data = {"final_email": email_id,"fullname":fullname}
+                    #     email_html_template = get_template(html_path).render(context_data)
+                    #     email_from = settings.EMAIL_HOST_USER
+                    #     recipient_list = (email_id,)
+                    #     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    #     email_msg.content_subtype = 'html'
+
+                    #     path = 'eddi_app'
+                    #     img_dir = 'static'
+                    #     image = 'Logo.jpg'
+                    #     file_path = os.path.join(path,img_dir,image)
+                    #     with open(file_path,'rb') as f:
+                    #         img = MIMEImage(f.read())
+                    #         img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    #         img.add_header('Content-Disposition', 'inline', filename=image)
+                    #     email_msg.attach(img)
+                    #     print("ok")
+                    #     email_msg.send(fail_silently=False)
+                    # except Exception as ex:
+                    #     print(ex, "exexexexexexexe")
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     # print(e)
@@ -606,7 +629,7 @@ class UserPaymentDetail_info(APIView):
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
-                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     record_map = {}

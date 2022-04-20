@@ -684,8 +684,8 @@ class UserProfile(models.Model):
         verbose_name = "User Profile Table"
 
 
-    # def __str__(self):
-    #     return self.email_id
+    def __str__(self):
+        return self.email_id
     
 
 
@@ -823,6 +823,7 @@ class EventAdEnroll(models.Model):
     
 
 class MaterialVideoMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
@@ -830,6 +831,7 @@ class MaterialVideoMaterial(models.Model):
         return self.video_file
 
 class MaterialDocumentMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
@@ -837,6 +839,7 @@ class MaterialDocumentMaterial(models.Model):
         return self.document_file
 
 class CourseMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
     video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="Video Title")
     video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name='Video Files',blank=True,null=True)
