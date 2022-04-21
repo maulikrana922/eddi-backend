@@ -25,7 +25,7 @@ from eddi_app.constants.table_name import *
 import datetime
 from datetime import date
 from django.db.models import Q
-# import pdfkit
+import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
@@ -88,26 +88,45 @@ class Save_stripe_info(APIView):
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                        vat_val = int(vat[0])
                         html_path = COURSE_ENROLL_HTML_TO_U
                         fullname = f'{instance.first_name} {instance.last_name}'
-                        var1 = f'{course_name}'
-                        context_data = {'fullname':fullname, "course_name":var1}
+                        context_data = {'fullname':fullname, "course_name":course_name}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (instance.email_id,)
-                        # recipient_list = ("nishant.k@latitudetechnolabs.com",)
-                        email_from = settings.EMAIL_HOST_USER
                         invoice_number = random.randrange(100000,999999)
-                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":None, "total":int(amount+40)}
-                        template = get_template('invoice.html')
-                        html  = template.render(context_data1)
-                        result = BytesIO()
-                        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
-                        pdf = result.getvalue()
-                        filename = 'Invoice.pdf'
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":amount + amount*vat_val/100}
+                        template = get_template('invoice.html').render(context_data1)
+                        try:
+                            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
+                        except:
+                            pass
+                        record = {}
+                        try:
+                            record = {
+                            "invoice_number" : invoice_number,
+                            "invoice_file" : f"invoice-{invoice_number}.pdf",
+                            "user_email" : instance.email_id,
+                            "course_name" : course_name
+                            }
+                            getattr(models,"InvoiceData").objects.update_or_create(**record)
+                        except Exception as ex:
+                            pass
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        filename = 'invoice.pdf'
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
-                        email_msg.attach(filename, pdf, "application/pdf")
+                        email_msg.attach(img)
+                        email_msg.attach_file(filename)
                         email_msg.send(fail_silently=False)
                         print("okokokokokok")
                     except Exception as ex:
@@ -914,7 +933,52 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
-       
+        html_path = COURSE_ENROLL_HTML_TO_U
+        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+        vat = int(vat[0])
+        context_data = {'fullname':23, "course_name":45}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ("nishant.k@latitudetechnolabs.com",)
+        # recipient_list = (instance.email_id,)
+        invoice_number = random.randrange(100000,999999)
+        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":24,"course_fees": 234, "vat":10, "total":1 + 40}
+        template = get_template('invoice.html').render(context_data1)
+        try:
+            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
+        except:
+            pass
+        record = {}
+        try:
+            record = {
+            "invoice_number" : invoice_number,
+            "invoice_file" : f"invoice-{invoice_number}.pdf",
+            "user_email" : "nishant.k@latitudetechnolabs.com",
+            "course_name" : 123
+            }
+            getattr(models,"InvoiceData").objects.update_or_create(**record)
+        except Exception as ex:
+            pass
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        filename = 'invoice.pdf'
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        email_msg.attach(img)
+        email_msg.attach_file(filename)
+        email_msg.send(fail_silently=False)
+        print("okokokokokok")
+
+
+
+
+
         email_id = get_user_email_by_token(request)
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})

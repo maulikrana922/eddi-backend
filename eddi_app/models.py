@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-# from email.mime.image import MIMEImage
+from email.mime.image import MIMEImage
 import os
 import string
 from eddi_app.constants.constants import *
@@ -119,6 +119,15 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         print("TRUE")
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
 
@@ -138,6 +147,15 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         print("TRUE")
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
     
@@ -153,6 +171,15 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         print("TRUE")
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
 
@@ -321,6 +348,10 @@ def add_organization_domain(sender, instance, created, **kwargs):
        
 
 ################## CMS    ###################################
+class InvoiceVATCMS(models.Model):
+    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True)
     banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name="Banner Image")
@@ -773,6 +804,15 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         recipient_list = (instance.supplier_email,)
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
 
@@ -893,3 +933,15 @@ class RecruitmentAd(models.Model):
 #     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
 
+
+class InvoiceData(models.Model):
+    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
+    invoice_file = models.FileField(upload_to='invoice/', verbose_name='Invoice File', blank=True, null=True)
+    user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Course Name')
+    created_date_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.course_name
+    
+    

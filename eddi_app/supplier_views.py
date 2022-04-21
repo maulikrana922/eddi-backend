@@ -489,6 +489,15 @@ class GetCourseDetails(APIView):
                                     recipient_list = (data.supplier.email_id,)
                                     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                                     email_msg.content_subtype = 'html'
+                                    path = 'eddi_app'
+                                    img_dir = 'static'
+                                    image = 'Logo.jpg'
+                                    file_path = os.path.join(path,img_dir,image)
+                                    with open(file_path,'rb') as f:
+                                        img = MIMEImage(f.read())
+                                        img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                        img.add_header('Content-Disposition', 'inline', filename=image)
+                                    email_msg.attach(img)
                                     email_msg.send(fail_silently=False)
                                     print("TRUE")
                                 except Exception as ex:
@@ -507,6 +516,15 @@ class GetCourseDetails(APIView):
                             recipient_list = (data.supplier.email_id,)
                             email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                             email_msg.content_subtype = 'html'
+                            path = 'eddi_app'
+                            img_dir = 'static'
+                            image = 'Logo.jpg'
+                            file_path = os.path.join(path,img_dir,image)
+                            with open(file_path,'rb') as f:
+                                img = MIMEImage(f.read())
+                                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                img.add_header('Content-Disposition', 'inline', filename=image)
+                            email_msg.attach(img)
                             email_msg.send(fail_silently=False)
                             print("TRUE")
 
