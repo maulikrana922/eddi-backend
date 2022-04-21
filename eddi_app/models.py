@@ -737,11 +737,6 @@ class UserPaymentDetail(models.Model):
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
 
 
-
-
-
-
-
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Name")
     email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
