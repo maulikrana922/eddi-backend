@@ -143,3 +143,17 @@ class RecruitmentAdSerializer(serializers.ModelSerializer):
         model = RecruitmentAd
         depth = 1
         fields = '__all__'
+
+
+class SupplierOrganizationProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierOrganizationProfile
+        depth = 1
+        fields = '__all__'
+
+
+class SupplierProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierProfile
+        depth = 1
+        fields = '__all__'

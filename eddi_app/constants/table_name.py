@@ -34,3 +34,6 @@ EVENTAD_PAYMENT_DETAIL_TABLE = 'EventAdPaymentDetail'
 EVENTAD_ENROLL_TABLE = 'EventAdEnroll'
 
 RECRUITMENTAD_TABLE = 'RecruitmentAd'
+
+SUPPLIER_ORGANIZATION_PROFILE_TABLE = 'SupplierOrganizationProfile'
+SUPPLIER_PROFILE_TABLE = 'SupplierProfile'

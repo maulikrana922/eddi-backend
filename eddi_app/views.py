@@ -564,34 +564,32 @@ class UserProfileView(APIView):
 
         try:
             record_map = {
-            "profile_image" : request.FILES.get("profile_image",data.profile_image),
-            "first_name" : request.POST.get("first_name",data.first_name),
-            "last_name" : request.POST.get("last_name",data.last_name),
-            "gender" : request.POST.get("gender",data.gender),
-            "dob" : request.POST.get("dob",data.dob),
-            "personal_number" : int(request.POST.get("personal_number",data.personal_number)),
-            "phone_number" : request.POST.get("phone_number",data.phone_number),
-            "highest_education" : request.POST.get("highest_education",data.highest_education),
-            "university_name" : request.POST.get("university_name",data.university_name),
-            "highest_degree" : request.POST.get("highest_degree",data.highest_degree),
-            "educational_area" : request.POST.get("educational_area",data.educational_area),
-            "other_education" : request.POST.get("other_education",data.other_education),
-            "diplomas_certificates" : request.POST.get("diplomas_certificates",data.diplomas_certificates),
-            "current_professional_role" : request.POST.get("current_professional_role",data.current_professional_role),
-            "additional_role" : request.POST.get("additional_role",data.additional_role),
-            "extra_curricular" : request.POST.get("extra_curricular",data.extra_curricular),
-            "extra_curricular_competence" : request.POST.get("extra_curricular_competence",data.extra_curricular_competence),
-            "core_responsibilities" : request.POST.get("core_responsibilities",data.core_responsibilities),
-            "level_of_role" : request.POST.get("level_of_role",data.level_of_role),
-            "future_professional_role" : request.POST.get("future_professional_role",data.future_professional_role),
-            "course_category" : request.POST.get("course_category",data.course_category),
-            "area_of_interest" : request.POST.get("area_of_interest",data.area_of_interest),
-            
+            PROFILE_IMAGE : request.FILES.get(PROFILE_IMAGE,data.profile_image),
+            FIRST_NAME : request.POST.get(FIRST_NAME,data.first_name),
+            LAST_NAME : request.POST.get(LAST_NAME,data.last_name),
+            GENDER : request.POST.get(GENDER,data.gender),
+            DOB : request.POST.get(DOB,data.dob),
+            PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
+            PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+            HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
+            UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
+            HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
+            EDUCATIONAL_AREA : request.POST.get(EDUCATIONAL_AREA,data.educational_area),
+            OTHER_EDUCATION : request.POST.get(OTHER_EDUCATION,data.other_education),
+            DIPLOMAS_CERTIFICATES : request.POST.get(DIPLOMAS_CERTIFICATES,data.diplomas_certificates),
+            CURRENT_PROFESSIONAL_ROLE : request.POST.get(CURRENT_PROFESSIONAL_ROLE,data.current_professional_role),
+            ADDITIONAL_ROLE : request.POST.get(ADDITIONAL_ROLE,data.additional_role),
+            EXTRA_CURRICULAR : request.POST.get(EXTRA_CURRICULAR,data.extra_curricular),
+            EXTRA_CURRICULAR_COMPETENCE : request.POST.get(EXTRA_CURRICULAR_COMPETENCE,data.extra_curricular_competence),
+            CORE_RESPONSIBILITIES : request.POST.get(CORE_RESPONSIBILITIES,data.core_responsibilities),
+            LEVEL_OF_ROLE : request.POST.get(LEVEL_OF_ROLE,data.level_of_role),
+            FUTURE_PROFESSIONAL_ROLE : request.POST.get(FUTURE_PROFESSIONAL_ROLE,data.future_professional_role),
+            COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),            
         }
-            if request.POST.get("agree_ads_terms"):
-                record_map["agree_ads_terms"] = json.loads(request.POST.get("agree_ads_terms"))
+            if request.POST.get(AGREE_ADS_TERMS):
+                record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
             else:
-                record_map["agree_ads_terms"] = data.agree_ads_terms
+                record_map[AGREE_ADS_TERMS] = data.agree_ads_terms
 
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             for key,value in record_map.items():

@@ -688,7 +688,45 @@ class UserProfile(models.Model):
         return self.email_id
     
 
+class SupplierOrganizationProfile(models.Model):
+    # Organization Information
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
+    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
+    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
+    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
+    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
+    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
+    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
+    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
+    organization_phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Organization Phone Number")
+    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
 
+    # Course Category
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
+    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
+
+    # Additional Information
+    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+
+    def __str__(self):
+        return self.organizational_name
+
+class SupplierProfile(models.Model):
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
+    supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Supplier Name")
+    address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
+    supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+    def __str__(self):
+        return self.supplier_name
 
 class UserPaymentDetail(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course name")
