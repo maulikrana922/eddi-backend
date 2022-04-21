@@ -171,3 +171,7 @@ ORGANIZATION_PHONE_NUMBER = 'organization_phone_number'
 CONTECT_PERSON = 'contact_person'
 SUB_CATEGORY = 'sub_category'
 ORGANIZATION_LOGO = 'organization_logo'
+
+SUPPLIER_NAME = 'supplier_name'
+ADDRESS = 'address'
+SUPPLIER_IMAGE = 'supplier_image'

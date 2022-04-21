@@ -856,7 +856,6 @@ class CourseMaterialUpload(APIView):
                 FILE_TITLE : request.POST.get(FILE_TITLE,None),
                 DOCUMENT_FILES : request.FILES.getlist(DOCUMENT_FILES,None),
                 } 
-            print(record_map,"record-----------------------map")
             record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
             for i in record_map.document_files:
                 record_1 = {}
@@ -865,7 +864,6 @@ class CourseMaterialUpload(APIView):
                 
                 doc.save()
             for j in record_map.video_files:
-                print(j,'-------------jjjj**********************jjjj')
                 file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**j)
                 file.save()
             # getattr(models,"CourseMaterial").objects.update_or_create(**record_map)
@@ -880,12 +878,12 @@ class CourseMaterialUpload(APIView):
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
         email_id = get_user_email_by_token(request)
-        print(email_id,'^^^^^^^^^^^^^^^^^^email Id')
         try:
             record_map = {
+                SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,None),
                 ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,None),
                 ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,None),
                 ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,None),
@@ -903,7 +901,6 @@ class SupplierOrganizationProfileview(APIView):
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
             except Exception as ex:
-                print(ex)
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
@@ -914,7 +911,7 @@ class SupplierOrganizationProfileview(APIView):
     def get(self, request):
         email_id = get_user_email_by_token(request)
         try:
-            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{ORGANIZATION_EMAIL:email_id})
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data):
@@ -925,11 +922,11 @@ class SupplierOrganizationProfileview(APIView):
     
     def put(self, request):
         if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
-            
+            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
+
         email_id = get_user_email_by_token(request)
         try:
-            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{ORGANIZATION_EMAIL:email_id})
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Not Able to get organization profile data"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -953,7 +950,46 @@ class SupplierOrganizationProfileview(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
-            return Response({STATUS: SUCCESS, DATA: "Edited Organization Profile Data successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Organization Profile Data edited successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "exexexexexe")
             return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SupplierProfileView(APIView):
+    def put(self, request):
+        if request.method != POST_METHOD:
+            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        email_id = get_user_email_by_token(request)
+        
+        try:
+            data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+        except Exception as ex:
+            data= None
+        try:
+            record_map = {
+                SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,data.supplier_name),
+                ADDRESS : request.POST.get(ADDRESS,data.address),
+                PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+                SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,data.supplier_image),
+            }
+
+            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()            
+            return Response({STATUS: SUCCESS, DATA: "Profile Data edited successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+        except Exception as ex:
+            data= None
+        if serializer := SupplierProfileSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
