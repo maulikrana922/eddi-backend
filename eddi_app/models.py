@@ -741,22 +741,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         email_msg.send(fail_silently=False)
-
-        html_path1 = COURSE_ENROLL_HTML_TO_U
-        email_html_template = get_template(html_path1).render(context_data)
-        recipient_list = (instance.user_profile.email_id,)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        # path = 'eddi_app'
-        # img_dir = 'static'
-        # image = 'Logo.jpg'
-        # file_path = os.path.join(path,img_dir,image)
-        # with open(file_path,'rb') as f:
-        #     img = MIMEImage(f.read())
-        #     img.add_header('Content-ID', '<{name}>'.format(name=image))
-        #     img.add_header('Content-Disposition', 'inline', filename=image)
-        # email_msg.attach(img)
-        email_msg.send(fail_silently=False)
         print("TRUE")
 
 

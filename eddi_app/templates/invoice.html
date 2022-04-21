@@ -7,6 +7,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <link rel="stylesheet" type="text/css" href="../static/fonts/fonts.css">
         <style>
             @font-face {
                 font-family: "RundText-SemiBold";
@@ -15,7 +16,7 @@
                 font-weight: 600;
                 font-style: normal;
                 font-display: swap;
-            }
+            }            
 
             @font-face {
                 font-family: "RundText-Regular";
@@ -105,7 +106,7 @@
                                 <span
                                     style="display: block;font-family: RundText-SemiBold;font-size: 30px;margin-top: 10px;line-height: 0;">
 
-                                    #101020
+                                    #{{invoice_number}}
                                 </span>
                             </td>
                         </tr>
@@ -130,7 +131,7 @@
                                     </td>
                                     <td style="width: 50%;">
                                         <h5 style=" font-size: 20px; font-family:  RundText-SemiBold;margin: 0;">
-                                            Bill To:
+                                            Bill To: {{user_address}}
                                         </h5>
                                         <p style="font-size: 16px;margin: 0;">John Doe</p>
                                         <p style="font-size: 16px;margin: 0;">6789 Mac Ln
@@ -143,17 +144,14 @@
                 <td align="right" style="width: 40%;" class=" w-100">
                     <table style="width: 100%;">
                         <tr>
-                            <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Client Name</td>
+                            <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Supplier Name</td>
                             <td align="right" style="width: 50%;font-size: 16px;">Kristan</td>
                         </tr>
                         <tr>
                             <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Issue Date</td>
-                            <td align="right" style="width: 50%;font-size: 16px;">09.10.20</td>
+                            <td align="right" style="width: 50%;font-size: 16px;">{{issue_date}}</td>
                         </tr>
-                        <tr>
-                            <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Due Date</td>
-                            <td align="right" style="width: 50%;font-size: 16px;">10.10.20</td>
-                        </tr>
+                      
                     </table>
                 </td>
             </tr>
@@ -170,7 +168,7 @@
                     </tr>
                     <tr style="display:inline-flex;width: 100%;border-bottom: 1px solid #00000020;">
                         <td align="left" style="width: 50%;">
-                            <p style="font-size: 18px;">Name of Course</p>
+                            <p style="font-size: 18px;">{{course_name}}</p>
                         </td>
                         <td align="right" style="width: 50%;">
                             <p style="font-size: 18px;">$60.00</p>
@@ -189,7 +187,7 @@
                             <p style="font-size: 22px;font-family:  RundText-SemiBold;">Total</p>
                         </td>
                         <td align="right" style="width: 50%;">
-                            <p style="font-size: 22px;font-family:  RundText-SemiBold;">$100.00</p>
+                            <p style="font-size: 22px;font-family:  RundText-SemiBold;">${{total}}</p>
                         </td>
                     </tr>
                     <tr>
