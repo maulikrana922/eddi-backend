@@ -1,6 +1,6 @@
 from calendar import TUESDAY
 from posixpath import split
-from select import select
+# from select import select
 import json
 from typing import final
 from wsgiref.handlers import read_environ

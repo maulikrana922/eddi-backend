@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from email.mime.image import MIMEImage
+# from email.mime.image import MIMEImage
 import os
 import string
 from eddi_app.constants.constants import *

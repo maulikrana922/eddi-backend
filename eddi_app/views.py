@@ -1,15 +1,15 @@
 # from doctest import FAIL_FAST
 # import email
-from copy import Error
+# from copy import Error
 from email.mime.image import MIMEImage
 import os
 
-import profile
+# import profile
 # from string import printable
 import random
 from io import BytesIO
 from xhtml2pdf import pisa
-from django.core.mail import EmailMultiAlternatives
+# from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 # from django.urls import is_valid_path
@@ -25,7 +25,7 @@ from eddi_app.constants.table_name import *
 import datetime
 from datetime import date
 from django.db.models import Q
-import pdfkit
+# import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
