@@ -20,7 +20,6 @@ stripe==2.68.0
 django-cors-headers==3.5.0
 python-dateutil==2.8.2
 xhtml2pdf==0.2.7
-# xkit
 pdfkit==1.0.0
 SQLAlchemy==1.4.31
 wkhtmltopdf==0.2

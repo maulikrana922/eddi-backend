@@ -98,7 +98,6 @@ class Save_stripe_info(APIView):
                         recipient_list = (instance.email_id,)
                         invoice_number = random.randrange(100000,999999)
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
-                        print("0")
                         template = get_template('invoice.html').render(context_data1)
                         try:
                             pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
