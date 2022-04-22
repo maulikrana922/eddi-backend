@@ -841,16 +841,16 @@ class CourseMaterialUpload(APIView):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # try:
-        #     course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
-        #     print(course_id,'*****************************************************')
-        # except Exception as ex:
-        #     print(ex,"exxxxxxxxxxxxxxxx")
-        #     return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
+            print(course_id,'*****************************************************')
+        except Exception as ex:
+            print(ex,"exxxxxxxxxxxxxxxx")
+            return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
         
             record_map = {
-                # COURSE : course_id.id,
+                COURSE : course_id.id,
                 VIDEO_TITLE : request.POST.get(VIDEO_TITLE,None),
                 VIDEO_FILES : request.FILES.getlist(VIDEO_FILES,None),
                 FILE_TITLE : request.POST.get(FILE_TITLE,None),
@@ -858,15 +858,12 @@ class CourseMaterialUpload(APIView):
                 } 
             record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
             for i in record_map.document_files:
-                record_1 = {}
-                record_1['document_file'] = i
-                doc = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**record_1)
-                
+                doc = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**i)
                 doc.save()
             for j in record_map.video_files:
                 file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**j)
                 file.save()
-            # getattr(models,"CourseMaterial").objects.update_or_create(**record_map)
+            getattr(models,"CourseMaterial").objects.update_or_create(**record_map)
 
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
