@@ -1,10 +1,17 @@
 # from doctest import FAIL_FAST
 # import email
-from copy import Error
+# from copy import Error
 from email.mime.image import MIMEImage
 import os
-import profile
+
+# import profile
 # from string import printable
+import random
+from io import BytesIO
+from xhtml2pdf import pisa
+# from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 # from django.urls import is_valid_path
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,7 +23,9 @@ from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 import datetime
+from datetime import date
 from django.db.models import Q
+# import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
@@ -24,6 +33,8 @@ from uuid import uuid4
 import stripe # 2.68.0
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.http import HttpResponse
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -75,6 +86,32 @@ class Save_stripe_info(APIView):
                     except Exception as e:
                         print(e)
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+                    try:
+                        instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        html_path = COURSE_ENROLL_HTML_TO_U
+                        fullname = f'{instance.first_name} {instance.last_name}'
+                        var1 = f'{course_name}'
+                        context_data = {'fullname':fullname, "course_name":var1}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (instance.email_id,)
+                        # recipient_list = ("nishant.k@latitudetechnolabs.com",)
+                        email_from = settings.EMAIL_HOST_USER
+                        invoice_number = random.randrange(100000,999999)
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":None, "total":int(amount+40)}
+                        template = get_template('invoice.html')
+                        html  = template.render(context_data1)
+                        result = BytesIO()
+                        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                        pdf = result.getvalue()
+                        filename = 'Invoice.pdf'
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        email_msg.attach(filename, pdf, "application/pdf")
+                        email_msg.send(fail_silently=False)
+                        print("okokokokokok")
+                    except Exception as ex:
+                        print(ex, "exexexexexexexe")
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     # print(e)
@@ -547,10 +584,7 @@ class UserProfileView(APIView):
             CORE_RESPONSIBILITIES : request.POST.get(CORE_RESPONSIBILITIES,data.core_responsibilities),
             LEVEL_OF_ROLE : request.POST.get(LEVEL_OF_ROLE,data.level_of_role),
             FUTURE_PROFESSIONAL_ROLE : request.POST.get(FUTURE_PROFESSIONAL_ROLE,data.future_professional_role),
-            COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),
-            AREA_OF_INTEREST : request.POST.get(AREA_OF_INTEREST,data.area_of_interest),
-            AGREE_ADS_TERMS : request.POST.get(AGREE_ADS_TERMS,data.agree_ads_terms),
-            
+            COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),            
         }
             if request.POST.get(AGREE_ADS_TERMS):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
@@ -606,7 +640,7 @@ class UserPaymentDetail_info(APIView):
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
-                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     record_map = {}
@@ -880,6 +914,7 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
+       
         email_id = get_user_email_by_token(request)
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})

@@ -5,11 +5,9 @@ from django.core.mail import EmailMessage
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from email.mime.image import MIMEImage
+# from email.mime.image import MIMEImage
 import os
 import string
-
-from sqlalchemy import true
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 import random
@@ -686,8 +684,8 @@ class UserProfile(models.Model):
         verbose_name = "User Profile Table"
 
 
-    # def __str__(self):
-    #     return self.email_id
+    def __str__(self):
+        return self.email_id
     
 
 class SupplierOrganizationProfile(models.Model):
@@ -695,7 +693,7 @@ class SupplierOrganizationProfile(models.Model):
     supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
     organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
     organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
-    organization_website = models.CharField(max_length=250,blank=true,null=True,verbose_name="organization Website")
+    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
     organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
     country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
     city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
@@ -739,11 +737,6 @@ class UserPaymentDetail(models.Model):
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
 
 
-
-
-
-
-
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Name")
     email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
@@ -780,22 +773,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         recipient_list = (instance.supplier_email,)
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
-        email_msg.send(fail_silently=False)
-
-        html_path1 = COURSE_ENROLL_HTML_TO_U
-        email_html_template = get_template(html_path1).render(context_data)
-        recipient_list = (instance.user_profile.email_id,)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        # path = 'eddi_app'
-        # img_dir = 'static'
-        # image = 'Logo.jpg'
-        # file_path = os.path.join(path,img_dir,image)
-        # with open(file_path,'rb') as f:
-        #     img = MIMEImage(f.read())
-        #     img.add_header('Content-ID', '<{name}>'.format(name=image))
-        #     img.add_header('Content-Disposition', 'inline', filename=image)
-        # email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print("TRUE")
 
@@ -863,6 +840,7 @@ class EventAdEnroll(models.Model):
     
 
 class MaterialVideoMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
@@ -870,6 +848,7 @@ class MaterialVideoMaterial(models.Model):
         return self.video_file
 
 class MaterialDocumentMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
@@ -877,6 +856,7 @@ class MaterialDocumentMaterial(models.Model):
         return self.document_file
 
 class CourseMaterial(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
     video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="Video Title")
     video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name='Video Files',blank=True,null=True)

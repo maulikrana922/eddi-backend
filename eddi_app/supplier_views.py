@@ -1,6 +1,6 @@
 from calendar import TUESDAY
 from posixpath import split
-from select import select
+# from select import select
 import json
 from typing import final
 from wsgiref.handlers import read_environ
@@ -111,18 +111,19 @@ class AddCourseView(APIView):
 class AddSubCategoryView(APIView):
     def post(self, request):
         if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
         email_id = get_user_email_by_token(request)
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
+        user_type = supplier_id.user_type.user_type
         try:    
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,None)})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "error Getting Category Name"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            SUPPLIER_ID:supplier_id.id,
+            SUPPLIER_ID: supplier_id.id,
             CATEGORY_NAME_ID: category_id.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,None),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,None),
@@ -130,7 +131,7 @@ class AddSubCategoryView(APIView):
             STATUS_ID:1
         }
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-        record_map[CREATED_BY] = 'admin'
+        record_map[CREATED_BY] = user_type
         getattr(models,COURSE_SUBCATEGORY_TABLE).objects.update_or_create(**record_map)
         return Response({STATUS: SUCCESS, DATA: "Sub Category Created successfully"}, status=status.HTTP_200_OK)
 
@@ -836,7 +837,7 @@ class SupplierDashboard_earningGraphView(APIView):
 
 
 class CourseMaterialUpload(APIView):
-    def post(self, request):
+    def post(self, request, uuid=None):
         email_id = get_user_email_by_token(request)   
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -848,27 +849,32 @@ class CourseMaterialUpload(APIView):
             print(ex,"exxxxxxxxxxxxxxxx")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-        
-            record_map = {
-                COURSE : course_id.id,
-                VIDEO_TITLE : request.POST.get(VIDEO_TITLE,None),
-                VIDEO_FILES : request.FILES.getlist(VIDEO_FILES,None),
-                FILE_TITLE : request.POST.get(FILE_TITLE,None),
-                DOCUMENT_FILES : request.FILES.getlist(DOCUMENT_FILES,None),
-                } 
-            record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
-            for i in record_map.document_files:
-                doc = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**i)
-                doc.save()
-            for j in record_map.video_files:
-                file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**j)
-                file.save()
-            getattr(models,"CourseMaterial").objects.update_or_create(**record_map)
-
-            return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
-            print(ex, "exxxxx")
-            return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
+            course_data = None
+            
+            
+        # record_map = {
+        video_title = request.POST.get(VIDEO_TITLE,None)
+        video_files = request.FILES.getlist(VIDEO_FILES,None)
+        file_title = request.POST.get(FILE_TITLE,None)
+        document_files = request.FILES.getlist(DOCUMENT_FILES,None)
+            # } 
+        # print(record_map,"record-----------------------map")
+        # record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
+        if request.FILES.getlist(DOCUMENT_FILES):
+            for i in document_files:
+                getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                # doc.save()
+                print("saaveeeee")
+        # for j in video_files:
+        #     file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"document_file":j})
+        #     file.save()
+
+        return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+        # except Exception as ex:
+        #     print(ex, "exxxxx")
+        #     return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
 
        
 
