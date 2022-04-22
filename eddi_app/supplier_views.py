@@ -169,8 +169,10 @@ class GetSubCategoryDetails(APIView):
             if user_type_data:
                 if user_type_data == ADMIN_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all().order_by("-created_date_time")
-                else:
+                elif user_type_data == SUPPLIER_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+                else:
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).order_by("-created_date_time")
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -871,15 +873,11 @@ class CourseMaterialUpload(APIView):
         except Exception as ex:
             course_data = None
             
-            
-        # record_map = {
         video_title = request.POST.get(VIDEO_TITLE,None)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
         file_title = request.POST.get(FILE_TITLE,None)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
-            # } 
-        # print(record_map,"record-----------------------map")
-        # record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
+        doc_uuiud = []
         if request.FILES.getlist(DOCUMENT_FILES):
             for i in document_files:
                 getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
