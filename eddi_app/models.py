@@ -95,6 +95,8 @@ class UserSignup(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
     is_authenticated = models.BooleanField(default=False)
+    is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name='Is Login From')
+    is_active = models.BooleanField(default=False)
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
@@ -945,5 +947,16 @@ class InvoiceData(models.Model):
 
     def __str__(self):
         return self.course_name
+
+
+class InvoiceDataEvent(models.Model):
+    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
+    invoice_file = models.FileField(upload_to='invoice/', verbose_name='Invoice File', blank=True, null=True)
+    user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Event Name')
+    created_date_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.event_name
     
     
