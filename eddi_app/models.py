@@ -682,6 +682,7 @@ class UserProfile(models.Model):
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
     last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="Last Name")
     gender = models.CharField(max_length=50,blank=True,null=True,verbose_name="Gender")
+    location = models.CharField(max_length=100,blank=True,null=True,verbose_name="location")
     dob = models.CharField(max_length=50,blank=True,null=True,verbose_name="Date of Birth")
     personal_number = models.IntegerField(blank=True,null=True,verbose_name="Personal Number")
     phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
@@ -705,6 +706,7 @@ class UserProfile(models.Model):
 
     #area of interest
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Categories")
+    user_interests = models.JSONField(blank=True,null=True, verbose_name="User Interests")
     area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name="Area of Interest")
     agree_ads_terms = models.BooleanField(default=True)
 
