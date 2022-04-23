@@ -214,6 +214,8 @@ class UserSignupView(APIView):
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
+
+
 @permission_classes([AllowAny])
 class GetUserDetails(APIView):
     def post(self, request):
@@ -588,6 +590,10 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+            "location" : request.POST.get("user_location",None),
+
+            # "user_interests" : request.POST.get("user_interests",None),
+            
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
@@ -607,6 +613,15 @@ class UserProfileView(APIView):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
             else:
                 record_map[AGREE_ADS_TERMS] = data.agree_ads_terms
+            if request.POST.get(PASSWORD):
+                var = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                recordd = {}
+                recordd = {
+                    PASSWORD: make_password(request.POST.get(PASSWORD))
+                }
+                for key,value in recordd.items():
+                    setattr(var,key,value)
+                var.save()    
 
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             for key,value in record_map.items():
