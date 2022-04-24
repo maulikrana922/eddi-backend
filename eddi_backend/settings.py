@@ -63,7 +63,7 @@ production_models = [
     'eddi_app.utl_status',
     'eddi_app.UserType',
     'eddi_app.approval_status',
-    'eddi_app.UserSignup',
+    # 'eddi_app.UserSignup',
     'eddi_app.CourseCategoryDetails',
     'eddi_app.CourseSubCategoryDetails',
     'eddi_app.CourseDetails',
@@ -88,6 +88,13 @@ production_models = [
     'eddi_app.RecruitmentAd',
     'eddi_app.EventAdPaymentDetail',
     'eddi_app.EventAdEnroll',
+    'eddi_app.CourseMaterial',
+    'eddi_app.InvoiceData',
+    'eddi_app.InvoiceDataEvent',
+    'eddi_app.MaterialVideoMaterial',
+    'eddi_app.MaterialDocumentMaterial',
+    'eddi_app.SupplierOrganizationProfile',
+    'eddi_app.SupplierProfile',
 
     ]
 local_models = []
