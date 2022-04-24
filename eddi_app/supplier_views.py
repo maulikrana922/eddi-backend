@@ -612,6 +612,34 @@ class GetCourseDetails(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Deleted"}, status=status.HTTP_200_OK)
     
+class AdminDashboardView(APIView):
+    def get(self, request,uuid = None): 
+        admin_email = get_user_email_by_token(request)
+        try:
+            total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
+            total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
+            total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
+            purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
+            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting tables data"}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer :=  UserSignupSerializer(users, many = True):
+            if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
+                return Response({STATUS: SUCCESS,
+            "supplier_count": total_supplier,
+            "user_count": total_user,
+            "total_course": total_course,
+            PURCHASED_COURSE_COUNT: purchased_course,
+            "users": serializer.data,
+            "suppliers": serializer1.data,
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SupplierDashboardView(APIView):
@@ -861,36 +889,93 @@ class CourseMaterialUpload(APIView):
         email_id = get_user_email_by_token(request)   
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # try:
-        #     course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
-        #     print(course_id,'*****************************************************')
-        # except Exception as ex:
-        #     print(ex,"exxxxxxxxxxxxxxxx")
-        #     return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            video_title = request.POST.get(VIDEO_TITLE,None)
+            video_files = request.FILES.getlist(VIDEO_FILES,None)
+            file_title = request.POST.get(FILE_TITLE,None)
+            document_files = request.FILES.getlist(DOCUMENT_FILES,None)
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            reccord_map = {}
+            reccord_map = {
+                "video_title" : video_title,      
+                "file_title"  : file_title,
+                "course_id" : course_data.id
+                }
+            data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+            if request.FILES.getlist(DOCUMENT_FILES):
+                try:
+                    for i in document_files:
+                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                        data[0].document_files.add(data1[0].id)
+                except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            if request.FILES.getlist("video_files"):
+                try:
+                    for j in video_files:
+                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
+                        data[0].video_files.add(data2[0].id)
+                except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
+        return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+    
+    def get(self, request, uuid=None):
+        if uuid:
+            try:
+                course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
+            except Exception as ex:
+                course_material_data = None
+            if serializer := CourseMaterialSerializer(course_material_data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)   
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
+        course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
+        recoed_map = {}
+        try:
+            record_map = {
+            "video_title" : request.POST.get(VIDEO_TITLE,course_material_data.video_title),
+            "file_title" : request.POST.get(FILE_TITLE,course_material_data.file_title),
+            }
+            video_files = request.FILES.getlist(VIDEO_FILES,None)
+            document_files = request.FILES.getlist(DOCUMENT_FILES,None),
+            # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            # reccord_map = {}
+            # reccord_map = {
+            #     "video_title" : video_title,      
+            #     "file_title"  : file_title,
+            #     "course_id" : course_data.id
+            #     }
+            # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+            if request.FILES.getlist(DOCUMENT_FILES):
+                try:
+                    for i in document_files:
+                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                        course_material_data[0].document_files.add(data1[0].id)
+                except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            if request.FILES.getlist("video_files"):
+                try:
+                    for j in video_files:
+                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
+                        course_material_data[0].video_files.add(data2[0].id)
+                except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)  
+
+            for key, value in record_map.items():
+                setattr(course_material_data, key, value)
+            course_material_data.save()
+
         except Exception as ex:
-            course_data = None
-            
-        video_title = request.POST.get(VIDEO_TITLE,None)
-        video_files = request.FILES.getlist(VIDEO_FILES,None)
-        file_title = request.POST.get(FILE_TITLE,None)
-        document_files = request.FILES.getlist(DOCUMENT_FILES,None)
-        doc_uuiud = []
-        if request.FILES.getlist(DOCUMENT_FILES):
-            for i in document_files:
-                getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                # doc.save()
-                print("saaveeeee")
-        # for j in video_files:
-        #     file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"document_file":j})
-        #     file.save()
+            return Response({STATUS: ERROR, DATA: "Error While Editing Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
-        # except Exception as ex:
-        #     print(ex, "exxxxx")
-        #     return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
 
        
 

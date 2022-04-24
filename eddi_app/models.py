@@ -888,16 +888,16 @@ class MaterialVideoMaterial(models.Model):
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.video_file
+    # def __str__(self):
+    #     return self.video_file
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.document_file
+    # def __str__(self):
+    #     return self.document_file
 
 class CourseMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
