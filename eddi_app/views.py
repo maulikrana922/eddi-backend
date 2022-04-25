@@ -1196,14 +1196,16 @@ class EventView(APIView):
 class RecruitmentAdView(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
+        print(email_id, "emailllll")
         record_map = {}
         supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
+        print(supplier_id, "ididididid")
         try:
             record_map = {
             RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
             RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,None),
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
-            "supplier_profile" : supplier_id.id,
+            "supplier_profile" : supplier_id,
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
             STATUS_ID:1,
@@ -1218,6 +1220,7 @@ class RecruitmentAdView(APIView):
             getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex, "exexexe")
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
