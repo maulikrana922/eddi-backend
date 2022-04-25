@@ -1205,7 +1205,6 @@ class RecruitmentAdView(APIView):
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
             "supplier_profile" : supplier_id.id,
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
-            SUPPLIER_EMAIL : email_id,
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
             STATUS_ID:1,
             'is_approved_id' : 2

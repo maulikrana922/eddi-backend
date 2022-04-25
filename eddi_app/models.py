@@ -134,8 +134,16 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         print("TRUE")
 
     if created and instance.user_type.user_type == SUPPLIER_S:
-        print("INNER")
+        record_map = {}
+        try:
+            record_map = {
+                "supplier_name" : f"{instance.first_name}{instance.last_name}"
+            }
+            getattr(models,"SupplierProfile").objects.update_or_create(**record_map)
+        except Exception as ex:
+            print(ex, "exexexexe")
 
+        print("INNER")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
