@@ -1224,6 +1224,6 @@ class EventEnrollView(APIView):
 
 
 
-    
+
 
         

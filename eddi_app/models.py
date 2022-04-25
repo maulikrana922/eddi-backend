@@ -98,7 +98,7 @@ class UserSignup(models.Model):
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
-    
+   
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
@@ -852,8 +852,8 @@ class MaterialDocumentMaterial(models.Model):
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.document_file
+    # def __str__(self):
+    #     return self.document_file
 
 class CourseMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)

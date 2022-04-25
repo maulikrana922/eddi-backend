@@ -25,6 +25,7 @@ admin.site.register(CourseSubCategoryDetails)
 admin.site.register(approval_status)
 admin.site.register(UserType)
 
+
 admin.site.unregister(Group)
 # admin.site.register(HomePageCMSBanner)
 

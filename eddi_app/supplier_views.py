@@ -1,4 +1,5 @@
 from calendar import TUESDAY
+from math import ceil
 from posixpath import split
 # from select import select
 import json
@@ -842,34 +843,67 @@ class CourseMaterialUpload(APIView):
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
-            print(course_id,'*****************************************************')
-        except Exception as ex:
-            print(ex,"exxxxxxxxxxxxxxxx")
-            return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-        except Exception as ex:
-            course_data = None
-            
-            
+        # try:
+        #     course_id = getattr(models,COURSEDETAILS_TABLE).objects.only(ID).get(**{COURSE_NAME:request.POST.get(COURSE_NAME,None)})
+        #     print(course_id,'*****************************************************')
+        # except Exception as ex:
+        #     print(ex,"exxxxxxxxxxxxxxxx")
+        #     return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+        # except Exception as ex:
+        #     course_data = None
         # record_map = {
-        video_title = request.POST.get(VIDEO_TITLE,None)
+        # video_title = request.POST.get(VIDEO_TITLE,None)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
-        file_title = request.POST.get(FILE_TITLE,None)
+        # file_title = request.POST.get(FILE_TITLE,None)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
+        course_name =  request.POST.get("course_name",None)
             # } 
         # print(record_map,"record-----------------------map")
         # record_map[CREATED_AT] = make_aware(datetime.datetime.now()) 
         if request.FILES.getlist(DOCUMENT_FILES):
-            for i in document_files:
-                getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                # doc.save()
-                print("saaveeeee")
-        # for j in video_files:
-        #     file = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"document_file":j})
-        #     file.save()
+            print(document_files,"rrrrrrrrrrrrrrr")
+            reccord_map = {}
+            reccord_map = {
+                "video_title" : "video_title",                        
+            }
+            getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+            coursedet = getattr(models,"CourseMaterial").objects.get(**{"video_title":"video_title"})
+            try:
+                for i in document_files:
+                    getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                    print(1)
+                    try:
+                        data = getattr(models,"MaterialDocumentMaterial").objects.all().order_by("-created_date_time")
+                    except Exception as ex:
+                        print(ex,"exexexexexe")
+                    print(data, "datatatataata")
+                    uid = data[0].uuid
+                    print(2)
+                    obj = getattr(models,"MaterialDocumentMaterial").objects.get(**{UUID:uid})
+                    record_map = {}
+                    record_map = {
+                        "document_files" : obj
+                    }
+                    print(4)
+                    print(record_map, "hrEED5TCRVSADsd")
+                    for key,value in record_map.items():
+                        setattr(coursedet,key,value)
+                    coursedet.save()
+                    print("okokokokokookok")
+            except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            try:
+                for j in video_files:
+                    getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_files":j})
+            except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
+            # try:
+            #     getattr(models,"").objects.update_or_create(**record_map)
+            # except Exception as ex:
+            #     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         # except Exception as ex:
