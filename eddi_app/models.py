@@ -918,12 +918,13 @@ class RecruitmentAd(models.Model):
     recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="RecruitmentAd Title")
     recruitmentAd_description = RichTextField(verbose_name = 'RecruitmentAd Description', blank = True, null=True)
     recruitmentAd_banner_video_link =  models.CharField(max_length=500,blank=True,null=True,verbose_name="RecruitmentAd Banner Link")
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    supplier_profile = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name='Supplier Profile')
+    user_profile = models.ManyToManyField(UserProfile,verbose_name='User Profile',blank=True,null=True)
     recruitmentAd_Expiry =  models.DateField(verbose_name='RecruitmentAd Expiry Date', blank=True,null=True)
     subscriber_count = models.IntegerField(default=0,verbose_name='Subscriber Count',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    approval = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
         
