@@ -25,7 +25,7 @@ from eddi_app.constants.table_name import *
 import datetime
 from datetime import date
 from django.db.models import Q
-# import pdfkit
+import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
@@ -88,33 +88,50 @@ class Save_stripe_info(APIView):
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                        vat_val = int(vat[0])
                         html_path = COURSE_ENROLL_HTML_TO_U
                         fullname = f'{instance.first_name} {instance.last_name}'
-                        var1 = f'{course_name}'
-                        context_data = {'fullname':fullname, "course_name":var1}
+                        context_data = {'fullname':fullname, "course_name":course_name}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (instance.email_id,)
-                        # recipient_list = ("nishant.k@latitudetechnolabs.com",)
-                        email_from = settings.EMAIL_HOST_USER
                         invoice_number = random.randrange(100000,999999)
-                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":None, "total":int(amount+40)}
-                        template = get_template('invoice.html')
-                        html  = template.render(context_data1)
-                        result = BytesIO()
-                        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
-                        pdf = result.getvalue()
-                        filename = 'Invoice.pdf'
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
+                        template = get_template('invoice.html').render(context_data1)
+                        try:
+                            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
+                        except:
+                            pass
+                        record = {}
+                        try:
+                            record = {
+                            "invoice_number" : invoice_number,
+                            "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
+                            "user_email" : instance.email_id,
+                            "course_name" : course_name
+                            }
+                            getattr(models,"InvoiceData").objects.update_or_create(**record)
+                        except Exception as ex:
+                            pass
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        filename = f"./media/invoice-{invoice_number}.pdf"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
-                        email_msg.attach(filename, pdf, "application/pdf")
+                        email_msg.attach(img)
+                        email_msg.attach_file(filename) 
                         email_msg.send(fail_silently=False)
-                        print("okokokokokok")
                     except Exception as ex:
-                        print(ex, "exexexexexexexe")
+                        pass
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
-                    # print(e)
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -164,6 +181,51 @@ class Save_stripe_infoEvent(APIView):
 
                     except Exception as e:
                         return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+                    try:
+                        instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+                        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                        vat_val = int(vat[0])
+                        html_path = COURSE_ENROLL_HTML_TO_U
+                        fullname = f'{instance.first_name} {instance.last_name}'
+                        context_data = {'fullname':fullname, "course_name":event_name}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (instance.email_id,)
+                        invoice_number = random.randrange(100000,999999)
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
+                        template = get_template('invoice.html').render(context_data1)
+                        try:
+                            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
+                        except:
+                            pass
+                        record = {}
+                        try:
+                            record = {
+                            "invoice_number" : invoice_number,
+                            "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
+                            "user_email" : instance.email_id,
+                            "event_name" : event_name
+                            }
+                            getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
+                        except Exception as ex:
+                            pass
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        filename = f"./media/invoice-{invoice_number}.pdf"
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        email_msg.attach(img)
+                        email_msg.attach_file(filename) 
+                        email_msg.send(fail_silently=False)
+                    except Exception as ex:
+                        pass
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
                 except Exception as e:
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,12 +245,18 @@ class UserSignupView(APIView):
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
             LAST_NAME: request.POST.get(LAST_NAME,None),
-            EMAIL_ID: request.POST.get(EMAIL_ID,None),
-            PASSWORD: make_password(request.POST.get(PASSWORD)),
-            
+            EMAIL_ID: request.POST.get(EMAIL_ID,None),            
             USER_TYPE_ID: user_type_id.id,
             STATUS_ID:1
         }
+        try:
+            if request.POST.get(PASSWORD):
+                record_map[PASSWORD] = make_password(request.POST.get(PASSWORD))
+            else:
+                record_map["is_login_from"] = request.POST.get("is_login_from")
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Need atleast password or is_login_from to login"}, status=status.HTTP_400_BAD_REQUEST)
+
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
         record_map[CREATED_BY] = 'admin'
         try:
@@ -197,9 +265,12 @@ class UserSignupView(APIView):
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
-@permission_classes([AllowAny])
+
+
+# @permission_classes([AllowAny])
 class GetUserDetails(APIView):
     def post(self, request):
+        email_id =  get_user_email_by_token(request)
         record_map = {}
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -213,6 +284,7 @@ class GetUserDetails(APIView):
 
 
     def get(self, request,uuid = None):
+        email_id =  get_user_email_by_token(request)
         if uuid:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
             if serializer := UserSignupSerializer(data):
@@ -227,8 +299,34 @@ class GetUserDetails(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self,request,uuid = None):  # sourcery skip: class-extract-method
+        email_id =  get_user_email_by_token(request)
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Not Able to get user data"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map1 = {}
+        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+            if request.POST.get("status"):
+                if request.POST.get("status") == "Active":
+                    record_map1[STATUS_ID] = 1
+                else:
+                    try:
+                        data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"user_profile__email_id": user_data.email_id})
+                    except Exception as ex:
+                        print(ex, "exxxx")
+                        data1 = None
+                    if data1.exists():
+                        return Response({STATUS: ERROR, DATA: "User Already Enrolled in Some Course"}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        record_map1[STATUS_ID] = 2
+                for key,value in record_map1.items():
+                    setattr(user_data,key,value)
+                user_data.save() 
+
+                return Response({STATUS: SUCCESS, DATA: "Data Successfully Edited"}, status=status.HTTP_200_OK)
+
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except:
@@ -571,6 +669,10 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+            "location" : request.POST.get("user_location",None),
+
+            "user_interests" : request.POST.get("user_interests",None),
+
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
@@ -590,6 +692,15 @@ class UserProfileView(APIView):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
             else:
                 record_map[AGREE_ADS_TERMS] = data.agree_ads_terms
+            if request.POST.get(PASSWORD):
+                var = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                recordd = {}
+                recordd = {
+                    PASSWORD: make_password(request.POST.get(PASSWORD))
+                }
+                for key,value in recordd.items():
+                    setattr(var,key,value)
+                var.save()    
 
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             for key,value in record_map.items():
@@ -862,6 +973,29 @@ class IncreaseAdCount(APIView):
                 setattr(data,key,value)
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
+class IncreaserecruitmentAdCount(APIView):
+    def put(self, request, uuid = None):
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "not get uuid"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
+        except Exception as ex:
+            print(ex, "exxxxx")
+            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        if data.subscriber_count == None:
+            data.subscriber_count = 1
+        else:
+            data.subscriber_count += 1
+        record_map = {
+            "subscriber_count" : data.subscriber_count,
+        }
+        print(record_map, "recorddd")
+        for key,value in record_map.items():
+                setattr(data,key,value)
+        data.save()
+        return Response({STATUS: SUCCESS, DATA: "Subscriber Count Increased Successfully"}, status=status.HTTP_200_OK)
         
 
 class EventView(APIView):
@@ -914,7 +1048,6 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, uuid = None):
-       
         email_id = get_user_email_by_token(request)
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
@@ -1052,23 +1185,22 @@ class EventView(APIView):
 
 class RecruitmentAdAdView(APIView):
     def post(self, request):
+        email_id =  get_user_email_by_token(request)
         record_map = {}
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
             RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
             RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,None),
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
-            SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,None),
+            SUPPLIER_EMAIL : email_id,
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
-            SUBSCRIBER_COUNT : request.POST.get(SUBSCRIBER_COUNT,None),
             STATUS_ID:1
            
         }
+
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            record_map[CREATED_BY] = request.POST.get(SUPPLIER_EMAIL)
+            record_map[CREATED_BY] = email_id
             record_map[UUID] = uuid4()
             
             getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
@@ -1078,6 +1210,7 @@ class RecruitmentAdAdView(APIView):
 
 
     def get(self, request, uuid = None):
+        email_id =  get_user_email_by_token(request)
         if uuid:
             data = getattr(models,RECRUITMENTAD_TABLE).objects.get(**{UUID:uuid})
             if serializer := RecruitmentAdSerializer(data):
@@ -1092,6 +1225,7 @@ class RecruitmentAdAdView(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, uuid = None):
+        email_id =  get_user_email_by_token(request)
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1105,10 +1239,7 @@ class RecruitmentAdAdView(APIView):
             RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,data.recruitmentAd_title),
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,data.recruitmentAd_description),
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,data.recruitmentAd_banner_video_link),
-            SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,data.supplier_email),
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,data.recruitmentAd_Expiry),
-            SUBSCRIBER_COUNT : request.POST.get(SUBSCRIBER_COUNT,data.subscriber_count),
-            CREATED_BY : request.POST.get(SUPPLIER_EMAIL,data.created_by),
             
         }
             if request.POST.get(STATUS):
@@ -1120,7 +1251,6 @@ class RecruitmentAdAdView(APIView):
                 record_map[STATUS_ID] = data.status
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
-            print(record_map, "recorddddddddddddd")
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
@@ -1154,7 +1284,6 @@ class CourseEnrollView(APIView):
     def get(self, request):
         email_id =  get_user_email_by_token(request)
         if email_id:
-            # email_id = get_user_email_by_token(request)
             try:
                 enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
             except Exception as ex:

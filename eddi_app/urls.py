@@ -28,7 +28,7 @@ urlpatterns = [
     path('get-course-details/',GetCourseDetails.as_view()),
     path('favourite-course-details/',FavCourseDetails.as_view()),
        
-    path('course-material-upload/',CourseMaterialUpload.as_view()),
+    path('course-material-upload/<str:uuid>/',CourseMaterialUpload.as_view()),
 
     path('add-sub-category/',AddSubCategoryView.as_view()),
     path('get-sub-category-details/<str:uuid>/',GetSubCategoryDetails.as_view()),
@@ -62,6 +62,10 @@ urlpatterns = [
     path('supplier-dashboard-courseGraph/',SupplierDashboard_courseGraphView.as_view()),
     path('supplier-dashboard-earningGraph/',SupplierDashboard_earningGraphView.as_view()),
 
+# Admin Dashboard
+    path('admin-dashboard/',AdminDashboardView.as_view()),
+
+
 # Event
     path('add-event/',EventView.as_view()),
     path('get-event/',EventView.as_view()),
@@ -70,14 +74,15 @@ urlpatterns = [
     path('delete-event/<str:uuid>/',EventView.as_view()),
 
     path('get-event-enroll/',EventEnrollView.as_view()),
+    path('increase-Adcount/<str:uuid>/',IncreaseAdCount.as_view()),
 
 # RecruitmentAd
-    path('add-recruitment/',RecruitmentAdAdView.as_view()),
-    path('get-recruitment/',RecruitmentAdAdView.as_view()),
-    path('get-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
-    path('edit-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
-    path('delete-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
-    path('increase-Adcount/<str:uuid>/',IncreaseAdCount.as_view()),
+    # path('add-recruitment/',RecruitmentAdAdView.as_view()),
+    path('recruitmentAd/',RecruitmentAdAdView.as_view()),
+    path('recruitmentAd/<str:uuid>/',RecruitmentAdAdView.as_view()),
+    # path('edit-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
+    # path('delete-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
+    path('increase-recruitmentAdcount/<str:uuid>/',IncreaserecruitmentAdCount.as_view()),
 
 
     path('get-courseenrolldetail/',CourseEnrollView.as_view()),

@@ -157,3 +157,9 @@ class SupplierProfileSerializer(serializers.ModelSerializer):
         model = SupplierProfile
         depth = 1
         fields = '__all__'
+
+class CourseMaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseMaterial
+        depth = 2
+        fields = '__all__'

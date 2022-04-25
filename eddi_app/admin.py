@@ -45,6 +45,8 @@ class HomePageCMSBannerAdmin(admin.ModelAdmin):
 
 admin.site.register(HomePageCMSBanner,HomePageCMSBannerAdmin)
 
+admin.site.register(InvoiceVATCMS)
+
 class BlogDetailsAdmin(admin.ModelAdmin):
     list_display = ('blog_title','written_by')
     list_filter = ('written_by',)
@@ -281,6 +283,8 @@ admin.site.site_header = 'Eddi Admin'
 
 admin.site.register(EventAd)
 admin.site.register(UserProfile)
+admin.site.register(InvoiceData)
+admin.site.register(InvoiceDataEvent)
 
 
 
