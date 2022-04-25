@@ -307,6 +307,10 @@ class FeeType(models.Model):
     def __str__(self):
         return self.fee_type_name
 
+class InvoiceVATCMS(models.Model):
+    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
@@ -323,6 +327,7 @@ class CourseDetails(models.Model):
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
     course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
+    var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name='Invoice Vat',blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
@@ -358,9 +363,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
        
 
 ################## CMS    ###################################
-class InvoiceVATCMS(models.Model):
-    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True)
