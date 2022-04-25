@@ -1197,7 +1197,7 @@ class RecruitmentAdView(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
         record_map = {}
-        supplier_id = getattr(models,"SupplierProfile").objects.get(**{EMAIL_ID:email_id})
+        supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
         try:
             record_map = {
             RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
