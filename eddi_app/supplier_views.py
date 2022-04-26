@@ -380,11 +380,12 @@ class GetCourseDetails(APIView):
 
                     organization_domain = email_id.split('@')[1]
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.all().values_list("course_name", flat=True)
+                    
                     data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list(COURSE_NAME, flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(Q(course_name__in = data_category_list) & (Q(course_name__in = course_enrolled))).order_by("-organization_domain")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
                 if serializer := CourseDetailsSerializer(data_category,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
