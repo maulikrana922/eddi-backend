@@ -939,11 +939,11 @@ class CourseMaterialUpload(APIView):
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         recoed_map = {}
         try:
-            record_map = {
-            "video_title" : request.POST.get(VIDEO_TITLE,course_material_data.video_title),
-            "file_title" : request.POST.get(FILE_TITLE,course_material_data.file_title),
-            }
-            video_files = request.FILES.getlist(VIDEO_FILES,None)
+            # record_map = {
+            # "video_title" : request.POST.get(VIDEO_TITLE,course_material_data.video_title),
+            # "file_title" : request.POST.get(FILE_TITLE,course_material_data.file_title),
+            # }
+            # video_files = request.FILES.getlist(VIDEO_FILES,None)
             document_files = request.FILES.getlist(DOCUMENT_FILES,None),
             # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             # reccord_map = {}
@@ -954,25 +954,37 @@ class CourseMaterialUpload(APIView):
             #     }
             # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
             if request.FILES.getlist(DOCUMENT_FILES):
-                try:
-                    for i in document_files:
-                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                        course_material_data[0].document_files.add(data1[0].id)
-                except Exception as ex:
-                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
-            if request.FILES.getlist("video_files"):
-                try:
-                    for j in video_files:
-                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
-                        course_material_data[0].video_files.add(data2[0].id)
-                except Exception as ex:
+                # try:
+                for i in document_files:
+                    # l = []
+                    # data1 = getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":i})
+                    a = course_material_data.document_files.all()
+                    l = [i.document_file for i in a]
+                    print(l, "aaaaaa")
+
+                    # a = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid}).value()
+                    # print(a, "aaaaa")
+                    # if data1 in course_material_data.document_files.all().values_list("document_files", flat=True):
+                    #     pass
+
+            #             data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+            #             course_material_data[0].document_files.add(data1[0].id)
+            #     except Exception as ex:
+            #         return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            # if request.FILES.getlist("video_files"):
+            #     try:
+            #         for j in video_files:
+            #             data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
+            #             course_material_data[0].video_files.add(data2[0].id)
+            #     except Exception as ex:
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)  
 
-            for key, value in record_map.items():
-                setattr(course_material_data, key, value)
-            course_material_data.save()
+            # for key, value in record_map.items():
+            #     setattr(course_material_data, key, value)
+            # course_material_data.save()
 
         except Exception as ex:
+            print(ex, "exexexex")
             return Response({STATUS: ERROR, DATA: "Error While Editing Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
@@ -1061,11 +1073,8 @@ class SupplierOrganizationProfileview(APIView):
 
 class SupplierProfileView(APIView):
     def put(self, request):
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
-
         email_id = get_user_email_by_token(request)
-        
+
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:

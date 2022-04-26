@@ -669,10 +669,8 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+            "user_interests" : request.POST.get("user_interests",data.user_interests),
             "location" : request.POST.get("user_location",None),
-
-            "user_interests" : request.POST.get("user_interests",None),
-
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
@@ -1196,16 +1194,17 @@ class EventView(APIView):
 class RecruitmentAdView(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
+        print(email_id, "emailllll")
         record_map = {}
-        supplier_id = getattr(models,"SupplierProfile").objects.get(**{EMAIL_ID:email_id})
+        supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
+        print(supplier_id, "ididididid")
         try:
             record_map = {
             RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
             RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,None),
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
-            "supplier_profile" : supplier_id.id,
+            "supplier_profile" : supplier_id,
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
-            SUPPLIER_EMAIL : email_id,
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
             STATUS_ID:1,
             'is_approved_id' : 2
@@ -1219,6 +1218,7 @@ class RecruitmentAdView(APIView):
             getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex, "exexexe")
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
