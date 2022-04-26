@@ -914,15 +914,22 @@ class FavCourseDetails(APIView):
             
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
-            try:
-                data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
-            except Exception as ex:
-                data= None
-            if serializer := FavouriteCourseSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+        try:
+            if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
+                try:
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
+                except Exception as ex:
+                    data= None
+                    return Response({STATUS: ERROR, DATA: "NO Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+                if serializer := FavouriteCourseSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+        except:
+            return Response({STATUS: ERROR, DATA: "ERROR Fetching data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
@@ -936,11 +943,11 @@ class ViewIndividualProfile(APIView):
         try:
             token = token_data.split()[1]
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
-            email_id = data.user.email_id
+            # email_id = data.user.email_id
             # print(data.key)
         except Exception as ex:
             # print(ex)
-            email_id = None
+            # email_id = None
             return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, SUPPLIER_EMAIL:supplier_email_id})

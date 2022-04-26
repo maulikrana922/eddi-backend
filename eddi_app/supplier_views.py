@@ -380,11 +380,12 @@ class GetCourseDetails(APIView):
 
                     organization_domain = email_id.split('@')[1]
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.all().values_list("course_name", flat=True)
+                    
                     data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list(COURSE_NAME, flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(Q(course_name__in = data_category_list) & (Q(course_name__in = course_enrolled))).order_by("-organization_domain")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
                 if serializer := CourseDetailsSerializer(data_category,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
@@ -660,14 +661,14 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
-          
+            
+            course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
             user_email = [x[2] for x in Individuals11]
-            course_name = [x[0] for x in Individuals11]
             individual_details = {}
             final_dict = {}
-            individual_details [USERNAME] = user_name
-            individual_details [COURSENAME] = course_name
+            individual_details[USERNAME] = user_name
+            individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
             counter = 0
             for v in individual_details[COURSENAME]:
