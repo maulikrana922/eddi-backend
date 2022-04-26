@@ -659,14 +659,14 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
-          
+            
+            course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
             user_email = [x[2] for x in Individuals11]
-            course_name = [x[0] for x in Individuals11]
             individual_details = {}
             final_dict = {}
-            individual_details [USERNAME] = user_name
-            individual_details [COURSENAME] = course_name
+            individual_details[USERNAME] = user_name
+            individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
             counter = 0
             for v in individual_details[COURSENAME]:

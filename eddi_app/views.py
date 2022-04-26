@@ -925,11 +925,11 @@ class ViewIndividualProfile(APIView):
         try:
             token = token_data.split()[1]
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
-            email_id = data.user.email_id
+            # email_id = data.user.email_id
             # print(data.key)
         except Exception as ex:
             # print(ex)
-            email_id = None
+            # email_id = None
             return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, SUPPLIER_EMAIL:supplier_email_id})
