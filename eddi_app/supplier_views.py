@@ -1,4 +1,5 @@
 from calendar import TUESDAY
+from math import ceil
 from posixpath import split
 # from select import select
 import json
@@ -926,9 +927,11 @@ class CourseMaterialUpload(APIView):
         return Response({STATUS: SUCCESS, DATA: "Material Uploaded successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
+        print("uuid",uuid)
         if uuid:
             try:
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
+                print("course",course_material_data)
             except Exception as ex:
                 course_material_data = None
             if serializer := CourseMaterialSerializer(course_material_data):
