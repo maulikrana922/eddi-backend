@@ -669,10 +669,8 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+            "user_interests" : request.POST.get("user_interests",data.user_interests),
             "location" : request.POST.get("user_location",None),
-
-            "user_interests" : request.POST.get("user_interests",None),
-
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
