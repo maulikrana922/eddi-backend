@@ -887,6 +887,7 @@ class SupplierDashboard_earningGraphView(APIView):
 
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
+        print("inside posttttttttttttttttttttttt")
         email_id = get_user_email_by_token(request)   
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -898,6 +899,9 @@ class CourseMaterialUpload(APIView):
             file_title = request.POST.get(FILE_TITLE,None)
             document_files = request.FILES.getlist(DOCUMENT_FILES,None)
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            print(video_files, "videooooooooo")
+            print(document_files, "documenttttt")
+            print(request.FILES, "filesssssss")
             reccord_map = {}
             reccord_map = {
                 "video_title" : video_title,      
@@ -905,9 +909,11 @@ class CourseMaterialUpload(APIView):
                 "course_id" : course_data.id
                 }
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+            print("saveddddddddddddddddddddddd")
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
+                        print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                         print(data1, "data11111")
                         data[0].document_files.add(data1[0].id)

@@ -1244,11 +1244,22 @@ class RecruitmentAdView(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
-            if serializer := RecruitmentAdSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == "User" and getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id}).agree_ads_terms == True:
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                if serializer := RecruitmentAdSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type != "User":
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                if serializer := RecruitmentAdSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "You have not Agreed to get Recruitment Ads"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
     def put(self, request, uuid = None):
         email_id =  get_user_email_by_token(request)
