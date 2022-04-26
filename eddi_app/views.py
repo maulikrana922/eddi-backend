@@ -914,15 +914,22 @@ class FavCourseDetails(APIView):
             
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
-            try:
-                data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
-            except Exception as ex:
-                data= None
-            if serializer := FavouriteCourseSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+        try:
+            if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
+                try:
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
+                except Exception as ex:
+                    data= None
+                    return Response({STATUS: ERROR, DATA: "NO Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+                if serializer := FavouriteCourseSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+        except:
+            return Response({STATUS: ERROR, DATA: "ERROR Fetching data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
