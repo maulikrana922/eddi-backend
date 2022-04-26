@@ -669,8 +669,10 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : int(request.POST.get(PERSONAL_NUMBER,data.personal_number)),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
-            "user_interests" : request.POST.get("user_interests",data.user_interests),
             "location" : request.POST.get("user_location",None),
+
+            "user_interests" : request.POST.get("user_interests",None),
+
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
@@ -908,11 +910,22 @@ class FavCourseDetails(APIView):
             except Exception as e:
                 print(e)
                 return Response({MESSAGE: "Error", DATA: "ERROR creating data"}, status=status.HTTP_400_BAD_REQUEST)
-                
-                
         return Response({MESSAGE: "SUCCESS", DATA: "Done"}, status=status.HTTP_200_OK)
             
-            
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
+            try:
+                data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
+            except Exception as ex:
+                data= None
+            if serializer := FavouriteCourseSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+
+
+
 class ViewIndividualProfile(APIView):
     def post(self, request):
         user_email_id = request.POST.get(EMAIL_ID)
