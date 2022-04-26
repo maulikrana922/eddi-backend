@@ -974,24 +974,34 @@ class IncreaseAdCount(APIView):
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
-@permission_classes([AllowAny])
+# @permission_classes([AllowAny])
 class IncreaserecruitmentAdCount(APIView):
     def put(self, request, uuid = None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Can't get User Profile with given email"}, status=status.HTTP_400_BAD_REQUEST)
         if not uuid:
             return Response({STATUS: ERROR, DATA: "not get uuid"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})
         except Exception as ex:
             print(ex, "exxxxx")
-            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
-        if data.subscriber_count == None:
-            data.subscriber_count = 1
-        else:
-            data.subscriber_count += 1
+            return Response({STATUS: ERROR, DATA: "Not Able to get data from RecruitmentAd Table"}, status=status.HTTP_400_BAD_REQUEST)
+        data_user = getattr(models,"RecruitmentAd").objects.get(**{UUID:uuid})    
+        user_list = data_user.user_profile.all().values_list("email_id", flat=True)
+        if user_data.email_id not in user_list:
+            data_user.user_profile.add(user_data.id)
+            if data.subscriber_count == None:
+                data.subscriber_count = 1
+            else:
+                data.subscriber_count += 1
+        
         record_map = {
             "subscriber_count" : data.subscriber_count,
+            UUID : uuid4()
         }
-        print(record_map, "recorddd")
         for key,value in record_map.items():
                 setattr(data,key,value)
         data.save()
@@ -1183,19 +1193,23 @@ class EventView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in Deleting Data"}, status=status.HTTP_200_OK)
 
 
-class RecruitmentAdAdView(APIView):
+class RecruitmentAdView(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
+        print(email_id, "emailllll")
         record_map = {}
+        supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
+        print(supplier_id, "ididididid")
         try:
             record_map = {
             RECRUITMENTAD_FILE : request.FILES.get(RECRUITMENTAD_FILE,None),
             RECRUITMENTAD_TITLE : request.POST.get(RECRUITMENTAD_TITLE,None),
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,None),
+            "supplier_profile" : supplier_id,
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,None),
-            SUPPLIER_EMAIL : email_id,
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,None),
-            STATUS_ID:1
+            STATUS_ID:1,
+            'is_approved_id' : 2
            
         }
 
@@ -1206,6 +1220,7 @@ class RecruitmentAdAdView(APIView):
             getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex, "exexexe")
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1218,7 +1233,7 @@ class RecruitmentAdAdView(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,RECRUITMENTAD_TABLE).objects.all()
+            data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
             if serializer := RecruitmentAdSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -1249,6 +1264,33 @@ class RecruitmentAdAdView(APIView):
                     record_map[STATUS_ID] = 2
             else:
                 record_map[STATUS_ID] = data.status
+            
+            if request.POST.get(APPROVAL_STATUS):
+                if request.POST.get(APPROVAL_STATUS) == "Approved":
+                    record_map[IS_APPROVED_ID] = 1
+                if request.POST.get(APPROVAL_STATUS) == "Pending":
+                    # try:
+                    #     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                    # except Exception as ex:
+                    #     print(ex, "exxxx")
+                    #     data1 = None
+                    # if data1.exists():
+                    #     return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                    # else:
+                    record_map[IS_APPROVED_ID] = 2
+                if request.POST.get(APPROVAL_STATUS) == "Rejected":
+                    # try:
+                    #     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                    # except Exception as ex:
+                    #     print(ex, "exxxx")
+                    #     data1 = None
+                    # if data1.exists():
+                    #     return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                    # else:
+                    record_map[IS_APPROVED_ID] = 3
+            else:
+                record_map[IS_APPROVED] = data.is_approved
+
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
             for key,value in record_map.items():

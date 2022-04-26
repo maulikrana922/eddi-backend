@@ -1062,11 +1062,8 @@ class SupplierOrganizationProfileview(APIView):
 
 class SupplierProfileView(APIView):
     def put(self, request):
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
-
         email_id = get_user_email_by_token(request)
-        
+
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:

@@ -134,8 +134,16 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         print("TRUE")
 
     if created and instance.user_type.user_type == SUPPLIER_S:
-        print("INNER")
+        record_map = {}
+        try:
+            record_map = {
+                "supplier_name" : f"{instance.first_name}{instance.last_name}"
+            }
+            getattr(models,"SupplierProfile").objects.update_or_create(**record_map)
+        except Exception as ex:
+            print(ex, "exexexexe")
 
+        print("INNER")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
@@ -299,6 +307,10 @@ class FeeType(models.Model):
     def __str__(self):
         return self.fee_type_name
 
+class InvoiceVATCMS(models.Model):
+    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
@@ -315,6 +327,7 @@ class CourseDetails(models.Model):
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
     course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
+    var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name='Invoice Vat',blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
     sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
@@ -350,9 +363,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
        
 
 ################## CMS    ###################################
-class InvoiceVATCMS(models.Model):
-    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True)
@@ -918,12 +929,13 @@ class RecruitmentAd(models.Model):
     recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="RecruitmentAd Title")
     recruitmentAd_description = RichTextField(verbose_name = 'RecruitmentAd Description', blank = True, null=True)
     recruitmentAd_banner_video_link =  models.CharField(max_length=500,blank=True,null=True,verbose_name="RecruitmentAd Banner Link")
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
+    supplier_profile = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name='Supplier Profile')
+    user_profile = models.ManyToManyField(UserProfile,verbose_name='User Profile',blank=True,null=True)
     recruitmentAd_Expiry =  models.DateField(verbose_name='RecruitmentAd Expiry Date', blank=True,null=True)
     subscriber_count = models.IntegerField(default=0,verbose_name='Subscriber Count',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    approval = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
         

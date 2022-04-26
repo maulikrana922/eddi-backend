@@ -78,8 +78,8 @@ urlpatterns = [
 
 # RecruitmentAd
     # path('add-recruitment/',RecruitmentAdAdView.as_view()),
-    path('recruitmentAd/',RecruitmentAdAdView.as_view()),
-    path('recruitmentAd/<str:uuid>/',RecruitmentAdAdView.as_view()),
+    path('recruitmentAd/',RecruitmentAdView.as_view()),
+    path('recruitmentAd/<str:uuid>/',RecruitmentAdView.as_view()),
     # path('edit-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
     # path('delete-recruitment/<str:uuid>/',RecruitmentAdAdView.as_view()),
     path('increase-recruitmentAdcount/<str:uuid>/',IncreaserecruitmentAdCount.as_view()),
