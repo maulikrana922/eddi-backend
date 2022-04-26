@@ -918,13 +918,15 @@ class CourseMaterialUpload(APIView):
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
                         data[0].video_files.add(data2[0].id)
                 except Exception as ex:
-                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST) 
         return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
+        print("uuid",uuid)
         if uuid:
             try:
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
+                print("course",course_material_data)
             except Exception as ex:
                 course_material_data = None
             if serializer := CourseMaterialSerializer(course_material_data):
