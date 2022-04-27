@@ -262,6 +262,7 @@ class UserSignupView(APIView):
         try:
             getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
         except Exception as ex:
+            print(ex)
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -311,16 +312,16 @@ class GetUserDetails(APIView):
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
                     record_map1[STATUS_ID] = 1
+                # else:
+                #     try:
+                #         data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"user_profile__email_id": user_data.email_id})
+                #     except Exception as ex:
+                #         print(ex, "exxxx")
+                #         data1 = None
+                #     if data1.exists():
+                #         return Response({STATUS: ERROR, DATA: "User Already Enrolled in Some Course"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    try:
-                        data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"user_profile__email_id": user_data.email_id})
-                    except Exception as ex:
-                        print(ex, "exxxx")
-                        data1 = None
-                    if data1.exists():
-                        return Response({STATUS: ERROR, DATA: "User Already Enrolled in Some Course"}, status=status.HTTP_400_BAD_REQUEST)
-                    else:
-                        record_map1[STATUS_ID] = 2
+                    record_map1[STATUS_ID] = 2
                 for key,value in record_map1.items():
                     setattr(user_data,key,value)
                 user_data.save() 
@@ -338,6 +339,7 @@ class GetUserDetails(APIView):
             IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
             STATUS_ID:request.POST.get(STATUS_ID,data.status)
         }
+
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
         record_map[UUID] = uuid4()
@@ -405,11 +407,10 @@ class UserLoginView(APIView):
         if serializer and data:
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
- 
-            return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
-           
+            if data.is_active == True:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
         else:
-            return Response({STATUS: ERROR, DATA: "User Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "User Not Found or User not Authenticated "}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @permission_classes([AllowAny])
@@ -474,6 +475,29 @@ class ResetPasswordView(APIView):
                 return Response({STATUS: ERROR, DATA: "Invalid Request"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ex}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@permission_classes([AllowAny])
+class VerifyUser(APIView):
+    def get(self,request,uuid):
+        try:
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+        except:
+            data = None
+            return Response({STATUS: ERROR, DATA: "UUID is not Valid"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if data:
+                data.uuid = uuid4()
+                data.is_active = True
+                data.is_authenticated = True
+                data.save()
+                return Response({STATUS: SUCCESS, DATA: "User Verified Successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "User not Verified"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @permission_classes([AllowAny])
@@ -1270,6 +1294,10 @@ class RecruitmentAdView(APIView):
 
     def put(self, request, uuid = None):
         email_id =  get_user_email_by_token(request)
+        try:
+            user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+        except Exception:
+            user_type_data = None
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1284,41 +1312,37 @@ class RecruitmentAdView(APIView):
             RECRUITMENTAD_DESCRIPTION : request.POST.get(RECRUITMENTAD_DESCRIPTION,data.recruitmentAd_description),
             RECRUITMENTAD_BANNER_VIEDO_LINK : request.POST.get(RECRUITMENTAD_BANNER_VIEDO_LINK,data.recruitmentAd_banner_video_link),
             RECRUITMENTAD_EXPIRY : request.POST.get(RECRUITMENTAD_EXPIRY,data.recruitmentAd_Expiry),
-            
-        }
-            if request.POST.get(STATUS):
-                if request.POST.get(STATUS) == "Active":
-                    record_map[STATUS_ID] = 1
-                else:
-                    record_map[STATUS_ID] = 2
-            else:
-                record_map[STATUS_ID] = data.status
-            
-            if request.POST.get(APPROVAL_STATUS):
-                if request.POST.get(APPROVAL_STATUS) == "Approved":
-                    record_map[IS_APPROVED_ID] = 1
-                if request.POST.get(APPROVAL_STATUS) == "Pending":
-                    # try:
-                    #     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
-                    # except Exception as ex:
-                    #     print(ex, "exxxx")
-                    #     data1 = None
-                    # if data1.exists():
-                    #     return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
-                    # else:
-                    record_map[IS_APPROVED_ID] = 2
-                if request.POST.get(APPROVAL_STATUS) == "Rejected":
-                    # try:
-                    #     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
-                    # except Exception as ex:
-                    #     print(ex, "exxxx")
-                    #     data1 = None
-                    # if data1.exists():
-                    #     return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
-                    # else:
-                    record_map[IS_APPROVED_ID] = 3
-            else:
-                record_map[IS_APPROVED] = data.is_approved
+            }
+
+            if user_type_data:
+                if user_type_data == ADMIN_S:
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
+                            record_map[STATUS_ID] = 1
+                        else:
+                            record_map[STATUS_ID] = 2
+                    else:
+                        record_map[STATUS] = data.status
+
+                    if request.POST.get(APPROVAL_STATUS):
+                        if request.POST.get(APPROVAL_STATUS) == "Approved":
+                            record_map[IS_APPROVED_ID] = 1
+                        elif request.POST.get(APPROVAL_STATUS) == "Pending":
+                            record_map[IS_APPROVED_ID] = 2
+                        else:
+                            record_map[IS_APPROVED_ID] = 3
+                    else:
+                        record_map[IS_APPROVED] = data.is_approved
+
+                elif user_type_data == SUPPLIER_S:
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
+                            record_map[STATUS_ID] = 1
+                        else:
+                            record_map[STATUS_ID] = 2
+                    else:
+                        record_map[STATUS] = data.status
+                        record_map[IS_APPROVED_ID] = 2
 
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
