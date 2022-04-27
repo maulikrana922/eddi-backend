@@ -914,21 +914,23 @@ class FavCourseDetails(APIView):
             
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
-            try:
-                data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True)
-            except Exception as ex:
-                data= None
-            try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(data)})
-            except:
-                course_data = None
+        try:
+            if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
+                try:
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True)
+                except Exception as ex:
+                    data= None
+                try:
+                    course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(data)})
+                except:
+                    course_data = None
 
-            if serializer := CourseDetailsSerializer(course_data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
-
+                if serializer := CourseDetailsSerializer(course_data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
+        except:
+            return Response({STATUS: ERROR, DATA: "Error getting favourite course data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ViewIndividualProfile(APIView):
@@ -941,11 +943,11 @@ class ViewIndividualProfile(APIView):
         try:
             token = token_data.split()[1]
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
-            email_id = data.user.email_id
+            # email_id = data.user.email_id
             # print(data.key)
         except Exception as ex:
             # print(ex)
-            email_id = None
+            # email_id = None
             return Response({MESSAGE: "Error", DATA: "Token Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             course_list = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__email_id":user_email_id, SUPPLIER_EMAIL:supplier_email_id})
@@ -1249,11 +1251,22 @@ class RecruitmentAdView(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
-            if serializer := RecruitmentAdSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == "User" and getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id}).agree_ads_terms == True:
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                if serializer := RecruitmentAdSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type != "User":
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                if serializer := RecruitmentAdSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "You have not Agreed to get Recruitment Ads"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
     def put(self, request, uuid = None):
         email_id =  get_user_email_by_token(request)

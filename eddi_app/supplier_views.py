@@ -379,10 +379,11 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.all().values_list("course_name", flat=True)
+                    
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).order_by("-organization_domain")
-
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).values_list(COURSE_NAME, flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
                 if serializer := CourseDetailsSerializer(data_category,many=True):
@@ -660,14 +661,14 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
-          
+            
+            course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
             user_email = [x[2] for x in Individuals11]
-            course_name = [x[0] for x in Individuals11]
             individual_details = {}
             final_dict = {}
-            individual_details [USERNAME] = user_name
-            individual_details [COURSENAME] = course_name
+            individual_details[USERNAME] = user_name
+            individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
             counter = 0
             for v in individual_details[COURSENAME]:
@@ -887,6 +888,7 @@ class SupplierDashboard_earningGraphView(APIView):
 
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
+        print("inside posttttttttttttttttttttttt")
         email_id = get_user_email_by_token(request)   
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -898,6 +900,9 @@ class CourseMaterialUpload(APIView):
             file_title = request.POST.get(FILE_TITLE,None)
             document_files = request.FILES.getlist(DOCUMENT_FILES,None)
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            print(video_files, "videooooooooo")
+            print(document_files, "documenttttt")
+            print(request.FILES, "filesssssss")
             reccord_map = {}
             reccord_map = {
                 "video_title" : video_title,      
@@ -905,9 +910,11 @@ class CourseMaterialUpload(APIView):
                 "course_id" : course_data.id
                 }
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+            print("saveddddddddddddddddddddddd")
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
+                        print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                         print(data1, "data11111")
                         data[0].document_files.add(data1[0].id)
@@ -924,7 +931,7 @@ class CourseMaterialUpload(APIView):
                 except Exception as ex:
                     print(ex, "exexexexe")
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Material Uploaded successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
         print("uuid",uuid)
@@ -988,7 +995,7 @@ class CourseMaterialUpload(APIView):
             except Exception as ex:
                 print(ex, "exexexexe")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Material Eited successfully"}, status=status.HTTP_200_OK)
 
        
 
