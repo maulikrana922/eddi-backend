@@ -941,20 +941,20 @@ class FavCourseDetails(APIView):
         try:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
                 try:
-                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True})
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True)
                 except Exception as ex:
                     data= None
-                    return Response({STATUS: ERROR, DATA: "NO Data"}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(data)})
+                except:
+                    course_data = None
 
-                if serializer := FavouriteCourseSerializer(data, many=True):
+                if serializer := CourseDetailsSerializer(course_data, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST) 
         except:
-            return Response({STATUS: ERROR, DATA: "ERROR Fetching data"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
+            return Response({STATUS: ERROR, DATA: "Error getting favourite course data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ViewIndividualProfile(APIView):
