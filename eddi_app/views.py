@@ -919,10 +919,8 @@ class FavCourseDetails(APIView):
                 data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True)
             except Exception as ex:
                 data= None
-            print(data,'--------------data')
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(data)})
-                print(course_data, "course_dataaa---------------------------course")
             except:
                 course_data = None
 
