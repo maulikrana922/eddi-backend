@@ -1401,6 +1401,12 @@ class RecruitmentAdView(APIView):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                if serializer := RecruitmentAdSerializer(data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                 try:
                     data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"supplier_profile__supplier_email":email_id}).order_by("-created_date_time")
