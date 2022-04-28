@@ -314,6 +314,11 @@ class GetCourseDetails(APIView):
         course_name = None
         course_data = None
         individuals = None
+        try:
+            vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+            vat_val = int(vat[0])
+        except Exception as ex:
+            vat_val = None
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
@@ -334,6 +339,7 @@ class GetCourseDetails(APIView):
               
             except Exception as e:
                 individuals = None
+                lerner_count = None
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_data.course_name, STATUS:"Success"})
             except Exception as ex:
@@ -342,7 +348,7 @@ class GetCourseDetails(APIView):
 
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,ENROLLED: "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -951,12 +957,13 @@ class CourseMaterialUpload(APIView):
         email_id = get_user_email_by_token(request)   
         if not uuid:
             return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
+        print("inside puttt")
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         video_title = request.POST.get(VIDEO_TITLE,course_material_data.video_title)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
         file_title = request.POST.get(FILE_TITLE,course_material_data.file_title)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
-        course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+        # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         reccord_map = {}
         reccord_map = {
             "video_title" : video_title,      
@@ -966,14 +973,18 @@ class CourseMaterialUpload(APIView):
         for key, value in reccord_map.items():
             setattr(course_material_data, key, value)
         course_material_data.save()
+        print("PUTTTTTTTTTTTTt")
         # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+        print(request.FILES.getlist(DOCUMENT_FILES), "filesssssss")
         if request.FILES.getlist(DOCUMENT_FILES):
+            print("inside doccccc")
             try:
                 old_docs = course_material_data.document_files.all()
                 for i in old_docs:
                     getattr(models,"MaterialDocumentMaterial").objects.get(**{"uuid":i.uuid}).delete()
                     print("Done")
                 course_material_data.document_files.clear()
+                print("clearrrrr")
                 for i in document_files:
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                     print(data1, "data11111")
