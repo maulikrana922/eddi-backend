@@ -856,19 +856,75 @@ class EventPaymentDetail_info(APIView):
                     }
                     getattr(models,EVENTAD_ENROLL_TABLE).objects.update_or_create(**record_map)
                     try:
-                        print("INNER")
+                        instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+                        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                        vat_val = int(vat[0])
                         html_path = EVENT_ENROLL_HTML
-                        context_data = {"event_name": event_name, "fullname":profile_data.first_name + " " + profile_data.last_name}
+                        fullname = f'{instance.first_name} {instance.last_name}'
+                        context_data = {'fullname':fullname, "course_name":event_name}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
-                        recipient_list = (user_email_id,)
+                        recipient_list = (instance.email_id,)
+                        invoice_number = random.randrange(100000,999999)
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
+                        template = get_template('invoice.html').render(context_data1)
+                        try:
+                            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
+                        except:
+                            pass
+                        record = {}
+                        try:
+                            record = {
+                            "invoice_number" : invoice_number,
+                            "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
+                            "user_email" : instance.email_id,
+                            "event_name" : event_name
+                            }
+                            getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
+                        except Exception as ex:
+                            pass
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        filename = f"./media/invoice-{invoice_number}.pdf"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
+                        email_msg.attach(img)
+                        email_msg.attach_file(filename) 
                         email_msg.send(fail_silently=False)
-                        print("TRUE")
-                        print("Enrolll createdddd")
                     except Exception as ex:
-                        print(ex, "exxexexexe")
+                        pass
+
+                    # try:
+                    #     print("INNER")
+                    #     html_path = EVENT_ENROLL_HTML
+                    #     context_data = {"event_name": event_name, "fullname":profile_data.first_name + " " + profile_data.last_name}
+                    #     email_html_template = get_template(html_path).render(context_data)
+                    #     email_from = settings.EMAIL_HOST_USER
+                    #     recipient_list = (user_email_id,)
+                    #     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    #     email_msg.content_subtype = 'html'
+                    #     path = 'eddi_app'
+                    #     img_dir = 'static'
+                    #     image = 'Logo.jpg'
+                    #     file_path = os.path.join(path,img_dir,image)
+                    #     with open(file_path,'rb') as f:
+                    #         img = MIMEImage(f.read())
+                    #         img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    #         img.add_header('Content-Disposition', 'inline', filename=image)
+                    #     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    #     email_msg.content_subtype = 'html'
+                    #     email_msg.attach(img)
+                    #     email_msg.send(fail_silently=False)
+                    #     print("TRUE")
+                    #     print("Enrolll createdddd")
+                    # except Exception as ex:
+                    #     print(ex, "exxexexexe")
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
