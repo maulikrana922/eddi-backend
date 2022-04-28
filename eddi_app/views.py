@@ -712,6 +712,7 @@ class UserProfileView(APIView):
             LEVEL_OF_ROLE : request.POST.get(LEVEL_OF_ROLE,data.level_of_role),
             FUTURE_PROFESSIONAL_ROLE : request.POST.get(FUTURE_PROFESSIONAL_ROLE,data.future_professional_role),
             COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),            
+            AREA_OF_INTEREST : request.POST.get(AREA_OF_INTEREST,data.area_of_interest),            
         }
             if request.POST.get(AGREE_ADS_TERMS):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
@@ -827,11 +828,11 @@ class UserPaymentDetail_info(APIView):
                             img = MIMEImage(f.read())
                             img.add_header('Content-ID', '<{name}>'.format(name=image))
                             img.add_header('Content-Disposition', 'inline', filename=image)
-                        filename = f"./media/invoice-{invoice_number}.pdf"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         print(1111)
                         email_msg.attach(img)
+                        filename = f"./media/invoice-{invoice_number}.pdf"
                         email_msg.attach_file(filename) 
                         email_msg.send(fail_silently=False)
                         print("sentttt")
