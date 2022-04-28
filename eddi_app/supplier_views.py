@@ -624,6 +624,7 @@ class AdminDashboardView(APIView):
     def get(self, request,uuid = None): 
         admin_email = get_user_email_by_token(request)
         try:
+            admin_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:admin_email})
             total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
@@ -638,6 +639,7 @@ class AdminDashboardView(APIView):
         if serializer :=  UserSignupSerializer(users, many = True):
             if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
                 return Response({STATUS: SUCCESS,
+            "admin_name" : admin_data.first_name + " " + admin_data.last_name,
             "supplier_count": total_supplier,
             "user_count": total_user,
             "total_course": total_course,
@@ -655,6 +657,7 @@ class SupplierDashboardView(APIView):
         supplier_email = get_user_email_by_token(request)
 
         try:
+            supplier_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"email_id":supplier_email})
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
@@ -702,6 +705,7 @@ class SupplierDashboardView(APIView):
             newvar = None
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
+            "supplier_name" :supplier_data.first_name + " " + supplier_data.last_name,
             TOTAL_COURSE_COUNT: total_course,
             TOTAL_USER_COUNT: total_user,
             SUPPLIER_COURSE_COUNT: supplier_course_count,
