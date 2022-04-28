@@ -385,7 +385,7 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
-                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'}).values_list("course_name", flat=True)
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
                     
                     data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
