@@ -624,7 +624,7 @@ class AdminDashboardView(APIView):
     def get(self, request,uuid = None): 
         admin_email = get_user_email_by_token(request)
         try:
-            admin_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:admin_email})
+            admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
             total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
@@ -657,7 +657,7 @@ class SupplierDashboardView(APIView):
         supplier_email = get_user_email_by_token(request)
 
         try:
-            supplier_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"email_id":supplier_email})
+            supplier_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":supplier_email})
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
