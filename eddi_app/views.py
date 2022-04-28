@@ -1357,7 +1357,10 @@ class RecruitmentAdView(APIView):
         email_id =  get_user_email_by_token(request)
         print(email_id, "emailllll")
         record_map = {}
-        supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
+        try:
+            supplier_id = getattr(models,"SupplierProfile").objects.get(**{"supplier_email":email_id})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Need to Add Supplier Profile First"}, status=status.HTTP_200_OK)
         print(supplier_id, "ididididid")
         try:
             record_map = {
