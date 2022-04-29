@@ -314,6 +314,11 @@ class GetCourseDetails(APIView):
         course_name = None
         course_data = None
         individuals = None
+        try:
+            vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+            vat_val = int(vat[0])
+        except Exception as ex:
+            vat_val = None
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
@@ -334,6 +339,7 @@ class GetCourseDetails(APIView):
               
             except Exception as e:
                 individuals = None
+                lerner_count = None
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_data.course_name, STATUS:"Success"})
             except Exception as ex:
@@ -342,7 +348,7 @@ class GetCourseDetails(APIView):
 
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,ENROLLED: "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -379,7 +385,7 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     organization_domain = email_id.split('@')[1]
-                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.all().values_list("course_name", flat=True)
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
                     
                     data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
@@ -618,6 +624,7 @@ class AdminDashboardView(APIView):
     def get(self, request,uuid = None): 
         admin_email = get_user_email_by_token(request)
         try:
+            admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
             total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
@@ -632,6 +639,7 @@ class AdminDashboardView(APIView):
         if serializer :=  UserSignupSerializer(users, many = True):
             if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
                 return Response({STATUS: SUCCESS,
+            "admin_name" : admin_data.first_name + " " + admin_data.last_name,
             "supplier_count": total_supplier,
             "user_count": total_user,
             "total_course": total_course,
@@ -649,6 +657,7 @@ class SupplierDashboardView(APIView):
         supplier_email = get_user_email_by_token(request)
 
         try:
+            supplier_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":supplier_email})
             total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
@@ -696,6 +705,7 @@ class SupplierDashboardView(APIView):
             newvar = None
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
+            "supplier_name" :supplier_data.first_name + " " + supplier_data.last_name,
             TOTAL_COURSE_COUNT: total_course,
             TOTAL_USER_COUNT: total_user,
             SUPPLIER_COURSE_COUNT: supplier_course_count,
@@ -951,12 +961,13 @@ class CourseMaterialUpload(APIView):
         email_id = get_user_email_by_token(request)   
         if not uuid:
             return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
+        print("inside puttt")
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         video_title = request.POST.get(VIDEO_TITLE,course_material_data.video_title)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
         file_title = request.POST.get(FILE_TITLE,course_material_data.file_title)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
-        course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+        # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         reccord_map = {}
         reccord_map = {
             "video_title" : video_title,      
@@ -966,14 +977,18 @@ class CourseMaterialUpload(APIView):
         for key, value in reccord_map.items():
             setattr(course_material_data, key, value)
         course_material_data.save()
+        print("PUTTTTTTTTTTTTt")
         # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+        print(request.FILES.getlist(DOCUMENT_FILES), "filesssssss")
         if request.FILES.getlist(DOCUMENT_FILES):
+            print("inside doccccc")
             try:
                 old_docs = course_material_data.document_files.all()
                 for i in old_docs:
                     getattr(models,"MaterialDocumentMaterial").objects.get(**{"uuid":i.uuid}).delete()
                     print("Done")
                 course_material_data.document_files.clear()
+                print("clearrrrr")
                 for i in document_files:
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                     print(data1, "data11111")
@@ -1045,9 +1060,6 @@ class SupplierOrganizationProfileview(APIView):
 
     
     def put(self, request):
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
-
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
@@ -1086,22 +1098,40 @@ class SupplierProfileView(APIView):
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
+            print(ex, "exexexe")
             data= None
-        try:
-            record_map = {
-                SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,data.supplier_name),
-                ADDRESS : request.POST.get(ADDRESS,data.address),
-                PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
-                SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,data.supplier_image),
-            }
+        if data is not None:
+            try:
+                record_map = {
+                    SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,data.supplier_name),
+                    SUPPLIER_EMAIL : email_id,
+                    ADDRESS : request.POST.get(ADDRESS,data.address),
+                    PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
+                    SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,data.supplier_image),
+                }
 
-            record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-            for key,value in record_map.items():
-                setattr(data,key,value)
-            data.save()            
-            return Response({STATUS: SUCCESS, DATA: "Profile Data edited successfully"}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
+                record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+                for key,value in record_map.items():
+                    setattr(data,key,value)
+                data.save()            
+                return Response({STATUS: SUCCESS, DATA: "Profile Data edited successfully"}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                record_map = {
+                    SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,None),
+                    SUPPLIER_EMAIL : email_id,
+                    ADDRESS : request.POST.get(ADDRESS,None),
+                    PHONE_NUMBER : request.POST.get(PHONE_NUMBER,None),
+                    SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,None),
+                }
+                record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+                getattr(models,SUPPLIER_PROFILE_TABLE).objects.update_or_create(**record_map)
+                return Response({STATUS: SUCCESS, DATA: "Profile Data created successfully"}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
+
 
     
     def get(self, request):
@@ -1109,7 +1139,7 @@ class SupplierProfileView(APIView):
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
-            data= None
+            return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer := SupplierProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:

@@ -18,6 +18,7 @@ urlpatterns = [
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),
     path('changepassword/<str:uuid>/',ChangePasswordView.as_view(), name="changepassword"),
+    path('verify-user/<str:uuid>/',VerifyUser.as_view(), name="VerifyUser"),
     path('resetpassword/',ResetPasswordView.as_view(), name="resetpassword"),
     path('get-user-details/<str:uuid>/',GetUserDetails.as_view()),
     path('get-user-details/',GetUserDetails.as_view()),
