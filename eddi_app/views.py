@@ -287,17 +287,62 @@ class GetUserDetails(APIView):
     def get(self, request,uuid = None):
         email_id =  get_user_email_by_token(request)
         if uuid:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-            if serializer := UserSignupSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type ==ADMIN_S:
+                    data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                    if userSignup_serializer :=  UserSignupSerializer(data):
+                        if data.user_type.user_type =='User':
+                            try:
+                                profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA: "User profile data not data found"}, status=status.HTTP_400_BAD_REQUEST)
+                                
+                            if serializer := UserProfileSerializer(profile_data):
+                                return Response({STATUS: SUCCESS, DATA: [serializer.data,userSignup_serializer.data]}, status=status.HTTP_200_OK)
+                            else:
+                                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+                        elif data.user_type.user_type ==SUPPLIER_S:
+                            supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":email_id}).count()
+                            try:
+                                try:
+                                    organization_profile_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:data.email_id})
+                                except Exception as ex:
+                                    organization_profile_data= None
+                                try:
+                                    supplier_profile_data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{'supplier_email':data.email_id})
+                                except Exception as ex:
+                                    supplier_profile_data= None
+
+                                if serializer := SupplierOrganizationProfileSerializer(organization_profile_data):
+                                    if serializer1 := SupplierProfileSerializer(supplier_profile_data):
+                                        return Response({STATUS: SUCCESS, 'organization_profile': serializer.data, 'supplier_profile':[serializer1.data,userSignup_serializer.data], 'total_course':supplier_course_count}, status=status.HTTP_200_OK)
+                                    else:
+                                        return Response({STATUS: ERROR, DATA:serializer1.errors}, status=status.HTTP_400_BAD_REQUEST)
+                                else:
+                                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile"}, status=status.HTTP_400_BAD_REQUEST)
+            
+                        elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type ==SUPPLIER_S:  
+                            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                            if serializer := UserSignupSerializer(data):
+                                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                            else:
+                                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        return Response({STATUS: ERROR, DATA: serializer.errors, "Data":"Data not found in UserSignUp Tabl.e"}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
+       
         else:
             data = getattr(models,USERSIGNUP_TABLE).objects.all()
             if serializer := UserSignupSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
     def put(self,request,uuid = None):  # sourcery skip: class-extract-method
         email_id =  get_user_email_by_token(request)
