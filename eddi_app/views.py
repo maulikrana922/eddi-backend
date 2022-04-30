@@ -125,15 +125,17 @@ class Save_stripe_info(APIView):
                         except Exception as ex:
                             pass
                         try:
-                            filename = f"invoice-{invoice_number}.pdf"
+                            filename = f"/invoice-{invoice_number}.pdf"
                         except Exception as ex:
                             filename = f"requirements.txt"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            email_msg.attach_file(filename) 
+                            # email_msg.attach(img)
+                            email_msg.attach_file(f'invoice-{invoice_number}.pdf') 
                         except Exception as ex:
+                            email_msg.attach_file(f'requirements.txt') 
                             pass
                         email_msg.send(fail_silently=False)
                     except Exception as ex:
