@@ -124,8 +124,10 @@ class Save_stripe_info(APIView):
                                 img.add_header('Content-Disposition', 'inline', filename=image)
                         except Exception as ex:
                             pass
-                        # filename = f"invoice-{invoice_number}.pdf"
-                        filename = f"requirements.txt"
+                        try:
+                            filename = f"invoice-{invoice_number}.pdf"
+                        except Exception as ex:
+                            filename = f"requirements.txt"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
