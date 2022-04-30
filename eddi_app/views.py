@@ -345,25 +345,42 @@ class GetUserDetails(APIView):
         email_id =  get_user_email_by_token(request)
         if uuid:
             try:
-                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type ==ADMIN_S:
-                    data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+                    # Below Line : To make Active or Inactive to Particular user or supplier 
                     if userSignup_serializer :=  UserSignupSerializer(data):
                         if data.user_type.user_type =='User':
                             try:
                                 profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "User profile data not data found"}, status=status.HTTP_400_BAD_REQUEST)
+
+                            try:
+                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course_name", flat=True)
+                                course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA: "Error in User Course Listing"}, status=status.HTTP_400_BAD_REQUEST)
                                 
                             if serializer := UserProfileSerializer(profile_data):
-                                return Response({STATUS: SUCCESS, DATA: [serializer.data,userSignup_serializer.data]}, status=status.HTTP_200_OK)
+                                if serializer2 := CourseDetailsSerializer(course_list, many=True):
+                                    return Response({STATUS: SUCCESS, DATA: [serializer.data,userSignup_serializer.data], "course_list":serializer2.data}, status=status.HTTP_200_OK)
+                                else:
+                                    return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
                         elif data.user_type.user_type ==SUPPLIER_S:
-
-                            supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":email_id}).count()
-                            supplier_all_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":email_id}).values_list("course_name", flat=True)
-                            enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).count()
+                            try:
+                                supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).count()
+                                supplier_all_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).values_list("course_name", flat=True)
+                                print(supplier_all_course, "all")
+                                enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).count()
+                                individuals_useremail = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).values_list("email_id", flat=True)
+                                print(individuals_useremail, "useremail")
+                                individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
+                                print(individuals_user, "userere")
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA: "Error in filtering data"}, status=status.HTTP_400_BAD_REQUEST)
 
                             try:
                                 try:
@@ -374,14 +391,16 @@ class GetUserDetails(APIView):
                                     supplier_profile_data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{'supplier_email':data.email_id})
                                 except Exception as ex:
                                     supplier_profile_data= None
-
                                 if serializer := SupplierOrganizationProfileSerializer(organization_profile_data):
                                     if serializer1 := SupplierProfileSerializer(supplier_profile_data):
-                                        return Response({STATUS: SUCCESS, 'organization_profile': serializer.data, 'supplier_profile':[serializer1.data,userSignup_serializer.data], 'total_course':supplier_course_count, "learners":enrolled_count}, status=status.HTTP_200_OK)
+                                        if serializer2 := UserProfileSerializer(individuals_user, many=True):
+                                            return Response({STATUS: SUCCESS, 'organization_profile': serializer.data, 'supplier_profile':[serializer1.data,userSignup_serializer.data], 'total_course':supplier_course_count, "learners":enrolled_count, "individual_list":serializer2.data}, status=status.HTTP_200_OK)
+                                        else:
+                                            return Response({STATUS: ERROR, DATA:serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
                                     else:
                                         return Response({STATUS: ERROR, DATA:serializer1.errors}, status=status.HTTP_400_BAD_REQUEST)
                                 else:
-                                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                                    return Response({STATUS: ERROR, DATA:serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile"}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -392,7 +411,13 @@ class GetUserDetails(APIView):
                             else:
                                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        return Response({STATUS: ERROR, DATA: serializer.errors, "Data":"Data not found in UserSignUp Tabl.e"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found in UserSignUp Table"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+
+                    return Response({STATUS: ERROR, DATA:"You are not authorized to make this data request"}, status=status.HTTP_400_BAD_REQUEST)
+
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
        
@@ -1336,7 +1361,10 @@ class EventView(APIView):
             vat_val = None
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            subscriber = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name}).count()
+            # if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+            individuals = getattr(models,EVENTAD_ENROLL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
+
+            subscriber = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name, "status":"Success"}).count()
             try:
                 var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:email_id, EVENT_NAME:data.event_name,STATUS:'Success'})
             except Exception as ex:
@@ -1344,7 +1372,11 @@ class EventView(APIView):
             var1 = True if var is not None else False
            
             if serializer := EventAdSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data, SUBSCRIBER_COUNT:subscriber, "is_enrolled":var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
+                if serializer2 := EventAdEnrollSerializer(individuals, many=True):
+                    print("gotttttt")
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, SUBSCRIBER_COUNT:subscriber, "is_enrolled":var1, "VAT_charges":vat_val, "individuals":serializer2.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
