@@ -99,7 +99,8 @@ class Save_stripe_info(APIView):
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
                         template = get_template('invoice.html').render(context_data1)
                         try:
-                            pdfkit.from_string(template,f"invoice-{invoice_number}.pdf")
+                            # pdfkit.from_string(template,f"invoice-{invoice_number}.pdf")
+                            pdfkit.from_string(template,f"{invoice_number}.pdf")
                         except:
                             pass
                         record = {}
@@ -159,6 +160,10 @@ class Save_stripe_info(APIView):
                             email_msg.attach_file(f'./invoice-{invoice_number}.pdf') 
                         except:
                             pass
+                        try:
+                            email_msg.attach_file(f"{invoice_number}.pdf") 
+                        except:
+                            pass
                         # try:
                         #     email_msg.attach_file(f'/eddi-backend/invoice-{invoice_number}.pdf') 
                         # except:
@@ -174,6 +179,7 @@ class Save_stripe_info(APIView):
                         try:
                             email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
                         except:
+                            email_msg.attach_file(f'requirements.txt') 
                             email_msg.attach_file(f'requirements.txt') 
                             # pass
                         # except Exception as ex:
