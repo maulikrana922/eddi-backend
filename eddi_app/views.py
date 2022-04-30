@@ -132,11 +132,28 @@ class Save_stripe_info(APIView):
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            # email_msg.attach(img)
-                            email_msg.attach_file(f'invoice-{invoice_number}.pdf') 
-                        except Exception as ex:
-                            email_msg.attach_file(f'requirements.txt') 
+                            email_msg.attach_file(f'/media/invoice-{invoice_number}.pdf') 
+                        except:
                             pass
+                        try:
+                            email_msg.attach_file(f'/eddi-backend/invoice-{invoice_number}.pdf') 
+                        except:
+                            pass
+                        try:
+                            email_msg.attach_file(f'./eddi-backend/invoice-{invoice_number}.pdf') 
+                        except:
+                            pass
+                        try:
+                            email_msg.attach_file(f'Eddi/eddi-backend/invoice-{invoice_number}.pdf') 
+                        except:
+                            pass
+                        try:
+                            email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
+                        except:
+                            email_msg.attach_file(f'requirements.txt') 
+                            # pass
+                        # except Exception as ex:
+                            # pass
                         email_msg.send(fail_silently=False)
                     except Exception as ex:
                         pass
