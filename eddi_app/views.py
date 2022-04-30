@@ -107,7 +107,7 @@ class Save_stripe_info(APIView):
                         try:
                             record = {
                             "invoice_number" : invoice_number,
-                            "invoice_file" : f"invoice-{invoice_number}.pdf",
+                            "invoice_file" : f"{invoice_number}.pdf",
                             "user_email" : instance.email_id,
                             "course_name" : course_name
                             }
@@ -132,34 +132,34 @@ class Save_stripe_info(APIView):
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
-                        try:
-                            email_msg.attach_file(f'./media/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'./media/invoices/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'./media/invoice/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'.invoice/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'.templates/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
-                        try:
-                            email_msg.attach_file(f'./invoice-{invoice_number}.pdf') 
-                        except:
-                            pass
+                        # try:
+                        #     email_msg.attach_file(f'./media/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'./media/invoices/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'./media/invoice/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'.invoice/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'.templates/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
+                        # try:
+                        #     email_msg.attach_file(f'./invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     pass
                         try:
                             email_msg.attach_file(f"{invoice_number}.pdf") 
                         except:
@@ -176,11 +176,11 @@ class Save_stripe_info(APIView):
                         #     email_msg.attach_file(f'Eddi/eddi-backend/invoice-{invoice_number}.pdf') 
                         # except:
                         #     pass
-                        try:
-                            email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
-                        except:
-                            email_msg.attach_file(f'requirements.txt') 
-                            email_msg.attach_file(f'requirements.txt') 
+                        # try:
+                        #     email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
+                        # except:
+                        #     email_msg.attach_file(f'requirements.txt') 
+                        #     email_msg.attach_file(f'requirements.txt') 
                             # pass
                         # except Exception as ex:
                             # pass
