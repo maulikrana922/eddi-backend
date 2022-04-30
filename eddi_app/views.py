@@ -113,15 +113,19 @@ class Save_stripe_info(APIView):
                             getattr(models,"InvoiceData").objects.update_or_create(**record)
                         except Exception as ex:
                             pass
-                        path = 'eddi_app'
-                        img_dir = 'static'
-                        image = 'Logo.jpg'
-                        file_path = os.path.join(path,img_dir,image)
-                        with open(file_path,'rb') as f:
-                            img = MIMEImage(f.read())
-                            img.add_header('Content-ID', '<{name}>'.format(name=image))
-                            img.add_header('Content-Disposition', 'inline', filename=image)
-                        filename = f"invoice-{invoice_number}.pdf"
+                        try:
+                            path = 'eddi_app'
+                            img_dir = 'static'
+                            image = 'Logo.jpg'
+                            file_path = os.path.join(path,img_dir,image)
+                            with open(file_path,'rb') as f:
+                                img = MIMEImage(f.read())
+                                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                img.add_header('Content-Disposition', 'inline', filename=image)
+                        except Exception as ex:
+                            pass
+                        # filename = f"invoice-{invoice_number}.pdf"
+                        filename = f"requirements.txt"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
