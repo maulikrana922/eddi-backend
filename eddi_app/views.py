@@ -131,7 +131,10 @@ class Save_stripe_info(APIView):
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
-                        email_msg.attach_file(filename) 
+                        try:
+                            email_msg.attach_file(filename) 
+                        except Exception as ex:
+                            pass
                         email_msg.send(fail_silently=False)
                     except Exception as ex:
                         pass
