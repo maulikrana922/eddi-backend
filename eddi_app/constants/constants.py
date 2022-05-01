@@ -6,6 +6,7 @@ AMOUNT = 'amount'
 PRICE = 'price'
 PAYMENT_METHOD_ID = 'payment_method_id'
 STATUS_ID = 'status_id'
+IS_DELETED = "is_deleted"
 UUID = 'uuid'
 PASSWORD = 'password'
 STATUS = 'status'

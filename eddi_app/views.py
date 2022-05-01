@@ -293,7 +293,7 @@ class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
         if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
         except:
@@ -303,6 +303,7 @@ class UserSignupView(APIView):
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
             LAST_NAME: request.POST.get(LAST_NAME,None),
             EMAIL_ID: request.POST.get(EMAIL_ID,None),            
+            "is_login_from": request.POST.get("is_login_from",None),            
             USER_TYPE_ID: user_type_id.id,
             STATUS_ID:1
         }
@@ -479,21 +480,19 @@ class GetUserDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
 
     def delete(self,request,uuid = None):
+        email_id =  get_user_email_by_token(request)
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "UUID not Provided"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except:
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
-            EMAIL_ID: data.email_id,
-            PASSWORD: request.POST.get(PASSWORD,data.password),
-            USER_TYPE_ID: 2,
-            IS_FIRST_TIME_LOGIN : request.POST.get(IS_FIRST_TIME_LOGIN,data.is_first_time_login),
-            STATUS_ID:2
+            STATUS_ID:2,
+            IS_DELETED :True
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-        record_map[MODIFIED_BY] = 'admin'
+        record_map[MODIFIED_BY] = email_id
         record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
@@ -522,7 +521,7 @@ class UserLoginView(APIView):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
             
         except Exception as ex:
@@ -533,8 +532,11 @@ class UserLoginView(APIView):
                 user_profile = True
         except Exception as ex:
             user_profile = False
-        serializer = UserSignupSerializer(data)
-        if serializer and data:
+        # serializer = UserSignupSerializer(data)
+        # if serializer and data:
+        if data is not None:
+            if data.is_login_from:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_active == True:
@@ -552,7 +554,7 @@ class ForgetPasswordView(APIView):
         email_id = request.POST.get(EMAIL_ID)
         request.session['forget-password'] = email_id
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
         except:
             data = None
         try:
@@ -591,7 +593,7 @@ class ResetPasswordView(APIView):
     def post(self,request,slug=None):
         email_id = request.POST.get(EMAIL_ID)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             password = request.POST.get(PASSWORD)
         except:
             data = None
@@ -1393,11 +1395,13 @@ class EventView(APIView):
                     a = cat.course_category.split(",")
                 except Exception as ex:
                     a = cat.course_category.split()
-                category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).order_by("-created_date_time")
 
-                category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).values_list(EVENT_NAME, flat=True)
+                user_data = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EMAIL_ID:email_id}).values_list("event_name", flat=True)
+                category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = user_data).order_by("-created_date_time")
 
-                all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
+                category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = user_data).values_list(EVENT_NAME, flat=True)
+
+                all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
 
                 if serializer := EventAdSerializer(category_event, many=True):
                     if serializer1 := EventAdSerializer(all_event_data, many=True):
@@ -1414,6 +1418,12 @@ class EventView(APIView):
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})            
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            enrolled = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
+            if enrolled.exists():
+                return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Event You Can't Edit"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            pass
         
         try:
             record_map = {
@@ -1491,6 +1501,7 @@ class EventView(APIView):
         try:
             record_map = {}
             record_map[STATUS_ID] = 2
+            record_map[IS_DELETED] = True
             record_map[UUID] = uuid4()
             for key,value in record_map.items():
                 setattr(data,key,value)
@@ -1544,7 +1555,8 @@ class RecruitmentAdView(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == "User" and getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id}).agree_ads_terms == True:
-                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                print("okokokokokokokokokokokokokok")
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"recruitmentAd_Expiry__gte":datetime.datetime.now().date()}).order_by("-created_date_time")
                 if serializer := RecruitmentAdSerializer(data, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
@@ -1641,6 +1653,7 @@ class RecruitmentAdView(APIView):
         try:
             record_map = {}
             record_map[STATUS_ID] = 2
+            record_map[IS_DELETED] = True
             record_map[UUID] = uuid4()
             for key,value in record_map.items():
                 setattr(data,key,value)
@@ -1676,7 +1689,7 @@ class CourseEnrollView(APIView):
                 print(ex, "exxxxxxxxx")
             organization_domain = email_id.split('@')[1]
             try:
-                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
+                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
                 print(data_category, "data category")
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
@@ -1709,7 +1722,7 @@ class EventEnrollView(APIView):
             except Exception as ex:
                 a = category.course_category.split()
             try:
-                category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = enroll_data).order_by("-created_date_time")
+                category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1, IS_DELETED:False}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = enroll_data).order_by("-created_date_time")
             except:
                 category_event = None
 

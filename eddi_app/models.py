@@ -98,6 +98,7 @@ class UserSignup(models.Model):
     is_authenticated = models.BooleanField(default=False)
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name='Is Login From')
     is_active = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
@@ -217,6 +218,7 @@ class CourseCategoryDetails(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    is_deleted = models.BooleanField(default=False)
 
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
@@ -247,6 +249,7 @@ class CourseSubCategoryDetails(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
+    is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
@@ -342,6 +345,7 @@ class CourseDetails(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
+    is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
     class Meta:
@@ -422,7 +426,6 @@ def send_contact_usl(sender, instance, created, **kwargs):
 
 class BlogDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-
     blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name="Blog Image")
     blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name='Blog Title')
     blog_description = RichTextField(verbose_name = 'Blog Description',blank = True)
@@ -433,7 +436,7 @@ class BlogDetails(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-
+    is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
 
@@ -448,7 +451,7 @@ class TestinomialsDetails(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-
+    is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
 
 
@@ -532,9 +535,6 @@ class HomePageCMS(models.Model):
    
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-
-
-
 
     class Meta:
         verbose_name = "Home Page"
@@ -722,6 +722,7 @@ class UserProfile(models.Model):
     user_interests = models.JSONField(blank=True,null=True, verbose_name="User Interests")
     area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name="Area of Interest")
     agree_ads_terms = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
 
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
@@ -753,7 +754,7 @@ class SupplierOrganizationProfile(models.Model):
 
     # Additional Information
     organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
-
+    is_deleted = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
@@ -767,7 +768,7 @@ class SupplierProfile(models.Model):
     address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
     phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
     supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')
-
+    is_deleted = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
@@ -799,7 +800,6 @@ class CourseEnroll(models.Model):
     supplier_email = models.EmailField(blank=True,null=True,verbose_name='supplier email')
     payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
     user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
-    
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
 
 
@@ -856,7 +856,7 @@ class EventAd(models.Model):
     event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name="Organizer")
     event_subscriber = models.IntegerField(default=0,verbose_name='Course Subscriber',blank=True,null=True)
     is_featured = models.BooleanField(default=False)
-
+    is_deleted = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='EventAd Created Date Time')
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=1)
 
@@ -887,7 +887,6 @@ class EventAdEnroll(models.Model):
     admin_email = models.EmailField(blank=True,null=True,verbose_name='Admin Email')
     payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
     user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
-    
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
     def __str__(self):
@@ -897,6 +896,7 @@ class EventAdEnroll(models.Model):
 class MaterialVideoMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
+    actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name="Actual Video Duration")
     created_date_time = models.DateTimeField(auto_now_add=True)
 
     # def __str__(self):
@@ -905,6 +905,7 @@ class MaterialVideoMaterial(models.Model):
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
+    file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Size")
     created_date_time = models.DateTimeField(auto_now_add=True)
 
     # def __str__(self):
@@ -918,9 +919,15 @@ class CourseMaterial(models.Model):
     file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Title")
     document_files = models.ManyToManyField(MaterialDocumentMaterial,verbose_name='Document Files',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.course.course_name
+
+
+# class CourseCompleteStatus(models.Model):
+#     course_material = models.ForeignKey(CourseMaterial,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course Material")
+#     user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name="User")
 
 
 class RecruitmentAd(models.Model):
@@ -936,6 +943,7 @@ class RecruitmentAd(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
     is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
+    is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
 
         

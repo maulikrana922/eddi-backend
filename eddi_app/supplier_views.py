@@ -173,7 +173,7 @@ class GetSubCategoryDetails(APIView):
                 elif user_type_data == SUPPLIER_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
                 else:
-                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).order_by("-created_date_time")
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).order_by("-created_date_time")
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -281,6 +281,7 @@ class GetSubCategoryDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
 
     def delete(self,request,uuid = None):
+        email_id =  get_user_email_by_token(request)
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -291,10 +292,12 @@ class GetSubCategoryDetails(APIView):
             CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME,data.category_name_id),
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
-            STATUS_ID:2
+            STATUS_ID:2,
+            IS_DELETED:True
+
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-        record_map[MODIFIED_BY] = 'admin'
+        record_map[MODIFIED_BY] = email_id
         record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
@@ -387,11 +390,11 @@ class GetCourseDetails(APIView):
                     organization_domain = email_id.split('@')[1]
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
                     
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
+                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
+                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
                 if serializer := CourseDetailsSerializer(data_category,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
@@ -422,11 +425,18 @@ class GetCourseDetails(APIView):
         res = None
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:data.course_name})
+            if enrolled.exists():
+                return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course You Can't Edit"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            pass
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
 
@@ -594,6 +604,7 @@ class GetCourseDetails(APIView):
 
 
     def delete(self,request,uuid = None):
+        email_id =  get_user_email_by_token(request)
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -610,10 +621,11 @@ class GetCourseDetails(APIView):
             FEE_TYPE_ID: request.POST.get(FEE_TYPE_ID,data.fee_type_id),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
-            STATUS_ID:2
+            STATUS_ID:2,
+            IS_DELETED:True
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-        record_map[MODIFIED_BY] = 'admin'
+        record_map[MODIFIED_BY] = email_id
         record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
@@ -695,7 +707,7 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1})
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False})
         except Exception as ex:
             all_subcategory = None
         try:
