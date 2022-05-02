@@ -593,8 +593,8 @@ class ContactUsPageCMS(models.Model):
     section_2_address = models.CharField(max_length=80,blank=True,null=True,verbose_name="Address")
     section_2_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name="Contact Number")
     section_2_email = models.EmailField(blank=True,null=True,verbose_name="Email ID")
-    section_2_latitude = models.CharField(max_length=80,blank=True,null=True,verbose_name="Latitude")
-    section_2_longitude = models.CharField(blank=True,null=True,verbose_name="Longitude")
+    section_2_latitude = models.CharField(max_length=100,blank=True,null=True,verbose_name="Latitude")
+    section_2_longitude = models.CharField(max_length=100,blank=True,null=True,verbose_name="Longitude")
 
     section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
 
