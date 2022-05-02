@@ -161,7 +161,7 @@ class Save_stripe_info(APIView):
                         # except:
                         #     pass
                         try:
-                            email_msg.attach_file(f"{invoice_number}.pdf") 
+                            email_msg.attach_file(f"{invoice_number}.pdf")
                         except:
                             pass
                         # try:
