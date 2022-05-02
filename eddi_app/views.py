@@ -2,14 +2,12 @@
 # import email
 # from copy import Error
 from email.mime.image import MIMEImage
-from msilib.schema import File
 import os
 
 # import profile
 # from string import printable
 import random
 from io import BytesIO
-from xhtml2pdf import pisa
 # from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
