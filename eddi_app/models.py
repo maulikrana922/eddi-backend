@@ -747,6 +747,8 @@ class SupplierOrganizationProfile(models.Model):
     brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
     organization_phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Organization Phone Number")
     contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
+    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
+    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
 
     # Course Category
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
@@ -765,6 +767,9 @@ class SupplierOrganizationProfile(models.Model):
 class SupplierProfile(models.Model):
     supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
     supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Supplier Name")
+    account_number = models.CharField(max_length=100,blank=True,null=True,verbose_name="Account Number")
+    account_holder_name = models.CharField(max_length=200,blank=True,null=True,verbose_name="Account Holder Name")
+    ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name="IFSC Code")
     address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
     phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
     supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')

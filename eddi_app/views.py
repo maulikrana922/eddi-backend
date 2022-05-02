@@ -708,7 +708,7 @@ class GetBlogDetails(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             
-            data = getattr(models,BLOGDETAILS_TABLE).objects.all()
+            data = getattr(models,BLOGDETAILS_TABLE).objects.all().order_by("-created_date_time")
             if serializer := BlogDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
