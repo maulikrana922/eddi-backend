@@ -49,12 +49,12 @@ class dummy(APIView):
         context_data = {'fullname':"Nishant", "course_name":"Testing"}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = ("nishant.kabariya@gmail.com",)
+        recipient_list = ("nishant.k@latitudetechnolabs.com",)
         invoice_number = random.randrange(100000,999999)
         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
         try:
-            pdfkit.from_string(template,f"{invoice_number}.pdf")
+            pdfkit.from_string(template,f"./media/invoice/{invoice_number}.pdf")
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
         except:
@@ -87,10 +87,13 @@ class dummy(APIView):
         email_msg.content_subtype = 'html'
         email_msg.attach(img)
         try:
-            email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
+            # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
+            email_msg.attach_file(f"./media/invoice/{invoice_number}.pdf") 
+            # email_msg.attach_file(f"requirements.txt") 
         except:
             pass
         email_msg.send(fail_silently=False)
+        return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
 
 
 @permission_classes([AllowAny])
