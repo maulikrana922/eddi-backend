@@ -889,7 +889,7 @@ class EventAdPaymentDetail(models.Model):
 
 class EventAdEnroll(models.Model):
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event name")
-    admin_email = models.EmailField(blank=True,null=True,verbose_name='Admin Email')
+    user_email = models.EmailField(blank=True,null=True,verbose_name='User Email')
     payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
     user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')

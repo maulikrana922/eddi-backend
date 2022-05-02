@@ -991,7 +991,7 @@ class EventPaymentDetail_info(APIView):
                     record_map = {}
                     record_map = {
                     EVENT_NAME : event_name,
-                    ADMIN_EMAIL : user_email_id,
+                    "user_email" : user_email_id,
                     PAYMENT_DETAIL_ID : var.id,
                     USER_PROFILE_ID : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())
