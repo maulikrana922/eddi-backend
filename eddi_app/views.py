@@ -99,15 +99,14 @@ class Save_stripe_info(APIView):
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
                         template = get_template('invoice.html').render(context_data1)
                         try:
-                            # pdfkit.from_string(template,f"invoice-{invoice_number}.pdf")
-                            pdfkit.from_string(template,f"{invoice_number}.pdf")
+                            pdfkit.from_string(template,f"./media/{invoice_number}.pdf")
                         except:
                             pass
                         record = {}
                         try:
                             record = {
                             "invoice_number" : invoice_number,
-                            "invoice_file" : f"{invoice_number}.pdf",
+                            "invoice_file" : f"./media/{invoice_number}.pdf",
                             "user_email" : instance.email_id,
                             "course_name" : course_name
                             }
@@ -125,65 +124,13 @@ class Save_stripe_info(APIView):
                                 img.add_header('Content-Disposition', 'inline', filename=image)
                         except Exception as ex:
                             pass
-                        try:
-                            filename = f"/invoice-{invoice_number}.pdf"
-                        except Exception as ex:
-                            filename = f"requirements.txt"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
-                        # try:
-                        #     email_msg.attach_file(f'./media/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'./media/invoices/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'./media/invoice/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'.invoice/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'.templates/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'./invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
                         try:
-                            email_msg.attach_file(f"{invoice_number}.pdf") 
+                            email_msg.attach_file(f'./media/invoice-{invoice_number}.pdf') 
                         except:
                             pass
-                        # try:
-                        #     email_msg.attach_file(f'/eddi-backend/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'./eddi-backend/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'Eddi/eddi-backend/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     pass
-                        # try:
-                        #     email_msg.attach_file(f'/invoice-{invoice_number}.pdf') 
-                        # except:
-                        #     email_msg.attach_file(f'requirements.txt') 
-                        #     email_msg.attach_file(f'requirements.txt') 
-                            # pass
-                        # except Exception as ex:
-                            # pass
                         email_msg.send(fail_silently=False)
                     except Exception as ex:
                         pass
