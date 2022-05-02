@@ -101,17 +101,17 @@ class Save_stripe_info(APIView):
                         template = get_template('invoice.html').render(context_data1)
                         try:
                             pdfkit.from_string(template,f"{invoice_number}.pdf")
-                            f = open(f'{invoice_number}.pdf')
-                            pdf = File(f)
+                            # f = open(f'{invoice_number}.pdf')
+                            # pdf = File(f)
                         except:
-                            f = None
-                            pdf = None
+                            # f = None
+                            # pdf = None
                             pass
                         record = {}
                         try:
                             record = {
                             "invoice_number" : invoice_number,
-                            "invoice_file" : pdf,
+                            "invoice_file" : f"{invoice_number}.pdf",
                             "user_email" : instance.email_id,
                             "course_name" : course_name
                             }
