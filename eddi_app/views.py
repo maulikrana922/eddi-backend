@@ -38,6 +38,59 @@ from django.http import HttpResponse
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+@permission_classes([AllowAny])
+class dummy(APIView):
+    def get(self, request):
+        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+        vat_val = int(vat[0])
+        html_path = COURSE_ENROLL_HTML_TO_U
+        # fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'fullname':"Nishant", "course_name":"Testing"}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ("nishant.kabariya@gmail.com",)
+        invoice_number = random.randrange(100000,999999)
+        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
+        template = get_template('invoice.html').render(context_data1)
+        try:
+            pdfkit.from_string(template,f"{invoice_number}.pdf")
+            # f = open(f'{invoice_number}.pdf')
+            # pdf = File(f)
+        except:
+            # f = None
+            # pdf = None
+            pass
+        record = {}
+        # try:
+        #     record = {
+        #     "invoice_number" : invoice_number,
+        #     "invoice_file" : f"{invoice_number}.pdf",
+        #     "user_email" : instance.email_id,
+        #     "course_name" : course_name
+        #     }
+        #     getattr(models,"InvoiceData").objects.update_or_create(**record)
+        # except Exception as ex:
+        #     pass
+        try:
+            path = 'eddi_app'
+            img_dir = 'static'
+            image = 'Logo.jpg'
+            file_path = os.path.join(path,img_dir,image)
+            with open(file_path,'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                img.add_header('Content-Disposition', 'inline', filename=image)
+        except Exception as ex:
+            pass
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        email_msg.attach(img)
+        try:
+            email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
+        except:
+            pass
+        email_msg.send(fail_silently=False)
 
 
 @permission_classes([AllowAny])
