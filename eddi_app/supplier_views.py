@@ -336,10 +336,9 @@ class GetCourseDetails(APIView):
                 fav_dataa = None
 
             try:
-                individuals = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:course_data.course_name, STATUS:"Success"})
-                # lerner_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(course_name = course_data.course_name, status="Success").count()
+                user_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:course_data.course_name, STATUS:"Success"}).values_list("email_id", flat=True)
+                individuals = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":user_data, IS_DELETED:False})
                 lerner_count = len(individuals)
-              
             except Exception as e:
                 individuals = None
                 lerner_count = None
@@ -350,7 +349,7 @@ class GetCourseDetails(APIView):
             var1 = True if var is not None else False
 
             if serializer := CourseDetailsSerializer(course_data):
-                if serializer1 := CourseEnrollSerializer(individuals, many=True):
+                if serializer1 := UserProfileSerializer(individuals, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors,ENROLLED: "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
