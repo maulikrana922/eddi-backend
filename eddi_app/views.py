@@ -369,6 +369,7 @@ class GetUserDetails(APIView):
 
                     return Response({STATUS: ERROR, DATA:"You are not authorized to make this data request"}, status=status.HTTP_400_BAD_REQUEST)
 
+
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
        

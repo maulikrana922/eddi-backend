@@ -329,6 +329,10 @@ class GetCourseDetails(APIView):
             except:
                 course_data = None
             try:
+                supplier_profile = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":course_data.supplier.email_id})
+            except Exception as ex:
+                supplier_profile = None
+            try:
                 fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_data.course_name}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
             except Exception as ex:
@@ -350,9 +354,14 @@ class GetCourseDetails(APIView):
 
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := UserProfileSerializer(individuals, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa, "learners_count": lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
+                    if serializer2 := SupplierOrganizationProfileSerializer(supplier_profile):
+                        return Response({STATUS: SUCCESS, DATA:serializer.data, "Supplier_Organization_Profile":serializer2.data, ENROLLED:serializer1.data, 'is_favoutite':fav_dataa, "learners_count":lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
+                    else: 
+                         return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer1.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors,ENROLLED: "No Enrolled User"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             email_id =  get_user_email_by_token(request)
             if email_id:
