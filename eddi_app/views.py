@@ -164,7 +164,9 @@ class Save_stripe_info(APIView):
                         template = get_template('invoice.html').render(context_data1)
                         try:
                             fname = f"{invoice_number}.pdf"
-                            pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
+                            config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+                            pdfkit.from_string(template,f"{invoice_number}.pdf", configuration=config)
+                            # pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
                             print(os.path.abspath(fname))
                             # f = open(f'{invoice_number}.pdf')
                             # pdf = File(f)
@@ -198,7 +200,7 @@ class Save_stripe_info(APIView):
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            email_msg.attach_file(f"..media/invoice/{invoice_number}.pdf") 
+                            email_msg.attach_file(f"{invoice_number}.pdf") 
                         except:
                             pass
                         email_msg.send(fail_silently=False)
