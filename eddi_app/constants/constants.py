@@ -176,3 +176,4 @@ ORGANIZATION_LOGO = 'organization_logo'
 SUPPLIER_NAME = 'supplier_name'
 ADDRESS = 'address'
 SUPPLIER_IMAGE = 'supplier_image'
+ABOUT_ME = "about_me"

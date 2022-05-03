@@ -1126,6 +1126,7 @@ class SupplierProfileView(APIView):
                     ADDRESS : request.POST.get(ADDRESS,data.address),
                     PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
                     SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,data.supplier_image),
+                    ABOUT_ME : request.POST.get(ABOUT_ME,data.about_me),
                 }
 
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
@@ -1143,6 +1144,7 @@ class SupplierProfileView(APIView):
                     ADDRESS : request.POST.get(ADDRESS,None),
                     PHONE_NUMBER : request.POST.get(PHONE_NUMBER,None),
                     SUPPLIER_IMAGE : request.FILES.get(SUPPLIER_IMAGE,None),
+                    ABOUT_ME : request.POST.get(ABOUT_ME, None),
                 }
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 getattr(models,SUPPLIER_PROFILE_TABLE).objects.update_or_create(**record_map)
