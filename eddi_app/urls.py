@@ -13,9 +13,6 @@ urlpatterns = [
 
 
     path('signup/',UserSignupView.as_view()),
-
-    
-
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),
     path('changepassword/<str:uuid>/',ChangePasswordView.as_view(), name="changepassword"),

@@ -89,8 +89,8 @@ class dummy(APIView):
         try:
             # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
             email_msg.attach_file(f"./media/invoice/{invoice_number}.pdf") 
-            # email_msg.attach_file(f"requirements.txt") 
         except:
+            email_msg.attach_file(f"requirements.txt") 
             pass
         email_msg.send(fail_silently=False)
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
@@ -354,8 +354,8 @@ class GetUserDetails(APIView):
             try:
                 data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
-                    # Below Line : To make Active or Inactive to Particular user or supplier 
                     if userSignup_serializer :=  UserSignupSerializer(data):
+                    # Below Line : To make Active or Inactive to Particular user or supplier 
                         if data.user_type.user_type =='User':
                             try:
                                 profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
@@ -422,11 +422,37 @@ class GetUserDetails(APIView):
 
 
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-
-                    return Response({STATUS: ERROR, DATA:"You are not authorized to make this data request"}, status=status.HTTP_400_BAD_REQUEST)
+                    if userSignup_serializer :=  UserSignupSerializer(data):
+                        print("supplierrrrrrrrrrrrrrrrrrrrrr")
+                        if data.user_type.user_type =='User':
+                            print("okokookokookkkkkkkkkkkkkk")
+                            try:
+                                profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA: "User profile data not data found"}, status=status.HTTP_400_BAD_REQUEST)
+                            try:
+                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course_name", flat=True)
+                                course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
+                            except Exception as ex:
+                                return Response({STATUS: ERROR, DATA: "Error in User Course Listing"}, status=status.HTTP_400_BAD_REQUEST)
+                                
+                            if serializer := UserProfileSerializer(profile_data):
+                                if serializer2 := CourseDetailsSerializer(course_list, many=True):
+                                    return Response({STATUS: SUCCESS, DATA: [serializer.data,userSignup_serializer.data], "course_list":serializer2.data}, status=status.HTTP_200_OK)
+                                else:
+                                    return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                        
+                        else:
+                            return Response({STATUS: ERROR, DATA: "Requested UUID in not find in UserSignUPtable"}, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found in UserSignUp Table"}, status=status.HTTP_400_BAD_REQUEST)
+                        # return Response({STATUS: ERROR, DATA:"You are not authorized to make this data request"}, status=status.HTTP_400_BAD_REQUEST)
 
 
             except Exception as ex:
+                print(ex, "exexexexexe")
                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
        
         else:
@@ -1221,11 +1247,10 @@ class FavCourseDetails(APIView):
 
 class ViewIndividualProfile(APIView):
     def post(self, request):
+        email_id = get_user_email_by_token(request)
         user_email_id = request.POST.get(EMAIL_ID)
         supplier_email_id = request.POST.get(SUPPLIER_EMAIL_ID)
         token_data = request.headers.get('Authorization')
-
-        
         try:
             token = token_data.split()[1]
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
