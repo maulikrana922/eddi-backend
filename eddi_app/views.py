@@ -54,10 +54,15 @@ class dummy(APIView):
         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
         try:
-            pdfkit.from_string(template,f"/var/www/html/eddi-backend/media/invoice/{invoice_number}.pdf")
+            data = pdfkit.from_string(template,f"/var/www/html/eddi-backend/media/invoice/{invoice_number}.pdf")
+            return Response({MESSAGE: SUCCESS, DATA: str(data)}, status=status.HTTP_200_OK,)
+            
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
-        except:
+        except Exception as ex:
+            # return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
+
+
             # f = None
             # pdf = None
             pass
@@ -90,7 +95,9 @@ class dummy(APIView):
             # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
             email_msg.attach_file(f"/var/www/html/eddi-backend/media/invoice/{invoice_number}.pdf") 
             # email_msg.attach_file(f"requirements.txt") 
-        except:
+        except Exception as ex:
+            return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
+
             pass
         email_msg.send(fail_silently=False)
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
