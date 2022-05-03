@@ -54,14 +54,24 @@ class dummy(APIView):
         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
         try:
-            config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
-            pdfkit.from_string(template,f"{invoice_number}.pdf", configuration=config)
+            
+            options = {
+                    'page-size': 'Letter',
+                    'margin-top': '0.75in',
+                    'margin-right': '0.75in',
+                    'margin-bottom': '0.75in',
+                    'margin-left': '0.75in',
+                    'encoding': "UTF-8",
+                    'no-outline': None
+                }
+            pdfkit.from_string(template,f"{invoice_number}.pdf", options=options, verbose=True)
             
             # return Response({MESSAGE: SUCCESS, DATA: []}, status=status.HTTP_200_OK,)
             
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
         except Exception as ex:
+            print(ex)
             
 
 
@@ -163,12 +173,11 @@ class Save_stripe_info(APIView):
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
                         template = get_template('invoice.html').render(context_data1)
                         try:
-                            # fname = f"{invoice_number}.pdf"
-                            # config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
-                            # pdfkit.from_string(template,f"{invoice_number}.pdf", configuration=config)
-                            pdfkit.from_string(template,f"/usr/local/bin/wkhtmltopdf/{invoice_number}.pdf")
+                            fname = f"{invoice_number}.pdf"
+                            config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+                            pdfkit.from_string(src = template,dest = f"{invoice_number}.pdf", configuration=config)
                             # pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
-                            # print(os.path.abspath(fname))
+                            print(os.path.abspath(fname))
                             # f = open(f'{invoice_number}.pdf')
                             # pdf = File(f)
                         except:
@@ -201,8 +210,7 @@ class Save_stripe_info(APIView):
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            # email_msg.attach_file(f"{invoice_number}.pdf") 
-                            email_msg.attach_file(f"/usr/local/bin/wkhtmltopdf/{invoice_number}.pdf") 
+                            email_msg.attach_file(f"{invoice_number}.pdf") 
                         except:
                             pass
                         email_msg.send(fail_silently=False)
