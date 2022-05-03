@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'ckeditor',
     'rest_framework',
     'rest_framework_swagger',
-    'corsheaders'
+    'corsheaders',
+    'wkhtmltopdf'
 ]
 # LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
 
@@ -152,7 +153,7 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    "hide_models": production_models,
+    "hide_models": local_models,
     # "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
@@ -272,7 +273,7 @@ CMS_TEMPLATES = (
 STATIC_URL = '/static/'
 
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/var/www/html/eddi-backend/media/'
+MEDIA_URL = '/media/'
 
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
@@ -282,6 +283,8 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'testing.skillism@gmail.com'
 EMAIL_HOST_PASSWORD = 'Latitude@123' 
+WKHTMLTOPDF_CMD = '/usr/local/bin/wkhtmltopdf'
+
 
 
 

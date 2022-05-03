@@ -786,6 +786,7 @@ class SupplierProfile(models.Model):
     ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name="IFSC Code")
     address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
     phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
+    about_me = models.CharField(max_length=500,blank=True,null=True,verbose_name="About Me")
     supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')
     is_deleted = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
