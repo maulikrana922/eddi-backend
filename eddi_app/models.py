@@ -730,12 +730,24 @@ class UserProfile(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
 
     class Meta:
-        verbose_name = "User Profile Table"
+        verbose_name = "User Eddi Profile"
 
 
     def __str__(self):
         return self.email_id
     
+
+class UserPersonalProfile(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
+    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
+    full_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Full Name")
+    location = models.CharField(max_length=300, blank=True, null=True, verbose_name="Location")
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
+
+    class Meta:
+        verbose_name = "User Personal Profile"
+
 
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
@@ -774,6 +786,7 @@ class SupplierProfile(models.Model):
     ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name="IFSC Code")
     address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
     phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
+    about_me = models.CharField(max_length=500,blank=True,null=True,verbose_name="About Me")
     supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')
     is_deleted = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
