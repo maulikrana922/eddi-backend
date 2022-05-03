@@ -60,12 +60,12 @@ class dummy(APIView):
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
         except Exception as ex:
-            # return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
+            return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
 
 
             # f = None
             # pdf = None
-            pass
+            # pass
         record = {}
         # try:
         #     record = {
