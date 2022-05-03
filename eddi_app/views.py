@@ -54,7 +54,7 @@ class dummy(APIView):
         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
         try:
-            pdfkit.from_string(template,f"./media/invoice/{invoice_number}.pdf")
+            pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
         except:
