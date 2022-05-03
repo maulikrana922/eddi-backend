@@ -38,6 +38,62 @@ from django.http import HttpResponse
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+@permission_classes([AllowAny])
+class dummy(APIView):
+    def get(self, request):
+        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+        vat_val = int(vat[0])
+        html_path = COURSE_ENROLL_HTML_TO_U
+        # fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'fullname':"Nishant", "course_name":"Testing"}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ("nishant.k@latitudetechnolabs.com",)
+        invoice_number = random.randrange(100000,999999)
+        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
+        template = get_template('invoice.html').render(context_data1)
+        try:
+            pdfkit.from_string(template,f"./media/invoice/{invoice_number}.pdf")
+            # f = open(f'{invoice_number}.pdf')
+            # pdf = File(f)
+        except:
+            # f = None
+            # pdf = None
+            pass
+        record = {}
+        # try:
+        #     record = {
+        #     "invoice_number" : invoice_number,
+        #     "invoice_file" : f"{invoice_number}.pdf",
+        #     "user_email" : instance.email_id,
+        #     "course_name" : course_name
+        #     }
+        #     getattr(models,"InvoiceData").objects.update_or_create(**record)
+        # except Exception as ex:
+        #     pass
+        try:
+            path = 'eddi_app'
+            img_dir = 'static'
+            image = 'Logo.jpg'
+            file_path = os.path.join(path,img_dir,image)
+            with open(file_path,'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                img.add_header('Content-Disposition', 'inline', filename=image)
+        except Exception as ex:
+            pass
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        email_msg.attach(img)
+        try:
+            # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
+            email_msg.attach_file(f"./media/invoice/{invoice_number}.pdf") 
+            # email_msg.attach_file(f"requirements.txt") 
+        except:
+            pass
+        email_msg.send(fail_silently=False)
+        return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
 
 
 @permission_classes([AllowAny])
@@ -370,6 +426,7 @@ class GetUserDetails(APIView):
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
 
                     return Response({STATUS: ERROR, DATA:"You are not authorized to make this data request"}, status=status.HTTP_400_BAD_REQUEST)
+
 
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
@@ -710,7 +767,7 @@ class GetBlogDetails(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             
-            data = getattr(models,BLOGDETAILS_TABLE).objects.all()
+            data = getattr(models,BLOGDETAILS_TABLE).objects.all().order_by("-created_date_time")
             if serializer := BlogDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -993,7 +1050,7 @@ class EventPaymentDetail_info(APIView):
                     record_map = {}
                     record_map = {
                     EVENT_NAME : event_name,
-                    ADMIN_EMAIL : user_email_id,
+                    "user_email" : user_email_id,
                     PAYMENT_DETAIL_ID : var.id,
                     USER_PROFILE_ID : profile_data.id,
                     CREATED_AT : make_aware(datetime.datetime.now())

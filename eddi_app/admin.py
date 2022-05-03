@@ -162,7 +162,7 @@ class ContactUsPageCMSAdmin(admin.ModelAdmin):
         }),
         ('Section 2 - Get In Touch', {
             'classes': ('collapse',),
-            'fields': ('section_2_heading','section_2_address','section_2_contact','section_2_email','section_2_button_text'),
+            'fields': ('section_2_heading','section_2_address','section_2_contact','section_2_email','section_2_latitude', 'section_2_longitude', 'section_2_button_text'),
         }),
        )
 
