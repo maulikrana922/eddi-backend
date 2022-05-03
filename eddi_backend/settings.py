@@ -152,7 +152,7 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    "hide_models": production_models,
+    "hide_models": local_models,
     # "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
@@ -272,7 +272,7 @@ CMS_TEMPLATES = (
 STATIC_URL = '/static/'
 
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/var/www/html/eddi-backend/media/'
+MEDIA_URL = '/media/'
 
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
