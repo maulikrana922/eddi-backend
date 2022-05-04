@@ -3,6 +3,7 @@
 # from copy import Error
 from email.mime.image import MIMEImage
 import os
+from xhtml2pdf import pisa
 
 # import profile
 # from string import printable
@@ -55,16 +56,11 @@ class dummy(APIView):
         template = get_template('invoice.html').render(context_data1)
         try:
             
-            options = {
-                    'page-size': 'Letter',
-                    'margin-top': '0.75in',
-                    'margin-right': '0.75in',
-                    'margin-bottom': '0.75in',
-                    'margin-left': '0.75in',
-                    'encoding': "UTF-8",
-                    'no-outline': None
-                }
-            pdfkit.from_string(template,f"{invoice_number}.pdf", options=options, verbose=True)
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+            pdf = result.getvalue()
+            filename = 'Invoice.pdf'
+            
             
             # return Response({MESSAGE: SUCCESS, DATA: []}, status=status.HTTP_200_OK,)
             
@@ -102,10 +98,11 @@ class dummy(APIView):
             pass
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
+        email_msg.encoding = 'us-ascii'
         email_msg.attach(img)
         try:
             # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
-            email_msg.attach_file(f"{invoice_number}.pdf") 
+            email_msg.attach(filename,pdf,"application/pdf") 
             # email_msg.attach_file(f"requirements.txt") 
         except Exception as ex:
             return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
