@@ -1,164 +1,485 @@
-
 <!DOCTYPE html>
 <html>
-
-    <head>
-        <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <link rel="stylesheet" type="text/css" href="../static/fonts/fonts.css">
-     
-    </head>
-
-    <body>
-        <table class="m-padding" style="width: 100%;">
-            <tr>
-                <td style="width: 100%;">
-                    <table style="width: 100%;padding-bottom: 20px;border-bottom: 1px solid #00000020;">
-                        <tr style="width: 100%;">
-                            <td align="left" style="width: 50%;">
-                                <h5
-                                    style=" display:block;font-family: RundText-SemiBold; font-size:26px;margin: 0; line-height:0;">
-                                    Eddie Website</h5>
-                                <p class="w-100"
-                                    style="display:block;font-size:18px;margin: 0;margin-top: 30px;width: 30%;">
-                                    1234 State St
-                                    Sweden, 12345
-                                </p>
-                            </td>
-                            <td align="right" style="width: 50%; ">
-                                <h2 style="display: block;font-family: RundText-SemiBold;font-size: 30px;margin: 0;">
-                                    Invoice
-                                </h2>
-                                <span
-                                    style="display: block;font-family: RundText-SemiBold;font-size: 30px;margin-top: 10px;line-height: 0;">
-
-                                    #{{invoice_number}}
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  </head>
+  <body>
+    <table style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+      <tr>
+        <td style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+          <table
+            style="
+              font-family: Verdana, Geneva, sans-serif;
+              width: 100%;
+              padding-bottom: 20px;
+              border-bottom: 1px solid #00000020;
+            "
+          >
+            <tr style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <div
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    font-size: 33px;
+                    font-weight: bold;
+                  "
+                >
+                  Eddie Website
+                </div>
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    margin-top: 30px;
+                    width: 30%;
+                    font-size: 14px;
+                  "
+                >
+                  1234 State St Sweden, 12345
+                </p>
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    margin-top: 30px;
+                    width: 30%;
+                    font-size: 14px;
+                  "
+                ></p>
+              </td>
+              <td
+                align="right"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <div
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    font-size: 33px;
+                    font-weight: bold;
+                  "
+                >
+                  Invoice
+                </div>
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    margin-top: 30px;
+                    width: 30%;
+                    font-size: 14px;
+                  "
+                >
+                  #101020
+                </p>
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    margin-top: 30px;
+                    width: 30%;
+                    font-size: 14px;
+                  "
+                ></p>
+              </td>
             </tr>
-            <tr>
-                <td style="width: 100%;">
-                    <table class="m-padding-2"
-                        style="width: 100%;padding-top: 40px;padding-bottom: 40px;border-bottom: 1px solid #00000020;">
-                        <tr style="width: 100%;">
-                            <td align="left" style="width: 60%;" class=" w-100">
-                                <table style="width: 100%;">
-                                    <td>
-                                    <td style="width: 50%;">
-                                        <h5 style=" font-size: 20px; font-family:  RundText-SemiBold;margin: 0;">
-                                            Client
-                                            Contact Info:</h5>
-                                        <p style="font-size: 16px;margin: 0;">Eddi
-                                            Kristan</p>
-                                        <p style="font-size: 16px;margin: 0;">eddi@gmail.com</p>
-                                    </td>
-                                    <td style="width: 50%;">
-                                        <h5 style=" font-size: 20px; font-family:  RundText-SemiBold;margin: 0;">
-                                            Bill To: {{user_address}}
-                                        </h5>
-                                        <p style="font-size: 16px;margin: 0;">John Doe</p>
-                                        <p style="font-size: 16px;margin: 0;">6789 Mac Ln
-                                            Sweden, 54321</p>
-                                    </td>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td align="right" style="width: 40%;" class=" w-100">
-                    <table style="width: 100%;">
-                        <tr>
-                            <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Client Name</td>
-                            <td align="right" style="width: 50%;font-size: 16px;">Kristan</td>
-                        </tr>
-                        <tr>
-                            <td align="left" style="width: 50%;color:#626262;font-size: 16px;">Issue Date</td>
-                            <td align="right" style="width: 50%;font-size: 16px;">{{issue_date}}</td>
-                        </tr>
-                      
-                    </table>
-                </td>
-            </tr>
-        </table>
+          </table>
         </td>
-
-        <tr>
-            <td>
-                <table style="width: 100%;">
-                    <tr style="display:block;width: 100%;border-bottom: 1px solid #00000020;padding: 10px 0;">
-                        <td class="charge" style=" font-size: 22px; font-family:  RundText-SemiBold;">
-                            Charges
-                        </td>
-                    </tr>
-                    <tr style="display:inline-flex;width: 100%;border-bottom: 1px solid #00000020;">
-                        <td align="left" style="width: 50%;">
-                            <p style="font-size: 18px;">{{course_name}}</p>
-                        </td>
-                        <td align="right" style="width: 50%;">
-                            <p style="font-size: 18px;">${{course_fees}}</p>
-                        </td>
-                    </tr>
-                    <tr style="display:inline-flex;width: 100%;border-bottom: 1px solid #00000020;">
-                        <td align="left" style="width: 50%;">
-                            <p style="font-size: 18px;">VAT Charges</p>
-                        </td>
-                        <td align="right" style="width: 50%;">
-                            <p style="font-size: 18px;">{{vat}}%</p>
-                        </td>
-                    </tr>
-                    <tr style="display:inline-flex;width: 100%;">
-                        <td align="left" style="width: 50%;">
-                            <p style="font-size: 22px;font-family:  RundText-SemiBold;">Total</p>
-                        </td>
-                        <td align="right" style="width: 50%;">
-                            <p style="font-size: 22px;font-family:  RundText-SemiBold;">${{total}}</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="h-unset" height="200"></td>
-                    </tr>
+      </tr>
+      <tr>
+        <td style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+          <table
+            style="
+              font-family: Verdana, Geneva, sans-serif;
+              width: 100%;
+              padding-top: 40px;
+              padding-bottom: 40px;
+              border-bottom: 1px solid #00000020;
+            "
+          >
+            <tr style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 60%"
+              >
+                <table
+                  style="font-family: Verdana, Geneva, sans-serif; width: 100%"
+                >
+                  <tr>
+                    <td
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                      "
+                    >
+                      <div
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-weight: bold;
+                        "
+                      >
+                        Client Contact Info:
+                      </div>
+                      <p
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-size: 12px;
+                        "
+                      >
+                        Eddi Kristan
+                      </p>
+                      <p
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-size: 12px;
+                        "
+                      >
+                        eddi@gmail.com
+                      </p>
+                    </td>
+                    <td
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                      "
+                    >
+                      <div
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-weight: bold;
+                        "
+                      >
+                        Bill To:
+                      </div>
+                      <p
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-size: 12px;
+                        "
+                      >
+                        John Doe
+                      </p>
+                      <p
+                        style="
+                          font-family: Verdana, Geneva, sans-serif;
+                          margin: 0;
+                          font-size: 12px;
+                        "
+                      >
+                        6789 Mac Ln Sweden, 54321
+                      </p>
+                    </td>
+                  </tr>
                 </table>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 100%;">
-                <table style="width: 100%;padding-top: 30px;border-top: 1px solid #00000020;">
-                    <tr style="width: 100%;">
-                        <td align="left" style="width: 40%;" class="w-100">
-                            <h5
-                                style=" display:block;font-family: RundText-SemiBold; font-size:18px;margin: 0; line-height:0;">
-                                Payments:
+              </td>
+              <td
+                align="right"
+                style="font-family: Verdana, Geneva, sans-serif; width: 40%"
+              >
+                <table
+                  style="font-family: Verdana, Geneva, sans-serif; width: 100%"
+                >
+                  <tr>
+                    <td
+                      align="left"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
 
-                            </h5>
-                            <span style=" display:block;; font-size:18px;margin-top: 10px;">
-                                Make checks payable to:</span>
-                            <p style="display:block;font-size:18px;margin: 0;width: 60%;">
-                                Eddi Website
-                                1234 State St
-                                Sweden, 12345
-                            </p>
-                        </td>
-                        <td style="width: 50%;" class="w-100 quetion">
-                            <h5
-                                style=" display:block;font-family: RundText-SemiBold; font-size:18px;margin: 0; line-height:0;">
-                                Questions
-                            </h5>
-                            <p style="display:block;font-size:18px;margin: 0;width: 30%;margin-top: 10px;">
-                                Eddi Pvt Ltd
-                                support@eddi.com
-                                123-456-7890
-                            </p>
-                        </td>
-                    </tr>
+                        font-weight: bold;
+                      "
+                    >
+                      Client Name
+                    </td>
+                    <td
+                      align="right"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                        font-weight: bold;
+                      "
+                    >
+                      Kristan
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      align="left"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        font-size: 12px;
+                        width: 50%;
+                      "
+                    >
+                      Issue Date
+                    </td>
+                    <td
+                      align="right"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                        font-size: 12px;
+                      "
+                    >
+                      09.10.20
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      align="left"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                        font-size: 12px;
+                      "
+                    >
+                      Due Date
+                    </td>
+                    <td
+                      align="right"
+                      style="
+                        font-family: Verdana, Geneva, sans-serif;
+                        width: 50%;
+                        font-size: 12px;
+                      "
+                    >
+                      10.10.20
+                    </td>
+                  </tr>
                 </table>
-            </td>
-        </tr>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-        </table>
-    </body>
+      <tr>
+        <td>
+          <table style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+            <tr
+              style="
+                font-family: Verdana, Geneva, sans-serif;
+                display: block;
+                width: 100%;
+                border-bottom: 1px solid #00000020;
+                padding: 10px 0;
+              "
+            >
+              <td
+                style="
+                  font-family: Verdana, Geneva, sans-serif;
+                  font-size: 14px;
+                  font-weight: bold;
+                "
+              >
+                Charges
+              </td>
+            </tr>
+            <tr
+              style="
+                font-family: Verdana, Geneva, sans-serif;
+                display: inline-flex;
+                width: 100%;
+                border-bottom: 1px solid #00000020;
+              "
+            >
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                  "
+                >
+                  Name of Course
+                </p>
+              </td>
+              <td
+                align="right"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                  "
+                >
+                  $60.00
+                </p>
+              </td>
+            </tr>
+            <tr
+              style="
+                font-family: Verdana, Geneva, sans-serif;
+                display: inline-flex;
+                width: 100%;
+                border-bottom: 1px solid #00000020;
+              "
+            >
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                  "
+                >
+                  VAT Charges
+                </p>
+              </td>
+              <td
+                align="right"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 12px;
+                  "
+                >
+                  $40.00
+                </p>
+              </td>
+            </tr>
+            <tr
+              style="
+                font-family: Verdana, Geneva, sans-serif;
+                display: inline-flex;
+                width: 100%;
+              "
+            >
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 18px;
+                  "
+                >
+                  Total
+                </p>
+              </td>
+              <td
+                align="right"
+                style="font-family: Verdana, Geneva, sans-serif; width: 50%"
+              >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    font-size: 18px;
+                  "
+                >
+                  $100.00
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td height="200"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+          <table
+            style="
+              font-family: Verdana, Geneva, sans-serif;
+              width: 100%;
+              padding-top: 30px;
+              border-top: 1px solid #00000020;
+            "
+          >
+            <tr style="font-family: Verdana, Geneva, sans-serif; width: 100%">
+              <td
+                align="left"
+                style="font-family: Verdana, Geneva, sans-serif; width: 40%"
+              >
+                <div
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
 
+                    font-size: 14px;
+                    font-weight: bold;
+                  "
+                >
+                  Payments:
+                </div>
+                <span
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin-top: 10px;
+                    font-size: 12px;
+                  "
+                >
+                  Make checks payable to:</span
+                >
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    width: 60%;
+                    font-size: 12px;
+                  "
+                >
+                  Eddi Website 1234 State St Sweden, 12345
+                </p>
+              </td>
+              <td style="font-family: Verdana, Geneva, sans-serif; width: 50%">
+                <div
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+
+                    font-size: 14px;
+                    font-weight: bold;
+                  "
+                >
+                  Questions
+                </div>
+                <p
+                  style="
+                    font-family: Verdana, Geneva, sans-serif;
+                    display: block;
+                    margin: 0;
+                    width: 30%;
+                    margin-top: 10px;
+                    font-size: 12px;
+                  "
+                >
+                  Eddi Pvt Ltd support@eddi.com 123-456-7890
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>

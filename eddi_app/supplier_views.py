@@ -472,6 +472,8 @@ class GetCourseDetails(APIView):
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,data.organization_location),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
+            "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
+            "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
