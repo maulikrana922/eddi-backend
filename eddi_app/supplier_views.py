@@ -91,6 +91,8 @@ class AddCourseView(APIView):
             COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
+            "meeting_link" : request.POST.get("meeting_link",None),
+            "meeting_passcode" : request.POST.get("meeting_passcode",None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
             STATUS_ID:1
