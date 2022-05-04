@@ -3,6 +3,7 @@
 # from copy import Error
 from email.mime.image import MIMEImage
 import os
+from xhtml2pdf import pisa
 
 # import profile
 # from string import printable
@@ -54,18 +55,25 @@ class dummy(APIView):
         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
         try:
-            data = pdfkit.from_string(template,f"{invoice_number}.pdf")
-            return Response({MESSAGE: SUCCESS, DATA: str(data)}, status=status.HTTP_200_OK,)
+            
+            result = BytesIO()
+            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+            pdf = result.getvalue()
+            filename = 'Invoice.pdf'
+            
+            
+            # return Response({MESSAGE: SUCCESS, DATA: []}, status=status.HTTP_200_OK,)
             
             # f = open(f'{invoice_number}.pdf')
             # pdf = File(f)
         except Exception as ex:
-            return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
+            print(ex)
+            
 
 
             # f = None
             # pdf = None
-            # pass
+            pass
         record = {}
         # try:
         #     record = {
@@ -90,10 +98,11 @@ class dummy(APIView):
             pass
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
+        email_msg.encoding = 'us-ascii'
         email_msg.attach(img)
         try:
             # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
-            email_msg.attach_file(f"{invoice_number}.pdf") 
+            email_msg.attach(filename,pdf,"application/pdf") 
             # email_msg.attach_file(f"requirements.txt") 
         except Exception as ex:
             return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
@@ -162,7 +171,9 @@ class Save_stripe_info(APIView):
                         template = get_template('invoice.html').render(context_data1)
                         try:
                             fname = f"{invoice_number}.pdf"
-                            pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
+                            config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+                            pdfkit.from_string(src = template,dest = f"{invoice_number}.pdf", configuration=config)
+                            # pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
                             print(os.path.abspath(fname))
                             # f = open(f'{invoice_number}.pdf')
                             # pdf = File(f)
@@ -196,7 +207,7 @@ class Save_stripe_info(APIView):
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            email_msg.attach_file(f"..media/invoice/{invoice_number}.pdf") 
+                            email_msg.attach_file(f"{invoice_number}.pdf") 
                         except:
                             pass
                         email_msg.send(fail_silently=False)
