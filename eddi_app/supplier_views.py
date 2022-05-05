@@ -25,6 +25,8 @@ from datetime import timedelta
 from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
+from moviepy.editor import VideoFileClip
+
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -148,7 +150,7 @@ class GetCategoryDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            data = getattr(models,COURSE_CATEGORY_TABLE).objects.all()
+            data = getattr(models,COURSE_CATEGORY_TABLE).objects.all().order_by("-created_date_time")
             if serializer := CategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -702,7 +704,9 @@ class SupplierDashboardView(APIView):
             individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
             counter = 0
+            # print(individual_details, "indididididididi")
             for v in individual_details[COURSENAME]:
+                print(v,"vvvvvvvvv")
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
@@ -714,6 +718,7 @@ class SupplierDashboardView(APIView):
                 counter +=1
             print(final_dict)
         except Exception as ex:
+            print(ex,"exexexexe")
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -946,6 +951,8 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
+                        clip = VideoFileClip(str(i))
+                        print(clip.duration, "durararararararararar")
                         print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                         print(data1, "data11111")

@@ -52,28 +52,15 @@ class dummy(APIView):
         email_from = settings.EMAIL_HOST_USER
         recipient_list = ("nishant.k@latitudetechnolabs.com",)
         invoice_number = random.randrange(100000,999999)
-        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Testing","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
+        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Python","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
         template = get_template('invoice.html').render(context_data1)
-        try:
-            
+        try: 
             result = BytesIO()
             pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
             pdf = result.getvalue()
-            filename = 'Invoice.pdf'
-            
-            
-            # return Response({MESSAGE: SUCCESS, DATA: []}, status=status.HTTP_200_OK,)
-            
-            # f = open(f'{invoice_number}.pdf')
-            # pdf = File(f)
+            filename = f'Invoice-{invoice_number}.pdf'
         except Exception as ex:
             print(ex)
-            
-
-
-            # f = None
-            # pdf = None
-            pass
         record = {}
         # try:
         #     record = {
@@ -101,12 +88,8 @@ class dummy(APIView):
         email_msg.encoding = 'us-ascii'
         email_msg.attach(img)
         try:
-            # email_msg.attach_file(f".media/invoice/{invoice_number}.pdf") 
-            email_msg.attach(filename,pdf,"application/pdf") 
-            # email_msg.attach_file(f"requirements.txt") 
+            email_msg.attach(filename, pdf, "application/pdf") 
         except Exception as ex:
-            return Response({MESSAGE: SUCCESS, DATA: str(ex)}, status=status.HTTP_200_OK,)
-
             pass
         email_msg.send(fail_silently=False)
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)

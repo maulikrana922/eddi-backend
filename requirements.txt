@@ -24,3 +24,4 @@ pdfkit==1.0.0
 SQLAlchemy==1.4.31
 wkhtmltopdf==0.2
 pisa==3.0.33
+moviepy==1.0.3
