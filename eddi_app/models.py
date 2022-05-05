@@ -759,7 +759,7 @@ class SupplierOrganizationProfile(models.Model):
     country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
     city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
     brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
-    organization_phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Organization Phone Number")
+    organization_phone_number = models.CharField(blank=True,null=True,verbose_name="Organization Phone Number")
     contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
     linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
     facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
