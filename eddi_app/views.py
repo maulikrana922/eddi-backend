@@ -280,10 +280,10 @@ class Save_stripe_infoEvent(APIView):
                         record = {}
                         try:
                             record = {
-                             "invoice_number" : invoice_number,
+                            "invoice_number" : invoice_number,
                             "user_address" : "Address",
                             "user_email" : instance.email_id,
-                            "course_name" : event_name,
+                            "event_name" : event_name,
                             "vat_charges" : vat_val
                             }
                             getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
