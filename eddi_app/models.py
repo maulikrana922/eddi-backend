@@ -980,7 +980,8 @@ class RecruitmentAd(models.Model):
 
 class InvoiceData(models.Model):
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
-    invoice_file = models.FileField(upload_to='invoice/', verbose_name='Invoice File', blank=True, null=True)
+    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name='User Address')
+    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name='Vat')
     user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Course Name')
     created_date_time = models.DateTimeField(auto_now_add=True)
@@ -991,7 +992,8 @@ class InvoiceData(models.Model):
 
 class InvoiceDataEvent(models.Model):
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
-    invoice_file = models.FileField(upload_to='invoice/', verbose_name='Invoice File', blank=True, null=True)
+    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name='User Address')
+    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name='Vat')
     user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Event Name')
     created_date_time = models.DateTimeField(auto_now_add=True)

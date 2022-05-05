@@ -153,25 +153,33 @@ class Save_stripe_info(APIView):
                         invoice_number = random.randrange(100000,999999)
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
                         template = get_template('invoice.html').render(context_data1)
-                        try:
-                            fname = f"{invoice_number}.pdf"
-                            config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
-                            pdfkit.from_string(src = template,dest = f"{invoice_number}.pdf", configuration=config)
-                            # pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
-                            print(os.path.abspath(fname))
-                            # f = open(f'{invoice_number}.pdf')
-                            # pdf = File(f)
-                        except:
-                            # f = None
-                            # pdf = None
-                            pass
+                        try: 
+                            result = BytesIO()
+                            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+                            pdf = result.getvalue()
+                            filename = f'Invoice-{invoice_number}.pdf'
+                        except Exception as ex:
+                            print(ex)
+                        # try:
+                        #     fname = f"{invoice_number}.pdf"
+                        #     config = pdfkit.configuration(wkhtmltopdf='/usr/local/bin/wkhtmltopdf')
+                        #     pdfkit.from_string(src = template,dest = f"{invoice_number}.pdf", configuration=config)
+                        #     # pdfkit.from_string(template,f"..media/invoice/{invoice_number}.pdf")
+                        #     print(os.path.abspath(fname))
+                        #     # f = open(f'{invoice_number}.pdf')
+                        #     # pdf = File(f)
+                        # except:
+                        #     # f = None
+                        #     # pdf = None
+                        #     pass
                         record = {}
                         try:
                             record = {
                             "invoice_number" : invoice_number,
-                            "invoice_file" : f"{invoice_number}.pdf",
+                            "user_address" : "Address",
                             "user_email" : instance.email_id,
-                            "course_name" : course_name
+                            "course_name" : course_name,
+                            "vat_charges" : vat_val
                             }
                             getattr(models,"InvoiceData").objects.update_or_create(**record)
                         except Exception as ex:
@@ -191,7 +199,7 @@ class Save_stripe_info(APIView):
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
-                            email_msg.attach_file(f"{invoice_number}.pdf") 
+                            email_msg.attach(filename, pdf, "application/pdf")                         
                         except:
                             pass
                         email_msg.send(fail_silently=False)
