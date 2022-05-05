@@ -42,6 +42,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 @permission_classes([AllowAny])
 class dummy(APIView):
     def get(self, request):
+        print("ok")
         # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
         vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
         vat_val = int(vat[0])
