@@ -206,7 +206,7 @@ class Save_stripe_info(APIView):
                     except Exception as ex:
                         pass
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
-                except Exception as e:
+                except Exception as ex:
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -255,7 +255,7 @@ class Save_stripe_infoEvent(APIView):
                         print("inside second try last")
 
                     except Exception as e:
-                        return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({MESSAGE: ERROR, DATA: "Error in stripe.PaymentIntent"}, status=status.HTTP_400_BAD_REQUEST)
 
                     try:
                         instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:user_email_id})
@@ -270,17 +270,21 @@ class Save_stripe_infoEvent(APIView):
                         invoice_number = random.randrange(100000,999999)
                         context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
                         template = get_template('invoice.html').render(context_data1)
-                        try:
-                            pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
-                        except:
-                            pass
+                        try: 
+                            result = BytesIO()
+                            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+                            pdf = result.getvalue()
+                            filename = f'Invoice-{invoice_number}.pdf'
+                        except Exception as ex:
+                            print(ex)
                         record = {}
                         try:
                             record = {
-                            "invoice_number" : invoice_number,
-                            "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
+                             "invoice_number" : invoice_number,
+                            "user_address" : "Address",
                             "user_email" : instance.email_id,
-                            "event_name" : event_name
+                            "course_name" : event_name,
+                            "vat_charges" : vat_val
                             }
                             getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
                         except Exception as ex:
@@ -293,16 +297,18 @@ class Save_stripe_infoEvent(APIView):
                             img = MIMEImage(f.read())
                             img.add_header('Content-ID', '<{name}>'.format(name=image))
                             img.add_header('Content-Disposition', 'inline', filename=image)
-                        filename = f"./media/invoice-{invoice_number}.pdf"
                         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
-                        email_msg.attach_file(filename) 
+                        try:
+                            email_msg.attach(filename, pdf, "application/pdf")                         
+                        except:
+                            pass
                         email_msg.send(fail_silently=False)
                     except Exception as ex:
                         pass
                     return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
-                except Exception as e:
+                except Exception as ex:
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
             return Response({MESSAGE: 'Invalid Method Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
