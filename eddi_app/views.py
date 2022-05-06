@@ -1725,9 +1725,30 @@ class CourseEnrollView(APIView):
                 enroll_data = None
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
-                print(course_data, "course_dataaa")
+                # print(course_data, "course_dataaa")
             except:
                 course_data = None
+
+            # try:
+            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
+            #     print(course_data_uuid, "course_dataaa_uuiddddd")
+            #     for i in list(course_data_uuid):
+            #         print(i, "iiiiiiiiiiiiiiiiii")
+            #         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+            #         print(var, "vararara")
+            #         print(var.video_files.count(), "lenenenen")
+            #         a = var.video_files.all()
+            #         print(a, "aaa")
+            #         for i in a:
+            #             print(i, "ii")
+            #             print(i.user_email, "emaillll")
+            #             print(i.duration, "durationnnnn")
+            #         # print(len(var.video_files), "lenenenen")
+
+            # except:
+            #     course_data = None
+
+            
             try:
                 cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                 try:
@@ -1743,6 +1764,7 @@ class CourseEnrollView(APIView):
                 print(data_category, "data category")
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
+
 
             if serializer := CourseDetailsSerializer(course_data, many=True):
                 if serializer1 := CourseDetailsSerializer(data_category, many=True):
@@ -1790,4 +1812,49 @@ class EventEnrollView(APIView):
 
 
 
-        
+class CourseMaterialStatus(APIView):
+    def post(self, request):
+        email_id =  get_user_email_by_token(request)
+        video_id = request.POST.get("video_id")
+        print("insideeeeeeeeeeeeee Course material Status")
+        try:
+            try:
+                data = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":video_id})
+            except Exception as ex:
+                print(ex,"exexexe")
+                data = None
+            if data is not None:
+                print("existsssss")
+                record_map = {}
+
+                if request.POST.get("duration"):
+                    record_map["duration"] = request.POST.get("duration")
+                else:
+                    record_map["duration"] = data.duration
+
+                if request.POST.get("is_complete"):
+                    record_map["is_complete"] = json.loads(request.POST.get("is_complete"))
+                else:
+                    record_map["is_complete"] = data.is_complete
+
+                for key, value in record_map.items():
+                    setattr(data, key, value)
+                data.save()
+            else:
+                print("not existsssss")
+                record_map = {}
+                record_map = {
+                    "user_email" : email_id,
+                    "video_id" : video_id,
+                }
+                if request.POST.get("is_complete"):
+                    record_map["is_complete"] = request.POST.get("is_complete")
+
+                if request.POST.get("duration"):
+                    record_map["duration"] = json.loads(request.POST.get("duration"))
+                getattr(models,"CourseMaterialStatus").objects.update_or_create(**record_map)
+        except Exception as ex:
+            print(ex, "exexexexe")
+        return Response({STATUS: SUCCESS, DATA: "Material Status Added Successfully"}, status=status.HTTP_200_OK)
+
+

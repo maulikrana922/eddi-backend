@@ -28,6 +28,7 @@ urlpatterns = [
     path('favourite-course-details/',FavCourseDetails.as_view()),
        
     path('course-material-upload/<str:uuid>/',CourseMaterialUpload.as_view()),
+    path('course-material-status/',CourseMaterialStatus.as_view()),
 
     path('add-sub-category/',AddSubCategoryView.as_view()),
     path('get-sub-category-details/<str:uuid>/',GetSubCategoryDetails.as_view()),

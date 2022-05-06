@@ -931,6 +931,15 @@ class MaterialDocumentMaterial(models.Model):
     # def __str__(self):
     #     return self.document_file
 
+
+class CourseMaterialStatus(models.Model):
+    user_email = models.CharField(max_length=100,blank=True,null=True,verbose_name='Email')
+    video_id = models.CharField(max_length=100,blank=True,null=True,verbose_name='Video')
+    document_id = models.CharField(max_length=100,blank=True,null=True,verbose_name='Document')
+    is_complete = models.BooleanField(default=False)
+    duration = models.CharField(max_length=100,blank=True,null=True,verbose_name='Duration')
+
+
 class CourseMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
@@ -938,6 +947,7 @@ class CourseMaterial(models.Model):
     video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name='Video Files',blank=True,null=True)
     file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Title")
     document_files = models.ManyToManyField(MaterialDocumentMaterial,verbose_name='Document Files',blank=True,null=True)
+    # material_status = models.ManyToManyField(CourseMaterialStatus,verbose_name='CourseMaterialStatus',blank=True,null=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
 
@@ -1000,5 +1010,5 @@ class InvoiceDataEvent(models.Model):
 
     def __str__(self):
         return self.event_name
-    
-    
+
+

@@ -171,6 +171,14 @@ class CourseMaterialSerializer(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
+
+class CourseMaterialStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseMaterialStatus
+        depth = 2
+        fields = '__all__'
+
+
 class FavouriteCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavouriteCourse

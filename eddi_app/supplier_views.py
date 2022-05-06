@@ -951,8 +951,8 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
-                        clip = VideoFileClip(str(i))
-                        print(clip.duration, "durararararararararar")
+                        # clip = VideoFileClip(str(i))
+                        # print(clip.duration, "durararararararararar")
                         print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                         print(data1, "data11111")
@@ -973,6 +973,7 @@ class CourseMaterialUpload(APIView):
         return Response({STATUS: SUCCESS, DATA: "Material Uploaded successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
+        email_id = get_user_email_by_token(request) 
         print("uuid",uuid)
         if uuid:
             try:
@@ -980,10 +981,19 @@ class CourseMaterialUpload(APIView):
                 print("course",course_material_data)
             except Exception as ex:
                 course_material_data = None
+            try:
+                course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
+                print("course",course_material_status)
+            except Exception as ex:
+                course_material_status = None
+            
             if serializer := CourseMaterialSerializer(course_material_data):
+                if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "material_status":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: ERROR, DATA: "uuid not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def put(self, request, uuid=None):
@@ -1006,7 +1016,7 @@ class CourseMaterialUpload(APIView):
         for key, value in reccord_map.items():
             setattr(course_material_data, key, value)
         course_material_data.save()
-        print("PUTTTTTTTTTTTTt")
+        print("PUTTTTTTTTTTTTT")
         # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
         print(request.FILES.getlist(DOCUMENT_FILES), "filesssssss")
         if request.FILES.getlist(DOCUMENT_FILES):
