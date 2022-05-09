@@ -1,6 +1,7 @@
 # from doctest import FAIL_FAST
 # import email
 # from copy import Error
+# from ast import Pass
 from email.mime.image import MIMEImage
 import os
 from xhtml2pdf import pisa
@@ -34,6 +35,8 @@ import stripe # 2.68.0
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
+from moviepy.editor import VideoFileClip
+
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -94,6 +97,20 @@ class dummy(APIView):
             pass
         email_msg.send(fail_silently=False)
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
+
+@permission_classes([AllowAny])
+class dummy2(APIView):
+    def get(self, request):
+        videos = request.FILES.getlist("v")
+        print(videos, "videossssss")
+        for i in videos:
+            print(i, 'iiiii')
+            clip = VideoFileClip(str(i))
+            print(int(clip.duration), "durararararararararar")
+        return Response(status.HTTP_200_OK)
+
+
+
 
 
 @permission_classes([AllowAny])
@@ -1725,29 +1742,63 @@ class CourseEnrollView(APIView):
                 enroll_data = None
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
-                # print(course_data, "course_dataaa")
+                print(course_data, "course_dataaa")
             except:
                 course_data = None
 
-            # try:
-            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
-            #     print(course_data_uuid, "course_dataaa_uuiddddd")
-            #     for i in list(course_data_uuid):
-            #         print(i, "iiiiiiiiiiiiiiiiii")
-            #         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
-            #         print(var, "vararara")
-            #         print(var.video_files.count(), "lenenenen")
-            #         a = var.video_files.all()
-            #         print(a, "aaa")
-            #         for i in a:
-            #             print(i, "ii")
-            #             print(i.user_email, "emaillll")
-            #             print(i.duration, "durationnnnn")
-            #         # print(len(var.video_files), "lenenenen")
+            try:
+                course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
+                print(course_data_uuid, "course_dataaa_uuiddddd")
+                new_dict = {}
+                for i in list(course_data_uuid):
+                    # new_dict[f"course_{i}"] = i
+                    print(i, "iiiiiiiiiiiiiiiiii")
+                    var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    # var matlab a course na many to many video fields
+                    print(var, "vararara")
+                    video_file_count =  var.video_files.count()
+                    # print(var.video_files.count(), "lenenenen")
+                    a = var.video_files.all()
+                    # print(a, "aaa")
+                    try:
+                        len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id}).count()
+                    except Exception as ex:
+                        len_material_status = 0
+                    print(len_material_status, "lenenenenen")
+                    print(video_file_count, "lenenenenen")
+                    if video_file_count != len_material_status:
+                        final_course_status = "Incomplete"
+                        print("laststststs")
+                        new_dict[f"course_{i}"] = final_course_status
+                        continue
+                    else:
+                        print("inside elsesesese")
+                        for i in a:
+                            print("inside iiiii")
+                            print(i, "iiiii")
+                            # try:
+                            #     len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id, "video_id" : i.uuid})
+                            # except Exception as ex:
+                            #     len_material_status = 0
+                            # print(i, "iiiiiiiiiiiiiiiiiii")
+                            var1 = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":i.uuid})
+                            print(var1, "var11111")
+                            if var1.is_complete == True:
+                                final_course_status = None
+                                continue
+                            else:
+                                final_course_status = "Incomplete"
+                                break
+                        if final_course_status is None:
+                            final_course_status = "Complete"
+                        else:
+                            final_course_status = "Incomplete"
+                        # new_dict[f'final_course_status'] = final_course_status
+                        new_dict[f"course_{i}"] = final_course_status
 
-            # except:
-            #     course_data = None
-
+            except Exception as ex:
+                print(ex, "exexexeexe")
+                pass
             
             try:
                 cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -1765,11 +1816,15 @@ class CourseEnrollView(APIView):
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
-
+            print(new_dict, "new_dictctctctct")
             if serializer := CourseDetailsSerializer(course_data, many=True):
                 if serializer1 := CourseDetailsSerializer(data_category, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data}, status=status.HTTP_200_OK)
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    # new_dict = {}
+                    # new_dict['final_course_status'] = final_course_status
+
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: new_dict, "related_course":serializer1.data}, status=status.HTTP_200_OK)
+                # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1816,7 +1871,7 @@ class CourseMaterialStatus(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
         video_id = request.POST.get("video_id")
-        print("insideeeeeeeeeeeeee Course material Status")
+        print("insideeeeeeeeee Course material Status")
         try:
             try:
                 data = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":video_id})
@@ -1824,22 +1879,23 @@ class CourseMaterialStatus(APIView):
                 print(ex,"exexexe")
                 data = None
             if data is not None:
-                print("existsssss")
-                record_map = {}
+                if data.is_complete != True:
+                    print("existsssss")
+                    record_map = {}
+                    if request.POST.get("duration"):
+                        record_map["duration"] = request.POST.get("duration")
+                    else:
+                        record_map["duration"] = data.duration
 
-                if request.POST.get("duration"):
-                    record_map["duration"] = request.POST.get("duration")
-                else:
-                    record_map["duration"] = data.duration
+                    if request.POST.get("is_complete"):
+                        record_map["is_complete"] = json.loads(request.POST.get("is_complete"))
+                    else:
+                        record_map["is_complete"] = data.is_complete
 
-                if request.POST.get("is_complete"):
-                    record_map["is_complete"] = json.loads(request.POST.get("is_complete"))
-                else:
-                    record_map["is_complete"] = data.is_complete
-
-                for key, value in record_map.items():
-                    setattr(data, key, value)
-                data.save()
+                    for key, value in record_map.items():
+                        setattr(data, key, value)
+                    data.save()
+                    
             else:
                 print("not existsssss")
                 record_map = {}

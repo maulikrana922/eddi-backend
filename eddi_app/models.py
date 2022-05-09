@@ -919,8 +919,8 @@ class MaterialVideoMaterial(models.Model):
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name="Actual Video Duration")
     created_date_time = models.DateTimeField(auto_now_add=True)
 
-    # def __str__(self):
-    #     return self.video_file
+    def __str__(self):
+        return str(self.video_file) + " " + str(self.uuid)
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
@@ -938,6 +938,10 @@ class CourseMaterialStatus(models.Model):
     document_id = models.CharField(max_length=100,blank=True,null=True,verbose_name='Document')
     is_complete = models.BooleanField(default=False)
     duration = models.CharField(max_length=100,blank=True,null=True,verbose_name='Duration')
+
+    def __str__(self):
+        return self.video_id
+    
 
 
 class CourseMaterial(models.Model):

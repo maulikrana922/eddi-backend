@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
     # Stripe Link
     path('dummy/',dummy.as_view(), name="Dummy"),   
+    path('dummy2/',dummy2.as_view(), name="Dummy2"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
 
