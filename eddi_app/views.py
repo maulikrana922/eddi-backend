@@ -1914,3 +1914,77 @@ class CourseMaterialStatus(APIView):
         return Response({STATUS: SUCCESS, DATA: "Material Status Added Successfully"}, status=status.HTTP_200_OK)
 
 
+class CourseRating(APIView):
+    def post(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            record_map = {}
+            record_map = {
+                "user" : user,
+                "course_name" : course,
+                "star" : request.POST.get("star", None),
+                "comment" : request.POST.get("comment", None)
+            }
+
+        except Exception as ex:
+            print(ex, "exexeee")
+            return Response({STATUS: ERROR, DATA: "Error in record map"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            getattr(models,"CourseRating").objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "User Rating Saved Successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data = getattr(models,"CourseRating").objects.get(**{"email_id":email_id, "course":course})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        if serializer := CourseRatingSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+
+        
+    def put(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data = getattr(models,"CourseRating").objects.get(**{"email_id":email_id, "course":course})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            record_map = {}
+            record_map = {
+                "star" : request.POST.get("star", data.star),
+                "comment" : request.POST.get("comment", data.comment)
+            }
+            for key, value in record_map.items():
+                setattr(data, key, value)
+            data.save()
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in Saving Edited Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

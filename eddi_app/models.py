@@ -314,6 +314,9 @@ class InvoiceVATCMS(models.Model):
     vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
+
+
+
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
@@ -364,7 +367,13 @@ def add_organization_domain(sender, instance, created, **kwargs):
         CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
 
 
-       
+class CourseRating(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
+    user = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
+    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True)
+    star = models.CharField(max_length=150,verbose_name='Star',blank=True,null=True)
+    comment = models.TextField(max_length=5000,verbose_name='Comment',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
 ################## CMS    ###################################
 

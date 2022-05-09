@@ -7,6 +7,7 @@ urlpatterns = [
     path('dummy2/',dummy2.as_view(), name="Dummy2"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
+    path('course-rating/',CourseRating.as_view(), name="UserPaymentDetail"),   
 
     # Event Payment Flow
     path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   
