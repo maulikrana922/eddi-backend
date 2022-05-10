@@ -1918,7 +1918,7 @@ class CourseRating(APIView):
     def post(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         try:
-            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
             course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1943,14 +1943,15 @@ class CourseRating(APIView):
     def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         try:
-            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
             course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            data = getattr(models,"CourseRating").objects.get(**{"email_id":email_id, "course":course})
+            data = getattr(models,"CourseRating").objects.get(**{"user":user, "course_name":course})
         except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
         
         
@@ -1963,13 +1964,13 @@ class CourseRating(APIView):
     def put(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         try:
-            user = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+            user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
             course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            data = getattr(models,"CourseRating").objects.get(**{"email_id":email_id, "course":course})
+            data = getattr(models,"CourseRating").objects.get(**{"user":user, "course_name":course})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -1982,6 +1983,7 @@ class CourseRating(APIView):
             for key, value in record_map.items():
                 setattr(data, key, value)
             data.save()
+            return Response({STATUS: SUCCESS, DATA: "Course Rating Edited Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in Saving Edited Data"}, status=status.HTTP_400_BAD_REQUEST)
 

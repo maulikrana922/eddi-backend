@@ -367,13 +367,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
         CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
 
 
-class CourseRating(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    user = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
-    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True)
-    star = models.CharField(max_length=150,verbose_name='Star',blank=True,null=True)
-    comment = models.TextField(max_length=5000,verbose_name='Comment',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
 
 ################## CMS    ###################################
 
@@ -746,6 +740,15 @@ class UserProfile(models.Model):
         return self.email_id
     
 
+class CourseRating(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True)
+    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True)
+    star = models.CharField(max_length=150,verbose_name='Star',blank=True,null=True)
+    comment = models.TextField(max_length=5000,verbose_name='Comment',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
+
 class UserPersonalProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
@@ -1024,4 +1027,12 @@ class InvoiceDataEvent(models.Model):
     def __str__(self):
         return self.event_name
 
+
+class Notification(models.Model):
+    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name='User Type',blank=True,null=True,default=None)
+    user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Email',blank=True,null=True,default=None)
+    supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Email',blank=True,null=True,default=None)
+    message = models.TextField(max_length=2000,blank=True,null=True,verbose_name="Address")
+    is_clear = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True)
 

@@ -329,6 +329,10 @@ class GetCourseDetails(APIView):
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
+                user = getattr(models,USER_PROFILE).objects.get(**{"email_id":email_id})
+            except:
+                user = None
+            try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
                 course_data = None
@@ -356,10 +360,25 @@ class GetCourseDetails(APIView):
                 var = None
             var1 = True if var is not None else False
 
+            try:
+                rating = getattr(models,"CourseRating").objects.filter(**{COURSE_NAME:course_data})
+                l = []
+                for i in rating:
+                    l.append(int(i.star))
+                final_rating = sum(l)/len(l)
+            except Exception as ex:
+                print(ex,"exeeeeee")
+                rating = None
+                final_rating = None
+            
+
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := UserProfileSerializer(individuals, many=True):
                     if serializer2 := SupplierOrganizationProfileSerializer(supplier_profile):
-                        return Response({STATUS: SUCCESS, DATA:serializer.data, "Supplier_Organization_Profile":serializer2.data, ENROLLED:serializer1.data, 'is_favoutite':fav_dataa, "learners_count":lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
+                        if serializer3 := CourseRatingSerializer(rating, many=True):
+                            return Response({STATUS: SUCCESS, DATA:serializer.data, "Supplier_Organization_Profile":serializer2.data, ENROLLED:serializer1.data, 'is_favoutite':fav_dataa, "learners_count":lerner_count, "is_enrolled": var1, "VAT_charges":vat_val, "rating":serializer3.data, "final_rating":final_rating}, status=status.HTTP_200_OK)
+                        else:
+                            return Response({STATUS: ERROR, DATA: serializer3.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else: 
                          return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
                 else:
@@ -1055,13 +1074,13 @@ class CourseMaterialUpload(APIView):
 
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
+        email_id = get_user_email_by_token(request)
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        email_id = get_user_email_by_token(request)
         try:
             record_map = {
-                SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,None),
+                SUPPLIER_EMAIL : email_id,
                 ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,None),
                 ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,None),
                 ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,None),
@@ -1078,7 +1097,9 @@ class SupplierOrganizationProfileview(APIView):
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
+                print("savedddd")
             except Exception as ex:
+                print(ex,"exexeex")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
@@ -1091,6 +1112,7 @@ class SupplierOrganizationProfileview(APIView):
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
+            print(ex,"exxexe")
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
