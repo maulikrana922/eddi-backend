@@ -316,10 +316,41 @@ class InvoiceVATCMS(models.Model):
 
 
 
+class SupplierOrganizationProfile(models.Model):
+    # Organization Information
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
+    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
+    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
+    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
+    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
+    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
+    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
+    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
+    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name="Organization Phone Number")
+    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
+    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
+    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
+
+    # Course Category
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
+    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
+
+    # Additional Information
+    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
+    is_deleted = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+
+    def __str__(self):
+        return self.organizational_name
+
+
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
+    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True)
     course_image = models.FileField(upload_to='course_image/',verbose_name='Course Image',blank=True,null=True)
     course_name = models.CharField(max_length=150,verbose_name='Course Name',blank=True,null=True)
     course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name='Course Level',blank=True,null=True)
@@ -761,34 +792,7 @@ class UserPersonalProfile(models.Model):
         verbose_name = "User Personal Profile"
 
 
-class SupplierOrganizationProfile(models.Model):
-    # Organization Information
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
-    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
-    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
-    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
-    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
-    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
-    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
-    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
-    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name="Organization Phone Number")
-    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
-    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
-    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
 
-    # Course Category
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
-    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
-
-    # Additional Information
-    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
-    is_deleted = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-
-
-    def __str__(self):
-        return self.organizational_name
 
 class SupplierProfile(models.Model):
     supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")

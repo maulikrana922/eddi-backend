@@ -286,6 +286,7 @@ admin.site.register(UserProfile)
 admin.site.register(InvoiceData)
 admin.site.register(InvoiceDataEvent)
 admin.site.register(CourseRating)
+admin.site.register(Notification)
 
 
 
