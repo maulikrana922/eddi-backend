@@ -37,32 +37,72 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from moviepy.editor import VideoFileClip
+# from datetime import datetime
+
 
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def send_notification(request, user_type, email, message):
-    email_id =  get_user_email_by_token(request)
-    user_t = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
-    try:
-        user_pro = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-    except Exception as ex:
-        user_pro = None
-    if serializer := UserProfileSerializer(user_pro):
-        msg = "this is demo msg"
-        final_json = {
-            "type":"type1",
-            "json":{
-                "user_type" : user_t,
-                "user_profile" : serializer.data,
-                "user_email" : email_id,
-                "message" : msg
-            }
-        }
-      
-        r = requests.post('https://testyourapp.online:5001/', final_json)
-        r.status_code
+# import requests
+# import json
+
+# url = "https://testyourapp.online:5001"
+
+# payload = json.dumps({
+#   "type": "type1",
+#   "json": {
+#     "key1": "value1",
+#     "key2": "value2",
+#     "key3": "value3"
+#   }
+# })
+# headers = {
+#   'Content-Type': 'application/json'
+# }
+
+# response = requests.request("POST", url, headers=headers, data=payload)
+
+# print(response.text)
+
+def send_notification(user_type, email, message, sender, receiver):
+    # email_id =  get_user_email_by_token(request)
+    # user_t = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+    # try:
+    #     user_pro = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+    # except Exception as ex:
+    #     user_pro = None
+    # if serializer := UserProfileSerializer(user_pro):
+    url = "https://testyourapp.online:5001"
+
+    payload = json.dumps({
+    "type": "type1",
+    "json": {
+        "user_type": user_type,
+        "email": email,
+        "message": message,
+        'sender':  sender,
+        'receiver':receiver,
+    }
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    # final_json = {
+    #     "type":"type1",
+    #     "json":{
+    #         "user_type" : user_t,
+    #         "user_profile" : serializer.data,
+    #         "user_email" : email_id,
+    #         "message" : msg
+    #     }
+    # }
+    
+    # r = requests.post('https://testyourapp.online:5001/', final_json)
+    # r.status_code
     # return ws://localhost:7000 final_json
 
 
@@ -969,6 +1009,7 @@ class UserPaymentDetail_info(APIView):
         try:
             course_name = request.POST.get(COURSE_NAME)
             email_id = request.POST.get(EMAIL_ID)
+            user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
             else:
@@ -1014,64 +1055,23 @@ class UserPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
-                    # try:
-                    #     print(1)
-                    #     instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    #     vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-                    #     vat_val = int(vat[0])
-                    #     html_path = COURSE_ENROLL_HTML_TO_U
-                    #     fullname = f'{instance.first_name} {instance.last_name}'
-                    #     print(1)
-                    #     context_data = {'fullname':fullname, "course_name":course_name}
-                    #     email_html_template = get_template(html_path).render(context_data)
-                    #     email_from = settings.EMAIL_HOST_USER
-                    #     print(1)
-                    #     recipient_list = (instance.email_id,)
-                    #     invoice_number = random.randrange(100000,999999)
-                    #     print(1)
-                    #     context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
-                    #     template = get_template('invoice.html').render(context_data1)
-                    #     print("got templateteteteet------------------------")
-                    #     print(invoice_number, "numberrerere")
-                    #     try:
-                    #         print("pdfkit")
-                    #         pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
-                    #         print("pdfkit")
-                    #     except:
-                    #         print(ex, "ex44")
-                    #     record = {}
-                    #     try:
-                    #         record = {
-                    #         "invoice_number" : invoice_number,
-                    #         "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
-                    #         "user_email" : instance.email_id,
-                    #         "course_name" : course_name
-                    #         }
-                    #         getattr(models,"InvoiceData").objects.update_or_create(**record)
-                    #         print(1)
-                    #     except Exception as ex:
-                    #         print(ex, "ex1")
-                    #         pass
-                    #     path = 'eddi_app'
-                    #     img_dir = 'static'
-                    #     print("inside image")
-                    #     image = 'Logo.jpg'
-                    #     file_path = os.path.join(path,img_dir,image)
-                    #     with open(file_path,'rb') as f:
-                    #         img = MIMEImage(f.read())
-                    #         img.add_header('Content-ID', '<{name}>'.format(name=image))
-                    #         img.add_header('Content-Disposition', 'inline', filename=image)
-                    #     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-                    #     email_msg.content_subtype = 'html'
-                    #     print(1111)
-                    #     email_msg.attach(img)
-                    #     filename = f"./media/invoice-{invoice_number}.pdf"
-                    #     email_msg.attach_file(filename) 
-                    #     email_msg.send(fail_silently=False)
-                    #     print("sentttt")
-                    # except Exception as ex:
-                    #     pass
                     print("Enrolll createdddd")
+                    userr = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    receiver = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    message = f"{userr.first_name}, has applied for {course_name}"
+                    send_notification(user_type,email_id, message, email_id, receiver.supplier.email_id)
+                    # data = getattr(models,"Notification").objects.get(**{"sender":email_id, "receiver":receiver.supplier.email_id, "user_type": user_type})
+                    record_map = {}
+                    record_map = {
+                        "sender" : email_id,
+                        "receiver" : receiver.supplier.email_id,
+                        "user_type" : user_type,
+                        "user_detail" : userr,
+                        "message" : message,
+                    }
+
+                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                    print("notification sent")
                     
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -1082,6 +1082,7 @@ class UserPaymentDetail_info(APIView):
                 return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                 
               

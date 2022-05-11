@@ -1034,6 +1034,8 @@ class InvoiceDataEvent(models.Model):
 
 
 class Notification(models.Model):
+    sender = models.CharField(max_length=100,blank=True,null=True,verbose_name='sender')
+    receiver = models.CharField(max_length=100,blank=True,null=True,verbose_name='receiver')
     user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name='User Type',blank=True,null=True,default=None)
     user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Email',blank=True,null=True,default=None)
     supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Email',blank=True,null=True,default=None)

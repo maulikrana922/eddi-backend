@@ -13,7 +13,7 @@ urlpatterns = [
     path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   
     path('event-payment-detail/',EventPaymentDetail_info.as_view(), name="EventPaymentDetail"),   
 
-
+    
     path('signup/',UserSignupView.as_view()),
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),

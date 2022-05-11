@@ -95,6 +95,7 @@ class AddCourseView(APIView):
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             "meeting_link" : request.POST.get("meeting_link",None),
             "meeting_passcode" : request.POST.get("meeting_passcode",None),
+            "target_users" : request.POST.get("target_users",None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
             STATUS_ID:1
@@ -495,6 +496,7 @@ class GetCourseDetails(APIView):
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
             "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
             "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
+            "target_users" : request.POST.get("target_users",data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
