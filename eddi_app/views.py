@@ -1781,13 +1781,21 @@ class CourseEnrollView(APIView):
                 for i in list(course_data_uuid): 
                     # new_dict[f"course_{i}"] = i
                     print(i, "iiiiiiiiiiiiiiiiii")
-                    var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    try:
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    except Exception as ex:
+                        var = None
+                        new_dict[f"course_{i}"] = "Ongoing"
+
                     # var matlab a course na many to many video fields
                     print(var, "vararara")
-                    video_file_count =  var.video_files.count()
-                    # print(var.video_files.count(), "lenenenen")
-                    a = var.video_files.all()
-                    # print(a, "aaa")
+                    try:
+                        video_file_count =  var.video_files.count()
+                        # print(var.video_files.count(), "lenenenen")
+                        a = var.video_files.all()
+                        # print(a, "aaa")
+                    except Exception as ex:
+                        pass
                     try:
                         len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id}).count()
                     except Exception as ex:
@@ -1795,7 +1803,7 @@ class CourseEnrollView(APIView):
                     print(len_material_status, "lenenenenen")
                     print(video_file_count, "lenenenenen")
                     if video_file_count != len_material_status:
-                        final_course_status = "Incomplete"
+                        final_course_status = "Ongoing"
                         print("laststststs")
                         new_dict[f"course_{i}"] = final_course_status
                         continue
@@ -1815,12 +1823,12 @@ class CourseEnrollView(APIView):
                                 final_course_status = None
                                 continue
                             else:
-                                final_course_status = "Incomplete"
+                                final_course_status = "Ongoing"
                                 break
                         if final_course_status is None:
                             final_course_status = "Complete"
                         else:
-                            final_course_status = "Incomplete"
+                            final_course_status = "Ongoing"
                         # new_dict[f'final_course_status'] = final_course_status
                         new_dict[f"course_{i}"] = final_course_status
 
@@ -1846,7 +1854,7 @@ class CourseEnrollView(APIView):
 
             print(new_dict, "new_dictctctctct")
             if serializer := CourseDetailsSerializer(course_data, many=True):
-                print(serializer.data, "serializerrrr")
+                # print(serializer.data, "serializerrrr")
                 if serializer1 := CourseDetailsSerializer(data_category, many=True):
                         
                     # new_dict = {}
