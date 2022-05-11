@@ -26,6 +26,7 @@ from eddi_app.constants.table_name import *
 import datetime
 from datetime import date
 from django.db.models import Q
+from collections import OrderedDict
 import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
@@ -1777,23 +1778,23 @@ class CourseEnrollView(APIView):
             try:
                 course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
                 print(course_data_uuid, "course_dataaa_uuiddddd")
-                new_dict = {}
+                new_dict = OrderedDict()
                 for i in list(course_data_uuid): 
                     # new_dict[f"course_{i}"] = i
-                    print(i, "iiiiiiiiiiiiiiiiii")
+                    # print(i, "iiiiiiiiiiiiiiiiii")
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
                     except Exception as ex:
                         var = None
+                        print("hereeeeeeeeeeeeeeee")
                         new_dict[f"course_{i}"] = "Ongoing"
+                        continue
 
                     # var matlab a course na many to many video fields
                     print(var, "vararara")
                     try:
                         video_file_count =  var.video_files.count()
-                        # print(var.video_files.count(), "lenenenen")
                         a = var.video_files.all()
-                        # print(a, "aaa")
                     except Exception as ex:
                         pass
                     try:
@@ -1812,11 +1813,6 @@ class CourseEnrollView(APIView):
                         for i in a:
                             print("inside iiiii")
                             print(i, "iiiii")
-                            # try:
-                            #     len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id, "video_id" : i.uuid})
-                            # except Exception as ex:
-                            #     len_material_status = 0
-                            # print(i, "iiiiiiiiiiiiiiiiiii")
                             var1 = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":i.uuid})
                             print(var1, "var11111")
                             if var1.is_complete == True:
@@ -1829,7 +1825,6 @@ class CourseEnrollView(APIView):
                             final_course_status = "Complete"
                         else:
                             final_course_status = "Ongoing"
-                        # new_dict[f'final_course_status'] = final_course_status
                         new_dict[f"course_{i}"] = final_course_status
 
             except Exception as ex:
