@@ -366,7 +366,7 @@ class GetCourseDetails(APIView):
                 l = []
                 for i in rating:
                     l.append(int(i.star))
-                final_rating = str(sum(l)/len(l))
+                final_rating = sum(l)/len(l)
             except Exception as ex:
                 print(ex,"exeeeeee")
                 rating = None
@@ -629,7 +629,7 @@ class GetCourseDetails(APIView):
 
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 record_map[MODIFIED_BY] = 'admin'
-                record_map[UUID] = uuid4()
+                # record_map[UUID] = uuid4()
                 print(record_map, "recordddddddddd")
                 for key,value in record_map.items():
                     setattr(data,key,value)
@@ -663,7 +663,7 @@ class GetCourseDetails(APIView):
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = email_id
-        record_map[UUID] = uuid4()
+        # record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()

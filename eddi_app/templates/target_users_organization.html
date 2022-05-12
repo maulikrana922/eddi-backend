@@ -31,10 +31,24 @@
         font-size: 18px;
       "
     >
-      Hello, {{user_name}}
-      <span style="font-family: Arial, Helvetica, sans-serif; font-weight: bold"
-        >{{supplier_name}} has enrolled you for {{course_name}} for organization {{organization_name}} </span
+      Hello, <b>{{user_name}}</b>
+      <br>
+      <span style="font-family: Arial, Helvetica, sans-serif;">
+        Congratulations, <b>{{supplier_name}}</b> from <b>{{organization_name}}</b> has offered the "<b>{{course_name}}</b>" course to you, please find the below link to view the course. </span>
+        <br>
+
+        <a
+        href="https://eddi-frontend.testyourapp.online/#/view-course-details/{{uuid}}/"
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: bold;
+          color: #3e3e3e;
+          text-decoration: underline;
+          cursor:pointer;
+        "
+        >Click Here for View Course Detail</a
       >
+
     </td>
   </tr>
   <tr>
@@ -45,17 +59,7 @@
       Thanks for registering on Eddi.
     </td>
   </tr>
-  <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
-    <td>
-      
-    </td>
-  </tr>
-  <tr>
-    <td height="45"></td>
-  </tr>
+  
   <tr>
     <td
       style="
