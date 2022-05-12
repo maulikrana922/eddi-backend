@@ -420,16 +420,17 @@ class GetCourseDetails(APIView):
                         print(ex, "exxxxxxxxx")
 
                     # organization_domain = email_id.split('@')[1]
-                    # course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
-                    target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id})
-                    target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).values_list("course_name")
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
+                    target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
+                    target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
                     
                     
                     # data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
                     # data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = target_course_data).order_by("-created_date_time")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
+                    print(data_all, "allllllllllll")
                     # final_queryset = list(chain(target_course, data_all))
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
