@@ -20,6 +20,9 @@ from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.authtoken.models import Token
+from django.core import mail
+from django.template.loader import render_to_string
+from django.core.mail import get_connection, EmailMultiAlternatives
 
 
 
@@ -397,6 +400,68 @@ def add_organization_domain(sender, instance, created, **kwargs):
         res = test_str.split('@')[1]
         print(res)
         CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
+
+@receiver(post_save, sender=CourseDetails)
+def bulk_email(sender, instance, created, **kwargs):
+    if created and instance.course_for_organization == True and instance.target_users != None:
+
+        connection = mail.get_connection()
+        instance.target_users.split(",")
+        try:
+            reciever_list = instance.target_users.split(",")
+        except Exception as ex:
+            reciever_list = instance.target_users.split()
+        # reciever_list = instance.target_users.split(",")
+        html_path = 'target_users_organization.html'
+        connection.open()
+        email_from = settings.EMAIL_HOST_USER
+        for i in reciever_list:
+            username = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:i})
+            context_data = {'course_name':instance.course_name, "user_name":username.first_name, "supplier_name" : instance.supplier.first_name, "organization_name" : instance.supplier_organization.organizational_name}
+            html_content = render_to_string(html_path, context_data)               
+            text_content = "..."                      
+            receiver = i,
+            msg = EmailMultiAlternatives("Hello", text_content, email_from, receiver, connection=connection)                                      
+            msg.attach_alternative(html_content, "text/html")    
+            path = 'eddi_app'
+            img_dir = 'static'
+            image = 'Logo.jpg'
+            file_path = os.path.join(path,img_dir,image)
+            with open(file_path,'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                img.add_header('Content-Disposition', 'inline', filename=image)
+            msg.attach(img)
+            msg.send()
+                                    
+        connection.close()
+
+
+
+
+
+        # connection = mail.get_connection()
+        # connection.open()
+        # reciever_list = instance.target_users.split(",")
+        # for i in reciever_list:
+        #     html_path = 'target_users_organization.html'
+        #     # fullname = f'{instance.first_name} {instance.last_name}'
+        #     # context_data = {'final_otp':otp,'fullname':fullname}
+        #     context_data = {'course_name':instance.course_name}
+        #     email_html_template = get_template(html_path).render(context_data)
+        #     connection = mail.get_connection()
+        #     reciever = i
+        #     email_from = settings.EMAIL_HOST_USER
+        #     email1 = mail.EmailMessage('Hello', email_html_template, email_from,
+        #                             reciever, connection=connection)
+                                    
+        #     email1.send()
+        # connection.close()
+        
+        # test_str = instance.supplier.email_id
+        # res = test_str.split('@')[1]
+        # print(res)
+        # CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
 
 
 

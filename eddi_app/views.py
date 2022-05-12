@@ -38,6 +38,9 @@ from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from moviepy.editor import VideoFileClip
 # from datetime import datetime
+from django.core import mail
+from django.template.loader import render_to_string
+from django.core.mail import get_connection, EmailMultiAlternatives
 
 
 
@@ -107,41 +110,32 @@ def send_notification(user_type, email, message, sender, receiver):
 
 
 
+
 @permission_classes([AllowAny])
 class dummy(APIView):
     def get(self, request):
         print("ok")
-        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-        vat_val = int(vat[0])
-        html_path = COURSE_ENROLL_HTML_TO_U
-        # fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':"Nishant", "course_name":"Testing"}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = ("nishant.k@latitudetechnolabs.com",)
-        invoice_number = random.randrange(100000,999999)
-        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Python","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
-        template = get_template('invoice.html').render(context_data1)
-        try: 
-            result = BytesIO()
-            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
-            pdf = result.getvalue()
-            filename = f'Invoice-{invoice_number}.pdf'
-        except Exception as ex:
-            print(ex)
-        record = {}
-        # try:
-        #     record = {
-        #     "invoice_number" : invoice_number,
-        #     "invoice_file" : f"{invoice_number}.pdf",
-        #     "user_email" : instance.email_id,
-        #     "course_name" : course_name
-        #     }
-        #     getattr(models,"InvoiceData").objects.update_or_create(**record)
-        # except Exception as ex:
-        #     pass
-        try:
+        # from django.core import mail
+        connection = mail.get_connection()
+        
+        reciever_list = ['nishant.kabariya@gmail.com', 'nishant.k@latitudetechnolabs.com']
+        html_path = 'target_users_organization.html'
+        connection.open()
+        context_data = {'course_name':"testing course"}
+        for i in reciever_list:
+            # fullname = f'{instance.first_name} {instance.last_name}'
+            # context_data = {'final_otp':otp,'fullname':fullname}
+            # email_html_template = get_template(html_path).render(context_data)
+            # email_html_template = html_path
+            # connection = mail.get_connection()
+            html_content = render_to_string(html_path, context_data)               
+            email_from = settings.EMAIL_HOST_USER
+            text_content = "..."                      
+            receiver = i,
+            msg = EmailMultiAlternatives("subject", text_content, email_from, receiver, connection=connection)                                      
+            msg.attach_alternative(html_content, "text/html")    
+            # email1 = mail.EmailMessage('Hello', email_html_template, email_from,
+                                    # receiver, connection=connection)
             path = 'eddi_app'
             img_dir = 'static'
             image = 'Logo.jpg'
@@ -150,18 +144,73 @@ class dummy(APIView):
                 img = MIMEImage(f.read())
                 img.add_header('Content-ID', '<{name}>'.format(name=image))
                 img.add_header('Content-Disposition', 'inline', filename=image)
-        except Exception as ex:
-            pass
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        email_msg.encoding = 'us-ascii'
-        email_msg.attach(img)
-        try:
-            email_msg.attach(filename, pdf, "application/pdf") 
-        except Exception as ex:
-            pass
-        email_msg.send(fail_silently=False)
+            msg.attach(img)
+            # email1.send()
+            msg.send()
+                                    
+        connection.close()
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
+        # connection = mail.get_connection()
+
+        # connection.open()
+        # reciever_list= ['nishant.kabariya@gmail.com', 'nishant.k@latitudetechnolabs.com']  #extend this list according to your requirement
+        # email_from = settings.EMAIL_HOST_USER
+        # email1 = mail.EmailMessage('Hello', 'Body goes here', email_from,
+        #                         reciever_list, connection=connection)
+                                
+        # email1.send()
+        # connection.close()
+        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        # vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+        # vat_val = int(vat[0])
+        # html_path = COURSE_ENROLL_HTML_TO_U
+        # # fullname = f'{instance.first_name} {instance.last_name}'
+        # context_data = {'fullname':"Nishant", "course_name":"Testing"}
+        # email_html_template = get_template(html_path).render(context_data)
+        # email_from = settings.EMAIL_HOST_USER
+        # recipient_list = ("nishant.k@latitudetechnolabs.com",)
+        # invoice_number = random.randrange(100000,999999)
+        # context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Python","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
+        # template = get_template('invoice.html').render(context_data1)
+        # try: 
+        #     result = BytesIO()
+        #     pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+        #     pdf = result.getvalue()
+        #     filename = f'Invoice-{invoice_number}.pdf'
+        # except Exception as ex:
+        #     print(ex)
+        # record = {}
+        # # try:
+        # #     record = {
+        # #     "invoice_number" : invoice_number,
+        # #     "invoice_file" : f"{invoice_number}.pdf",
+        # #     "user_email" : instance.email_id,
+        # #     "course_name" : course_name
+        # #     }
+        # #     getattr(models,"InvoiceData").objects.update_or_create(**record)
+        # # except Exception as ex:
+        # #     pass
+        # try:
+        #     path = 'eddi_app'
+        #     img_dir = 'static'
+        #     image = 'Logo.jpg'
+        #     file_path = os.path.join(path,img_dir,image)
+        #     with open(file_path,'rb') as f:
+        #         img = MIMEImage(f.read())
+        #         img.add_header('Content-ID', '<{name}>'.format(name=image))
+        #         img.add_header('Content-Disposition', 'inline', filename=image)
+        # except Exception as ex:
+        #     pass
+        # email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        # email_msg.content_subtype = 'html'
+        # email_msg.encoding = 'us-ascii'
+        # email_msg.attach(img)
+        # try:
+        #     email_msg.attach(filename, pdf, "application/pdf") 
+        # except Exception as ex:
+        #     pass
+        # email_msg.send(fail_silently=False)
+        # return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
 
 @permission_classes([AllowAny])
 class dummy2(APIView):
