@@ -366,9 +366,8 @@ class GetCourseDetails(APIView):
                 l = []
                 for i in rating:
                     l.append(int(i.star))
-                final_rating = sum(l)/len(l)
+                final_rating = "{:.2f}".format(sum(l)/len(l))
             except Exception as ex:
-                print(ex,"exeeeeee")
                 rating = None
                 final_rating = None
             
