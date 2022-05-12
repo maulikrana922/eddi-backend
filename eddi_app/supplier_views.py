@@ -26,6 +26,7 @@ from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
 from moviepy.editor import VideoFileClip
+from itertools import chain
 
 
 @permission_classes([AllowAny])
@@ -429,10 +430,12 @@ class GetCourseDetails(APIView):
                     # data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = target_course_data).order_by("-created_date_time")
-                if serializer := CourseDetailsSerializer(target_course,many=True):
-                    if serializer_all := CourseDetailsSerializer(data_all, many=True):
-                        return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
+                    final_queryset = list(chain(target_course, data_all))
+                if serializer := CourseDetailsSerializer(final_queryset,many=True):
+                    # if serializer_all := CourseDetailsSerializer(data_all, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    # return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
+                    # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    
             else:
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
