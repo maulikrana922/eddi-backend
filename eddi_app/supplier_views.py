@@ -429,7 +429,7 @@ class GetCourseDetails(APIView):
 
                     # data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False,}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
                     print(data_all, "allllllllllll")
                     # final_queryset = list(chain(target_course, data_all))
                 if serializer := CourseDetailsSerializer(target_course,many=True):
