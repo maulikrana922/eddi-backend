@@ -939,6 +939,9 @@ class CourseMaterialStatus(models.Model):
     is_complete = models.BooleanField(default=False)
     duration = models.CharField(max_length=100,blank=True,null=True,verbose_name='Duration')
 
+    def __str__(self) :  # <- This Method in Tag Model
+        return self.user_email
+
 
 class CourseMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)

@@ -975,21 +975,23 @@ class CourseMaterialUpload(APIView):
     def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request) 
         print("uuid",uuid)
+        response_dict = {}
         if uuid:
             try:
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
-                print("course",course_material_data)
+                print("course Data",course_material_data)
             except Exception as ex:
                 course_material_data = None
             try:
                 course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
-                print("course",course_material_status)
+                for i in course_material_status:
+                    print(i.is_complete)
             except Exception as ex:
                 course_material_status = None
             
             if serializer := CourseMaterialSerializer(course_material_data):
-                if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "material_status":serializer1.data}, status=status.HTTP_200_OK)
+                # if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
+                    # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
