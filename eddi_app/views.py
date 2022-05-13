@@ -1108,18 +1108,18 @@ class UserPaymentDetail_info(APIView):
                     userr = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     receiver = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     message = f"{userr.first_name}, has applied for {course_name}"
-                    send_notification(user_type,email_id, message, email_id, receiver.supplier.email_id)
+                    # send_notification(user_type,email_id, message, email_id, receiver.supplier.email_id)
                     # data = getattr(models,"Notification").objects.get(**{"sender":email_id, "receiver":receiver.supplier.email_id, "user_type": user_type})
                     record_map = {}
-                    record_map = {
-                        "sender" : email_id,
-                        "receiver" : receiver.supplier.email_id,
-                        "user_type" : user_type,
-                        "user_detail" : userr,
-                        "message" : message,
-                    }
+                    # record_map = {
+                    #     "sender" : email_id,
+                    #     "receiver" : receiver.supplier.email_id,
+                    #     "user_type" : user_type,
+                    #     "user_detail" : userr,
+                    #     "message" : message,
+                    # }
 
-                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                    # getattr(models,"Notification").objects.update_or_create(**record_map)
                     print("notification sent")
                     
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
