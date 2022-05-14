@@ -105,6 +105,8 @@ class UserSignup(models.Model):
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
+    def __str__(self):
+       return self.email_id
    
 
 @receiver(post_save, sender=UserSignup)
@@ -766,6 +768,7 @@ class TermsConditionCMSSupplier(models.Model):
 class UserProfile(models.Model):
 
     #personal information
+    usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
     email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")

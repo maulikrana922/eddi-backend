@@ -1362,7 +1362,7 @@ class ViewIndividualProfile(APIView):
         supplier_email_id = request.POST.get(SUPPLIER_EMAIL_ID)
         token_data = request.headers.get('Authorization')
         try:
-            token = token_data.split()[1]
+            token = token_data.split()[1]   
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
             # email_id = data.user.email_id
             # print(data.key)
