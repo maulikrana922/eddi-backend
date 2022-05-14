@@ -20,6 +20,9 @@ from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.authtoken.models import Token
+from django.core import mail
+from django.template.loader import render_to_string
+from django.core.mail import get_connection, EmailMultiAlternatives
 
 
 
@@ -102,6 +105,8 @@ class UserSignup(models.Model):
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
 
+    def __str__(self):
+       return self.email_id
    
 
 @receiver(post_save, sender=UserSignup)
@@ -314,9 +319,43 @@ class InvoiceVATCMS(models.Model):
     vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
 
+
+
+class SupplierOrganizationProfile(models.Model):
+    # Organization Information
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
+    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
+    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
+    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
+    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
+    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
+    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
+    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
+    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name="Organization Phone Number")
+    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
+    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
+    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
+
+    # Course Category
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
+    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
+
+    # Additional Information
+    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
+    is_deleted = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+
+
+    def __str__(self):
+        return self.organizational_name
+
+
+
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
+    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True)
     course_image = models.FileField(upload_to='course_image/',verbose_name='Course Image',blank=True,null=True)
     course_name = models.CharField(max_length=150,verbose_name='Course Name',blank=True,null=True)
     course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name='Course Level',blank=True,null=True)
@@ -337,6 +376,7 @@ class CourseDetails(models.Model):
     course_checkout_link = models.CharField(max_length=255,verbose_name='Checkout Link',blank=True,null=True)
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name="Meeting Link")
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name="Passcode")
+    target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name="Target Users")
     
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
@@ -363,8 +403,44 @@ def add_organization_domain(sender, instance, created, **kwargs):
         print(res)
         CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
 
-
-       
+@receiver(post_save, sender=CourseDetails)
+def bulk_email(sender, instance, created, **kwargs):
+    if instance.course_for_organization == True and instance.target_users:
+        connection = mail.get_connection()
+        instance.target_users.split(",")
+        try:
+            reciever_list = instance.target_users.split(",")
+        except Exception as ex:
+            reciever_list = instance.target_users.split()
+        try:
+            path = 'eddi_app'
+            img_dir = 'static'
+            image = 'Logo.jpg'
+            file_path = os.path.join(path,img_dir,image)
+            with open(file_path,'rb') as f:
+                img = MIMEImage(f.read())
+                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                img.add_header('Content-Disposition', 'inline', filename=image)
+            html_path = 'target_users_organization.html'
+            connection.open()
+            email_from = settings.EMAIL_HOST_USER
+            for i in reciever_list:
+                try:
+                    user_detail = UserSignup.objects.get(email_id = i)
+                    username = user_detail.first_name
+                except Exception as ex:
+                    username = ""
+                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : instance.supplier_organization.organizational_name, "uuid":instance.uuid}
+                html_content = render_to_string(html_path, context_data)               
+                text_content = "..."                      
+                receiver = i,
+                msg = EmailMultiAlternatives("Hello", text_content, email_from, receiver, connection=connection)                                      
+                msg.attach_alternative(html_content, "text/html")
+                msg.attach(img)
+                msg.send()                
+            connection.close()
+        except Exception as ex:
+            pass
 
 ################## CMS    ###################################
 
@@ -692,6 +768,7 @@ class TermsConditionCMSSupplier(models.Model):
 class UserProfile(models.Model):
 
     #personal information
+    usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
     email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
     first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
@@ -737,6 +814,15 @@ class UserProfile(models.Model):
         return self.email_id
     
 
+class CourseRating(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True)
+    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True)
+    star = models.CharField(max_length=150,verbose_name='Star',blank=True,null=True)
+    comment = models.TextField(max_length=5000,verbose_name='Comment',blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+
+
 class UserPersonalProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
@@ -749,34 +835,7 @@ class UserPersonalProfile(models.Model):
         verbose_name = "User Personal Profile"
 
 
-class SupplierOrganizationProfile(models.Model):
-    # Organization Information
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
-    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
-    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
-    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
-    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
-    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
-    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
-    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
-    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name="Organization Phone Number")
-    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
-    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
-    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
 
-    # Course Category
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
-    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
-
-    # Additional Information
-    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
-    is_deleted = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-
-
-    def __str__(self):
-        return self.organizational_name
 
 class SupplierProfile(models.Model):
     supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
@@ -919,8 +978,8 @@ class MaterialVideoMaterial(models.Model):
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name="Actual Video Duration")
     created_date_time = models.DateTimeField(auto_now_add=True)
 
-    # def __str__(self):
-    #     return self.video_file
+    def __str__(self):
+        return str(self.video_file) + " " + str(self.uuid)
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True)
@@ -939,8 +998,9 @@ class CourseMaterialStatus(models.Model):
     is_complete = models.BooleanField(default=False)
     duration = models.CharField(max_length=100,blank=True,null=True,verbose_name='Duration')
 
-    def __str__(self) :  # <- This Method in Tag Model
-        return self.user_email
+    def __str__(self):
+        return self.video_id
+    
 
 
 class CourseMaterial(models.Model):
@@ -1014,4 +1074,14 @@ class InvoiceDataEvent(models.Model):
     def __str__(self):
         return self.event_name
 
+
+class Notification(models.Model):
+    sender = models.CharField(max_length=100,blank=True,null=True,verbose_name='sender')
+    receiver = models.CharField(max_length=100,blank=True,null=True,verbose_name='receiver')
+    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name='User Type',blank=True,null=True,default=None)
+    user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Email',blank=True,null=True,default=None)
+    supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Email',blank=True,null=True,default=None)
+    message = models.TextField(max_length=2000,blank=True,null=True,verbose_name="Address")
+    is_clear = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True)
 

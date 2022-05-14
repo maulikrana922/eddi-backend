@@ -4,14 +4,16 @@ from .views import *
 urlpatterns = [
     # Stripe Link
     path('dummy/',dummy.as_view(), name="Dummy"),   
+    path('dummy2/',dummy2.as_view(), name="Dummy2"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
+    path('course-rating/<str:uuid>/',CourseRating.as_view(), name="UserPaymentDetail"),   
 
     # Event Payment Flow
     path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   
     path('event-payment-detail/',EventPaymentDetail_info.as_view(), name="EventPaymentDetail"),   
 
-
+    
     path('signup/',UserSignupView.as_view()),
     path('login/',UserLoginView.as_view()),
     path('forgot/',ForgetPasswordView.as_view()),

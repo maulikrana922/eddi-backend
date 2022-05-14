@@ -1,10 +1,11 @@
 # from doctest import FAIL_FAST
 # import email
 # from copy import Error
+# from ast import Pass
 from email.mime.image import MIMEImage
 import os
 from xhtml2pdf import pisa
-
+import requests
 # import profile
 # from string import printable
 import random
@@ -25,6 +26,7 @@ from eddi_app.constants.table_name import *
 import datetime
 from datetime import date
 from django.db.models import Q
+from collections import OrderedDict
 import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
@@ -34,46 +36,106 @@ import stripe # 2.68.0
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
+from moviepy.editor import VideoFileClip
+# from datetime import datetime
+from django.core import mail
+from django.template.loader import render_to_string
+from django.core.mail import get_connection, EmailMultiAlternatives
+
+
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+# import requests
+# import json
+
+# url = "https://testyourapp.online:5001"
+
+# payload = json.dumps({
+#   "type": "type1",
+#   "json": {
+#     "key1": "value1",
+#     "key2": "value2",
+#     "key3": "value3"
+#   }
+# })
+# headers = {
+#   'Content-Type': 'application/json'
+# }
+
+# response = requests.request("POST", url, headers=headers, data=payload)
+
+# print(response.text)
+
+def send_notification(user_type, email, message, sender, receiver):
+    # email_id =  get_user_email_by_token(request)
+    # user_t = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+    # try:
+    #     user_pro = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+    # except Exception as ex:
+    #     user_pro = None
+    # if serializer := UserProfileSerializer(user_pro):
+    url = "https://testyourapp.online:5001"
+
+    payload = json.dumps({
+    "type": "type1",
+    "json": {
+        "user_type": user_type,
+        "email": email,
+        "message": message,
+        'sender':  sender,
+        'receiver':receiver,
+    }
+    })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    # final_json = {
+    #     "type":"type1",
+    #     "json":{
+    #         "user_type" : user_t,
+    #         "user_profile" : serializer.data,
+    #         "user_email" : email_id,
+    #         "message" : msg
+    #     }
+    # }
+    
+    # r = requests.post('https://testyourapp.online:5001/', final_json)
+    # r.status_code
+    # return ws://localhost:7000 final_json
+
+
 
 
 @permission_classes([AllowAny])
 class dummy(APIView):
     def get(self, request):
         print("ok")
-        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-        vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-        vat_val = int(vat[0])
-        html_path = COURSE_ENROLL_HTML_TO_U
-        # fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':"Nishant", "course_name":"Testing"}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = ("nishant.k@latitudetechnolabs.com",)
-        invoice_number = random.randrange(100000,999999)
-        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Python","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
-        template = get_template('invoice.html').render(context_data1)
-        try: 
-            result = BytesIO()
-            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
-            pdf = result.getvalue()
-            filename = f'Invoice-{invoice_number}.pdf'
-        except Exception as ex:
-            print(ex)
-        record = {}
-        # try:
-        #     record = {
-        #     "invoice_number" : invoice_number,
-        #     "invoice_file" : f"{invoice_number}.pdf",
-        #     "user_email" : instance.email_id,
-        #     "course_name" : course_name
-        #     }
-        #     getattr(models,"InvoiceData").objects.update_or_create(**record)
-        # except Exception as ex:
-        #     pass
-        try:
+        # from django.core import mail
+        connection = mail.get_connection()
+        
+        reciever_list = ['nishant.kabariya@gmail.com', 'nishant.k@latitudetechnolabs.com']
+        html_path = 'target_users_organization.html'
+        connection.open()
+        context_data = {'course_name':"testing course"}
+        for i in reciever_list:
+            # fullname = f'{instance.first_name} {instance.last_name}'
+            # context_data = {'final_otp':otp,'fullname':fullname}
+            # email_html_template = get_template(html_path).render(context_data)
+            # email_html_template = html_path
+            # connection = mail.get_connection()
+            html_content = render_to_string(html_path, context_data)               
+            email_from = settings.EMAIL_HOST_USER
+            text_content = "..."                      
+            receiver = i,
+            msg = EmailMultiAlternatives("subject", text_content, email_from, receiver, connection=connection)                                      
+            msg.attach_alternative(html_content, "text/html")    
+            # email1 = mail.EmailMessage('Hello', email_html_template, email_from,
+                                    # receiver, connection=connection)
             path = 'eddi_app'
             img_dir = 'static'
             image = 'Logo.jpg'
@@ -82,18 +144,87 @@ class dummy(APIView):
                 img = MIMEImage(f.read())
                 img.add_header('Content-ID', '<{name}>'.format(name=image))
                 img.add_header('Content-Disposition', 'inline', filename=image)
-        except Exception as ex:
-            pass
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        email_msg.encoding = 'us-ascii'
-        email_msg.attach(img)
-        try:
-            email_msg.attach(filename, pdf, "application/pdf") 
-        except Exception as ex:
-            pass
-        email_msg.send(fail_silently=False)
+            msg.attach(img)
+            # email1.send()
+            msg.send()
+                                    
+        connection.close()
         return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
+        # connection = mail.get_connection()
+
+        # connection.open()
+        # reciever_list= ['nishant.kabariya@gmail.com', 'nishant.k@latitudetechnolabs.com']  #extend this list according to your requirement
+        # email_from = settings.EMAIL_HOST_USER
+        # email1 = mail.EmailMessage('Hello', 'Body goes here', email_from,
+        #                         reciever_list, connection=connection)
+                                
+        # email1.send()
+        # connection.close()
+        # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        # vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+        # vat_val = int(vat[0])
+        # html_path = COURSE_ENROLL_HTML_TO_U
+        # # fullname = f'{instance.first_name} {instance.last_name}'
+        # context_data = {'fullname':"Nishant", "course_name":"Testing"}
+        # email_html_template = get_template(html_path).render(context_data)
+        # email_from = settings.EMAIL_HOST_USER
+        # recipient_list = ("nishant.k@latitudetechnolabs.com",)
+        # invoice_number = random.randrange(100000,999999)
+        # context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":"Python","course_fees": 100, "vat":vat_val, "total":int(100) + (int(100)*vat_val)/100}
+        # template = get_template('invoice.html').render(context_data1)
+        # try: 
+        #     result = BytesIO()
+        #     pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+        #     pdf = result.getvalue()
+        #     filename = f'Invoice-{invoice_number}.pdf'
+        # except Exception as ex:
+        #     print(ex)
+        # record = {}
+        # # try:
+        # #     record = {
+        # #     "invoice_number" : invoice_number,
+        # #     "invoice_file" : f"{invoice_number}.pdf",
+        # #     "user_email" : instance.email_id,
+        # #     "course_name" : course_name
+        # #     }
+        # #     getattr(models,"InvoiceData").objects.update_or_create(**record)
+        # # except Exception as ex:
+        # #     pass
+        # try:
+        #     path = 'eddi_app'
+        #     img_dir = 'static'
+        #     image = 'Logo.jpg'
+        #     file_path = os.path.join(path,img_dir,image)
+        #     with open(file_path,'rb') as f:
+        #         img = MIMEImage(f.read())
+        #         img.add_header('Content-ID', '<{name}>'.format(name=image))
+        #         img.add_header('Content-Disposition', 'inline', filename=image)
+        # except Exception as ex:
+        #     pass
+        # email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        # email_msg.content_subtype = 'html'
+        # email_msg.encoding = 'us-ascii'
+        # email_msg.attach(img)
+        # try:
+        #     email_msg.attach(filename, pdf, "application/pdf") 
+        # except Exception as ex:
+        #     pass
+        # email_msg.send(fail_silently=False)
+        # return Response({MESSAGE: SUCCESS, DATA: "sent"}, status=status.HTTP_200_OK,)
+
+@permission_classes([AllowAny])
+class dummy2(APIView):
+    def get(self, request):
+        videos = request.FILES.getlist("v")
+        print(videos, "videossssss")
+        for i in videos:
+            print(i, 'iiiii')
+            clip = VideoFileClip(str(i))
+            print(int(clip.duration), "durararararararararar")
+        return Response(status.HTTP_200_OK)
+
+
+
 
 
 @permission_classes([AllowAny])
@@ -927,6 +1058,7 @@ class UserPaymentDetail_info(APIView):
         try:
             course_name = request.POST.get(COURSE_NAME)
             email_id = request.POST.get(EMAIL_ID)
+            user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
             else:
@@ -972,64 +1104,23 @@ class UserPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
-                    # try:
-                    #     print(1)
-                    #     instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    #     vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-                    #     vat_val = int(vat[0])
-                    #     html_path = COURSE_ENROLL_HTML_TO_U
-                    #     fullname = f'{instance.first_name} {instance.last_name}'
-                    #     print(1)
-                    #     context_data = {'fullname':fullname, "course_name":course_name}
-                    #     email_html_template = get_template(html_path).render(context_data)
-                    #     email_from = settings.EMAIL_HOST_USER
-                    #     print(1)
-                    #     recipient_list = (instance.email_id,)
-                    #     invoice_number = random.randrange(100000,999999)
-                    #     print(1)
-                    #     context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
-                    #     template = get_template('invoice.html').render(context_data1)
-                    #     print("got templateteteteet------------------------")
-                    #     print(invoice_number, "numberrerere")
-                    #     try:
-                    #         print("pdfkit")
-                    #         pdfkit.from_string(template,f"./media/invoice-{invoice_number}.pdf")
-                    #         print("pdfkit")
-                    #     except:
-                    #         print(ex, "ex44")
-                    #     record = {}
-                    #     try:
-                    #         record = {
-                    #         "invoice_number" : invoice_number,
-                    #         "invoice_file" : f"./media/invoice-{invoice_number}.pdf",
-                    #         "user_email" : instance.email_id,
-                    #         "course_name" : course_name
-                    #         }
-                    #         getattr(models,"InvoiceData").objects.update_or_create(**record)
-                    #         print(1)
-                    #     except Exception as ex:
-                    #         print(ex, "ex1")
-                    #         pass
-                    #     path = 'eddi_app'
-                    #     img_dir = 'static'
-                    #     print("inside image")
-                    #     image = 'Logo.jpg'
-                    #     file_path = os.path.join(path,img_dir,image)
-                    #     with open(file_path,'rb') as f:
-                    #         img = MIMEImage(f.read())
-                    #         img.add_header('Content-ID', '<{name}>'.format(name=image))
-                    #         img.add_header('Content-Disposition', 'inline', filename=image)
-                    #     email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-                    #     email_msg.content_subtype = 'html'
-                    #     print(1111)
-                    #     email_msg.attach(img)
-                    #     filename = f"./media/invoice-{invoice_number}.pdf"
-                    #     email_msg.attach_file(filename) 
-                    #     email_msg.send(fail_silently=False)
-                    #     print("sentttt")
-                    # except Exception as ex:
-                    #     pass
                     print("Enrolll createdddd")
+                    userr = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    receiver = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    message = f"{userr.first_name}, has applied for {course_name}"
+                    # send_notification(user_type,email_id, message, email_id, receiver.supplier.email_id)
+                    # data = getattr(models,"Notification").objects.get(**{"sender":email_id, "receiver":receiver.supplier.email_id, "user_type": user_type})
+                    record_map = {}
+                    # record_map = {
+                    #     "sender" : email_id,
+                    #     "receiver" : receiver.supplier.email_id,
+                    #     "user_type" : user_type,
+                    #     "user_detail" : userr,
+                    #     "message" : message,
+                    # }
+
+                    # getattr(models,"Notification").objects.update_or_create(**record_map)
+                    print("notification sent")
                     
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -1040,6 +1131,7 @@ class UserPaymentDetail_info(APIView):
                 return Response({MESSAGE: "Error", DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
                 
               
@@ -1270,7 +1362,7 @@ class ViewIndividualProfile(APIView):
         supplier_email_id = request.POST.get(SUPPLIER_EMAIL_ID)
         token_data = request.headers.get('Authorization')
         try:
-            token = token_data.split()[1]
+            token = token_data.split()[1]   
             data = getattr(models,TOKEN_TABLE).objects.get(key = token)
             # email_id = data.user.email_id
             # print(data.key)
@@ -1719,35 +1811,75 @@ class CourseEnrollView(APIView):
     def get(self, request):
         email_id =  get_user_email_by_token(request)
         if email_id:
+            # try:
+            #     supplier_organization = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{'supplier_email':email_id})
+            # except Exception as ex:
+            #     supplier_organization = None
             try:
                 enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
             except Exception as ex:
                 enroll_data = None
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
-                # print(course_data, "course_dataaa")
+                print(course_data, "course_dataaa")
             except:
                 course_data = None
 
-            # try:
-            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
-            #     print(course_data_uuid, "course_dataaa_uuiddddd")
-            #     for i in list(course_data_uuid):
-            #         print(i, "iiiiiiiiiiiiiiiiii")
-            #         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
-            #         print(var, "vararara")
-            #         print(var.video_files.count(), "lenenenen")
-            #         a = var.video_files.all()
-            #         print(a, "aaa")
-            #         for i in a:
-            #             print(i, "ii")
-            #             print(i.user_email, "emaillll")
-            #             print(i.duration, "durationnnnn")
-            #         # print(len(var.video_files), "lenenenen")
+            try:
+                course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
+                print(course_data_uuid, "course_dataaa_uuiddddd")
+                new_dict = OrderedDict()
+                for i in list(course_data_uuid): 
+                    # new_dict[f"course_{i}"] = i
+                    # print(i, "iiiiiiiiiiiiiiiiii")
+                    try:
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    except Exception as ex:
+                        var = None
+                        print("hereeeeeeeeeeeeeeee")
+                        new_dict[f"course_{i}"] = "Ongoing"
+                        continue
 
-            # except:
-            #     course_data = None
+                    # var matlab a course na many to many video fields
+                    print(var, "vararara")
+                    try:
+                        video_file_count =  var.video_files.count()
+                        a = var.video_files.all()
+                    except Exception as ex:
+                        pass
+                    try:
+                        len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id}).count()
+                    except Exception as ex:
+                        len_material_status = 0
+                    print(len_material_status, "lenenenenen")
+                    print(video_file_count, "lenenenenen")
+                    if video_file_count != len_material_status:
+                        final_course_status = "Ongoing"
+                        print("laststststs")
+                        new_dict[f"course_{i}"] = final_course_status
+                        continue
+                    else:
+                        print("inside elsesesese")
+                        for i in a:
+                            print("inside iiiii")
+                            print(i, "iiiii")
+                            var1 = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":i.uuid})
+                            print(var1, "var11111")
+                            if var1.is_complete == True:
+                                final_course_status = None
+                                continue
+                            else:
+                                final_course_status = "Ongoing"
+                                break
+                        if final_course_status is None:
+                            final_course_status = "Complete"
+                        else:
+                            final_course_status = "Ongoing"
+                        new_dict[f"course_{i}"] = final_course_status
 
+            except Exception as ex:
+                print(ex, "exexexeexe")
+                pass
             
             try:
                 cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -1765,11 +1897,17 @@ class CourseEnrollView(APIView):
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
-
+            print(new_dict, "new_dictctctctct")
             if serializer := CourseDetailsSerializer(course_data, many=True):
+                # print(serializer.data, "serializerrrr")
                 if serializer1 := CourseDetailsSerializer(data_category, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data}, status=status.HTTP_200_OK)
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                        
+                    # new_dict = {}
+                    # new_dict['final_course_status'] = final_course_status
+
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: new_dict, "related_course":serializer1.data}, status=status.HTTP_200_OK)
+                # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1816,7 +1954,7 @@ class CourseMaterialStatus(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
         video_id = request.POST.get("video_id")
-        print("insideeeeeeeeeeeeee Course material Status")
+        print("insideeeeeeeeee Course material Status")
         try:
             try:
                 data = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":video_id})
@@ -1824,22 +1962,23 @@ class CourseMaterialStatus(APIView):
                 print(ex,"exexexe")
                 data = None
             if data is not None:
-                print("existsssss")
-                record_map = {}
+                if data.is_complete != True:
+                    print("existsssss")
+                    record_map = {}
+                    if request.POST.get("duration"):
+                        record_map["duration"] = request.POST.get("duration")
+                    else:
+                        record_map["duration"] = data.duration
 
-                if request.POST.get("duration"):
-                    record_map["duration"] = request.POST.get("duration")
-                else:
-                    record_map["duration"] = data.duration
+                    if request.POST.get("is_complete"):
+                        record_map["is_complete"] = json.loads(request.POST.get("is_complete"))
+                    else:
+                        record_map["is_complete"] = data.is_complete
 
-                if request.POST.get("is_complete"):
-                    record_map["is_complete"] = json.loads(request.POST.get("is_complete"))
-                else:
-                    record_map["is_complete"] = data.is_complete
-
-                for key, value in record_map.items():
-                    setattr(data, key, value)
-                data.save()
+                    for key, value in record_map.items():
+                        setattr(data, key, value)
+                    data.save()
+                    
             else:
                 print("not existsssss")
                 record_map = {}
@@ -1856,5 +1995,100 @@ class CourseMaterialStatus(APIView):
         except Exception as ex:
             print(ex, "exexexexe")
         return Response({STATUS: SUCCESS, DATA: "Material Status Added Successfully"}, status=status.HTTP_200_OK)
+
+
+class CourseRating(APIView):
+    def post(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data = getattr(models,"CourseRating").objects.get(**{"user":user, "course_name":course})
+        except Exception as ex:
+            data = None
+        if data is None:
+            try:
+                record_map = {}
+                record_map = {
+                    "user" : user,
+                    "course_name" : course,
+                    "star" : request.POST.get("star", None),
+                    "comment" : request.POST.get("comment", None)
+                }
+
+            except Exception as ex:
+                print(ex, "exexeee")
+                return Response({STATUS: ERROR, DATA: "Error in record map"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                getattr(models,"CourseRating").objects.update_or_create(**record_map)
+                return Response({STATUS: SUCCESS, DATA: "User Rating Saved Successfully"}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                record_map = {}
+                record_map = {
+                    "star" : request.POST.get("star", data.star),
+                    "comment" : request.POST.get("comment", data.comment)
+                }
+                for key, value in record_map.items():
+                    setattr(data, key, value)
+                data.save()
+                return Response({STATUS: SUCCESS, DATA: "Course Rating Edited Successfully"}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in Saving Edited Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        try:
+            user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            data = getattr(models,"CourseRating").objects.get(**{"user":user, "course_name":course})
+        except Exception as ex:
+            print(ex,"exexe")
+            return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        if serializer := CourseRatingSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+
+        
+    # def put(self, request, uuid=None):
+    #     email_id = get_user_email_by_token(request)
+    #     try:
+    #         user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
+    #         course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+    #     except Exception as ex:
+    #         return Response({STATUS: ERROR, DATA: "Error in getting user or course"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     try:
+    #         data = getattr(models,"CourseRating").objects.get(**{"user":user, "course_name":course})
+    #     except Exception as ex:
+    #         return Response({STATUS: ERROR, DATA: "Error in getting CourseRating"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    #     try:
+    #         record_map = {}
+    #         record_map = {
+    #             "star" : request.POST.get("star", data.star),
+    #             "comment" : request.POST.get("comment", data.comment)
+    #         }
+    #         for key, value in record_map.items():
+    #             setattr(data, key, value)
+    #         data.save()
+    #         return Response({STATUS: SUCCESS, DATA: "Course Rating Edited Successfully"}, status=status.HTTP_200_OK)
+    #     except Exception as ex:
+    #         return Response({STATUS: ERROR, DATA: "Error in Saving Edited Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 

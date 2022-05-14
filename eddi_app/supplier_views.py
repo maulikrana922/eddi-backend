@@ -26,6 +26,7 @@ from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
 from moviepy.editor import VideoFileClip
+from itertools import chain
 
 
 @permission_classes([AllowAny])
@@ -95,6 +96,7 @@ class AddCourseView(APIView):
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             "meeting_link" : request.POST.get("meeting_link",None),
             "meeting_passcode" : request.POST.get("meeting_passcode",None),
+            "target_users" : request.POST.get("target_users",None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
             STATUS_ID:1
@@ -329,6 +331,10 @@ class GetCourseDetails(APIView):
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
+                user = getattr(models,USER_PROFILE).objects.get(**{"email_id":email_id})
+            except:
+                user = None
+            try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
                 course_data = None
@@ -356,10 +362,24 @@ class GetCourseDetails(APIView):
                 var = None
             var1 = True if var is not None else False
 
+            try:
+                rating = getattr(models,"CourseRating").objects.filter(**{COURSE_NAME:course_data})
+                l = []
+                for i in rating:
+                    l.append(int(i.star))
+                final_rating = "{:.1f}".format(sum(l)/len(l))
+            except Exception as ex:
+                rating = None
+                final_rating = None
+            
+
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := UserProfileSerializer(individuals, many=True):
                     if serializer2 := SupplierOrganizationProfileSerializer(supplier_profile):
-                        return Response({STATUS: SUCCESS, DATA:serializer.data, "Supplier_Organization_Profile":serializer2.data, ENROLLED:serializer1.data, 'is_favoutite':fav_dataa, "learners_count":lerner_count, "is_enrolled": var1, "VAT_charges":vat_val}, status=status.HTTP_200_OK)
+                        if serializer3 := CourseRatingSerializer(rating, many=True):
+                            return Response({STATUS: SUCCESS, DATA:serializer.data, "Supplier_Organization_Profile":serializer2.data, ENROLLED:serializer1.data, 'is_favoutite':fav_dataa, "learners_count":lerner_count, "is_enrolled": var1, "VAT_charges":vat_val, "rating":serializer3.data, "final_rating":final_rating}, status=status.HTTP_200_OK)
+                        else:
+                            return Response({STATUS: ERROR, DATA: serializer3.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else: 
                          return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
                 else:
@@ -399,16 +419,22 @@ class GetCourseDetails(APIView):
                     except Exception as ex:
                         print(ex, "exxxxxxxxx")
 
-                    organization_domain = email_id.split('@')[1]
+                    # organization_domain = email_id.split('@')[1]
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
+                    target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
+                    target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
                     
-                    data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
+                    
+                    # data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
 
-                    data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
+                    # data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = data_category_list).order_by("-organization_domain")
-                if serializer := CourseDetailsSerializer(data_category,many=True):
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False,}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
+                    print(data_all, "allllllllllll")
+                    # final_queryset = list(chain(target_course, data_all))
+                if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
+                        # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                    
@@ -476,6 +502,7 @@ class GetCourseDetails(APIView):
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
             "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
             "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
+            "target_users" : request.POST.get("target_users",data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
@@ -606,7 +633,7 @@ class GetCourseDetails(APIView):
 
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 record_map[MODIFIED_BY] = 'admin'
-                record_map[UUID] = uuid4()
+                # record_map[UUID] = uuid4()
                 print(record_map, "recordddddddddd")
                 for key,value in record_map.items():
                     setattr(data,key,value)
@@ -640,7 +667,7 @@ class GetCourseDetails(APIView):
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = email_id
-        record_map[UUID] = uuid4()
+        # record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
@@ -1057,13 +1084,13 @@ class CourseMaterialUpload(APIView):
 
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
+        email_id = get_user_email_by_token(request)
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        email_id = get_user_email_by_token(request)
         try:
             record_map = {
-                SUPPLIER_EMAIL : request.POST.get(SUPPLIER_EMAIL,None),
+                SUPPLIER_EMAIL : email_id,
                 ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,None),
                 ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,None),
                 ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,None),
@@ -1080,7 +1107,9 @@ class SupplierOrganizationProfileview(APIView):
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
+                print("savedddd")
             except Exception as ex:
+                print(ex,"exexeex")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
@@ -1093,6 +1122,7 @@ class SupplierOrganizationProfileview(APIView):
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
+            print(ex,"exxexe")
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
