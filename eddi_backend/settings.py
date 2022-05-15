@@ -16,6 +16,7 @@ import os
 from django.conf.global_settings import LANGUAGES as DJANGO_LANGUAGES
 import datetime
 
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,9 +56,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'corsheaders',
-    'wkhtmltopdf'
+    'wkhtmltopdf',
+    'rosetta'
 ]
-# LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
+LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
 
 production_models = [
     'eddi_app.HomePageCMSBanner',
@@ -260,8 +262,8 @@ USE_L10N = True
 
 USE_TZ = True
 LANGUAGES = [
-    ('sv', ('Swedish')),
-    ('en', ('English')),
+    ('sv', _(u'Swedish')),
+    ('en', _(u'English')),
 ]
 CMS_TEMPLATES = (
     ('page.html', 'Page'),  # any name should work
