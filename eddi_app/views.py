@@ -1920,7 +1920,9 @@ class CourseEnrollView(APIView):
                 data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
                 print(data_category, "data category")
             except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
+                print(ex,"exxexe")
+                pass
+                # return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
             print(new_dict, "new_dictctctctct")
             if serializer := CourseDetailsSerializer(course_data, many=True):
