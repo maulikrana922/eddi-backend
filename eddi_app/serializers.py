@@ -181,11 +181,11 @@ class CourseMaterialStatusSerializer(serializers.ModelSerializer):
         fields = ['user_email','id']
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
-    coursestatus = CourseMaterialStatusSerializer(many=True)
+
 
     class Meta:
         model = CourseMaterial
-        fields = ['uuid','coursestatus']
+        fields = '__all__'
 
 
 
