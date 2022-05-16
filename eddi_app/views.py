@@ -37,7 +37,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from moviepy.editor import VideoFileClip
-# from datetime import datetime
+import datetime
 from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
@@ -68,7 +68,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # print(response.text)
 
-def send_notification(user_type, email, message, sender, receiver):
+def send_notification(sender, receiver, sender_type, receiver_type, message):
     # email_id =  get_user_email_by_token(request)
     # user_t = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
     # try:
@@ -81,11 +81,12 @@ def send_notification(user_type, email, message, sender, receiver):
     payload = json.dumps({
     "type": "type1",
     "json": {
-        "user_type": user_type,
-        "email": email,
+        'sender': sender,
+        'receiver': receiver,
+        "sender_type": sender_type,
+        "receiver_type" : receiver_type,
         "message": message,
-        'sender':  sender,
-        'receiver':receiver,
+        # "time" : datetime.now()
     }
     })
     headers = {
@@ -1105,19 +1106,43 @@ class UserPaymentDetail_info(APIView):
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
                     print("Enrolll createdddd")
-                    userr = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    receiver = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-                    message = f"{userr.first_name}, has applied for {course_name}"
-                    # send_notification(user_type,email_id, message, email_id, receiver.supplier.email_id)
+                    # try:
+                    #     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    #     if serializer := UserProfileSerializer(user):
+                    #         sender = serializer.data
+                    # except Exception as ex:
+                    #     sender = None
+                    # sender = email_id
+                    # sender_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    # sender_type = user_type
+                    # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    # receiver = course_data.supplier.email_id
+                    # receiver_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:course_data.supplier.email_id}).user_type.user_type
+                    # supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":receiver})
+                    # try:
+                    #     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    #     if serializer := UserProfileSerializer(user):
+                    #         sender = serializer.data
+                    # except Exception as ex:
+                    #     sender = None
+                    # message = f"{sender_data.first_name}, has applied for {course_data.course_name}"
+                    # send_notification(sender,receiver,sender_type,receiver_type,message)
                     # data = getattr(models,"Notification").objects.get(**{"sender":email_id, "receiver":receiver.supplier.email_id, "user_type": user_type})
-                    record_map = {}
-                    # record_map = {
-                    #     "sender" : email_id,
-                    #     "receiver" : receiver.supplier.email_id,
-                    #     "user_type" : user_type,
-                    #     "user_detail" : userr,
-                    #     "message" : message,
-                    # }
+                    # try:
+                    #     data_notification = getattr(models,"Notification").objects.get(**{"sender":sender, "sender_type":sender_type, "receiver":receiver,})
+                    # try:
+                    #     record_map = {}
+                    #     record_map = {
+                    #         "sender" : sender,
+                    #         "sender_type" : sender_type,
+                    #         "receiver" : receiver,
+                    #         "receiver_type" : receiver_type,
+                    #         "user_profile" : sender_data,
+                    #         "supplier_profile" : supplier_data,
+                    #     }
+                    #     getattr(models,"Notification").objects.update_or_create(**record_map)
+                    # except Exception as ex:
+                    #     print(ex, "exexexexe")
 
                     # getattr(models,"Notification").objects.update_or_create(**record_map)
                     print("notification sent")
@@ -1895,7 +1920,9 @@ class CourseEnrollView(APIView):
                 data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
                 print(data_category, "data category")
             except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
+                print(ex,"exxexe")
+                data_category = None
+                # return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
             print(new_dict, "new_dictctctctct")
             if serializer := CourseDetailsSerializer(course_data, many=True):
@@ -2091,4 +2118,31 @@ class CourseRating(APIView):
 
 
 
+class MyProgressView(APIView):
+    pass
+    # def get(self, request, uuid=None):
+    #     email_id = get_user_email_by_token(request)
+    #     time_period = request.POST.get(TIME_PERIOD)
+    #     datee = datetime.datetime.now()
+
+    #     if time_period == WEEKLY:
+    #         week = datee.strftime("%V")
+    #         today = datetime.datetime.now()
+    #         week_list = {}
+    #         try:
+    #             for i in range(0, 7):
+    #                 past = today - timedelta(days = i)
+    #                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+    #                 var = list(data)
+    #                 # final = float(sum(var))
+    #                 final = "{:.2f}".format(sum(var))
+    #                 if var == "":
+    #                     final = 0.0
+    #                 week_list[past.strftime("%A")] = final
+    #             data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
+    #             # total_earning = float(sum(list(data)))
+    #             total_earning = "{:.2f}".format(sum(list(data)))
+    #             return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
+    #         except Exception as ex: 
+    #             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 

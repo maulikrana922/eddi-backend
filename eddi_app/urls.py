@@ -67,7 +67,6 @@ urlpatterns = [
 # Admin Dashboard
     path('admin-dashboard/',AdminDashboardView.as_view()),
 
-
 # Event
     path('add-event/',EventView.as_view()),
     path('get-event/',EventView.as_view()),
@@ -87,6 +86,7 @@ urlpatterns = [
     path('increase-recruitmentAdcount/<str:uuid>/',IncreaserecruitmentAdCount.as_view()),
 
     path('get-courseenrolldetail/',CourseEnrollView.as_view()),
+    path('my-progressgraph/',MyProgressView.as_view()),
 
     path('supplier-organization-profile/',SupplierOrganizationProfileview.as_view()),
     path('supplier-profile/',SupplierProfileView.as_view())
