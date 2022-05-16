@@ -880,12 +880,14 @@ class SupplierDashboard_earningGraphView(APIView):
                     past = today - timedelta(days = i)
                     data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
                     var = list(data)
-                    final = float(sum(var))
+                    # final = float(sum(var))
+                    final = "{:.2f}".format(sum(var))
                     if var == "":
                         final = 0.0
                     week_list[past.strftime("%A")] = final
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                total_earning = float(sum(list(data)))
+                # total_earning = float(sum(list(data)))
+                total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -900,15 +902,16 @@ class SupplierDashboard_earningGraphView(APIView):
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month}).values_list("payment_detail__amount", flat=True)
 
                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(first, second)}).values_list("payment_detail__amount", flat=True)
-                month_list[str(first.date()) + " to " + str(second.date())] = float(sum(list(data1)))
+                month_list[str(first.date()) + " to " + str(second.date())] = "{:.2f}".format(sum(list(data1)))
 
                 data2 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(second, third)}).values_list("payment_detail__amount", flat=True)
-                month_list[str(second.date())+ " to " +str(third.date())] = float(sum(list(data2)))
+                month_list[str(second.date())+ " to " +str(third.date())] = "{:.2f}".format(sum(list(data2)))
 
                 data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
-                month_list[str(third.date())+" to "+str(datetime.date.today())] = float(sum(list(data3)))
+                month_list[str(third.date())+" to "+str(datetime.date.today())] = "{:.2f}".format(sum(list(data3)))
 
-                total_earning = float(sum(list(data)))
+                # total_earning = float(sum(list(data)))
+                total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -935,11 +938,11 @@ class SupplierDashboard_earningGraphView(APIView):
                 month_List = list(deque_months)
                 year = datee.strftime("%Y")
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
-                total_earning = float(sum(list(data)))
+                total_earning = "{:.2f}".format(sum(list(data)))
                 final_data = {}
                 for i in range(0, 12):
                     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
-                    final_data[month_List[i].split()[0]] = float(sum(list(data1)))
+                    final_data[month_List[i].split()[0]] = "{:.2f}".format(sum(list(data1)))
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning, DATA:final_data}, status=status.HTTP_200_OK)
             except Exception as ex:
