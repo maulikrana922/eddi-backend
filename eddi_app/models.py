@@ -838,6 +838,7 @@ class UserPersonalProfile(models.Model):
 
 
 class SupplierProfile(models.Model):
+    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True)
     supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
     supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Supplier Name")
     account_number = models.CharField(max_length=100,blank=True,null=True,verbose_name="Account Number")
@@ -1076,12 +1077,13 @@ class InvoiceDataEvent(models.Model):
 
 
 class Notification(models.Model):
-    sender = models.CharField(max_length=100,blank=True,null=True,verbose_name='sender')
-    receiver = models.CharField(max_length=100,blank=True,null=True,verbose_name='receiver')
-    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name='User Type',blank=True,null=True,default=None)
-    user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Email',blank=True,null=True,default=None)
-    supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Email',blank=True,null=True,default=None)
-    message = models.TextField(max_length=2000,blank=True,null=True,verbose_name="Address")
+    sender = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Sender')
+    sender_type = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Sender Type')
+    receiver = models.TextField(blank=True,null=True,verbose_name='Receiver')
+    receiver_type = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Receiver Type')
+    user_profile = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True,default=None)
+    supplier_profile = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Profile',blank=True,null=True,default=None)
+    message = models.TextField(blank=True,null=True,verbose_name="Message")
     is_clear = models.BooleanField(default=False)
     created_date_time = models.DateTimeField(auto_now_add=True)
 
