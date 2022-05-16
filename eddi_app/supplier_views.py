@@ -1036,9 +1036,12 @@ class CourseMaterialUpload(APIView):
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         video_title = request.POST.get(VIDEO_TITLE,course_material_data.video_title)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
+        video_files_old = request.POST.getlist("video_files_old",None)
         file_title = request.POST.get(FILE_TITLE,course_material_data.file_title)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
+        document_files_old = request.POST.getlist("document_files_old",None)
         # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+        print(document_files_old, "oldddddocu")
         reccord_map = {}
         reccord_map = {
             "video_title" : video_title,      
@@ -1055,33 +1058,101 @@ class CourseMaterialUpload(APIView):
             print("inside doccccc")
             try:
                 old_docs = course_material_data.document_files.all()
-                for i in old_docs:
-                    getattr(models,"MaterialDocumentMaterial").objects.get(**{"uuid":i.uuid}).delete()
-                    print("Done")
-                course_material_data.document_files.clear()
-                print("clearrrrr")
+                print(old_docs, "docssss")
+                new = list(old_docs)
+                oldd = [i.document_file.url for i in new]
+                print(oldd,"OOOOOOOOOOOOOOOOOOOOOOO")
+                print(new, "newewewewe")
+                for i in document_files_old:
+                    if i in oldd:
+                        print("OKOK") 
+                        oldd.remove(i)
+                print(oldd,"oldddd")
+                print(document_files_old)
+                        
+                for k in oldd:
+                    # print(k,"kkk")
+                    try:
+                        getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
+                        print("deleted")
+                    except Exception as ex:
+                        print(ex, "exexexexe")
+                    # getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file.url":k}).delete()
+
+                    # else:
+                    #     print("inside else")
+                    #     try:
+                    #         getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file.url":k}).delete()
+                    #         print("deleted")
+                    #     except Exception as ex:
+                    #         print(ex, "exexexexe")
+
                 for i in document_files:
+                    print("inside iiiii")
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                     print(data1, "data11111")
                     course_material_data.document_files.add(data1[0].id)
+
+                    # if var == False:
+
+                    
+                    # for i in old_docs:
+                    #     # print(o,"KKKKKKK")
+                    #     print(str(i),"iiiiiiiiiiiiiiiiiiiiii")
+                    #     if str(o) == str(i):
+                    #         print("okok")
+                    # print(k[7:], "kkkk")
+                # for i in old_docs:
+                #     print(i, "iii")
+                #         n = i[7:]
+                #         print(n, "nnnn")
+                #         # print(j, "jjjj")
+                #         try:
+                #             old = getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":j})
+                #         except Exception as ex:
+                #             # pass
+                #             getattr(models,"MaterialDocumentMaterial").objects.get(**{"uuid":i.uuid}).delete()
+                #     print("Done")
+                # course_material_data.document_files.clear()
+                # print("clearrrrr")
+                # for i in document_files:
+                #     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                #     print(data1, "data11111")
+                #     course_material_data.document_files.add(data1[0].id)
             except Exception as ex:
                 print(ex, "exexexexe")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+                
         if request.FILES.getlist("video_files"):
             try:
                 old_videos = course_material_data.video_files.all()
-                for i in old_videos:
-                    getattr(models,"MaterialVideoMaterial").objects.get(**{"uuid":i.uuid}).delete()
-                    print("Done")
-                course_material_data.video_files.clear()
-                for j in video_files:
-                    data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
-                    print(data2, "data2222")
-                    course_material_data.video_files.add(data2[0].id)
+                new1 = list(old_videos)
+                oldd1 = [i.video_file.url for i in new1]
+                print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
+                print(new1, "newewewewe")
+                for i in video_files_old:
+                    if i in oldd1:
+                        print("OKOK") 
+                        oldd1.remove(i)
+                print(oldd1,"oldddd")
+                print(video_files_old)
+                for j in oldd1:
+                    try:
+                        getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
+                        print("deleted")
+                    except Exception as ex:
+                        print(ex,"exexexexe")
+            
+                for p in video_files:
+                    print("inside pppp")
+                    data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
+                    print(data3, "data3333")
+                    course_material_data.video_files.add(data3[0].id)
+                    
             except Exception as ex:
                 print(ex, "exexexexe")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Material Eited successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Material Edited successfully"}, status=status.HTTP_200_OK)
 
        
 
