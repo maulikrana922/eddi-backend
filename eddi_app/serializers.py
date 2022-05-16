@@ -181,11 +181,11 @@ class CourseMaterialStatusSerializer(serializers.ModelSerializer):
         fields = ['user_email','id']
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
-    coursestatus = CourseMaterialStatusSerializer(many=True)
+    # coursestatus = CourseMaterialStatusSerializer(many=True)
 
     class Meta:
         model = CourseMaterial
-        fields = ['uuid','coursestatus']
+        fields = '__all__'
 
 
 
@@ -197,14 +197,14 @@ class FavouriteCourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CourseDetailSerializer4courseenroll(serializers.ModelSerializer):
-    supplier1 = serializers.SerializerMethodField('get_org')
-    class Meta:
-        model = CourseDetails
-        depth = 2
+# class CourseDetailSerializer4courseenroll(serializers.ModelSerializer):
+#     supplier1 = serializers.SerializerMethodField('get_org')
+#     class Meta:
+#         model = CourseDetails
+#         depth = 2
 
-        fields = ['uuid', 'supplier', 'course_image', 'course_name', 'course_level', 'course_length', 'course_category', 'course_subcategory', 'course_language', 'course_starting_date', 'course_for_organization', 'organization_domain', 'course_type', 'fee_type', 'course_price', 'var_charges', 'additional_information', 'organization_location', 'sub_area', 'course_checkout_link', 'meeting_link', 'meeting_passcode', 'created_by', 'is_approved', 'status', 'is_deleted', 'supplier1']
+#         fields = ['uuid', 'supplier', 'course_image', 'course_name', 'course_level', 'course_length', 'course_category', 'course_subcategory', 'course_language', 'course_starting_date', 'course_for_organization', 'organization_domain', 'course_type', 'fee_type', 'course_price', 'var_charges', 'additional_information', 'organization_location', 'sub_area', 'course_checkout_link', 'meeting_link', 'meeting_passcode', 'created_by', 'is_approved', 'status', 'is_deleted', 'supplier1']
 
-    def get_org(self, SupplierOrganizationProfile):
-        supplier1 = SupplierOrganizationProfile.organizational_name
-        return supplier1
+#     def get_org(self, SupplierOrganizationProfile):
+#         supplier1 = SupplierOrganizationProfile.organizational_name
+#         return supplier1

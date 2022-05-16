@@ -2119,29 +2119,30 @@ class CourseRating(APIView):
 
 
 class MyProgressView(APIView):
-    def get(self, request, uuid=None):
-        email_id = get_user_email_by_token(request)
-        time_period = request.POST.get(TIME_PERIOD)
-        datee = datetime.datetime.now()
+    pass
+    # def get(self, request, uuid=None):
+    #     email_id = get_user_email_by_token(request)
+    #     time_period = request.POST.get(TIME_PERIOD)
+    #     datee = datetime.datetime.now()
 
-        if time_period == WEEKLY:
-            week = datee.strftime("%V")
-            today = datetime.datetime.now()
-            week_list = {}
-            try:
-                for i in range(0, 7):
-                    past = today - timedelta(days = i)
-                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
-                    var = list(data)
-                    # final = float(sum(var))
-                    final = "{:.2f}".format(sum(var))
-                    if var == "":
-                        final = 0.0
-                    week_list[past.strftime("%A")] = final
-                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                # total_earning = float(sum(list(data)))
-                total_earning = "{:.2f}".format(sum(list(data)))
-                return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
-            except Exception as ex: 
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+    #     if time_period == WEEKLY:
+    #         week = datee.strftime("%V")
+    #         today = datetime.datetime.now()
+    #         week_list = {}
+    #         try:
+    #             for i in range(0, 7):
+    #                 past = today - timedelta(days = i)
+    #                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+    #                 var = list(data)
+    #                 # final = float(sum(var))
+    #                 final = "{:.2f}".format(sum(var))
+    #                 if var == "":
+    #                     final = 0.0
+    #                 week_list[past.strftime("%A")] = final
+    #             data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
+    #             # total_earning = float(sum(list(data)))
+    #             total_earning = "{:.2f}".format(sum(list(data)))
+    #             return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
+    #         except Exception as ex: 
+    #             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
