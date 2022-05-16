@@ -1921,7 +1921,7 @@ class CourseEnrollView(APIView):
                 print(data_category, "data category")
             except Exception as ex:
                 print(ex,"exxexe")
-                pass
+                data_category = None
                 # return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
             print(new_dict, "new_dictctctctct")
