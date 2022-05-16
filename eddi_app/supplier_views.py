@@ -1012,14 +1012,14 @@ class CourseMaterialUpload(APIView):
                 print("course Data",course_material_data)
             except Exception as ex:
                 course_material_data = None
-            try:
-                course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
-                for i in course_material_status:
-                    print(i.is_complete)
-            except Exception as ex:
-                course_material_status = None
-            
+            # try:
+            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
+            #     for i in course_material_status:
+            #         print(i.is_complete)
+            # except Exception as ex:
+            #     course_material_status = None
             if serializer := CourseMaterialSerializer(course_material_data):
+                print(serializer.data, "datatatat")
                 # if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
                     # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)

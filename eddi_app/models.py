@@ -52,7 +52,7 @@ class utl_status(models.Model):
         verbose_name = _("Status Table")
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
 class UserType(models.Model):
     user_type = models.CharField(max_length=60,blank=True, verbose_name=_("User Type"))
@@ -66,7 +66,7 @@ class UserType(models.Model):
         verbose_name = _("User Type Table")
 
     def __str__(self):
-        return self.user_type
+        return str(self.user_type)
 
 
 class approval_status(models.Model):
@@ -81,7 +81,7 @@ class approval_status(models.Model):
         verbose_name = _("Approval Status Table")
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
 class UserSignup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True, verbose_name=_("UUID"))
@@ -108,9 +108,6 @@ class UserSignup(models.Model):
     class Meta:
         verbose_name = _("User Signup Table")
 
-    def __str__(self):
-       return self.email_id
-   
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
@@ -245,6 +242,8 @@ class CourseCategoryDetails(models.Model):
 
     def __str__(self):
         return self.category_name
+    
+
 
 class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -287,6 +286,7 @@ class CourseType(models.Model):
 
     def __str__(self):
         return self.type_name
+    
 
 class CourseLevel(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -301,9 +301,6 @@ class CourseLevel(models.Model):
 
     class Meta:
         verbose_name = _("Course Level Table")
-
-    def __str__(self):
-        return self.level_name
 
 class FeeType(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -321,13 +318,14 @@ class FeeType(models.Model):
 
     def __str__(self):
         return self.fee_type_name
+    
 
 class InvoiceVATCMS(models.Model):
     vat_value = models.IntegerField(blank=True,null=True,verbose_name=_("VAT Value Percentage"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     def __str__(self):
-        return self.vat_value
+        return str(self.vat_value)
 
     class Meta:
         verbose_name = _("Invoice VAT Table")
@@ -360,11 +358,13 @@ class SupplierOrganizationProfile(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
 
-    def __str__(self):
-        return self.organizational_name
 
     class Meta:
         verbose_name = _("Supplier Organization Profile Table")
+
+    def __str__(self):
+        return self.supplier_email
+    
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -406,7 +406,7 @@ class CourseDetails(models.Model):
         verbose_name = _("Course Details Table")
 
     def __str__(self):
-        return self.course_name
+        return str(self.course_name)
     
 @receiver(post_save, sender=CourseDetails)
 def add_organization_domain(sender, instance, created, **kwargs):
@@ -506,7 +506,7 @@ class ContactFormLead(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     def __str__(self):
-        return self.email_id
+        return str(self.email_id)
 
     class Meta:
         verbose_name = _("Contact Form Lead Table")
@@ -836,7 +836,7 @@ class UserProfile(models.Model):
 
 
     def __str__(self):
-        return self.email_id
+        return str(self.email_id)
     
 
 class CourseRating(models.Model):
@@ -849,6 +849,10 @@ class CourseRating(models.Model):
 
     class Meta:
         verbose_name = _("Course Rating Table")
+
+    def __str__(self):
+        return self.course_name
+    
 
 
 class UserPersonalProfile(models.Model):
@@ -878,7 +882,7 @@ class SupplierProfile(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     def __str__(self):
-        return self.supplier_name
+        return str(self.supplier_name)
 
     class Meta:
         verbose_name = _("Supplier Profile")
@@ -895,6 +899,9 @@ class UserPaymentDetail(models.Model):
     class Meta:
         verbose_name = _("User Payment Detail")
 
+    def __str__(self):
+        return self.course_name
+    
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
@@ -902,7 +909,7 @@ class FavouriteCourse(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Favourite Course Created Date Time'))
     
     def __str__(self):
-        return self.course_name
+        return str(self.course_name)
 
     class Meta:
         verbose_name = _("Favourite Course")
@@ -918,11 +925,12 @@ class CourseEnroll(models.Model):
 
 
     def __str__(self):
-        return self.payment_detail.course_name
+        return str(self.payment_detail.course_name)
 
     class Meta:
         verbose_name = _("Course Enroll")  
 
+    
 @receiver(post_save, sender=CourseEnroll)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     if created:
@@ -981,7 +989,7 @@ class EventAd(models.Model):
         verbose_name = _("EventAd Table")
 
     def __str__(self):
-        return self.event_name
+        return str(self.event_name)
 
 
 
@@ -995,7 +1003,7 @@ class EventAdPaymentDetail(models.Model):
 
 
     def __str__(self):
-        return self.event_name
+        return str(self.event_name)
 
     class Meta:
         verbose_name = _("Event Ad Payment Detail") 
@@ -1008,7 +1016,7 @@ class EventAdEnroll(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     def __str__(self):
-        return self.event_name
+        return str(self.event_name)
 
     class Meta:
         verbose_name = _("Event Ad Enroll")
@@ -1020,11 +1028,11 @@ class MaterialVideoMaterial(models.Model):
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
-    def __str__(self):
-        return str(self.video_file) + " " + str(self.uuid)
+    # def __str__(self):
+    #     return str(self.video_file) + " " + str(self.uuid)
     
-    class Meta:
-        verbose_name = _("Material Video Material")
+    # class Meta:
+    #     verbose_name = _("Material Video Material")
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
@@ -1032,8 +1040,8 @@ class MaterialDocumentMaterial(models.Model):
     file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Size"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
-    # def __str__(self):
-    #     return self.document_file
+    def __str__(self):
+        return str(self.document_file)
 
     class Meta:
         verbose_name = _("Material Document Material")
@@ -1047,7 +1055,7 @@ class CourseMaterialStatus(models.Model):
     duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Duration'))
 
     def __str__(self):
-        return self.video_id
+        return str(self.video_id)
 
     class Meta:
         verbose_name = _("Course Material Status")
@@ -1068,8 +1076,8 @@ class CourseMaterial(models.Model):
     def __str__(self):
         return self.course.course_name
     
-    class Meta:
-        verbose_name = _("Course Material")
+    # class Meta:
+    #     verbose_name = _("Course Material")
 
 
 # class CourseCompleteStatus(models.Model):
@@ -1097,16 +1105,6 @@ class RecruitmentAd(models.Model):
         verbose_name = _("Recruitment Ad")
         
 
-# class RecruitmentAdEnrollment(models.Model):
-#     subscriber_image = models.ImageField(upload_to='recruitment_subscriber_image/',verbose_name='Subscriber Image',blank=True,null=True)
-#     subscriber_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Subscriber Name")
-#     subscriber_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-#     subscriber_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name="Contact Number")
-#     created_date_time = models.DateTimeField(auto_now_add=True)
-#     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
-
-
-
 class InvoiceData(models.Model):
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
     user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
@@ -1116,7 +1114,7 @@ class InvoiceData(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
-        return self.course_name
+        return str(self.course_name)
     
     class Meta:
         verbose_name = _("Invoice Data")
@@ -1131,7 +1129,7 @@ class InvoiceDataEvent(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
-        return self.event_name
+        return str(self.event_name)
     
     class Meta:
         verbose_name = _("Invoice Data Event")
