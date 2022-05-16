@@ -23,6 +23,7 @@ from rest_framework.authtoken.models import Token
 from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
+from django.utils.translation import gettext_lazy as _
 
 
 
@@ -40,7 +41,7 @@ def PasswordView():
 
 
 class utl_status(models.Model):
-    value = models.CharField(max_length=60,blank=True)
+    value = models.CharField(max_length=60,blank=True, verbose_name=_("Value"))
 
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
@@ -48,13 +49,13 @@ class utl_status(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Status Table"
+        verbose_name = _("Status Table")
 
     def __str__(self):
         return self.value
 
 class UserType(models.Model):
-    user_type = models.CharField(max_length=60,blank=True, verbose_name="User Type")
+    user_type = models.CharField(max_length=60,blank=True, verbose_name=_("User Type"))
 
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
@@ -62,7 +63,7 @@ class UserType(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "User Type Table"
+        verbose_name = _("User Type Table")
 
     def __str__(self):
         return self.user_type
@@ -70,40 +71,42 @@ class UserType(models.Model):
 
 class approval_status(models.Model):
     # status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name='Status')
-    value = models.CharField(max_length=60,blank=True)
+    value = models.CharField(max_length=60,blank=True, verbose_name=_("Value"))
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
     modified_by = models.CharField(max_length=100,blank=True)
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = 'Approval Status Table'
+        verbose_name = _("Approval Status Table")
 
     def __str__(self):
         return self.value
 
 class UserSignup(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    first_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='First Name')
-    last_name = models.CharField(max_length=150, blank=True, null=True, verbose_name='Last Name')
-    password = models.CharField(max_length=150,blank=True,null=True,)
-    email_id = models.EmailField(unique=True)
-    password = models.CharField(max_length=150,blank=True,null=True,)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True, verbose_name=_("UUID"))
+    first_name = models.CharField(max_length=150, blank=True, null=True, verbose_name=_('First Name'))
+    last_name = models.CharField(max_length=150, blank=True, null=True, verbose_name=_('Last Name'))
+    password = models.CharField(max_length=150,blank=True,null=True,verbose_name=_('password'))
+    email_id = models.EmailField(unique=True,verbose_name=_('Email ID'))
+    password = models.CharField(max_length=150,blank=True,null=True,verbose_name=_('Password'))
 
-    user_type = models.ForeignKey(UserType,on_delete=models.CASCADE,blank=True,null=True,verbose_name="User Type")
-    is_first_time_login = models.BooleanField(default=True)
+    user_type = models.ForeignKey(UserType,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("User Type"))
+    is_first_time_login = models.BooleanField(default=True,verbose_name = _('is First Time Login'))
 
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    is_authenticated = models.BooleanField(default=False, verbose_name=_('is_authenticated'))
+    is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
+    is_active = models.BooleanField(default=False, verbose_name=_('is_active'))
+    is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-    is_authenticated = models.BooleanField(default=False)
-    is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name='Is Login From')
-    is_active = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True,default=1)
+    class Meta:
+        verbose_name = _("User Signup Table")
 
     def __str__(self):
        return self.email_id
@@ -201,32 +204,36 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
 
     
 class NonBuiltInUserToken(Token):
-        """
-        Overrides the Token model to use the
-        non-built-in user model
-        """
-        user = models.ForeignKey(
-            UserSignup, related_name='auth_token',
-            on_delete=models.CASCADE, 
-            verbose_name=("email_id")
-        )
+    """
+    Overrides the Token model to use the
+    non-built-in user model
+    """
+    user = models.ForeignKey(
+        UserSignup, related_name='auth_token',
+        on_delete=models.CASCADE, 
+        verbose_name=_("email_id")
+    )
+
+    class Meta:
+        verbose_name = _('Non BuiltIn User Token')
+
 
 
 
 class CourseCategoryDetails(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    category_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
-    category_image = models.FileField(upload_to='category_image/',verbose_name='Category Image',blank=True,null=True)
-    color = models.CharField(max_length=100,blank=True,null=True,verbose_name='Color')
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    category_name = models.CharField(max_length=150,verbose_name=_('Category Name'),blank=True,null=True)
+    category_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
+    color = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Color'))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-    is_deleted = models.BooleanField(default=False)
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
 
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     # def  image_tag(self):
     #     return mark_safe('<img src="/../../media/%s" width="150" height="150" />' % (self.category_image))
@@ -234,162 +241,169 @@ class CourseCategoryDetails(models.Model):
     # image_tag.allow_tags = True
 
     class Meta:
-        verbose_name = "Course Category Table"
+        verbose_name = _("Course Category Table")
 
     def __str__(self):
         return self.category_name
 
 class CourseSubCategoryDetails(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Sub Category Name',blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,limit_choices_to={'user_type_id': 1})
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Sub Category Name'),blank=True,null=True)
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('supplier'),blank=True,limit_choices_to={'user_type_id': 1})
 
-    subcategory_name = models.CharField(max_length=150,verbose_name='Category Name',blank=True,null=True)
+    subcategory_name = models.CharField(max_length=150,verbose_name=_('Sub Category Name'),blank=True,null=True)
 
-    subcategory_image = models.FileField(upload_to='category_image/',verbose_name='Category Image',blank=True,null=True)
+    subcategory_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     is_deleted = models.BooleanField(default=False)
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Course Sub Category Table"
+        verbose_name = _("Course Sub Category Table")
 
     def __str__(self):
         return self.subcategory_name
 
 
 class CourseType(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    type_name = models.CharField(max_length=150,verbose_name='Course Type Name',blank=True,null=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    type_name = models.CharField(max_length=150,verbose_name=_('Course Type Name'),blank=True,null=True)
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Course Type Table"
+        verbose_name = _("Course Type Table")
 
     def __str__(self):
         return self.type_name
 
 class CourseLevel(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    level_name = models.CharField(max_length=150,verbose_name='Course Level Name',blank=True,null=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    level_name = models.CharField(max_length=150,verbose_name=_('Course Level Name'),blank=True,null=True)
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Course Level Table"
+        verbose_name = _("Course Level Table")
 
     def __str__(self):
         return self.level_name
 
 class FeeType(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    fee_type_name = models.CharField(max_length=150,verbose_name='Fee Type Name',blank=True,null=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    fee_type_name = models.CharField(max_length=150,verbose_name=_('Fee Type Name'),blank=True,null=True)
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Fee Type Table"
+        verbose_name = _("Fee Type Table")
 
     def __str__(self):
         return self.fee_type_name
 
 class InvoiceVATCMS(models.Model):
-    vat_value = models.IntegerField(blank=True,null=True,verbose_name="VAT Value Percentage")
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    vat_value = models.IntegerField(blank=True,null=True,verbose_name=_("VAT Value Percentage"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+
+    def __str__(self):
+        return self.vat_value
+
+    class Meta:
+        verbose_name = _("Invoice VAT Table")
 
 
 
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
-    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name="Organizational Name")
-    organization_email = models.EmailField(blank=True,null=True,verbose_name="Oraganization Email")
-    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name="organization Website")
-    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Organization Address")
-    country = models.CharField(max_length=100,blank=True,null=True,verbose_name="Country")
-    city = models.CharField(max_length=100,blank=True,null=True,verbose_name="City")
-    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name="Brif Information on Organization")
-    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name="Organization Phone Number")
-    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name="Contact Person at Eddi")
-    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="LinkedIn Profile")
-    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name="Facebook Profile")
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_("Supplier Email"))
+    organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name=_("Organizational Name"))
+    organization_email = models.EmailField(blank=True,null=True,verbose_name=_("Oraganization Email"))
+    organization_website = models.CharField(max_length=250,blank=True,null=True,verbose_name=_("organization Website"))
+    organization_address = models.TextField(max_length=500,blank=True,null=True,verbose_name=_("Organization Address"))
+    country = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Country"))
+    city = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("City"))
+    brif_information = models.TextField(max_length=250,blank=True,null=True,verbose_name=_("Brief Information on Organization"))
+    organization_phone_number = models.CharField(max_length=25,blank=True,null=True,verbose_name=_("Organization Phone Number"))
+    contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Contact Person at Eddi"))
+    linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("LinkedIn Profile"))
+    facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Facebook Profile"))
 
     # Course Category
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
-    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Sub Category")
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
+    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Sub Category"))
 
     # Additional Information
-    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name='Organization Logo')
-    is_deleted = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    organization_logo = models.ImageField(upload_to = 'organization_logo/',blank=True,null=True,verbose_name=_('Organization Logo'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
 
     def __str__(self):
         return self.organizational_name
 
-
+    class Meta:
+        verbose_name = _("Supplier Organization Profile Table")
 
 class CourseDetails(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
-    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True)
-    course_image = models.FileField(upload_to='course_image/',verbose_name='Course Image',blank=True,null=True)
-    course_name = models.CharField(max_length=150,verbose_name='Course Name',blank=True,null=True)
-    course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name='Course Level',blank=True,null=True)
-    course_length = models.IntegerField(default=0,verbose_name='Course Length',blank=True,null=True)
-    course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
-    course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name='Course Category',blank=True,null=True)
-    course_language = models.CharField(max_length=100,blank=True,null=True)
-    course_starting_date = models.DateField(verbose_name='Course Start Date', blank=True,null=True)
-    course_for_organization = models.BooleanField(default=False)
-    organization_domain = models.CharField(max_length=100,blank=True,null=True)
-    course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name='Course Type',blank=True,null=True)
-    fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name='Fee Type',blank=True,null=True)
-    course_price = models.FloatField(default=0,verbose_name='Course Price',blank=True,null=True)
-    var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name='Invoice Vat',blank=True,null=True)
-    additional_information = models.TextField(max_length=1500,verbose_name='Additional Information',blank=True,null=True)
-    organization_location = models.CharField(max_length=500,verbose_name='Organization Location',blank=True,null=True)
-    sub_area = models.CharField(max_length=300,verbose_name='Sub Area',blank=True,null=True)
-    course_checkout_link = models.CharField(max_length=255,verbose_name='Checkout Link',blank=True,null=True)
-    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name="Meeting Link")
-    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name="Passcode")
-    target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name="Target Users")
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'))
+    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Organization'))
+    course_image = models.FileField(upload_to='course_image/',verbose_name=_('Course Image'),blank=True,null=True)
+    course_name = models.CharField(max_length=150,verbose_name=_('Course Name'),blank=True,null=True)
+    course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name=_('Course Level'),blank=True,null=True)
+    course_length = models.IntegerField(default=0,verbose_name=_('Course Length'),blank=True,null=True)
+    course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Course Category'),blank=True,null=True)
+    course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Course Category'),blank=True,null=True)
+    course_language = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Course Language'))
+    course_starting_date = models.DateField(verbose_name=_('Course Start Date'), blank=True,null=True)
+    course_for_organization = models.BooleanField(default=False,verbose_name=_('Course For Organization'))
+    organization_domain = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Domain'))
+    course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name=_('Course Type'),blank=True,null=True)
+    fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name=_('Fee Type'),blank=True,null=True)
+    course_price = models.FloatField(default=0,verbose_name=_('Course Price'),blank=True,null=True)
+    var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name=_('Invoice Vat'),blank=True,null=True)
+    additional_information = models.TextField(max_length=1500,verbose_name=_('Additional Information'),blank=True,null=True)
+    organization_location = models.CharField(max_length=500,verbose_name=_('Organization Location'),blank=True,null=True)
+    sub_area = models.CharField(max_length=300,verbose_name=_('Sub Area'),blank=True,null=True)
+    course_checkout_link = models.CharField(max_length=255,verbose_name=_('Checkout Link'),blank=True,null=True)
+    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
+    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
+    target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True)
-    is_deleted = models.BooleanField(default=False)
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('is_approved'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Course Details Table"
+        verbose_name = _("Course Details Table")
 
     def __str__(self):
         return self.course_name
@@ -446,45 +460,56 @@ def bulk_email(sender, instance, created, **kwargs):
 
 
 class HomePageCMSBanner(models.Model):
-    image_title = models.CharField(max_length=50,blank=True,null=True)
-    banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name="Banner Image")
+    image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
+    banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name=_("Banner Image"))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+
+    class Meta:
+        verbose_name = _("Home Page CMS Banner Table")
+
 
 class HomePageCMSPartners(models.Model):
-    image_title = models.CharField(max_length=50,blank=True,null=True)
-    partner_logo = models.ImageField(upload_to = 'homepage_partner_logo/', verbose_name="Partner Logo")
+    image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
+    partner_logo = models.ImageField(upload_to = 'homepage_partner_logo/', verbose_name=_("Partner Logo"))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     def __str__(self):
         return str(self.partner_logo.url)
 
+    class Meta:
+        verbose_name = _("Home Page CMS Partners Table")
+
+
 class ContactFormLead(models.Model):
-    fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name='Full Name')
-    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name='Phone Number')
-    message = models.TextField(max_length=500,blank=True,null=True,verbose_name='Message')
+    fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_('Phone Number'))
+    message = models.TextField(max_length=500,blank=True,null=True,verbose_name=_('Message'))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     def __str__(self):
         return self.email_id
+
+    class Meta:
+        verbose_name = _("Contact Form Lead Table")
 
 @receiver(post_save, sender=ContactFormLead)
 def send_contact_usl(sender, instance, created, **kwargs):
@@ -501,119 +526,119 @@ def send_contact_usl(sender, instance, created, **kwargs):
 
 
 class BlogDetails(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name="Blog Image")
-    blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name='Blog Title')
-    blog_description = RichTextField(verbose_name = 'Blog Description',blank = True)
-    blog_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,null=True,blank=True,verbose_name="Blog Category")
-    written_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Written by')
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name=_("Blog Image"))
+    blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name=_('Blog Title'))
+    blog_description = RichTextField(verbose_name = _('Blog Description'),blank = True)
+    blog_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_("Blog Category"))
+    written_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Written by'))
 
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-    is_deleted = models.BooleanField(default=False)
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
-
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = "Blog Table"
+        verbose_name = _("Blog Table")
 
 class TestinomialsDetails(models.Model):
-    user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name='User Details')
-    review = RichTextField(blank=True,verbose_name = 'User Review')
+    user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
+    review = RichTextField(blank=True,verbose_name = _('User Review'))
     # profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Modified By')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
-    is_deleted = models.BooleanField(default=False)
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True)
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Modified Date Time'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=('Status'),blank=True,null=True)
 
-
+    class Meta:
+        verbose_name = _("Testinomials Details Table")
 
 class Header_FooterCMS(models.Model):
     # Header
-    eddi_logo_header = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name="Eddi Logo Header")
-    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 1 Text')
-    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 2 Text')
-    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 3 Text')
-    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button 4 Text')
-    login_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Login Button Text')
+    eddi_logo_header = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name=_("Eddi Logo Header"))
+    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 1 Text'))
+    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
+    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
+    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))
+    login_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Login Button Text'))
 
     # Footer
-    eddi_logo_footer = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name="Eddi Logo Footer")
-    description = RichTextField(verbose_name = 'Footer Description',blank=True)
-    follow_us_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Follow Us Text')
-    social_media_icon1 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 1")
-    social_media_icon2 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 2")
-    social_media_icon3 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name="Social Media Icon 3")
-    copyright_text = models.CharField(max_length=100,blank=True,null=True,verbose_name='Copyright Text')
+    eddi_logo_footer = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name=_("Eddi Logo Footer"))
+    description = RichTextField(verbose_name = _('Footer Description'),blank=True)
+    follow_us_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Follow Us Text'))
+    social_media_icon1 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 1"))
+    social_media_icon2 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 2"))
+    social_media_icon3 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 3"))
+    copyright_text = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Copyright Text'))
 
-    quick_link_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Text')
-    quick_link_button_text1 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text1')
-    quick_link_button_text2 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text2')
-    quick_link_button_text3 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text3')
-    quick_link_button_text4 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text4')
-    quick_link_button_text5 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text5')
-    quick_link_button_text6 = models.CharField(max_length=50,blank=True,null=True,verbose_name='Quicklink Button Text6')
+    quick_link_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Text'))
+    quick_link_button_text1 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text1'))
+    quick_link_button_text2 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text2'))
+    quick_link_button_text3 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text3'))
+    quick_link_button_text4 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text4'))
+    quick_link_button_text5 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text5'))
+    quick_link_button_text6 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text6'))
     
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     class Meta:
-        verbose_name = "Header_FooterCMS"
+        verbose_name = _("Header_FooterCMS")
 
 class HomePageCMS(models.Model):
 
     #section 1
-    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name='Banner Image')
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
+    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
 
 
-    section_1_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_1_description = RichTextField(verbose_name = _('Description'),blank=True)
 
 
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
-    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_2_left_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Left Button Text')
-    section_2_left_button_link = models.URLField(verbose_name='Left Button URL',blank=True,null=True)
-    section_2_right_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Right Button Text')
-    section_2_right_button_link = models.URLField(verbose_name='Right Button URL',blank=True,null=True)
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_left_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Left Button Text'))
+    section_2_left_button_link = models.URLField(verbose_name=_('Left Button URL'),blank=True,null=True)
+    section_2_right_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Right Button Text'))
+    section_2_right_button_link = models.URLField(verbose_name=_('Right Button URL'),blank=True,null=True)
 
     #section 3
-    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_3_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_3_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 4
-    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_4_logo = models.ManyToManyField(HomePageCMSPartners,verbose_name='Partner Logo',blank=True,null=True)
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_4_logo = models.ManyToManyField(HomePageCMSPartners,verbose_name=_('Partner Logo'),blank=True,null=True)
 
     #section 5
-    section_5_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_5_blog = models.ManyToManyField(BlogDetails,blank=True,null=True,verbose_name="Blog")
+    section_5_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_5_blog = models.ManyToManyField(BlogDetails,blank=True,null=True,verbose_name=_("Blog"))
 
     #section 6
-    section_6_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_6_description = models.CharField(max_length=80,blank=True,null=True,verbose_name="Description")
-    section_6_testinomials = models.ManyToManyField(TestinomialsDetails,blank=True,null=True,verbose_name='Testinomials')
+    section_6_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_6_description = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Description"))
+    section_6_testinomials = models.ManyToManyField(TestinomialsDetails,blank=True,null=True,verbose_name=_('Testinomials'))
 
     #section 8
-    section_8_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_8_image = models.ImageField(upload_to = 'homepage/',blank=True,null=True,verbose_name='Image')
-    section_8_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_8_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_8_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_8_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_8_image = models.ImageField(upload_to = 'homepage/',blank=True,null=True,verbose_name=_('Image'))
+    section_8_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_8_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_8_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
    
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Home Page"
+        verbose_name = _("Home Page")
 
 def regions_changed(sender, **kwargs):
     if kwargs['instance'].section_5_blog.count() > 4:
@@ -625,189 +650,189 @@ m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 class AboutUsPageCMS(models.Model):
 
     #section 1
-    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Banner Image')
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
-    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_2_video = models.FileField(verbose_name='Video Upload',upload_to='about_us/',null=True,blank=True)
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_video = models.FileField(verbose_name=_('Video Upload'),upload_to='about_us/',null=True,blank=True)
 
     #section 3
-    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_3_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Image')
-    section_3_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_3_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_3_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Image'))
+    section_3_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_3_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 4
-    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_4_courses = models.ManyToManyField(CourseDetails,verbose_name='Newest Courses',blank=True,null=True)
-    section_4_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_4_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_4_courses = models.ManyToManyField(CourseDetails,verbose_name=_('Newest Courses'),blank=True,null=True)
+    section_4_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_4_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
    
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "About Us Page"
+        verbose_name = _("About Us Page")
 
 
 class ContactUsPageCMS(models.Model):
     
     #section 1
-    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name='Banner Image')
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
-    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_2_address = models.CharField(max_length=80,blank=True,null=True,verbose_name="Address")
-    section_2_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name="Contact Number")
-    section_2_email = models.EmailField(blank=True,null=True,verbose_name="Email ID")
-    section_2_latitude = models.CharField(max_length=100,blank=True,null=True,verbose_name="Latitude")
-    section_2_longitude = models.CharField(max_length=100,blank=True,null=True,verbose_name="Longitude")
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_address = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Address"))
+    section_2_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Contact Number"))
+    section_2_email = models.EmailField(blank=True,null=True,verbose_name=_("Email ID"))
+    section_2_latitude = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Latitude"))
+    section_2_longitude = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Longitude"))
 
-    section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
+    section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Contact Us Page"
+        verbose_name = _("Contact Us Page")
 
 
 class PrivacyPolicyCMS(models.Model):
     #section 1
-    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name='Banner Image')
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
-    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
-    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Sub Heading")
-    section_2_sub_description = RichTextField(verbose_name = 'Sub Description',blank=True)
-    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Last Heading")
-    section_2_last_description = RichTextField(verbose_name = 'Last Description',blank=True)
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Sub Heading"))
+    section_2_sub_description = RichTextField(verbose_name = _('Sub Description'),blank=True)
+    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Last Heading"))
+    section_2_last_description = RichTextField(verbose_name = _('Last Description'),blank=True)
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Privacy Policy Page"
+        verbose_name = _("Privacy Policy Page")
 
 
 class PrivacyPolicyCMSSupplier(models.Model):
     #section 1
-    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name='Banner Image')
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
-    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
-    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
-    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Sub Heading")
-    section_2_sub_description = RichTextField(verbose_name = 'Sub Description',blank=True)
-    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Last Heading")
-    section_2_last_description = RichTextField(verbose_name = 'Last Description',blank=True)
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Sub Heading"))
+    section_2_sub_description = RichTextField(verbose_name = _('Sub Description'),blank=True)
+    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Last Heading"))
+    section_2_last_description = RichTextField(verbose_name = _('Last Description'),blank=True)
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Privacy Policy Page Supplier"
+        verbose_name = _("Privacy Policy Page Supplier")
 
 class TermsConditionCMS(models.Model):
     #section 1
-    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name='Banner Image')
+    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name=_('Banner Image'))
 
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
     #section 2
-    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
-    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Terms & Condition Page"
+        verbose_name = _("Terms & Condition Page")
 
 
 class TermsConditionCMSSupplier(models.Model):
     #section 1
-    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name='Banner Image')
+    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name=_('Banner Image'))
 
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Heading")
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name='Button Text')
-    section_1_button_link = models.URLField(verbose_name='Button URL',blank=True,null=True)
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
     #section 2
-    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Main Heading")
-    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name="Left Heading")
-    section_2_description = RichTextField(verbose_name = 'Description',blank=True)
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "Terms & Condition Page Supplier"
+        verbose_name = _("Terms & Condition Page Supplier")
 
 
 
 class UserProfile(models.Model):
 
     #personal information
-    usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True)
-    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
-    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
-    first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="First Name")
-    last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="Last Name")
-    gender = models.CharField(max_length=50,blank=True,null=True,verbose_name="Gender")
-    location = models.CharField(max_length=100,blank=True,null=True,verbose_name="location")
-    dob = models.CharField(max_length=50,blank=True,null=True,verbose_name="Date of Birth")
-    personal_number = models.IntegerField(blank=True,null=True,verbose_name="Personal Number")
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
+    usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('User Signup'))
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name=_("Email Id"),unique=True)
+    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name=_('Profile Image'))
+    first_name = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("First Name"))
+    last_name = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Last Name"))
+    gender = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Gender"))
+    location = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("location"))
+    dob = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Date of Birth"))
+    personal_number = models.IntegerField(blank=True,null=True,verbose_name=_("Personal Number"))
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
 
     #Educational Information
-    highest_education = models.CharField(max_length=50,blank=True,null=True,verbose_name="Highest Level of Education")
-    university_name = models.CharField(max_length=50,blank=True,null=True,verbose_name="University Name")
-    highest_degree = models.CharField(max_length=50,blank=True,null=True,verbose_name="Highest Degree")
-    educational_area = models.CharField(max_length=50,blank=True,null=True,verbose_name="Educational Area")
-    other_education = models.CharField(max_length=50,blank=True,null=True,verbose_name="Other Relavant Education")
-    diplomas_certificates = models.CharField(max_length=50,blank=True,null=True,verbose_name="Diplomas and Certificates")
+    highest_education = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Highest Level of Education"))
+    university_name = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("University Name"))
+    highest_degree = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Highest Degree"))
+    educational_area = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Educational Area"))
+    other_education = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Other Relavant Education"))
+    diplomas_certificates = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Diplomas and Certificates"))
 
     #Professional Information
-    current_professional_role = models.CharField(max_length=50,blank=True,null=True,verbose_name="Current Professional Role")
-    additional_role = models.CharField(max_length=50,blank=True,null=True,verbose_name="Additional Role")
-    extra_curricular = models.CharField(max_length=100,blank=True,null=True,verbose_name="Extra Curricular You Want")
-    extra_curricular_competence = models.CharField(max_length=100,blank=True,null=True,verbose_name="Extra Curricular Competence You Have")
-    core_responsibilities = models.CharField(max_length=100,blank=True,null=True,verbose_name="Core Responsibilities")
-    level_of_role = models.CharField(max_length=100,blank=True,null=True,verbose_name="Level Of Role")
-    future_professional_role = models.CharField(max_length=100,blank=True,null=True,verbose_name="Future Professional Role")
+    current_professional_role = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Current Professional Role"))
+    additional_role = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Additional Role"))
+    extra_curricular = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Extra Curricular You Want"))
+    extra_curricular_competence = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Extra Curricular Competence You Have"))
+    core_responsibilities = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Core Responsibilities"))
+    level_of_role = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Level Of Role"))
+    future_professional_role = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Future Professional Role"))
 
     #area of interest
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Categories")
-    user_interests = models.JSONField(blank=True,null=True, verbose_name="User Interests")
-    area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name="Area of Interest")
-    agree_ads_terms = models.BooleanField(default=True)
-    is_deleted = models.BooleanField(default=False)
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Categories"))
+    user_interests = models.JSONField(blank=True,null=True, verbose_name=_("User Interests"))
+    area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Area of Interest"))
+    agree_ads_terms = models.BooleanField(default=True,verbose_name=_('agree ads terms'))
+    is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
 
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = "User Eddi Profile"
+        verbose_name = _("User Eddi Profile")
 
 
     def __str__(self):
@@ -815,77 +840,88 @@ class UserProfile(models.Model):
     
 
 class CourseRating(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name='UUID',blank=True,null=True)
-    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True)
-    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True)
-    star = models.CharField(max_length=150,verbose_name='Star',blank=True,null=True)
-    comment = models.TextField(max_length=5000,verbose_name='Comment',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('user'))
+    course_name = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('course_name'))
+    star = models.CharField(max_length=150,verbose_name=_('Star'),blank=True,null=True)
+    comment = models.TextField(max_length=5000,verbose_name=_('Comment'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+
+    class Meta:
+        verbose_name = _("Course Rating Table")
 
 
 class UserPersonalProfile(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name='Profile Image')
-    full_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Full Name")
-    location = models.CharField(max_length=300, blank=True, null=True, verbose_name="Location")
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
-    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name="Email Id",unique=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name=_('Profile Image'))
+    full_name = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Full Name"))
+    location = models.CharField(max_length=300, blank=True, null=True, verbose_name=_("Location"))
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
+    email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name=_("Email Id"),unique=True)
 
     class Meta:
-        verbose_name = "User Personal Profile"
-
-
+        verbose_name = _("User Personal Profile")
 
 
 class SupplierProfile(models.Model):
-    supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True)
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name="Supplier Email")
-    supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Supplier Name")
-    account_number = models.CharField(max_length=100,blank=True,null=True,verbose_name="Account Number")
-    account_holder_name = models.CharField(max_length=200,blank=True,null=True,verbose_name="Account Holder Name")
-    ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name="IFSC Code")
-    address = models.TextField(max_length=500,blank=True,null=True,verbose_name="Address")
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name="Phone Number")
-    about_me = models.CharField(max_length=500,blank=True,null=True,verbose_name="About Me")
-    supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name='Supplier Image')
-    is_deleted = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Modified Date Time')
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_("Supplier Email"))
+    supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Supplier Name"))
+    account_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Account Number"))
+    account_holder_name = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Account Holder Name"))
+    ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("IFSC Code"))
+    address = models.TextField(max_length=500,blank=True,null=True,verbose_name=_("Address"))
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
+    about_me = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("About Me"))
+    supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name=_('Supplier Image'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     def __str__(self):
         return self.supplier_name
 
-class UserPaymentDetail(models.Model):
-    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course name")
-    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
-    amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
-    status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
+    class Meta:
+        verbose_name = _("Supplier Profile")
 
+
+class UserPaymentDetail(models.Model):
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course name"))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
+
+    class Meta:
+        verbose_name = _("User Payment Detail")
 
 class FavouriteCourse(models.Model):
-    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Name")
-    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    is_favourite = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Name"))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    is_favourite = models.BooleanField(default=False,verbose_name=_('is_favourite'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Favourite Course Created Date Time'))
     
     def __str__(self):
         return self.course_name
+
+    class Meta:
+        verbose_name = _("Favourite Course")
     
 
 
 class CourseEnroll(models.Model):
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Course Category")
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name='supplier email')
-    payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
-    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Favourite Course Created Date Time')
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('supplier email'))
+    payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Favourite Course Created Date Time'))
 
 
     def __str__(self):
         return self.payment_detail.course_name
-  
+
+    class Meta:
+        verbose_name = _("Course Enroll")  
 
 @receiver(post_save, sender=CourseEnroll)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
@@ -915,34 +951,34 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
 
 
 class EventAd(models.Model):    
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    event_image = models.FileField(upload_to='event_image/',verbose_name='Event Image',blank=True,null=True)
-    event_choose_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Choose Type")
-    event_publish_on = models.CharField(max_length=100,blank=True,null=True,verbose_name="Publish on")
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
-    event_category = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Category")
-    banner_video_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Banner Link")
-    start_date = models.DateField(verbose_name='Event Start Date', blank=True,null=True)
-    start_time = models.TimeField(verbose_name='Event Start Time', blank=True,null=True)
-    fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Fees Type")
-    event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Type")
-    event_price = models.FloatField(default=0,verbose_name='Event Price',blank=True,null=True)
-    checkout_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name="Checkout Link")
-    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name="Meeting Link")
-    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name="Passcode")
-    event_small_description = RichTextField(verbose_name = 'Event Small Description', blank = True, null=True)
-    event_description = RichTextField(verbose_name = 'Event Description', blank = True, null=True)
-    event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name="Location")
-    event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name="Organizer")
-    event_subscriber = models.IntegerField(default=0,verbose_name='Course Subscriber',blank=True,null=True)
-    is_featured = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='EventAd Created Date Time')
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=1)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    event_image = models.FileField(upload_to='event_image/',verbose_name=_('Event Image'),blank=True,null=True)
+    event_choose_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Choose Type"))
+    event_publish_on = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Publish on"))
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
+    event_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Category"))
+    banner_video_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Banner Link"))
+    start_date = models.DateField(verbose_name=_('Event Start Date'), blank=True,null=True)
+    start_time = models.TimeField(verbose_name=_('Event Start Time'), blank=True,null=True)
+    fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Fees Type"))
+    event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Type"))
+    event_price = models.FloatField(default=0,verbose_name=_('Event Price'),blank=True,null=True)
+    checkout_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Checkout Link"))
+    meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
+    meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
+    event_small_description = RichTextField(verbose_name = _('Event Small Description'), blank = True, null=True)
+    event_description = RichTextField(verbose_name = _('Event Description'), blank = True, null=True)
+    event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Location"))
+    event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Organizer"))
+    event_subscriber = models.IntegerField(default=0,verbose_name=_('Course Subscriber'),blank=True,null=True)
+    is_featured = models.BooleanField(default=False,verbose_name=_('is_featured'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('EventAd Created Date Time'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True, default=1)
 
 
     class Meta:
-        verbose_name = "EventAd Table"
+        verbose_name = _("EventAd Table")
 
     def __str__(self):
         return self.event_name
@@ -950,73 +986,90 @@ class EventAd(models.Model):
 
 
 class EventAdPaymentDetail(models.Model):
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event Name")
-    email_id = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Card Type")
-    amount = models.FloatField(blank=True,null=True,verbose_name="Amount")
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Payment Created Date Time')
-    status = models.CharField(max_length=100,blank=True,null=True,verbose_name="Payment Status")
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
 
 
     def __str__(self):
         return self.event_name
 
+    class Meta:
+        verbose_name = _("Event Ad Payment Detail") 
 
 class EventAdEnroll(models.Model):
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name="Event name")
-    user_email = models.EmailField(blank=True,null=True,verbose_name='User Email')
-    payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name='Payment Detail',blank=True,null=True)
-    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name='Created Date Time')
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event name"))
+    user_email = models.EmailField(blank=True,null=True,verbose_name=_('User Email'))
+    payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     def __str__(self):
         return self.event_name
+
+    class Meta:
+        verbose_name = _("Event Ad Enroll")
     
 
 class MaterialVideoMaterial(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    video_file = models.FileField(upload_to='course_material_video/',verbose_name='Video Files',blank=True,null=True)
-    actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name="Actual Video Duration")
-    created_date_time = models.DateTimeField(auto_now_add=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    video_file = models.FileField(upload_to='course_material_video/',verbose_name=_('Video Files'),blank=True,null=True)
+    actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
         return str(self.video_file) + " " + str(self.uuid)
+    
+    class Meta:
+        verbose_name = _("Material Video Material")
 
 class MaterialDocumentMaterial(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    document_file = models.FileField(upload_to='course_material_doc/',verbose_name='Document Files',blank=True,null=True)
-    file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Size")
-    created_date_time = models.DateTimeField(auto_now_add=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    document_file = models.FileField(upload_to='course_material_doc/',verbose_name=_('Document Files'),blank=True,null=True)
+    file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Size"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     # def __str__(self):
     #     return self.document_file
 
+    class Meta:
+        verbose_name = _("Material Document Material")
+
 
 class CourseMaterialStatus(models.Model):
-    user_email = models.CharField(max_length=100,blank=True,null=True,verbose_name='Email')
-    video_id = models.CharField(max_length=100,blank=True,null=True,verbose_name='Video')
-    document_id = models.CharField(max_length=100,blank=True,null=True,verbose_name='Document')
-    is_complete = models.BooleanField(default=False)
-    duration = models.CharField(max_length=100,blank=True,null=True,verbose_name='Duration')
+    user_email = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Email'))
+    video_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Video'))
+    document_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Document'))
+    is_complete = models.BooleanField(default=False,verbose_name=_('is_complete'))
+    duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Duration'))
 
     def __str__(self):
         return self.video_id
+
+    class Meta:
+        verbose_name = _("Course Material Status")
     
 
 
 class CourseMaterial(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course")
-    video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="Video Title")
-    video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name='Video Files',blank=True,null=True)
-    file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="File Title")
-    document_files = models.ManyToManyField(MaterialDocumentMaterial,verbose_name='Document Files',blank=True,null=True)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True, verbose_name=_('UUID'))
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
+    video_title = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Video Title"))
+    video_files = models.ManyToManyField(MaterialVideoMaterial,verbose_name=_('Video Files'),blank=True,null=True)
+    file_title = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Title"))
+    document_files = models.ManyToManyField(MaterialDocumentMaterial,verbose_name=_('Document Files'),blank=True,null=True)
     # material_status = models.ManyToManyField(CourseMaterialStatus,verbose_name='CourseMaterialStatus',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True)
-    is_deleted = models.BooleanField(default=False)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
 
     def __str__(self):
         return self.course.course_name
+    
+    class Meta:
+        verbose_name = _("Course Material")
 
 
 # class CourseCompleteStatus(models.Model):
@@ -1025,21 +1078,23 @@ class CourseMaterial(models.Model):
 
 
 class RecruitmentAd(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True)
-    recruitmentAd_File = models.FileField(upload_to='recruitment_file/',verbose_name='Recruitment File',blank=True,null=True)
-    recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name="RecruitmentAd Title")
-    recruitmentAd_description = RichTextField(verbose_name = 'RecruitmentAd Description', blank = True, null=True)
-    recruitmentAd_banner_video_link =  models.CharField(max_length=500,blank=True,null=True,verbose_name="RecruitmentAd Banner Link")
-    supplier_profile = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name='Supplier Profile')
-    user_profile = models.ManyToManyField(UserProfile,verbose_name='User Profile',blank=True,null=True)
-    recruitmentAd_Expiry =  models.DateField(verbose_name='RecruitmentAd Expiry Date', blank=True,null=True)
-    subscriber_count = models.IntegerField(default=0,verbose_name='Subscriber Count',blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True)
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name='Created By')
-    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name='Approval Status', blank=True,null=True, default=None)
-    is_deleted = models.BooleanField(default=False)
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name='Status',blank=True,null=True, default=None)
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    recruitmentAd_File = models.FileField(upload_to='recruitment_file/',verbose_name=_('Recruitment File'),blank=True,null=True)
+    recruitmentAd_title = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("RecruitmentAd Title"))
+    recruitmentAd_description = RichTextField(verbose_name = _('RecruitmentAd Description'), blank = True, null=True)
+    recruitmentAd_banner_video_link =  models.CharField(max_length=500,blank=True,null=True,verbose_name=_("RecruitmentAd Banner Link"))
+    supplier_profile = models.ForeignKey(SupplierProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Profile'))
+    user_profile = models.ManyToManyField(UserProfile,verbose_name=_('User Profile'),blank=True,null=True)
+    recruitmentAd_Expiry =  models.DateField(verbose_name=_('RecruitmentAd Expiry Date'), blank=True,null=True)
+    subscriber_count = models.IntegerField(default=0,verbose_name=_('Subscriber Count'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True, default=None)
 
+    class Meta:
+        verbose_name = _("Recruitment Ad")
         
 
 # class RecruitmentAdEnrollment(models.Model):
@@ -1053,37 +1108,45 @@ class RecruitmentAd(models.Model):
 
 
 class InvoiceData(models.Model):
-    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
-    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name='User Address')
-    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name='Vat')
-    user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Course Name')
-    created_date_time = models.DateTimeField(auto_now_add=True)
+    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
+    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
+    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Vat'))
+    user_email = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Course Name'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
         return self.course_name
+    
+    class Meta:
+        verbose_name = _("Invoice Data")
 
 
 class InvoiceDataEvent(models.Model):
-    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name='Invoice Number')
-    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name='User Address')
-    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name='Vat')
-    user_email = models.EmailField(blank=True,null=True,verbose_name='Email ID')
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name='Event Name')
-    created_date_time = models.DateTimeField(auto_now_add=True)
+    invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
+    user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
+    vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Vat'))
+    user_email = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Name'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
         return self.event_name
+    
+    class Meta:
+        verbose_name = _("Invoice Data Event")
 
 
 class Notification(models.Model):
-    sender = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Sender')
-    sender_type = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Sender Type')
-    receiver = models.TextField(blank=True,null=True,verbose_name='Receiver')
-    receiver_type = models.CharField(max_length=10000,blank=True,null=True,verbose_name='Receiver Type')
-    user_profile = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='User Profile',blank=True,null=True,default=None)
-    supplier_profile = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name='Supplier Profile',blank=True,null=True,default=None)
-    message = models.TextField(blank=True,null=True,verbose_name="Message")
-    is_clear = models.BooleanField(default=False)
-    created_date_time = models.DateTimeField(auto_now_add=True)
+    sender = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('sender'))
+    receiver = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('receiver'))
+    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name=_('User Type'),blank=True,null=True,default=None)
+    user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name=_('User Email'),blank=True,null=True,default=None)
+    supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name=_('Supplier Email'),blank=True,null=True,default=None)
+    message = models.TextField(max_length=2000,blank=True,null=True,verbose_name=_("Address"))
+    is_clear = models.BooleanField(default=False,verbose_name=_('is_clear'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+
+    class Meta:
+        verbose_name = _("Notification Table")
 

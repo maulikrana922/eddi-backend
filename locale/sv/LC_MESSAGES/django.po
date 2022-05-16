@@ -1,0 +1,1088 @@
+msgid ""
+msgstr ""
+"Project-Id-Version:PACKAGE VERSIONReport-Msgid-Bugs-To:POT-Creation-"
+"Date:2022-05-15 08:55+0000PO-Revision-Date:YEAR-MO-DA HO:MI+ZONELast-"
+"Translator:FULL NAME <EMAIL@ADDRESS>Language-Team:LANGUAGE <LL@li."
+"org>Language:MIME-Version:1.0Content-Type:text/plain; charset=UTF-8\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-05-15 09:33+0000\n"
+"Content-Transfer-Encoding:8bitPlural-Forms:nplurals=2; plural=(n != 1);\n"
+
+#: eddi_app/models.py:44 eddi_app/models.py:74
+msgid "Value"
+msgstr "Värde"
+
+#: eddi_app/models.py:52
+msgid "Status Table"
+msgstr "Statustabell"
+
+#: eddi_app/models.py:58 eddi_app/models.py:94 eddi_app/models.py:1143
+msgid "User Type"
+msgstr "Användartyp"
+
+#: eddi_app/models.py:66
+msgid "User Type Table"
+msgstr "Användartyptabell"
+
+#: eddi_app/models.py:81
+msgid "Approval Status Table"
+msgstr "Statustabell för godkännande"
+
+#: eddi_app/models.py:87 eddi_app/models.py:224 eddi_app/models.py:250
+#: eddi_app/models.py:275 eddi_app/models.py:292 eddi_app/models.py:309
+#: eddi_app/models.py:370 eddi_app/models.py:529 eddi_app/models.py:843
+#: eddi_app/models.py:855 eddi_app/models.py:954 eddi_app/models.py:1018
+#: eddi_app/models.py:1030 eddi_app/models.py:1058 eddi_app/models.py:1081
+msgid "UUID"
+msgstr "UUID"
+
+#: eddi_app/models.py:88 eddi_app/models.py:799
+msgid "First Name"
+msgstr "Förnamn"
+
+#: eddi_app/models.py:89 eddi_app/models.py:800
+msgid "Last Name"
+msgstr "Efternamn"
+
+#: eddi_app/models.py:90
+msgid "password"
+msgstr "Lösenord"
+
+#: eddi_app/models.py:91 eddi_app/models.py:497 eddi_app/models.py:696
+#: eddi_app/models.py:889 eddi_app/models.py:900 eddi_app/models.py:990
+#: eddi_app/models.py:1114 eddi_app/models.py:1129
+msgid "Email ID"
+msgstr "E-post ID"
+
+#: eddi_app/models.py:92
+msgid "Password"
+msgstr "Lösenord"
+
+#: eddi_app/models.py:95
+msgid "is First Time Login"
+msgstr "är förstagångsinloggning"
+
+#: eddi_app/models.py:97 eddi_app/models.py:229 eddi_app/models.py:258
+#: eddi_app/models.py:278 eddi_app/models.py:295 eddi_app/models.py:312
+#: eddi_app/models.py:396 eddi_app/models.py:466 eddi_app/models.py:481
+#: eddi_app/models.py:501 eddi_app/models.py:536 eddi_app/models.py:1091
+msgid "Created By"
+msgstr "Skapad av"
+
+#: eddi_app/models.py:98 eddi_app/models.py:230 eddi_app/models.py:259
+#: eddi_app/models.py:279 eddi_app/models.py:296 eddi_app/models.py:313
+#: eddi_app/models.py:327 eddi_app/models.py:359 eddi_app/models.py:397
+#: eddi_app/models.py:467 eddi_app/models.py:482 eddi_app/models.py:502
+#: eddi_app/models.py:537 eddi_app/models.py:586 eddi_app/models.py:637
+#: eddi_app/models.py:677 eddi_app/models.py:702 eddi_app/models.py:725
+#: eddi_app/models.py:748 eddi_app/models.py:766 eddi_app/models.py:785
+#: eddi_app/models.py:831 eddi_app/models.py:848 eddi_app/models.py:877
+#: eddi_app/models.py:1008
+msgid "Created Date Time"
+msgstr "Skapat Datum Tid"
+
+#: eddi_app/models.py:99 eddi_app/models.py:231 eddi_app/models.py:260
+#: eddi_app/models.py:280 eddi_app/models.py:297 eddi_app/models.py:314
+#: eddi_app/models.py:398 eddi_app/models.py:468 eddi_app/models.py:483
+#: eddi_app/models.py:503 eddi_app/models.py:538
+msgid "Modified By"
+msgstr "Modifierad av"
+
+#: eddi_app/models.py:100 eddi_app/models.py:232 eddi_app/models.py:261
+#: eddi_app/models.py:281 eddi_app/models.py:298 eddi_app/models.py:315
+#: eddi_app/models.py:360 eddi_app/models.py:399 eddi_app/models.py:469
+#: eddi_app/models.py:484 eddi_app/models.py:504 eddi_app/models.py:539
+#: eddi_app/models.py:638 eddi_app/models.py:678 eddi_app/models.py:703
+#: eddi_app/models.py:726 eddi_app/models.py:749 eddi_app/models.py:767
+#: eddi_app/models.py:786 eddi_app/models.py:832 eddi_app/models.py:878
+msgid "Modified Date Time"
+msgstr "Ändrad Datum Tid"
+
+#: eddi_app/models.py:101
+msgid "is_authenticated"
+msgstr "is_autenticated"
+
+#: eddi_app/models.py:102
+msgid "Is Login From"
+msgstr "Är inloggning från"
+
+#: eddi_app/models.py:103
+msgid "is_active"
+msgstr "är aktiv"
+
+#: eddi_app/models.py:104 eddi_app/models.py:233 eddi_app/models.py:358
+#: eddi_app/models.py:402 eddi_app/models.py:540 eddi_app/models.py:554
+#: eddi_app/models.py:829 eddi_app/models.py:876 eddi_app/models.py:975
+#: eddi_app/models.py:1066 eddi_app/models.py:1093
+msgid "is_deleted"
+msgstr "is_deleted"
+
+#: eddi_app/models.py:106 eddi_app/models.py:236 eddi_app/models.py:265
+#: eddi_app/models.py:283 eddi_app/models.py:300 eddi_app/models.py:317
+#: eddi_app/models.py:403 eddi_app/models.py:471 eddi_app/models.py:486
+#: eddi_app/models.py:506 eddi_app/models.py:541 eddi_app/models.py:977
+#: eddi_app/models.py:1094
+msgid "Status"
+msgstr "Status"
+
+#: eddi_app/models.py:109
+msgid "User Signup Table"
+msgstr "Användarregistreringstabell"
+
+#: eddi_app/models.py:214
+msgid "email_id"
+msgstr "e-post ID"
+
+#: eddi_app/models.py:218
+msgid "Non BuiltIn User Token"
+msgstr "Icke inbyggd användartoken"
+
+#: eddi_app/models.py:225
+msgid "Category Name"
+msgstr "kategori namn"
+
+#: eddi_app/models.py:226 eddi_app/models.py:256
+msgid "Category Image"
+msgstr "Kategoribild"
+
+#: eddi_app/models.py:227
+msgid "Color"
+msgstr "Färg"
+
+#: eddi_app/models.py:244
+msgid "Course Category Table"
+msgstr "Kurskategoritabell"
+
+#: eddi_app/models.py:251 eddi_app/models.py:254
+msgid "Sub Category Name"
+msgstr "Underkategorinamn"
+
+#: eddi_app/models.py:252 eddi_app/models.py:371
+msgid "supplier"
+msgstr "leverantör"
+
+#: eddi_app/models.py:263 eddi_app/models.py:401
+msgid "is_approved"
+msgstr "är godkänd"
+
+#: eddi_app/models.py:268
+msgid "Course Sub Category Table"
+msgstr "Tabell för underkategorier för kurser"
+
+#: eddi_app/models.py:276
+msgid "Course Type Name"
+msgstr "Namn på kurstyp"
+
+#: eddi_app/models.py:286
+msgid "Course Type Table"
+msgstr "Tabell för kurstyp"
+
+#: eddi_app/models.py:293
+msgid "Course Level Name"
+msgstr "Namn på kursnivå"
+
+#: eddi_app/models.py:303
+msgid "Course Level Table"
+msgstr "Kursnivåtabell"
+
+#: eddi_app/models.py:310
+msgid "Fee Type Name"
+msgstr "Avgiftstyps namn"
+
+#: eddi_app/models.py:320
+msgid "Fee Type Table"
+msgstr "Tabell för avgiftstyp"
+
+#: eddi_app/models.py:326
+msgid "VAT Value Percentage"
+msgstr "Moms Värdeprocent"
+
+#: eddi_app/models.py:333
+msgid "Invoice VAT Table"
+msgstr "Fakturamomstabell"
+
+#: eddi_app/models.py:339 eddi_app/models.py:867 eddi_app/models.py:1145
+msgid "Supplier Email"
+msgstr "Leverantörs e-post"
+
+#: eddi_app/models.py:340
+msgid "Organizational Name"
+msgstr "Organisationsnamn"
+
+#: eddi_app/models.py:341
+msgid "Oraganization Email"
+msgstr "Organisations e-post"
+
+#: eddi_app/models.py:342
+msgid "organization Website"
+msgstr "organisationens webbplats"
+
+#: eddi_app/models.py:343
+msgid "Organization Address"
+msgstr "Organisationens adress"
+
+#: eddi_app/models.py:344
+msgid "Country"
+msgstr "Land"
+
+#: eddi_app/models.py:345
+msgid "City"
+msgstr "Stad"
+
+#: eddi_app/models.py:346
+msgid "Brief Information on Organization"
+msgstr "Kort information om organisation"
+
+#: eddi_app/models.py:347
+msgid "Organization Phone Number"
+msgstr "Organisationens telefonnummer"
+
+#: eddi_app/models.py:348
+msgid "Contact Person at Eddi"
+msgstr "Kontaktperson på Eddi"
+
+#: eddi_app/models.py:349
+msgid "LinkedIn Profile"
+msgstr "LinkedIn-profil"
+
+#: eddi_app/models.py:350
+msgid "Facebook Profile"
+msgstr "Facebook profil"
+
+#: eddi_app/models.py:353 eddi_app/models.py:377 eddi_app/models.py:378
+#: eddi_app/models.py:913
+msgid "Course Category"
+msgstr "Kurskategori"
+
+#: eddi_app/models.py:354
+msgid "Sub Category"
+msgstr "Underkategori"
+
+#: eddi_app/models.py:357
+msgid "Organization Logo"
+msgstr "Organisationens logotyp"
+
+#: eddi_app/models.py:367
+msgid "Supplier Organization Profile Table"
+msgstr "Leverantörsorganisationsprofiltabell"
+
+#: eddi_app/models.py:372
+msgid "Supplier Organization"
+msgstr "Leverantörsorganisation"
+
+#: eddi_app/models.py:373
+msgid "Course Image"
+msgstr "Kursbild"
+
+#: eddi_app/models.py:374 eddi_app/models.py:899 eddi_app/models.py:1115
+msgid "Course Name"
+msgstr "Kursnamn"
+
+#: eddi_app/models.py:375
+msgid "Course Level"
+msgstr "Kursnivå"
+
+#: eddi_app/models.py:376
+msgid "Course Length"
+msgstr "Kurslängd"
+
+#: eddi_app/models.py:379
+msgid "Course Language"
+msgstr "Kursspråk"
+
+#: eddi_app/models.py:380
+msgid "Course Start Date"
+msgstr "Kursstartdatum"
+
+#: eddi_app/models.py:381
+msgid "Course For Organization"
+msgstr "Kurs för organisation"
+
+#: eddi_app/models.py:382
+msgid "Organization Domain"
+msgstr "Organisationsdomän"
+
+#: eddi_app/models.py:383
+msgid "Course Type"
+msgstr "Kurstyp"
+
+#: eddi_app/models.py:384
+msgid "Fee Type"
+msgstr "Typ av avgift"
+
+#: eddi_app/models.py:385
+msgid "Course Price"
+msgstr "Kurspris"
+
+#: eddi_app/models.py:386
+msgid "Invoice Vat"
+msgstr "Faktura moms"
+
+#: eddi_app/models.py:387
+msgid "Additional Information"
+msgstr "ytterligare information"
+
+#: eddi_app/models.py:388
+msgid "Organization Location"
+msgstr "Organisationens plats"
+
+#: eddi_app/models.py:389
+msgid "Sub Area"
+msgstr "Underområde"
+
+#: eddi_app/models.py:390 eddi_app/models.py:966
+msgid "Checkout Link"
+msgstr "Länk till kassan"
+
+#: eddi_app/models.py:391 eddi_app/models.py:967
+msgid "Meeting Link"
+msgstr "Möteslänk"
+
+#: eddi_app/models.py:392 eddi_app/models.py:968
+msgid "Passcode"
+msgstr "Lösenord"
+
+#: eddi_app/models.py:393
+msgid "Target Users"
+msgstr "Målanvändare"
+
+#: eddi_app/models.py:406
+msgid "Course Details Table"
+msgstr "Tabell med kursdetaljer"
+
+#: eddi_app/models.py:463 eddi_app/models.py:478
+msgid "Image Title"
+msgstr "Bildens titel"
+
+#: eddi_app/models.py:464 eddi_app/models.py:594 eddi_app/models.py:653
+#: eddi_app/models.py:687 eddi_app/models.py:711 eddi_app/models.py:734
+#: eddi_app/models.py:756 eddi_app/models.py:775
+msgid "Banner Image"
+msgstr "Bannerbild"
+
+#: eddi_app/models.py:474
+msgid "Home Page CMS Banner Table"
+msgstr "Hemsida CMS Banner Tabell"
+
+#: eddi_app/models.py:479 eddi_app/models.py:619
+msgid "Partner Logo"
+msgstr "Partnerlogotyp"
+
+#: eddi_app/models.py:492
+msgid "Home Page CMS Partners Table"
+msgstr "Hemsida CMS-partnertabell"
+
+#: eddi_app/models.py:496 eddi_app/models.py:857
+msgid "Full Name"
+msgstr "Fullständiga namn"
+
+#: eddi_app/models.py:498 eddi_app/models.py:805 eddi_app/models.py:859
+#: eddi_app/models.py:873
+msgid "Phone Number"
+msgstr "Telefonnummer"
+
+#: eddi_app/models.py:499
+msgid "Message"
+msgstr "Meddelande"
+
+#: eddi_app/models.py:512
+msgid "Contact Form Lead Table"
+msgstr "Kontaktformulär Lead Table"
+
+#: eddi_app/models.py:530
+msgid "Blog Image"
+msgstr "Bloggbild"
+
+#: eddi_app/models.py:531
+msgid "Blog Title"
+msgstr "Bloggtitel"
+
+#: eddi_app/models.py:532
+msgid "Blog Description"
+msgstr "Bloggbeskrivning"
+
+#: eddi_app/models.py:533
+msgid "Blog Category"
+msgstr "Bloggkategori"
+
+#: eddi_app/models.py:534
+msgid "Written by"
+msgstr "Skriven av"
+
+#: eddi_app/models.py:544
+msgid "Blog Table"
+msgstr "Bloggtabell"
+
+#: eddi_app/models.py:547
+msgid "User Details"
+msgstr "Användarinformation"
+
+#: eddi_app/models.py:548
+msgid "User Review"
+msgstr "Användarrecension"
+
+#: eddi_app/models.py:558
+msgid "Testinomials Details Table"
+msgstr "Testinomial Detaljer Tabell"
+
+#: eddi_app/models.py:562
+msgid "Eddi Logo Header"
+msgstr "Eddi Logotyp Header"
+
+#: eddi_app/models.py:563
+msgid "Button 1 Text"
+msgstr "Knapp 1 Text"
+
+#: eddi_app/models.py:564
+msgid "Button 2 Text"
+msgstr "Knapp 2 Text"
+
+#: eddi_app/models.py:565
+msgid "Button 3 Text"
+msgstr "Knapp 3 Text"
+
+#: eddi_app/models.py:566
+msgid "Button 4 Text"
+msgstr "Knapp 4 Text"
+
+#: eddi_app/models.py:567
+msgid "Login Button Text"
+msgstr "Text för inloggningsknapp"
+
+#: eddi_app/models.py:570
+msgid "Eddi Logo Footer"
+msgstr "Eddi logotyp sidfot"
+
+#: eddi_app/models.py:571
+msgid "Footer Description"
+msgstr "Sidfot Beskrivning"
+
+#: eddi_app/models.py:572
+msgid "Follow Us Text"
+msgstr "Följ oss text"
+
+#: eddi_app/models.py:573
+msgid "Social Media Icon 1"
+msgstr "Ikon för sociala medier 1"
+
+#: eddi_app/models.py:574
+msgid "Social Media Icon 2"
+msgstr "Ikon för sociala medier 2"
+
+#: eddi_app/models.py:575
+msgid "Social Media Icon 3"
+msgstr "Ikon för sociala medier 3"
+
+#: eddi_app/models.py:576
+msgid "Copyright Text"
+msgstr "Upphovsrättstext"
+
+#: eddi_app/models.py:578
+msgid "Quicklink Text"
+msgstr "Snabblänktext"
+
+#: eddi_app/models.py:579
+msgid "Quicklink Button Text1"
+msgstr "Snabblänkknapp Text1"
+
+#: eddi_app/models.py:580
+msgid "Quicklink Button Text2"
+msgstr "Snabblänkknapp Text2"
+
+#: eddi_app/models.py:581
+msgid "Quicklink Button Text3"
+msgstr "Snabblänkknapp Text3"
+
+#: eddi_app/models.py:582
+msgid "Quicklink Button Text4"
+msgstr "Snabblänkknapp Text4"
+
+#: eddi_app/models.py:583
+msgid "Quicklink Button Text5"
+msgstr "Snabblänkknapp Text5"
+
+#: eddi_app/models.py:584
+msgid "Quicklink Button Text6"
+msgstr "Snabblänkknapp Text6"
+
+#: eddi_app/models.py:589
+msgid "Header_FooterCMS"
+msgstr "Header_FooterCMS"
+
+#: eddi_app/models.py:595 eddi_app/models.py:605 eddi_app/models.py:613
+#: eddi_app/models.py:618 eddi_app/models.py:622 eddi_app/models.py:626
+#: eddi_app/models.py:631 eddi_app/models.py:654 eddi_app/models.py:659
+#: eddi_app/models.py:664 eddi_app/models.py:671 eddi_app/models.py:688
+#: eddi_app/models.py:693 eddi_app/models.py:712 eddi_app/models.py:735
+#: eddi_app/models.py:758 eddi_app/models.py:777
+msgid "Heading"
+msgstr "Rubrik"
+
+#: eddi_app/models.py:598 eddi_app/models.py:606 eddi_app/models.py:627
+#: eddi_app/models.py:633 eddi_app/models.py:660 eddi_app/models.py:666
+#: eddi_app/models.py:719 eddi_app/models.py:742 eddi_app/models.py:764
+#: eddi_app/models.py:783
+msgid "Description"
+msgstr "Beskrivning"
+
+#: eddi_app/models.py:601 eddi_app/models.py:614 eddi_app/models.py:634
+#: eddi_app/models.py:655 eddi_app/models.py:667 eddi_app/models.py:673
+#: eddi_app/models.py:689 eddi_app/models.py:700 eddi_app/models.py:713
+#: eddi_app/models.py:736 eddi_app/models.py:759 eddi_app/models.py:778
+msgid "Button Text"
+msgstr "Knapp-text"
+
+#: eddi_app/models.py:602 eddi_app/models.py:615 eddi_app/models.py:635
+#: eddi_app/models.py:656 eddi_app/models.py:668 eddi_app/models.py:674
+#: eddi_app/models.py:690 eddi_app/models.py:714 eddi_app/models.py:737
+#: eddi_app/models.py:760 eddi_app/models.py:779
+msgid "Button URL"
+msgstr "Knappens URL"
+
+#: eddi_app/models.py:607
+msgid "Left Button Text"
+msgstr "Vänster knapptext"
+
+#: eddi_app/models.py:608
+msgid "Left Button URL"
+msgstr "Vänster knapp URL"
+
+#: eddi_app/models.py:609
+msgid "Right Button Text"
+msgstr "Högerknappstext"
+
+#: eddi_app/models.py:610
+msgid "Right Button URL"
+msgstr "Höger knapp URL"
+
+#: eddi_app/models.py:623
+msgid "Blog"
+msgstr "Blogg"
+
+#: eddi_app/models.py:628
+msgid "Testinomials"
+msgstr "Rekommendationer"
+
+#: eddi_app/models.py:632 eddi_app/models.py:665
+msgid "Image"
+msgstr "Bild"
+
+#: eddi_app/models.py:641
+msgid "Home Page"
+msgstr "Hemsida"
+
+#: eddi_app/models.py:661
+msgid "Video Upload"
+msgstr "Videouppladdning"
+
+#: eddi_app/models.py:672
+msgid "Newest Courses"
+msgstr "Nyaste kurserna"
+
+#: eddi_app/models.py:681
+msgid "About Us Page"
+msgstr "Om oss sida"
+
+#: eddi_app/models.py:694 eddi_app/models.py:872 eddi_app/models.py:1146
+msgid "Address"
+msgstr "Adress"
+
+#: eddi_app/models.py:695
+msgid "Contact Number"
+msgstr "Kontaktnummer"
+
+#: eddi_app/models.py:697
+msgid "Latitude"
+msgstr "Latitud"
+
+#: eddi_app/models.py:698
+msgid "Longitude"
+msgstr "Longitud"
+
+#: eddi_app/models.py:706
+msgid "Contact Us Page"
+msgstr "Kontakta oss sida"
+
+#: eddi_app/models.py:717 eddi_app/models.py:740 eddi_app/models.py:762
+#: eddi_app/models.py:781
+msgid "Main Heading"
+msgstr "Huvudrubrik"
+
+#: eddi_app/models.py:718 eddi_app/models.py:741 eddi_app/models.py:763
+#: eddi_app/models.py:782
+msgid "Left Heading"
+msgstr "Vänster rubrik"
+
+#: eddi_app/models.py:720 eddi_app/models.py:743
+msgid "Sub Heading"
+msgstr "Underrubrik"
+
+#: eddi_app/models.py:721 eddi_app/models.py:744
+msgid "Sub Description"
+msgstr "Underbeskrivning"
+
+#: eddi_app/models.py:722 eddi_app/models.py:745
+msgid "Last Heading"
+msgstr "Sista rubriken"
+
+#: eddi_app/models.py:723 eddi_app/models.py:746
+msgid "Last Description"
+msgstr "Sista beskrivningen"
+
+#: eddi_app/models.py:729
+msgid "Privacy Policy Page"
+msgstr "Sekretesspolicy sida"
+
+#: eddi_app/models.py:752
+msgid "Privacy Policy Page Supplier"
+msgstr "Sekretesspolicy Sidleverantör"
+
+#: eddi_app/models.py:770
+msgid "Terms & Condition Page"
+msgstr "Sida med villkor och villkor"
+
+#: eddi_app/models.py:789
+msgid "Terms & Condition Page Supplier"
+msgstr "Användarvillkor Sida Leverantör"
+
+#: eddi_app/models.py:796
+msgid "User Signup"
+msgstr "Användarregistrering"
+
+#: eddi_app/models.py:797 eddi_app/models.py:860
+msgid "Email Id"
+msgstr "E-post ID"
+
+#: eddi_app/models.py:798 eddi_app/models.py:856
+msgid "Profile Image"
+msgstr "Profilbild"
+
+#: eddi_app/models.py:801
+msgid "Gender"
+msgstr "Kön"
+
+#: eddi_app/models.py:802
+msgid "location"
+msgstr "plats"
+
+#: eddi_app/models.py:803
+msgid "Date of Birth"
+msgstr "Födelsedatum"
+
+#: eddi_app/models.py:804
+msgid "Personal Number"
+msgstr "Personligt nummer"
+
+#: eddi_app/models.py:808
+msgid "Highest Level of Education"
+msgstr "Högsta utbildningsnivå"
+
+#: eddi_app/models.py:809
+msgid "University Name"
+msgstr "Universitetets namn"
+
+#: eddi_app/models.py:810
+msgid "Highest Degree"
+msgstr "Högsta grad"
+
+#: eddi_app/models.py:811
+msgid "Educational Area"
+msgstr "Utbildningsområde"
+
+#: eddi_app/models.py:812
+msgid "Other Relavant Education"
+msgstr "Annan relevant utbildning"
+
+#: eddi_app/models.py:813
+msgid "Diplomas and Certificates"
+msgstr "Diplom och certifikat"
+
+#: eddi_app/models.py:816
+msgid "Current Professional Role"
+msgstr "Nuvarande yrkesroll"
+
+#: eddi_app/models.py:817
+msgid "Additional Role"
+msgstr "Ytterligare roll"
+
+#: eddi_app/models.py:818
+msgid "Extra Curricular You Want"
+msgstr "Extra läroplan du vill ha"
+
+#: eddi_app/models.py:819
+msgid "Extra Curricular Competence You Have"
+msgstr "Extra Curricular kompetens du har"
+
+#: eddi_app/models.py:820
+msgid "Core Responsibilities"
+msgstr "Kärnansvar"
+
+#: eddi_app/models.py:821
+msgid "Level Of Role"
+msgstr "Rollnivå"
+
+#: eddi_app/models.py:822
+msgid "Future Professional Role"
+msgstr "Framtida yrkesroll"
+
+#: eddi_app/models.py:825
+msgid "Course Categories"
+msgstr "Kurskategorier"
+
+#: eddi_app/models.py:826
+msgid "User Interests"
+msgstr "Användarintressen"
+
+#: eddi_app/models.py:827
+msgid "Area of Interest"
+msgstr "Intresseområde"
+
+#: eddi_app/models.py:828
+msgid "agree ads terms"
+msgstr "godkänn annonsvillkoren"
+
+#: eddi_app/models.py:835
+msgid "User Eddi Profile"
+msgstr "Användar Eddi-profil"
+
+#: eddi_app/models.py:844
+msgid "user"
+msgstr "användare"
+
+#: eddi_app/models.py:845
+msgid "course_name"
+msgstr "Kursnamn"
+
+#: eddi_app/models.py:846
+msgid "Star"
+msgstr "Stjärna"
+
+#: eddi_app/models.py:847
+msgid "Comment"
+msgstr "Kommentar"
+
+#: eddi_app/models.py:851
+msgid "Course Rating Table"
+msgstr "Kursens betygstabell"
+
+#: eddi_app/models.py:858 eddi_app/models.py:971
+msgid "Location"
+msgstr "Plats"
+
+#: eddi_app/models.py:863
+msgid "User Personal Profile"
+msgstr "Användarens personliga profil"
+
+#: eddi_app/models.py:868
+msgid "Supplier Name"
+msgstr "Leverantörsnamn"
+
+#: eddi_app/models.py:869
+msgid "Account Number"
+msgstr "Kontonummer"
+
+#: eddi_app/models.py:870
+msgid "Account Holder Name"
+msgstr "Kontoinnehavarens namn"
+
+#: eddi_app/models.py:871
+msgid "IFSC Code"
+msgstr "IFSC-kod"
+
+#: eddi_app/models.py:874
+msgid "About Me"
+msgstr "Om mig"
+
+#: eddi_app/models.py:875
+msgid "Supplier Image"
+msgstr "Leverantörsbild"
+
+#: eddi_app/models.py:884 eddi_app/models.py:1086
+msgid "Supplier Profile"
+msgstr "Leverantörsprofil"
+
+#: eddi_app/models.py:888
+msgid "Course name"
+msgstr "Kursnamn"
+
+#: eddi_app/models.py:890 eddi_app/models.py:991
+msgid "Card Type"
+msgstr "Kort typ"
+
+#: eddi_app/models.py:891 eddi_app/models.py:992
+msgid "Amount"
+msgstr "Belopp"
+
+#: eddi_app/models.py:892 eddi_app/models.py:993
+msgid "Payment Created Date Time"
+msgstr "Betalning Skapat Datum Tid"
+
+#: eddi_app/models.py:893 eddi_app/models.py:994
+msgid "Payment Status"
+msgstr "Betalningsstatus"
+
+#: eddi_app/models.py:896
+msgid "User Payment Detail"
+msgstr "Användarbetalningsinformation"
+
+#: eddi_app/models.py:901
+msgid "is_favourite"
+msgstr "är_favorit"
+
+#: eddi_app/models.py:902 eddi_app/models.py:917
+msgid "Favourite Course Created Date Time"
+msgstr "Favoritkurs skapad Datum Tid"
+
+#: eddi_app/models.py:908
+msgid "Favourite Course"
+msgstr "Favoritbana"
+
+#: eddi_app/models.py:914
+msgid "supplier email"
+msgstr "leverantörens e-post"
+
+#: eddi_app/models.py:915 eddi_app/models.py:1006
+msgid "Payment Detail"
+msgstr "Betalningsdetaljer"
+
+#: eddi_app/models.py:916 eddi_app/models.py:1007 eddi_app/models.py:1087
+msgid "User Profile"
+msgstr "Användarprofil"
+
+#: eddi_app/models.py:924
+msgid "Course Enroll"
+msgstr "Kursregistrering"
+
+#: eddi_app/models.py:955
+msgid "Event Image"
+msgstr "Händelsebild"
+
+#: eddi_app/models.py:956
+msgid "Event Choose Type"
+msgstr "Händelse Välj typ"
+
+#: eddi_app/models.py:957
+msgid "Publish on"
+msgstr "Publicera på"
+
+#: eddi_app/models.py:958 eddi_app/models.py:989 eddi_app/models.py:1130
+msgid "Event Name"
+msgstr "Event namn"
+
+#: eddi_app/models.py:959
+msgid "Event Category"
+msgstr "Händelsekategori"
+
+#: eddi_app/models.py:960
+msgid "Event Banner Link"
+msgstr "Evenemangsbannerlänk"
+
+#: eddi_app/models.py:961
+msgid "Event Start Date"
+msgstr "Eventets startdatum"
+
+#: eddi_app/models.py:962
+msgid "Event Start Time"
+msgstr "Eventets starttid"
+
+#: eddi_app/models.py:963
+msgid "Fees Type"
+msgstr "Typ av avgifter"
+
+#: eddi_app/models.py:964
+msgid "Event Type"
+msgstr "Event typ"
+
+#: eddi_app/models.py:965
+msgid "Event Price"
+msgstr "Evenemangspris"
+
+#: eddi_app/models.py:969
+msgid "Event Small Description"
+msgstr "Händelse liten beskrivning"
+
+#: eddi_app/models.py:970
+msgid "Event Description"
+msgstr "Händelsebeskrivning"
+
+#: eddi_app/models.py:972
+msgid "Organizer"
+msgstr "Arrangör"
+
+#: eddi_app/models.py:973
+msgid "Course Subscriber"
+msgstr "Kursabonnent"
+
+#: eddi_app/models.py:974
+msgid "is_featured"
+msgstr "is_featured"
+
+#: eddi_app/models.py:976
+msgid "EventAd Created Date Time"
+msgstr "EventAd skapad Datum Tid"
+
+#: eddi_app/models.py:981
+msgid "EventAd Table"
+msgstr "EventAd-tabell"
+
+#: eddi_app/models.py:1001
+msgid "Event Ad Payment Detail"
+msgstr "Betalningsinformation för händelseannons"
+
+#: eddi_app/models.py:1004
+msgid "Event name"
+msgstr "Event namn"
+
+#: eddi_app/models.py:1005 eddi_app/models.py:1144
+msgid "User Email"
+msgstr "Användarens e-post"
+
+#: eddi_app/models.py:1014
+msgid "Event Ad Enroll"
+msgstr "Registrera dig för eventannons"
+
+#: eddi_app/models.py:1019 eddi_app/models.py:1061
+msgid "Video Files"
+msgstr "Videofiler"
+
+#: eddi_app/models.py:1020
+msgid "Actual Video Duration"
+msgstr "Faktisk videolängd"
+
+#: eddi_app/models.py:1021 eddi_app/models.py:1033 eddi_app/models.py:1065
+#: eddi_app/models.py:1090 eddi_app/models.py:1116 eddi_app/models.py:1131
+#: eddi_app/models.py:1148
+msgid "created_date_time"
+msgstr "skapad_datum_tid"
+
+#: eddi_app/models.py:1027
+msgid "Material Video Material"
+msgstr "Material Video Material"
+
+#: eddi_app/models.py:1031 eddi_app/models.py:1063
+msgid "Document Files"
+msgstr "Dokumentfiler"
+
+#: eddi_app/models.py:1032
+msgid "File Size"
+msgstr "Filstorlek"
+
+#: eddi_app/models.py:1039
+msgid "Material Document Material"
+msgstr "Material Dokument Material"
+
+#: eddi_app/models.py:1043
+msgid "Email"
+msgstr "E-post"
+
+#: eddi_app/models.py:1044
+msgid "Video"
+msgstr "Video"
+
+#: eddi_app/models.py:1045
+msgid "Document"
+msgstr "Dokumentera"
+
+#: eddi_app/models.py:1046
+msgid "is_complete"
+msgstr "är komplett"
+
+#: eddi_app/models.py:1047
+msgid "Duration"
+msgstr "Varaktighet"
+
+#: eddi_app/models.py:1053
+msgid "Course Material Status"
+msgstr "Kursmaterialstatus"
+
+#: eddi_app/models.py:1059
+msgid "Course"
+msgstr "Kurs"
+
+#: eddi_app/models.py:1060
+msgid "Video Title"
+msgstr "Videotitel"
+
+#: eddi_app/models.py:1062
+msgid "File Title"
+msgstr "Filens titel"
+
+#: eddi_app/models.py:1072
+msgid "Course Material"
+msgstr "Kursmaterial"
+
+#: eddi_app/models.py:1082
+msgid "Recruitment File"
+msgstr "Rekryteringsfil"
+
+#: eddi_app/models.py:1083
+msgid "RecruitmentAd Title"
+msgstr "Rekryteringannonstitel"
+
+#: eddi_app/models.py:1084
+msgid "RecruitmentAd Description"
+msgstr "RekryteringAnnonsbeskrivning"
+
+#: eddi_app/models.py:1085
+msgid "RecruitmentAd Banner Link"
+msgstr "RecruitmentAd Banner Link"
+
+#: eddi_app/models.py:1088
+msgid "RecruitmentAd Expiry Date"
+msgstr "Rekryteringsannons utgångsdatum"
+
+#: eddi_app/models.py:1089
+msgid "Subscriber Count"
+msgstr "Antal prenumeranter"
+
+#: eddi_app/models.py:1092
+msgid "Approval Status"
+msgstr "godkännandestatus"
+
+#: eddi_app/models.py:1097
+msgid "Recruitment Ad"
+msgstr "Rekryteringsannons"
+
+#: eddi_app/models.py:1111 eddi_app/models.py:1126
+msgid "Invoice Number"
+msgstr "Fakturanummer"
+
+#: eddi_app/models.py:1112 eddi_app/models.py:1127
+msgid "User Address"
+msgstr "Användaradress"
+
+#: eddi_app/models.py:1113 eddi_app/models.py:1128
+msgid "Vat"
+msgstr "moms"
+
+#: eddi_app/models.py:1122
+msgid "Invoice Data"
+msgstr "Fakturauppgifter"
+
+#: eddi_app/models.py:1137
+msgid "Invoice Data Event"
+msgstr "Fakturadatahändelse"
+
+#: eddi_app/models.py:1141
+msgid "sender"
+msgstr "avsändare"
+
+#: eddi_app/models.py:1142
+msgid "receiver"
+msgstr "mottagare"
+
+#: eddi_app/models.py:1147
+msgid "is_clear"
+msgstr "är klart"
+
+#: eddi_app/models.py:1151
+msgid "Notification Table"
+msgstr "Aviseringstabell"
+
+#: eddi_backend/settings.py:265
+msgid "Swedish"
+msgstr "svenska"
+
+#: eddi_backend/settings.py:266
+msgid "English"
+msgstr "engelsk"

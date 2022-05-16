@@ -25,6 +25,7 @@ from django.conf.urls.i18n import i18n_patterns
 urlpatterns = [
    
     path('',include('eddi_app.urls')),
+    path('rosetta/',include('rosetta.urls')),
     path("i18n/", include("django.conf.urls.i18n")),
     path('openapi/', get_schema_view(
         title="Eddi Api Service",
@@ -33,7 +34,7 @@ urlpatterns = [
     path('docs/7e3f7124d67d0b6471842d311388b818/', TemplateView.as_view(
         template_name='documentation.html',
         extra_context={'schema_url':'openapi-schema'}
-    ), name ='swagger-ui'),
+    ), name ='swagger-ui'), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns +=staticfiles_urlpatterns()

@@ -174,18 +174,20 @@ class SupplierProfileSerializer(serializers.ModelSerializer):
         depth = 1
         fields = '__all__'
 
-class CourseMaterialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CourseMaterial
-        depth = 2
-        fields = '__all__'
-
 
 class CourseMaterialStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseMaterialStatus
-        depth = 2
-        fields = '__all__'
+        fields = ['user_email','id']
+
+class CourseMaterialSerializer(serializers.ModelSerializer):
+    coursestatus = CourseMaterialStatusSerializer(many=True)
+
+    class Meta:
+        model = CourseMaterial
+        fields = ['uuid','coursestatus']
+
+
 
 
 class FavouriteCourseSerializer(serializers.ModelSerializer):
