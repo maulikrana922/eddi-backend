@@ -1019,6 +1019,7 @@ class CourseMaterialUpload(APIView):
                 course_material_data = None
             try:
                 course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
+                print(course_material_status, "statusssss")
                 for i in course_material_status:
                     print(i.is_complete)
             except Exception as ex:
@@ -1267,38 +1268,71 @@ class MyProgressView(APIView):
         datee = datetime.datetime.now()
 
         if time_period == WEEKLY:
-            week = datee.strftime("%V")
+            # week = datee.strftime("%V")
             today = datetime.datetime.now()
-            week_list = {}
-
-
+            # week_list = {}
             try:
-                enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
-            except Exception as ex:
-                enroll_data = None
-            try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
-                print(course_data, "course_dataaa")
-            except:
-                course_data = None
-
-
-
-
-            try:
+                l = []
                 for i in range(0, 7):
+                    # week_list = {}
                     past = today - timedelta(days = i)
-                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
-                    var = list(data)
-                    # final = float(sum(var))
-                    final = "{:.2f}".format(sum(var))
-                    if var == "":
-                        final = 0.0
-                    week_list[past.strftime("%A")] = final
-                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                # total_earning = float(sum(lis
-                
-                total_earning = "{:.2f}".format(sum(list(data)))
-                return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
+                    # print(past, "pastttt")
+                    try:
+                        data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__date":past}).values_list("is_complete", flat=True)
+                        l.append(data)
+                        # print(data, "datatatatatata")
+                    except Exception as ex:
+                        # print(ex,"exexexe")
+                        return Response({STATUS: ERROR, DATA: "Error in getting useremail"}, status=status.HTTP_400_BAD_REQUEST)
+                # print(l, "lllll")
+                is_complete_count = 0
+                is_ongoing_count = 0
+                for i in l:
+                    # print(i, "i")
+                    for j in i:
+                        # print(j,"j")
+                        if j == True:
+                            is_complete_count += 1
+                        else:
+                            is_ongoing_count += 1
+                # print(is_complete_count)
+                # print(is_ongoing_count)
+                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
             except Exception as ex: 
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif time_period == MONTHLY:
+            month = datee.strftime("%m")
+            # print(month,"monthhh")
+            is_complete_count = 0
+            is_ongoing_count = 0
+            try:
+                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__month":month}).values_list("is_complete", flat=True)
+                # print(data,"datatatat")
+                for i in data:
+                    if i == True:
+                        is_complete_count += 1
+                    else:
+                        is_ongoing_count += 1
+                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif time_period == YEARLY:
+            year = datee.strftime("%Y")
+            # print(year)
+            is_complete_count = 0
+            is_ongoing_count = 0
+            try:
+                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__year":year}).values_list("is_complete", flat=True)
+                # print(data,"datatatat")
+                for i in data:
+                    if i == True:
+                        is_complete_count += 1
+                    else:
+                        is_ongoing_count += 1
+                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
