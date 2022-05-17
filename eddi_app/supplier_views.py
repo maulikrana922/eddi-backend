@@ -1026,7 +1026,7 @@ class CourseMaterialUpload(APIView):
             if serializer := CourseMaterialSerializer(course_material_data):
                 print(serializer.data, "datatatat")
                 if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "status":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

@@ -1054,6 +1054,7 @@ class CourseMaterialStatus(models.Model):
     document_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Document'))
     is_complete = models.BooleanField(default=False,verbose_name=_('is_complete'))
     duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Duration'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     def __str__(self):
         return str(self.video_id)
