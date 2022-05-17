@@ -966,7 +966,10 @@ class CourseMaterialUpload(APIView):
             video_files = request.FILES.getlist(VIDEO_FILES,None)
             file_title = request.POST.get(FILE_TITLE,None)
             document_files = request.FILES.getlist(DOCUMENT_FILES,None)
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            try:
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            except Exception as ex:
+                 return Response({STATUS: ERROR, DATA: "Course details object not matched with uuid"}, status=status.HTTP_400_BAD_REQUEST)
             print(video_files, "videooooooooo")
             print(document_files, "documenttttt")
             print(request.FILES, "filesssssss")
@@ -1014,16 +1017,16 @@ class CourseMaterialUpload(APIView):
             except Exception as ex:
                 print(ex,"exexexe")
                 course_material_data = None
-            # try:
-            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
-            #     for i in course_material_status:
-            #         print(i.is_complete)
-            # except Exception as ex:
-            #     course_material_status = None
+            try:
+                course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
+                for i in course_material_status:
+                    print(i.is_complete)
+            except Exception as ex:
+                course_material_status = None
             if serializer := CourseMaterialSerializer(course_material_data):
                 print(serializer.data, "datatatat")
-                # if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
-                    # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
