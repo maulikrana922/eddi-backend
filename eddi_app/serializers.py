@@ -179,7 +179,8 @@ class CourseMaterialStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseMaterialStatus
         depth = 2
-        fields = ['user_email','id']
+        # fields = ['user_email','id']
+        fields = '__all__'
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
     # coursestatus = CourseMaterialStatusSerializer(many=True)
