@@ -1262,7 +1262,7 @@ class SupplierProfileView(APIView):
 
 
 class MyProgressView(APIView):
-    def get(self, request, uuid=None):
+    def post(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         time_period = request.POST.get(TIME_PERIOD)
         datee = datetime.datetime.now()
