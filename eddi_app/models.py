@@ -366,6 +366,7 @@ class SupplierOrganizationProfile(models.Model):
         return self.supplier_email
     
 
+
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'))

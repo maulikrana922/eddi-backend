@@ -976,6 +976,7 @@ class CourseMaterialUpload(APIView):
                 "file_title"  : file_title,
                 "course_id" : course_data.id
                 }
+            print(reccord_map, "recordddddd")
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
             print("saveddddddddddddddddddddddd")
             if request.FILES.getlist(DOCUMENT_FILES):
@@ -1011,6 +1012,7 @@ class CourseMaterialUpload(APIView):
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
                 print("course Data",course_material_data)
             except Exception as ex:
+                print(ex,"exexexe")
                 course_material_data = None
             # try:
             #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
@@ -1041,7 +1043,7 @@ class CourseMaterialUpload(APIView):
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
         document_files_old = request.POST.getlist("document_files_old",None)
         # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-        print(document_files_old, "oldddddocu")
+        # print(document_files_old, "oldddddocu")
         reccord_map = {}
         reccord_map = {
             "video_title" : video_title,      
@@ -1051,107 +1053,68 @@ class CourseMaterialUpload(APIView):
         for key, value in reccord_map.items():
             setattr(course_material_data, key, value)
         course_material_data.save()
-        print("PUTTTTTTTTTTTTT")
-        # data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
+        # print("PUTTTTTTTTTTTTT")
         print(request.FILES.getlist(DOCUMENT_FILES), "filesssssss")
-        if request.FILES.getlist(DOCUMENT_FILES):
-            print("inside doccccc")
-            try:
-                old_docs = course_material_data.document_files.all()
-                print(old_docs, "docssss")
-                new = list(old_docs)
-                oldd = [i.document_file.url for i in new]
-                print(oldd,"OOOOOOOOOOOOOOOOOOOOOOO")
-                print(new, "newewewewe")
-                for i in document_files_old:
-                    if i in oldd:
-                        print("OKOK") 
-                        oldd.remove(i)
-                print(oldd,"oldddd")
-                print(document_files_old)
-                        
-                for k in oldd:
-                    # print(k,"kkk")
-                    try:
-                        getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
-                        print("deleted")
-                    except Exception as ex:
-                        print(ex, "exexexexe")
-                    # getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file.url":k}).delete()
-
-                    # else:
-                    #     print("inside else")
-                    #     try:
-                    #         getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file.url":k}).delete()
-                    #         print("deleted")
-                    #     except Exception as ex:
-                    #         print(ex, "exexexexe")
-
+        # print("inside doccccc")
+        try:
+            old_docs = course_material_data.document_files.all()
+            # print(old_docs, "docssss")
+            new = list(old_docs)
+            oldd = [i.document_file.url for i in new]
+            # print(oldd,"OOOOOOOOOOOOOOOOOOOOOOO")
+            # print(new, "newewewewe")
+            for i in document_files_old:
+                if i in oldd:
+                    # print("OKOK") 
+                    oldd.remove(i)
+            # print(oldd,"oldddd")
+            # print(document_files_old)
+                    
+            for k in oldd:
+                try:
+                    getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
+                    print("deleted")
+                except Exception as ex:
+                    print(ex, "exexexexe")
+            if document_files:
                 for i in document_files:
                     print("inside iiiii")
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                     print(data1, "data11111")
                     course_material_data.document_files.add(data1[0].id)
+               
+        except Exception as ex:
+            print(ex, "exexexexe")
+            return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
-                    # if var == False:
-
-                    
-                    # for i in old_docs:
-                    #     # print(o,"KKKKKKK")
-                    #     print(str(i),"iiiiiiiiiiiiiiiiiiiiii")
-                    #     if str(o) == str(i):
-                    #         print("okok")
-                    # print(k[7:], "kkkk")
-                # for i in old_docs:
-                #     print(i, "iii")
-                #         n = i[7:]
-                #         print(n, "nnnn")
-                #         # print(j, "jjjj")
-                #         try:
-                #             old = getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":j})
-                #         except Exception as ex:
-                #             # pass
-                #             getattr(models,"MaterialDocumentMaterial").objects.get(**{"uuid":i.uuid}).delete()
-                #     print("Done")
-                # course_material_data.document_files.clear()
-                # print("clearrrrr")
-                # for i in document_files:
-                #     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                #     print(data1, "data11111")
-                #     course_material_data.document_files.add(data1[0].id)
-            except Exception as ex:
-                print(ex, "exexexexe")
-                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            old_videos = course_material_data.video_files.all()
+            new1 = list(old_videos)
+            oldd1 = [i.video_file.url for i in new1]
+            # print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
+            # print(new1, "newewewewe")
+            for i in video_files_old:
+                if i in oldd1:
+                    # print("OKOK") 
+                    oldd1.remove(i)
+            # print(oldd1,"oldddd")
+            print(video_files_old)
+            for j in oldd1:
+                try:
+                    getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
+                    print("deleted")
+                except Exception as ex:
+                    print(ex,"exexexexe")
+        
+            for p in video_files:
+                # print("inside pppp")
+                data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
+                # print(data3, "data3333")
+                course_material_data.video_files.add(data3[0].id)
                 
-        if request.FILES.getlist("video_files"):
-            try:
-                old_videos = course_material_data.video_files.all()
-                new1 = list(old_videos)
-                oldd1 = [i.video_file.url for i in new1]
-                print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
-                print(new1, "newewewewe")
-                for i in video_files_old:
-                    if i in oldd1:
-                        print("OKOK") 
-                        oldd1.remove(i)
-                print(oldd1,"oldddd")
-                print(video_files_old)
-                for j in oldd1:
-                    try:
-                        getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
-                        print("deleted")
-                    except Exception as ex:
-                        print(ex,"exexexexe")
-            
-                for p in video_files:
-                    print("inside pppp")
-                    data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
-                    print(data3, "data3333")
-                    course_material_data.video_files.add(data3[0].id)
-                    
-            except Exception as ex:
-                print(ex, "exexexexe")
-                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
+        except Exception as ex:
+            print(ex, "exexexexe")
+            return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Material Edited successfully"}, status=status.HTTP_200_OK)
 
        
@@ -1291,3 +1254,48 @@ class SupplierProfileView(APIView):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class MyProgressView(APIView):
+    def get(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)
+        time_period = request.POST.get(TIME_PERIOD)
+        datee = datetime.datetime.now()
+
+        if time_period == WEEKLY:
+            week = datee.strftime("%V")
+            today = datetime.datetime.now()
+            week_list = {}
+
+
+            try:
+                enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+            except Exception as ex:
+                enroll_data = None
+            try:
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+                print(course_data, "course_dataaa")
+            except:
+                course_data = None
+
+
+
+
+            try:
+                for i in range(0, 7):
+                    past = today - timedelta(days = i)
+                    data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
+                    var = list(data)
+                    # final = float(sum(var))
+                    final = "{:.2f}".format(sum(var))
+                    if var == "":
+                        final = 0.0
+                    week_list[past.strftime("%A")] = final
+                data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
+                # total_earning = float(sum(lis
+                
+                total_earning = "{:.2f}".format(sum(list(data)))
+                return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
+            except Exception as ex: 
+                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)

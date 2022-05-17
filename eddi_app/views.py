@@ -1845,13 +1845,13 @@ class CourseEnrollView(APIView):
             except Exception as ex:
                 enroll_data = None
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
                 print(course_data, "course_dataaa")
             except:
                 course_data = None
 
             try:
-                course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True)
+                course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
                 print(course_data_uuid, "course_dataaa_uuiddddd")
                 new_dict = OrderedDict()
                 for i in list(course_data_uuid): 
@@ -2118,31 +2118,4 @@ class CourseRating(APIView):
 
 
 
-class MyProgressView(APIView):
-    pass
-    # def get(self, request, uuid=None):
-    #     email_id = get_user_email_by_token(request)
-    #     time_period = request.POST.get(TIME_PERIOD)
-    #     datee = datetime.datetime.now()
-
-    #     if time_period == WEEKLY:
-    #         week = datee.strftime("%V")
-    #         today = datetime.datetime.now()
-    #         week_list = {}
-    #         try:
-    #             for i in range(0, 7):
-    #                 past = today - timedelta(days = i)
-    #                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
-    #                 var = list(data)
-    #                 # final = float(sum(var))
-    #                 final = "{:.2f}".format(sum(var))
-    #                 if var == "":
-    #                     final = 0.0
-    #                 week_list[past.strftime("%A")] = final
-    #             data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-    #             # total_earning = float(sum(list(data)))
-    #             total_earning = "{:.2f}".format(sum(list(data)))
-    #             return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
-    #         except Exception as ex: 
-    #             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
