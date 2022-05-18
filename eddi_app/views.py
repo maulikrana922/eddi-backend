@@ -783,7 +783,7 @@ class ResetPasswordView(APIView):
         try:
             if data:
                 setattr(data,PASSWORD,make_password(password))
-                setattr(data,IS_FIRST_TIME_LOGIN,False)
+                # setattr(data,IS_FIRST_TIME_LOGIN,False)
 
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
                 setattr(data,MODIFIED_BY,'admin')
@@ -2024,6 +2024,16 @@ class CourseMaterialStatus(APIView):
         return Response({STATUS: SUCCESS, DATA: "Material Status Added Successfully"}, status=status.HTTP_200_OK)
 
 
+class Whats_On_Eddi(APIView):
+    def get(self, request):
+        data = getattr(models,"WhatsonEddiCMS").objects.all()
+        print(data,"datatat")
+        if serializer := WhatsOnEddiSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class CourseRating(APIView):
     def post(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
@@ -2039,11 +2049,12 @@ class CourseRating(APIView):
             data = None
         if data is None:
             try:
+                star1 = request.POST.get("star", None)
                 record_map = {}
                 record_map = {
                     "user" : user,
                     "course_name" : course,
-                    "star" : request.POST.get("star", None),
+                    "star" : "{:.1f}".format(int(star1)),
                     "comment" : request.POST.get("comment", None)
                 }
 

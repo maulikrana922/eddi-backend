@@ -148,7 +148,10 @@ class GetCategoryDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
             data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{UUID:uuid})
+            course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category_id":data.id})
             if serializer := CategoryDetailsSerializer(data):
+                if serializer1 := CourseDetailsSerializer(course_list, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "course":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -1028,11 +1031,15 @@ class CourseMaterialUpload(APIView):
             document = []
             video = []
             try:
-                course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
-                print("course Data",course_material_data)
-                # all_doc_data = course_material_data.document_files.all()
-                all_video_data = course_material_data.video_files.all()
-                print(all_video_data, "alalalal")
+                try:
+                    course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
+                    print("course Data",course_material_data)
+                    # all_doc_data = course_material_data.document_files.all()
+                    all_video_data = course_material_data.video_files.all()
+                    print(all_video_data, "alalalal")
+                except Exception as ex:
+                    course_material_data = None
+
             # except Exception as ex:
             #     course_material_data = None
             #     print(ex,"exexe")
@@ -1175,7 +1182,7 @@ class SupplierOrganizationProfileview(APIView):
         email_id = get_user_email_by_token(request)
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         try:
             record_map = {
                 SUPPLIER_EMAIL : email_id,
@@ -1195,6 +1202,11 @@ class SupplierOrganizationProfileview(APIView):
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
+                try:
+                    getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).is_first_time_login = False
+                except Exception as ex:
+                    print(ex,"exexe")
+
                 print("savedddd")
             except Exception as ex:
                 print(ex,"exexeex")

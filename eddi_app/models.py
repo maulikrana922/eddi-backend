@@ -221,7 +221,19 @@ class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.CharField(max_length=150,verbose_name=_('Category Name'),blank=True,null=True)
     category_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
+
+    category_overview = models.CharField(max_length=150,verbose_name=_('Category Overview'),blank=True,null=True)
+    key_highlights = models.CharField(max_length=150,verbose_name=_('Key_highlights'),blank=True,null=True)
+    key_highlights_description =  RichTextField(verbose_name = _('Key_highlights_Description'),blank = True)
     color = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Color'))
+    enrollment_process = models.CharField(max_length=150,verbose_name=_('Enrollment_Process'),blank=True,null=True)
+    enrollment_process_description = models.CharField(max_length=2000,verbose_name=_('Enrollment_Process_Description'),blank=True,null=True)
+    step_1_text = models.CharField(max_length=150,verbose_name=_('Step_1_text'),blank=True,null=True)
+    step_1_description = models.CharField(max_length=2000,verbose_name=_('Step_1_Description'),blank=True,null=True)
+    step_2_text = models.CharField(max_length=150,verbose_name=_('Step_2_text'),blank=True,null=True)
+    step_2_description = models.CharField(max_length=2000,verbose_name=_('Step_2_Description'),blank=True,null=True)
+    step_3_text = models.CharField(max_length=150,verbose_name=_('Step_3_text'),blank=True,null=True)
+    step_3_description = models.CharField(max_length=2000,verbose_name=_('Step_3_Description'),blank=True,null=True)
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
@@ -459,6 +471,16 @@ def bulk_email(sender, instance, created, **kwargs):
 
 ################## CMS    ###################################
 
+class WhatsonEddiCMS(models.Model):
+    content = RichTextField(verbose_name = _("Whats'on Eddi"),blank = True)
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+    
+    class Meta:
+        verbose_name = _("Whats'on Eddi CMS")
 
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))

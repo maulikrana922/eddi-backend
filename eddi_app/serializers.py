@@ -49,6 +49,12 @@ class CategoryDetailsSerializer(serializers.ModelSerializer):
         depth = 1
 
         fields = '__all__'
+        
+class WhatsOnEddiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WhatsonEddiCMS
+        fields = '__all__'
+
 
 class HomePageCMSSerializer(serializers.ModelSerializer):
 
