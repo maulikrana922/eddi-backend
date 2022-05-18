@@ -1009,11 +1009,11 @@ class CourseMaterialUpload(APIView):
                 try:
                     for j in video_files:
                         print(j, "jjjj")
-                        video = cv2.VideoCapture(j)
+                        # video = cv2.VideoCapture(j)
 
-                        duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
                         # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                        print(duration, "durationnnnnnn")
+                        # print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
                         # print(data2, "data2222")
 
