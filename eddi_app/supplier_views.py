@@ -369,11 +369,14 @@ class GetCourseDetails(APIView):
 
             try:
                 rating = getattr(models,"CourseRating").objects.filter(**{COURSE_NAME:course_data})
+                print(rating,"ratinggg")
                 l = []
                 for i in rating:
-                    l.append(int(i.star))
+                    print(i.star,"iiii")
+                    l.append(float(i.star))
                 final_rating = "{:.1f}".format(sum(l)/len(l))
             except Exception as ex:
+                print(ex,"exexexe")
                 rating = None
                 final_rating = None
             

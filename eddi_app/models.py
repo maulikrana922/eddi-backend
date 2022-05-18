@@ -874,8 +874,8 @@ class CourseRating(models.Model):
     class Meta:
         verbose_name = _("Course Rating Table")
 
-    def __str__(self):
-        return self.course_name
+    # def __str__(self):
+    #     return self.course_name
     
 
 
