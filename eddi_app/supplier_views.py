@@ -1024,30 +1024,45 @@ class CourseMaterialUpload(APIView):
         print("uuid",uuid)
         response_dict = {}
         if uuid:
+            # try:
+            document = []
+            video = []
             try:
-                document = []
-                video = []
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
                 print("course Data",course_material_data)
                 # all_doc_data = course_material_data.document_files.all()
                 all_video_data = course_material_data.video_files.all()
-                # for i in all_doc_data:
-                #     print(i.uuid,"uuiddddd")
-                #     course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'document_id':i.uuid})
-                #     print(course_material_status, "sttuasasasas")
-                #     document.append(course_material_status)
+                print(all_video_data, "alalalal")
+            # except Exception as ex:
+            #     course_material_data = None
+            #     print(ex,"exexe")
+        
+            # for i in all_doc_data:
+            #     print(i.uuid,"uuiddddd")
+            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'document_id':i.uuid})
+            #     print(course_material_status, "sttuasasasas")
+            #     document.append(course_material_status)
+            # try:
                 for i in all_video_data:
                     print(i.uuid,"uuiddddd")
-                    course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'video_id':i.uuid})
-                    # print(course_material_status, "sttuasasasas")
-                    video.append(course_material_status)
+                    # print(i,"uuiddddd")
+                    try:
+                        course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'video_id':i.uuid})
+                        # print(course_material_status, "sttuasasasas")
+                        video.append(course_material_status)
+                    except Exception as ex:
+                        course_material_status = None
+                        print(ex, "exx")
                 course_material_final_video = getattr(models,"CourseMaterialStatus").objects.filter(**{'video_id__in':video})
-                # print(course_material_final_video, "finalalalal")
-
+            # print(course_material_final_video, "finalalalal")
             except Exception as ex:
-                print(ex,"exexexe")
-                course_material_data = None
-                course_material_final_video = None
+                print(ex,"exx")
+
+            # except Exception as ex:
+                # course_material_data = None
+                # print(ex,"exexexe")
+                # course_material_data = None
+                # course_material_final_video = None
             
             # try:
             #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
@@ -1057,7 +1072,7 @@ class CourseMaterialUpload(APIView):
             # except Exception as ex:
             #     course_material_status = None
             if serializer := CourseMaterialSerializer(course_material_data):
-                print(serializer.data, "datatatat")
+                # print(serializer.data, "datatatat")
                 if serializer1 := CourseMaterialStatusSerializer(course_material_final_video, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "material_status":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
