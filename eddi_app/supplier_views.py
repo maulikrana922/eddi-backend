@@ -1204,7 +1204,7 @@ class SupplierOrganizationProfileview(APIView):
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
                 try:
-                    getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).is_first_time_login = False
+                    getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).is_resetpassword = False
                 except Exception as ex:
                     print(ex,"exexe")
 
