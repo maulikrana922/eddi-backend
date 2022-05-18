@@ -986,14 +986,15 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
-                        video = cv2.VideoCapture(i)
+                        print(i, "iiiii")
+                        # video = cv2.VideoCapture(i)
 
-                        duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
                         # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                        print(duration, "durationnnnnnn")
+                        # print(duration, "durationnnnnnn")
                         # clip = VideoFileClip(str(i))
                         # print(clip.duration, "durararararararararar")
-                        print(i, "iiiii")
+                        # print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
                         print(data1, "data11111")
                         data[0].document_files.add(data1[0].id)
@@ -1003,8 +1004,14 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist("video_files"):
                 try:
                     for j in video_files:
+                        # print(j, "jjjj")
+                        # video = cv2.VideoCapture(j)
+
+                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                        # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                        # print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
-                        print(data2, "data2222")
+                        # print(data2, "data2222")
 
                         data[0].video_files.add(data2[0].id)
                 except Exception as ex:
