@@ -149,6 +149,7 @@ class GetCategoryDetails(APIView):
         if uuid:
             data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{UUID:uuid})
             course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category_id":data.id})
+            print(course_list, "liststst")
             if serializer := CategoryDetailsSerializer(data):
                 if serializer1 := CourseDetailsSerializer(course_list, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "course":serializer1.data}, status=status.HTTP_200_OK)
@@ -1007,12 +1008,12 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist("video_files"):
                 try:
                     for j in video_files:
-                        # print(j, "jjjj")
-                        # video = cv2.VideoCapture(j)
+                        print(j, "jjjj")
+                        video = cv2.VideoCapture(j)
 
-                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                        duration = video.get(cv2.CAP_PROP_POS_MSEC)
                         # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                        # print(duration, "durationnnnnnn")
+                        print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
                         # print(data2, "data2222")
 

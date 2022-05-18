@@ -102,6 +102,7 @@ class UserSignup(models.Model):
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
     is_active = models.BooleanField(default=False, verbose_name=_('is_active'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
+    is_resetpassword = models.BooleanField(default=True, verbose_name=_('is_resetpassword'))
 
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
 

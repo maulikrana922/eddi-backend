@@ -783,7 +783,7 @@ class ResetPasswordView(APIView):
         try:
             if data:
                 setattr(data,PASSWORD,make_password(password))
-                # setattr(data,IS_FIRST_TIME_LOGIN,False)
+                setattr(data,"is_resetpassword",False)
 
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
                 setattr(data,MODIFIED_BY,'admin')
