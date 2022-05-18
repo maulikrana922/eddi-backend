@@ -1348,7 +1348,7 @@ class MyProgressView(APIView):
             try:
                 l = []
                 for i in range(0, 7):
-                    # week_list = {}
+                    week_list = {}
                     past = today - timedelta(days = i)
                     # print(past, "pastttt")
                     try:
