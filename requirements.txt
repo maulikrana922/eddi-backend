@@ -26,3 +26,4 @@ wkhtmltopdf==0.2
 pisa==3.0.33
 moviepy==1.0.3
 django-rosetta==0.9.8 
+opencv-python==4.5.5.64

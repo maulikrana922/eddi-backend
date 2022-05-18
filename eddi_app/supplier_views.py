@@ -27,6 +27,7 @@ from dateutil.relativedelta import *
 from collections import deque
 from moviepy.editor import VideoFileClip
 from itertools import chain
+import cv2
 
 
 @permission_classes([AllowAny])
@@ -985,6 +986,11 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
+                        video = cv2.VideoCapture(i)
+
+                        duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                        # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                        print(duration, "durationnnnnnn")
                         # clip = VideoFileClip(str(i))
                         # print(clip.duration, "durararararararararar")
                         print(i, "iiiii")
@@ -1012,21 +1018,40 @@ class CourseMaterialUpload(APIView):
         response_dict = {}
         if uuid:
             try:
+                document = []
+                video = []
                 course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
                 print("course Data",course_material_data)
+                # all_doc_data = course_material_data.document_files.all()
+                all_video_data = course_material_data.video_files.all()
+                # for i in all_doc_data:
+                #     print(i.uuid,"uuiddddd")
+                #     course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'document_id':i.uuid})
+                #     print(course_material_status, "sttuasasasas")
+                #     document.append(course_material_status)
+                for i in all_video_data:
+                    print(i.uuid,"uuiddddd")
+                    course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'video_id':i.uuid})
+                    # print(course_material_status, "sttuasasasas")
+                    video.append(course_material_status)
+                course_material_final_video = getattr(models,"CourseMaterialStatus").objects.filter(**{'video_id__in':video})
+                # print(course_material_final_video, "finalalalal")
+
             except Exception as ex:
                 print(ex,"exexexe")
                 course_material_data = None
-            try:
-                course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
-                print(course_material_status, "statusssss")
-                for i in course_material_status:
-                    print(i.is_complete)
-            except Exception as ex:
-                course_material_status = None
+                course_material_final_video = None
+            
+            # try:
+            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
+            #     print(course_material_status, "statusssss")
+            #     for i in course_material_status:
+            #         print(i.is_complete)
+            # except Exception as ex:
+            #     course_material_status = None
             if serializer := CourseMaterialSerializer(course_material_data):
                 print(serializer.data, "datatatat")
-                if serializer1 := CourseMaterialStatusSerializer(course_material_status, many=True):
+                if serializer1 := CourseMaterialStatusSerializer(course_material_final_video, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "material_status":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -1267,10 +1292,59 @@ class MyProgressView(APIView):
         time_period = request.POST.get(TIME_PERIOD)
         datee = datetime.datetime.now()
 
+
         if time_period == WEEKLY:
             # week = datee.strftime("%V")
             today = datetime.datetime.now()
             # week_list = {}
+            # try:
+            #     enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+            # except Exception as ex:
+            #     enroll_data = None
+            # try:
+            #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
+            #     print(course_data, "course_dataaa")
+            # except:
+            #     course_data = None
+
+            # try:
+            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+            #     print(course_data_uuid, "course_dataaa_uuiddddd")
+            #     for i in list(course_data_uuid): 
+            #         # new_dict[f"course_{i}"] = i
+            #         # print(i, "iiiiiiiiiiiiiiiiii")
+            #         try:
+            #             var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+            #         except Exception as ex:
+            #             var = None
+            #             print("hereeeeeeeeeeeeeeee")
+            #             # new_dict[f"course_{i}"] = "Ongoing"
+            #         all_video = var.video_files.all()
+            #         print(all_video, "videoooo")
+            #         complete = 0
+            #         ongoing = 0
+            #         l = []
+            #         for i in all_video:
+            #             print(i.uuid, "iiiiiii")
+            #             for j in range(0, 7):
+            #         # week_list = {}
+            #                 past = today - timedelta(days = j)
+            #                 try:
+            #                     # data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid,"created_date_time__date":past}).values_list("is_complete", flat=True)
+            #                     data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid, "user_email":email_id,"created_date_time__date":past})
+            #                     l.append(data.is_complete)
+            #                 except Exception as ex:
+            #                     print(ex, "ex")
+            #             print(l, "llllll")
+            #             if False in l or l == []:
+            #                 ongoing += 1
+            #             else:
+            #                 complete += 1
+            #     print(complete,"comppp")
+            #     print(ongoing,"ongoing")
+                
+            # except Exception as ex:
+            #     print(ex,"exexexe")
             try:
                 l = []
                 for i in range(0, 7):
