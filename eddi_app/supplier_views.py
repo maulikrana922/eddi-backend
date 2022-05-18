@@ -1206,6 +1206,7 @@ class SupplierOrganizationProfileview(APIView):
                 try:
                     data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     data1.is_resetpassword = False
+                    data1.is_first_time_login = False
                     data1.save()
                 except Exception as ex:
                     print(ex,"exexe")
