@@ -25,7 +25,7 @@ from datetime import timedelta
 from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
-from moviepy.editor import VideoFileClip
+from moviepy.editor import *
 from itertools import chain
 import cv2
 
@@ -959,7 +959,24 @@ class SupplierDashboard_earningGraphView(APIView):
         return Response({STATUS: "Invalid time_period added", DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# def get_video_duration(video_file):
+#     cmd = [
+#         "ffmpeg",
+#         "-i", str(video_file),
+#         "-f", "null", "-"
+#     ]
 
+#     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+#     result_all = ffmpeg_duration_template.findall(output.decode())
+#     if result_all:
+#         result = result_all[-1]
+#         duration = float(result[0]) * 60 * 60 \
+#                    + float(result[1]) * 60 \
+#                    + float(result[2]) \
+#                    + float(result[3]) * (10 ** -len(result[3]))
+#     else:
+#         duration = -1
+#     return duration 
 
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
@@ -1012,10 +1029,17 @@ class CourseMaterialUpload(APIView):
                 try:
                     for j in video_files:
                         print(j, "jjjj")
+                        a = get_video_duration(j)
+                        print(a, "aaaa")
                         # video = cv2.VideoCapture(j)
 
                         # duration = video.get(cv2.CAP_PROP_POS_MSEC)
                         # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                        # clip = VideoFileClip(j)
+                        clip = VideoFileClip("Screencast from 13-04-22 11-49-16 PM IST.mp4")
+                        print(clip.duration, "durararararararararar")
+                        print(str(clip.duration), "durararararararararar")
+                        # print(i, "iiiii")
                         # print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
                         # print(data2, "data2222")
@@ -1204,6 +1228,8 @@ class SupplierOrganizationProfileview(APIView):
                 ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,None),
             }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[IS_APPROVED_ID] = 2
+            record_map[STATUS_ID] = 2 
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
                 try:
@@ -1221,7 +1247,7 @@ class SupplierOrganizationProfileview(APIView):
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: SUCCESS, DATA: "Profile Created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Profile Created Successfully Your Profile Is Under Review"}, status=status.HTTP_200_OK)
 
 
     def get(self, request):
@@ -1239,6 +1265,34 @@ class SupplierOrganizationProfileview(APIView):
     
     def put(self, request):
         email_id = get_user_email_by_token(request)
+        supplier_email = request.POST.get("supplier_email")
+        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+            data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
+            record_map1 = {}
+            if request.POST.get(STATUS):
+                if request.POST.get(STATUS) == "Active":
+                    record_map1[STATUS_ID] = 1
+                else:
+                    record_map1[STATUS_ID] = 2
+            else:
+                record_map1[STATUS] = data1.status
+
+            if request.POST.get(APPROVAL_STATUS):
+                if request.POST.get(APPROVAL_STATUS) == "Approved":
+                    record_map1[IS_APPROVED_ID] = 1
+                elif request.POST.get(APPROVAL_STATUS) == "Pending":
+                    record_map1[IS_APPROVED_ID] = 2
+                else:
+                    record_map1[IS_APPROVED_ID] = 3
+                    if request.POST.get("reject_reason"):
+                        record_map1["reject_reason"] = request.POST.get("reject_reason")
+
+            else:
+                record_map1[IS_APPROVED] = data1.is_approved
+            for key,value in record_map1.items():
+                setattr(data1,key,value)
+            data1.save()
+
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:

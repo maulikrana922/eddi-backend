@@ -703,6 +703,36 @@ class UserLoginView(APIView):
         # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+        record_map = {}
+        record_map = {
+            FIRST_NAME: request.POST.get(FIRST_NAME,None),
+            LAST_NAME: request.POST.get(LAST_NAME,None),
+            EMAIL_ID: request.POST.get(EMAIL_ID,None),            
+            "is_login_from": request.POST.get("is_login_from",None)
+        }
+
+        if record_map:
+            try:
+                d = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
+                if d.is_login_from == "google":
+                    try:
+                        user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        if user_profile:
+                            user_profile = True
+                    except Exception as ex:
+                        user_profile = False
+                    token = NonBuiltInUserToken.objects.create(user_id = d.id)
+                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+
+        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+             if data1.is_approved == "Rejected":
+                return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            #  elif data1.is_approved == "Pending":
+            #     return Response({STATUS: ERROR, DATA: "Your Profile is Rejected"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
@@ -718,7 +748,7 @@ class UserLoginView(APIView):
         # serializer = UserSignupSerializer(data)
         # if serializer and data:
         if data is not None:
-            if data.is_login_from:
+            if data.is_login_from == "google":
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)

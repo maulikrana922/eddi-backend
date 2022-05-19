@@ -359,6 +359,7 @@ class SupplierOrganizationProfile(models.Model):
     contact_person = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Contact Person at Eddi"))
     linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("LinkedIn Profile"))
     facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Facebook Profile"))
+    reject_reason = models.CharField(max_length=2000,blank=True,null=True,verbose_name=_("Reject_Rason"))
 
     # Course Category
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
@@ -369,6 +370,8 @@ class SupplierOrganizationProfile(models.Model):
     is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('is_approved'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
 
 
@@ -412,8 +415,8 @@ class CourseDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('is_approved'))
     is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('is_approved'))
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
