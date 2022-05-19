@@ -703,17 +703,23 @@ class UserLoginView(APIView):
         # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+        
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
             LAST_NAME: request.POST.get(LAST_NAME,None),
             EMAIL_ID: request.POST.get(EMAIL_ID,None),            
-            "is_login_from": request.POST.get("is_login_from",None)
+            "is_login_from": request.POST.get("is_login_from",None),
+            STATUS_ID:1
         }
-
-        if record_map:
+        if request.POST.get("is_login_from"):
+            # try:
+            #     user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
+            # except:
+            #     return Response({STATUS:ERROR, DATA: "Error Getting User Type"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 d = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
+                print(d,"ddd")
                 if d.is_login_from == "google":
                     try:
                         user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -723,7 +729,13 @@ class UserLoginView(APIView):
                         user_profile = False
                     token = NonBuiltInUserToken.objects.create(user_id = d.id)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+                else:
+                    d.is_login_from = "google"
+                    d.save()
+                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
             except Exception as ex:
+                print(ex,"exexex")
+                record_map['USER_TYPE'] = "User"
                 getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
 
         if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
@@ -747,6 +759,7 @@ class UserLoginView(APIView):
             user_profile = False
         # serializer = UserSignupSerializer(data)
         # if serializer and data:
+        print(data,"dataa")
         if data is not None:
             if data.is_login_from == "google":
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)

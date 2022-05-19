@@ -1312,6 +1312,7 @@ class SupplierOrganizationProfileview(APIView):
                 COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),
                 SUB_CATEGORY : request.POST.get(SUB_CATEGORY,data.sub_category),
                 ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,data.organization_logo),
+                STATUS : request.POST.get(STATUS, data.status)
             }
 
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
