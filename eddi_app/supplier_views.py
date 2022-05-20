@@ -1092,6 +1092,7 @@ class CourseMaterialUpload(APIView):
             # print(course_material_final_video, "finalalalal")
             except Exception as ex:
                 print(ex,"exx")
+                course_material_final_video = None
 
             # except Exception as ex:
                 # course_material_data = None

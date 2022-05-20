@@ -739,9 +739,14 @@ class UserLoginView(APIView):
                 getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
 
         if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-             if data1.is_approved == "Rejected":
-                return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+                if data1.is_approved == "Rejected":
+                    return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as ex:
+                print(ex,"exexe")
+
+                
             #  elif data1.is_approved == "Pending":
             #     return Response({STATUS: ERROR, DATA: "Your Profile is Rejected"}, status=status.HTTP_400_BAD_REQUEST)
 
