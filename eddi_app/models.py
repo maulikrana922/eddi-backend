@@ -408,8 +408,8 @@ class CourseDetails(models.Model):
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
+    course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
     
-
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -573,7 +573,8 @@ class BlogDetails(models.Model):
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
     review = RichTextField(blank=True,verbose_name = _('User Review'))
-    # profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
+    profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=('UserName'))
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Modified By'))
@@ -1006,6 +1007,8 @@ class EventAd(models.Model):
     event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Location"))
     event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Organizer"))
     event_subscriber = models.IntegerField(default=0,verbose_name=_('Course Subscriber'),blank=True,null=True)
+    event_for_organization = models.BooleanField(default=False,verbose_name=_('Event For Organization'))
+    organization_domain = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Domain'))
     is_featured = models.BooleanField(default=False,verbose_name=_('is_featured'))
     is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('EventAd Created Date Time'))

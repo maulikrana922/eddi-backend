@@ -25,9 +25,11 @@ from datetime import timedelta
 from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
-from moviepy.editor import *
+# from moviepy.editor import *
+import moviepy.editor
 from itertools import chain
 import cv2
+# import pafy
 
 
 @permission_classes([AllowAny])
@@ -977,7 +979,12 @@ class SupplierDashboard_earningGraphView(APIView):
 #     else:
 #         duration = -1
 #     return duration 
-
+def convert(seconds):
+    hours = seconds // 3600
+    seconds %= 3600
+    mins = seconds // 60
+    seconds %= 60
+    return hours, mins, seconds
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
         print("inside posttttttttttttttttttttttt")
@@ -1029,16 +1036,21 @@ class CourseMaterialUpload(APIView):
                 try:
                     for j in video_files:
                         print(j, "jjjj")
-                        a = get_video_duration(j)
-                        print(a, "aaaa")
+                        # video = moviepy.editor.VideoFileClip(j)
+                        # print(video, "videoo")
+                        # video_duration = int(video.duration)
+                        # print(video_duration, "dyrationnn")
+                        # hours, mins, secs = convert(video_duration)
+                        # print(hours,mins,secs, "okonjlhbttv")
+
                         # video = cv2.VideoCapture(j)
 
                         # duration = video.get(cv2.CAP_PROP_POS_MSEC)
                         # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
                         # clip = VideoFileClip(j)
-                        clip = VideoFileClip("Screencast from 13-04-22 11-49-16 PM IST.mp4")
-                        print(clip.duration, "durararararararararar")
-                        print(str(clip.duration), "durararararararararar")
+                        # clip = VideoFileClip("Screencast from 13-04-22 11-49-16 PM IST.mp4")
+                        # print(clip.duration, "durararararararararar")
+                        # print(str(clip.duration), "durararararararararar")
                         # print(i, "iiiii")
                         # print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
@@ -1152,7 +1164,7 @@ class CourseMaterialUpload(APIView):
             # print(new, "newewewewe")
             for i in document_files_old:
                 if i in oldd:
-                    # print("OKOK") 
+                    print("OKOK") 
                     oldd.remove(i)
             # print(oldd,"oldddd")
             # print(document_files_old)
@@ -1178,15 +1190,16 @@ class CourseMaterialUpload(APIView):
             old_videos = course_material_data.video_files.all()
             new1 = list(old_videos)
             oldd1 = [i.video_file.url for i in new1]
-            # print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
+            print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
             # print(new1, "newewewewe")
             for i in video_files_old:
                 if i in oldd1:
-                    # print("OKOK") 
+                    print("OKOK") 
                     oldd1.remove(i)
             # print(oldd1,"oldddd")
             print(video_files_old)
             for j in oldd1:
+                print(j, "jjj")
                 try:
                     getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
                     print("deleted")
@@ -1194,7 +1207,7 @@ class CourseMaterialUpload(APIView):
                     print(ex,"exexexexe")
         
             for p in video_files:
-                # print("inside pppp")
+                print("inside pppp")
                 data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
                 # print(data3, "data3333")
                 course_material_data.video_files.add(data3[0].id)
@@ -1384,126 +1397,52 @@ class SupplierProfileView(APIView):
 
 
 class MyProgressView(APIView):
-    def post(self, request, uuid=None):
+    def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
-        time_period = request.POST.get(TIME_PERIOD)
-        datee = datetime.datetime.now()
+        is_completed_count = 0
+        is_ongoing_count = 0
 
+        try:
+            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+        except Exception as ex:
+            enroll_data = None
+        try:
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+            print(course_data, "course_dataaa")
+        except:
+            course_data = None
 
-        if time_period == WEEKLY:
-            # week = datee.strftime("%V")
-            today = datetime.datetime.now()
-            # week_list = {}
-            # try:
-            #     enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
-            # except Exception as ex:
-            #     enroll_data = None
-            # try:
-            #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
-            #     print(course_data, "course_dataaa")
-            # except:
-            #     course_data = None
+        try:
+            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+            print(course_data_uuid, "course_dataaa_uuiddddd")
+            
+        except Exception as ex:
+            course_data_uuid = None
 
-            # try:
-            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
-            #     print(course_data_uuid, "course_dataaa_uuiddddd")
-            #     for i in list(course_data_uuid): 
-            #         # new_dict[f"course_{i}"] = i
-            #         # print(i, "iiiiiiiiiiiiiiiiii")
-            #         try:
-            #             var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
-            #         except Exception as ex:
-            #             var = None
-            #             print("hereeeeeeeeeeeeeeee")
-            #             # new_dict[f"course_{i}"] = "Ongoing"
-            #         all_video = var.video_files.all()
-            #         print(all_video, "videoooo")
-            #         complete = 0
-            #         ongoing = 0
-            #         l = []
-            #         for i in all_video:
-            #             print(i.uuid, "iiiiiii")
-            #             for j in range(0, 7):
-            #         # week_list = {}
-            #                 past = today - timedelta(days = j)
-            #                 try:
-            #                     # data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid,"created_date_time__date":past}).values_list("is_complete", flat=True)
-            #                     data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid, "user_email":email_id,"created_date_time__date":past})
-            #                     l.append(data.is_complete)
-            #                 except Exception as ex:
-            #                     print(ex, "ex")
-            #             print(l, "llllll")
-            #             if False in l or l == []:
-            #                 ongoing += 1
-            #             else:
-            #                 complete += 1
-            #     print(complete,"comppp")
-            #     print(ongoing,"ongoing")
-                
-            # except Exception as ex:
-            #     print(ex,"exexexe")
-            try:
-                l = []
-                for i in range(0, 7):
-                    week_list = {}
-                    past = today - timedelta(days = i)
-                    # print(past, "pastttt")
+        try:
+            for i in list(course_data_uuid): 
+                try:
+                    var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    all_videos = var.video_files.all()
+                except Exception as ex:
+                        var = None
+                        is_ongoing_count += 1
+                        continue
+                l1 = []
+                for j in all_videos:
                     try:
-                        data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__date":past}).values_list("is_complete", flat=True)
-                        l.append(data)
-                        # print(data, "datatatatatata")
+                        material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
+                        l1.append(material_status.is_complete)
                     except Exception as ex:
-                        # print(ex,"exexexe")
-                        return Response({STATUS: ERROR, DATA: "Error in getting useremail"}, status=status.HTTP_400_BAD_REQUEST)
-                # print(l, "lllll")
-                is_complete_count = 0
-                is_ongoing_count = 0
-                for i in l:
-                    # print(i, "i")
-                    for j in i:
-                        # print(j,"j")
-                        if j == True:
-                            is_complete_count += 1
-                        else:
-                            is_ongoing_count += 1
-                # print(is_complete_count)
-                # print(is_ongoing_count)
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex: 
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+                        pass
+                if len(l1) != len(all_videos) or False in l1:
+                    is_ongoing_count += 1
+                else:
+                    is_completed_count += 1            
+            return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        elif time_period == MONTHLY:
-            month = datee.strftime("%m")
-            # print(month,"monthhh")
-            is_complete_count = 0
-            is_ongoing_count = 0
-            try:
-                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__month":month}).values_list("is_complete", flat=True)
-                # print(data,"datatatat")
-                for i in data:
-                    if i == True:
-                        is_complete_count += 1
-                    else:
-                        is_ongoing_count += 1
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        elif time_period == YEARLY:
-            year = datee.strftime("%Y")
-            # print(year)
-            is_complete_count = 0
-            is_ongoing_count = 0
-            try:
-                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__year":year}).values_list("is_complete", flat=True)
-                # print(data,"datatatat")
-                for i in data:
-                    if i == True:
-                        is_complete_count += 1
-                    else:
-                        is_ongoing_count += 1
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-
+        
 

@@ -9,6 +9,7 @@ import requests
 # import profile
 # from string import printable
 import random
+from random import shuffle
 from io import BytesIO
 # from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -902,6 +903,22 @@ class Header_FooterCMSDetails(APIView):
         print(ex, "exxxxxxxxxxxxxxxxxxx")
 
 @permission_classes([AllowAny])
+class Testimonial(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,"TestinomialsDetails").objects.all().values_list("id", flat=True)
+            l = list(data)
+            shuffle(l)
+            data1 = getattr(models,"TestinomialsDetails").objects.filter(**{"pk__in":l[:3]})
+            if serializer := TestinomialsDetailsSerializer(data1, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA:serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            print(ex,"exexe")
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
 class GetHomePageDetails(APIView):
 
     def get(self, request):
@@ -1412,7 +1429,7 @@ class FavCourseDetails(APIView):
         try:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
                 try:
-                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True)
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True).order_by("-created_date_time")
                 except Exception as ex:
                     data= None
                 try:
@@ -1881,110 +1898,135 @@ class RecruitmentAdView(APIView):
 
 # For My Course Page
 class CourseEnrollView(APIView):
-    def get(self, request):
+    def post(self, request):
         email_id =  get_user_email_by_token(request)
-        if email_id:
-            # try:
-            #     supplier_organization = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{'supplier_email':email_id})
-            # except Exception as ex:
-            #     supplier_organization = None
-            try:
-                enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
-            except Exception as ex:
-                enroll_data = None
-            try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
-                print(course_data, "course_dataaa")
-            except:
-                course_data = None
+        var = request.POST.get("filter")
+        try:
+            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+        except Exception as ex:
+            enroll_data = None
+        try:
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
+            print(course_data, "course_dataaa")
+        except:
+            course_data = None
 
+        try:
+            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+            print(course_data_uuid, "course_dataaa_uuiddddd")
+            
+        except Exception as ex:
+            course_data_uuid = None
+
+        if var == "all":
+            new_dict = OrderedDict()
             try:
-                course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
-                print(course_data_uuid, "course_dataaa_uuiddddd")
-                new_dict = OrderedDict()
                 for i in list(course_data_uuid): 
-                    # new_dict[f"course_{i}"] = i
-                    # print(i, "iiiiiiiiiiiiiiiiii")
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        all_videos = var.video_files.all()
                     except Exception as ex:
-                        var = None
-                        print("hereeeeeeeeeeeeeeee")
+                            var = None
+                            new_dict[f"course_{i}"] = "Ongoing"
+                            continue
+                    l1 = []
+                    for j in all_videos:
+                        try:
+                            material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
+                            l1.append(material_status.is_complete)
+                        except Exception as ex:
+                            pass
+                    if len(l1) != len(all_videos) or False in l1:
                         new_dict[f"course_{i}"] = "Ongoing"
-                        continue
-
-                    # var matlab a course na many to many video fields
-                    print(var, "vararara")
-                    try:
-                        video_file_count =  var.video_files.count()
-                        a = var.video_files.all()
-                    except Exception as ex:
-                        pass
-                    try:
-                        len_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id}).count()
-                    except Exception as ex:
-                        len_material_status = 0
-                    print(len_material_status, "lenenenenen")
-                    print(video_file_count, "lenenenenen")
-                    if video_file_count != len_material_status:
-                        final_course_status = "Ongoing"
-                        print("laststststs")
-                        new_dict[f"course_{i}"] = final_course_status
-                        continue
                     else:
-                        print("inside elsesesese")
-                        for i in a:
-                            print("inside iiiii")
-                            print(i, "iiiii")
-                            var1 = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, "video_id":i.uuid})
-                            print(var1, "var11111")
-                            if var1.is_complete == True:
-                                final_course_status = None
-                                continue
-                            else:
-                                final_course_status = "Ongoing"
-                                break
-                        if final_course_status is None:
-                            final_course_status = "Complete"
-                        else:
-                            final_course_status = "Ongoing"
-                        new_dict[f"course_{i}"] = final_course_status
+                        new_dict[f"course_{i}"] = "Completed"                          
 
             except Exception as ex:
                 print(ex, "exexexeexe")
-                pass
-            
-            try:
-                cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                try:
-                    a = cat.course_category.split(",")
-                except Exception as ex:
-                    a = cat.course_category.split()
-                print(a)
-            except Exception as ex:
-                print(ex, "exxxxxxxxx")
-            organization_domain = email_id.split('@')[1]
-            try:
-                data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
-                print(data_category, "data category")
-            except Exception as ex:
-                print(ex,"exxexe")
-                data_category = None
-                # return Response({STATUS: ERROR, DATA: "Error getting related course"}, status=status.HTTP_200_OK)
 
-            print(new_dict, "new_dictctctctct")
-            if serializer := CourseDetailsSerializer(course_data, many=True):
-                # print(serializer.data, "serializerrrr")
-                if serializer1 := CourseDetailsSerializer(data_category, many=True):
-                        
-                    # new_dict = {}
-                    # new_dict['final_course_status'] = final_course_status
+        elif var == "ongoing":
+            new_dict = OrderedDict()
+            try:
+                ongoing_coures_uuid = []
+                for i in list(course_data_uuid): 
+                    try:
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        all_videos = var.video_files.all()
+                    except Exception as ex:
+                        var = None
+                        new_dict[f"course_{i}"] = "Ongoing"
+                        ongoing_coures_uuid.append(i)
+                        continue
+                    l1 = []
+                    for j in all_videos:
+                        try:
+                            material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
+                            l1.append(material_status.is_complete)
+                        except Exception as ex:
+                            material_status = None
+                    if len(l1) != len(all_videos) or False in l1:
+                        new_dict[f"course_{i}"] = "Ongoing"
+                        ongoing_coures_uuid.append(i)
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'uuid__in':ongoing_coures_uuid})
+            except Exception as ex:
+                print(ex, "exexexeexe")
 
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict}, status=status.HTTP_200_OK)
-                    return Response({STATUS: SUCCESS, DATA: new_dict, "related_course":serializer1.data}, status=status.HTTP_200_OK)
-                # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        elif var == "completed":
+            print("inside completed")
+            new_dict = OrderedDict()
+
+            try:
+                completed_coures_uuid = []
+                for i in list(course_data_uuid): 
+                    try:
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        all_videos = var.video_files.all()
+                    except Exception as ex:
+                        var = None
+                        new_dict[f"course_{i}"] = "Ongoing"
+                        continue
+                    l1 = []
+                    for j in all_videos:
+                        try:
+                            material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
+                            l1.append(material_status.is_complete)
+                        except Exception as ex:
+                            print(ex,"exex")
+                            material_status = None
+                    if len(l1) == len(all_videos) and False not in l1:
+                        new_dict[f"course_{i}"] = "Completed"
+                        completed_coures_uuid.append(i)
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'uuid__in':completed_coures_uuid})
+            except Exception as ex:
+                print(ex, "exexexeexe")
+                
+        try:
+            cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            try:
+                area_of_interest = cat.area_of_interest.split(",")
+            except Exception as ex:
+                area_of_interest = cat.area_of_interest.split()
+           
+            try:
+                a = cat.course_category.split(",")
+            except Exception as ex:
+                a = cat.course_category.split()
+            print(a)
+        except Exception as ex:
+            print(ex, "exxxxxxxxx")
+        organization_domain = email_id.split('@')[1]
+        try:
+            data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest) | Q(course_name__in = area_of_interest)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
+            print(data_category, "data category")
+        except Exception as ex:
+            print(ex,"exxexe")
+            data_category = None
+        print(new_dict, "new_dictctctctct")
+        if serializer := CourseDetailsSerializer(course_data, many=True):
+            if serializer1 := CourseDetailsSerializer(data_category, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict}, status=status.HTTP_200_OK)   
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EventEnrollView(APIView):
@@ -2020,8 +2062,6 @@ class EventEnrollView(APIView):
             
         else:
             return Response({STATUS: ERROR, DATA: "Cound not find email Id from token."}, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 

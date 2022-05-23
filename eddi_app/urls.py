@@ -47,6 +47,7 @@ urlpatterns = [
 
     path('whats-on-eddi/',Whats_On_Eddi.as_view()),
     path('get-home-page-data/',GetHomePageDetails.as_view()),
+    path('testimonial/',Testimonial.as_view()),
     path('get-header-footer-data/',Header_FooterCMSDetails.as_view()),
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
     path('get-contactus-page-data/',GetContactUsPageDetails.as_view()),

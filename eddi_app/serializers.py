@@ -63,6 +63,13 @@ class HomePageCMSSerializer(serializers.ModelSerializer):
         depth = 1
         fields = '__all__'
 
+class TestinomialsDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TestinomialsDetails
+        depth = 1
+        fields = '__all__'
+
 class Header_FooterCMSSerializer(serializers.ModelSerializer):
 
     class Meta:
