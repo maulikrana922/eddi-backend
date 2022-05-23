@@ -1114,15 +1114,15 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[IS_APPROVED_ID] = 2
                 else:
                     record_map1[IS_APPROVED_ID] = 3
-                    record_map1["rejection"] = 3
+                    record_map1["rejection"] += 1
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
-
             else:
                 record_map1[IS_APPROVED] = data1.is_approved
             for key,value in record_map1.items():
                 setattr(data1,key,value)
             data1.save()
+            return Response({STATUS: SUCCESS, DATA: "Organization Profile Data edited successfully"}, status=status.HTTP_200_OK)
 
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
