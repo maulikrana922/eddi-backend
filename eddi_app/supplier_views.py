@@ -1,7 +1,6 @@
 from calendar import TUESDAY
 from math import ceil
 from posixpath import split
-# from select import select
 import json
 from typing import final
 from wsgiref.handlers import read_environ
@@ -25,9 +24,11 @@ from datetime import timedelta
 from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
-from moviepy.editor import *
+# from moviepy.editor import *
+import moviepy.editor
 from itertools import chain
 import cv2
+# import pafy
 
 
 @permission_classes([AllowAny])
@@ -42,7 +43,6 @@ def get_user_email_by_token(request):
         data = getattr(models,TOKEN_TABLE).objects.get(key = token)
         return data.user.email_id
     except Exception as ex:
-        print(ex)
         data = None
         return data
 
@@ -51,7 +51,6 @@ class AddCourseView(APIView):
         res = None
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
-
         email_id = get_user_email_by_token(request)
         course_organization = None
 
@@ -59,7 +58,6 @@ class AddCourseView(APIView):
             course_organization = True
             test_str = email_id
             res = test_str.split('@')[1]
-            print(res)
         else:
             course_organization = False
         try:    
@@ -73,15 +71,12 @@ class AddCourseView(APIView):
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
         except Exception as ex:
-            print(ex,"exxxxxxxxxxxxxxxx")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
-        print(request.POST.get("organization_location"), "locationnonononononon")
         try:
             record_map = {
             SUPPLIER_ID: supplier_id.id,
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
             COURSE_NAME: request.POST.get(COURSE_NAME,None),
-            # "course_start_date": request.POST.get("course_start_date",None),
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
             COURSE_CATEGORY_ID :category_id.id ,
@@ -95,9 +90,9 @@ class AddCourseView(APIView):
             COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
-            "meeting_link" : request.POST.get("meeting_link",None),
-            "meeting_passcode" : request.POST.get("meeting_passcode",None),
-            "target_users" : request.POST.get("target_users",None),
+            MEETING_LINK : request.POST.get(MEETING_LINK,None),
+            MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
+            TARGET_USERS : request.POST.get(TARGET_USERS,None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
             STATUS_ID:1
@@ -111,9 +106,7 @@ class AddCourseView(APIView):
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "exxxxx")
             return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class AddSubCategoryView(APIView):
@@ -149,7 +142,6 @@ class GetCategoryDetails(APIView):
         if uuid:
             data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{UUID:uuid})
             course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category_id":data.id})
-            print(course_list, "liststst")
             if serializer := CategoryDetailsSerializer(data):
                 if serializer1 := CourseDetailsSerializer(course_list, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "course":serializer1.data}, status=status.HTTP_200_OK)
@@ -202,13 +194,11 @@ class GetSubCategoryDetails(APIView):
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
-            print(ex, "ex")
             return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
         except Exception as ex:
-            print(ex, "exxx")
             return Response({STATUS: ERROR, DATA: "Category Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -217,9 +207,8 @@ class GetSubCategoryDetails(APIView):
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
          }
-            print(record_map, "recordddddd")
         except Exception as ex:
-            print(ex, "exxxxx")
+            pass
         if user_type_data:
             if user_type_data == ADMIN_S:
                 if request.POST.get(STATUS):
@@ -229,7 +218,6 @@ class GetSubCategoryDetails(APIView):
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
-                            print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -245,7 +233,6 @@ class GetSubCategoryDetails(APIView):
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
-                            print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -255,7 +242,6 @@ class GetSubCategoryDetails(APIView):
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
-                            print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -272,7 +258,6 @@ class GetSubCategoryDetails(APIView):
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
                         except Exception as ex:
-                            print(ex, "exxxx")
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -285,7 +270,6 @@ class GetSubCategoryDetails(APIView):
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = 'admin'
         record_map[UUID] = uuid4()
-        print(record_map, "recorddddd")
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
@@ -369,14 +353,11 @@ class GetCourseDetails(APIView):
 
             try:
                 rating = getattr(models,"CourseRating").objects.filter(**{COURSE_NAME:course_data})
-                print(rating,"ratinggg")
                 l = []
                 for i in rating:
-                    print(i.star,"iiii")
                     l.append(float(i.star))
                 final_rating = "{:.1f}".format(sum(l)/len(l))
             except Exception as ex:
-                print(ex,"exexexe")
                 rating = None
                 final_rating = None
             
@@ -402,7 +383,6 @@ class GetCourseDetails(APIView):
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Error in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
-                    print("insidesupplier")
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
@@ -411,7 +391,6 @@ class GetCourseDetails(APIView):
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Error in getting Admin data"}, status=status.HTTP_400_BAD_REQUEST)
-                    print("insideadmin")
 
                     if serializer := CourseDetailsSerializer(data_a,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -423,40 +402,22 @@ class GetCourseDetails(APIView):
                             a = cat.course_category.split(",")
                         except Exception as ex:
                             a = cat.course_category.split()
-                        print(a)
                     except Exception as ex:
-                        print(ex, "exxxxxxxxx")
+                        pass
 
-                    # organization_domain = email_id.split('@')[1]
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
-                    
-                    
-                    # data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a)).filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).exclude(course_name__in = course_enrolled).order_by("-organization_domain")
-
-                    # data_category_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(organization_domain = organization_domain) | Q(course_category__category_name__in = a) | Q(course_name__in = course_enrolled)).values_list(COURSE_NAME, flat=True)
-
+                 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False,}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
-                    print(data_all, "allllllllllll")
-                    # final_queryset = list(chain(target_course, data_all))
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
-                        # return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-                   
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK) 
             else:
                 data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
-                
-           
             if serializer := CourseDetailsSerializer(data_s):
                 return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
-
-                # if serializer1 := CourseEnrollSerializer(individuals, many=True):
-                #     return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: serializer1.data,'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
-                # else:
-                #     return Response({STATUS: SUCCESS, DATA: serializer.data,ENROLLED: "No Enrolled User",'is_favoutite':fav_dataa}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
        
@@ -494,7 +455,6 @@ class GetCourseDetails(APIView):
 
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
         except Exception as ex:
-            print(ex, "ex")
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -508,9 +468,9 @@ class GetCourseDetails(APIView):
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,data.organization_location),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
-            "meeting_link" : request.POST.get("meeting_link",data.meeting_link),
-            "meeting_passcode" : request.POST.get("meeting_passcode",data.meeting_passcode),
-            "target_users" : request.POST.get("target_users",data.target_users),
+            MEETING_LINK : request.POST.get(MEETING_LINK,data.meeting_link),
+            MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,data.meeting_passcode),
+            TARGET_USERS : request.POST.get(TARGET_USERS,data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
@@ -526,7 +486,6 @@ class GetCourseDetails(APIView):
                     test_str = data.supplier.email_id
                     res = test_str.split('@')[1]
                     record_map[ORGANIZATION_DOMAIN] = res
-                    print(res)
                 elif request.POST.get(COURSE_FOR_ORGANIZATION) == 'false':
                     record_map[COURSE_FOR_ORGANIZATION] = json.loads(request.POST.get(COURSE_FOR_ORGANIZATION))
                     record_map[ORGANIZATION_DOMAIN] = None
@@ -543,14 +502,12 @@ class GetCourseDetails(APIView):
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
-                                print(ex, "exxxx")
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
                                 try:
-                                    print("INNER")
                                     html_path = INACTIVE_COURSE
                                     context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
                                     email_html_template = get_template(html_path).render(context_data)
@@ -568,16 +525,14 @@ class GetCourseDetails(APIView):
                                         img.add_header('Content-Disposition', 'inline', filename=image)
                                     email_msg.attach(img)
                                     email_msg.send(fail_silently=False)
-                                    print("TRUE")
                                 except Exception as ex:
-                                    print(ex, "exexexexexe")
+                                    pass
                     else:
                         record_map[STATUS] = data.status
                         
                     if request.POST.get(APPROVAL_STATUS):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
                             record_map[IS_APPROVED_ID] = 1
-                            print("INNER")
                             html_path = APPROVE_COURSE_HTML
                             context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
                             email_html_template = get_template(html_path).render(context_data)
@@ -595,13 +550,11 @@ class GetCourseDetails(APIView):
                                 img.add_header('Content-Disposition', 'inline', filename=image)
                             email_msg.attach(img)
                             email_msg.send(fail_silently=False)
-                            print("TRUE")
 
                         if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
-                                print(ex, "exxxx")
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -611,7 +564,6 @@ class GetCourseDetails(APIView):
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
-                                print(ex, "exxxx")
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -628,7 +580,6 @@ class GetCourseDetails(APIView):
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
                             except Exception as ex:
-                                print(ex, "exxxx")
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -638,17 +589,13 @@ class GetCourseDetails(APIView):
                         record_map[STATUS] = data.status
                         record_map[IS_APPROVED_ID] = 2
 
-
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 record_map[MODIFIED_BY] = 'admin'
-                # record_map[UUID] = uuid4()
-                print(record_map, "recordddddddddd")
                 for key,value in record_map.items():
                     setattr(data,key,value)
                 data.save()
                 return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex, "exxxxxxxxxxxxxxx")
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -675,7 +622,6 @@ class GetCourseDetails(APIView):
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = email_id
-        # record_map[UUID] = uuid4()
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
@@ -712,7 +658,6 @@ class AdminDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class SupplierDashboardView(APIView):
     def post(self, request,uuid = None):
         supplier_email = get_user_email_by_token(request)
@@ -739,9 +684,7 @@ class SupplierDashboardView(APIView):
             individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
             counter = 0
-            # print(individual_details, "indididididididi")
             for v in individual_details[COURSENAME]:
-                print(v,"vvvvvvvvv")
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
@@ -751,9 +694,7 @@ class SupplierDashboardView(APIView):
                     COURSETYPE:Individuals.course_type.type_name,
                 }
                 counter +=1
-            print(final_dict)
         except Exception as ex:
-            print(ex,"exexexexe")
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -826,7 +767,6 @@ class SupplierDashboard_courseGraphView(APIView):
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
-
         elif time_period == MONTHLY:
             month = date.strftime("%m")
             try:
@@ -888,13 +828,11 @@ class SupplierDashboard_earningGraphView(APIView):
                     past = today - timedelta(days = i)
                     data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
                     var = list(data)
-                    # final = float(sum(var))
                     final = "{:.2f}".format(sum(var))
                     if var == "":
                         final = 0.0
                     week_list[past.strftime("%A")] = final
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                # total_earning = float(sum(list(data)))
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
             except Exception as ex: 
@@ -918,7 +856,6 @@ class SupplierDashboard_earningGraphView(APIView):
                 data3 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date__range":(third, datetime.datetime.today())}).values_list("payment_detail__amount", flat=True)
                 month_list[str(third.date())+" to "+str(datetime.date.today())] = "{:.2f}".format(sum(list(data3)))
 
-                # total_earning = float(sum(list(data)))
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:month_list}, status=status.HTTP_200_OK)
             except Exception as ex:
@@ -940,7 +877,6 @@ class SupplierDashboard_earningGraphView(APIView):
 
                     if i == num_months_back:
                         deque_months.append(next_month.strftime('%B %Y'))
-
                     i = i+1
                 # Convert deque to list
                 month_List = list(deque_months)
@@ -958,29 +894,8 @@ class SupplierDashboard_earningGraphView(APIView):
 
         return Response({STATUS: "Invalid time_period added", DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
-
-# def get_video_duration(video_file):
-#     cmd = [
-#         "ffmpeg",
-#         "-i", str(video_file),
-#         "-f", "null", "-"
-#     ]
-
-#     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-#     result_all = ffmpeg_duration_template.findall(output.decode())
-#     if result_all:
-#         result = result_all[-1]
-#         duration = float(result[0]) * 60 * 60 \
-#                    + float(result[1]) * 60 \
-#                    + float(result[2]) \
-#                    + float(result[3]) * (10 ** -len(result[3]))
-#     else:
-#         duration = -1
-#     return duration 
-
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
-        print("inside posttttttttttttttttttttttt")
         email_id = get_user_email_by_token(request)   
         if request.method != POST_METHOD:
             return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -995,120 +910,51 @@ class CourseMaterialUpload(APIView):
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except Exception as ex:
                  return Response({STATUS: ERROR, DATA: "Course details object not matched with uuid"}, status=status.HTTP_400_BAD_REQUEST)
-            print(video_files, "videooooooooo")
-            print(document_files, "documenttttt")
-            print(request.FILES, "filesssssss")
             reccord_map = {}
             reccord_map = {
                 "video_title" : video_title,      
                 "file_title"  : file_title,
                 "course_id" : course_data.id
                 }
-            print(reccord_map, "recordddddd")
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
-            print("saveddddddddddddddddddddddd")
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
-                        print(i, "iiiii")
-                        # video = cv2.VideoCapture(i)
-
-                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
-                        # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                        # print(duration, "durationnnnnnn")
-                        # clip = VideoFileClip(str(i))
-                        # print(clip.duration, "durararararararararar")
-                        # print(i, "iiiii")
                         data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                        print(data1, "data11111")
                         data[0].document_files.add(data1[0].id)
                 except Exception as ex:
-                    print(ex, "exexexexe")
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
             if request.FILES.getlist("video_files"):
                 try:
                     for j in video_files:
-                        print(j, "jjjj")
-                        a = get_video_duration(j)
-                        print(a, "aaaa")
-                        # video = cv2.VideoCapture(j)
-
-                        # duration = video.get(cv2.CAP_PROP_POS_MSEC)
-                        # frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                        # clip = VideoFileClip(j)
-                        clip = VideoFileClip("Screencast from 13-04-22 11-49-16 PM IST.mp4")
-                        print(clip.duration, "durararararararararar")
-                        print(str(clip.duration), "durararararararararar")
-                        # print(i, "iiiii")
-                        # print(duration, "durationnnnnnn")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
-                        # print(data2, "data2222")
-
                         data[0].video_files.add(data2[0].id)
                 except Exception as ex:
-                    print(ex, "exexexexe")
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Material Uploaded successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request) 
-        print("uuid",uuid)
         response_dict = {}
         if uuid:
-            # try:
             document = []
             video = []
             try:
                 try:
                     course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
-                    print("course Data",course_material_data)
-                    # all_doc_data = course_material_data.document_files.all()
                     all_video_data = course_material_data.video_files.all()
-                    print(all_video_data, "alalalal")
                 except Exception as ex:
                     course_material_data = None
-
-            # except Exception as ex:
-            #     course_material_data = None
-            #     print(ex,"exexe")
-        
-            # for i in all_doc_data:
-            #     print(i.uuid,"uuiddddd")
-            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'document_id':i.uuid})
-            #     print(course_material_status, "sttuasasasas")
-            #     document.append(course_material_status)
-            # try:
                 for i in all_video_data:
-                    print(i.uuid,"uuiddddd")
-                    # print(i,"uuiddddd")
                     try:
                         course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'video_id':i.uuid})
-                        # print(course_material_status, "sttuasasasas")
                         video.append(course_material_status)
                     except Exception as ex:
                         course_material_status = None
-                        print(ex, "exx")
                 course_material_final_video = getattr(models,"CourseMaterialStatus").objects.filter(**{'video_id__in':video})
-            # print(course_material_final_video, "finalalalal")
             except Exception as ex:
-                print(ex,"exx")
                 course_material_final_video = None
-
-            # except Exception as ex:
-                # course_material_data = None
-                # print(ex,"exexexe")
-                # course_material_data = None
-                # course_material_final_video = None
-            
-            # try:
-            #     course_material_status = getattr(models,"CourseMaterialStatus").objects.filter(**{'user_email':email_id})
-            #     print(course_material_status, "statusssss")
-            #     for i in course_material_status:
-            #         print(i.is_complete)
-            # except Exception as ex:
-            #     course_material_status = None
             if serializer := CourseMaterialSerializer(course_material_data):
-                # print(serializer.data, "datatatat")
                 if serializer1 := CourseMaterialStatusSerializer(course_material_final_video, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "material_status":serializer1.data}, status=status.HTTP_200_OK)
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1121,7 +967,6 @@ class CourseMaterialUpload(APIView):
         email_id = get_user_email_by_token(request)   
         if not uuid:
             return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
-        print("inside puttt")
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         video_title = request.POST.get(VIDEO_TITLE,course_material_data.video_title)
         video_files = request.FILES.getlist(VIDEO_FILES,None)
@@ -1129,78 +974,52 @@ class CourseMaterialUpload(APIView):
         file_title = request.POST.get(FILE_TITLE,course_material_data.file_title)
         document_files = request.FILES.getlist(DOCUMENT_FILES,None)
         document_files_old = request.POST.getlist("document_files_old",None)
-        # course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-        # print(document_files_old, "oldddddocu")
         reccord_map = {}
         reccord_map = {
             "video_title" : video_title,      
             "file_title"  : file_title,
-            # "course_id" : course_data.id
             }
         for key, value in reccord_map.items():
             setattr(course_material_data, key, value)
         course_material_data.save()
-        # print("PUTTTTTTTTTTTTT")
-        print(request.FILES.getlist(DOCUMENT_FILES), "filesssssss")
-        # print("inside doccccc")
         try:
             old_docs = course_material_data.document_files.all()
-            # print(old_docs, "docssss")
             new = list(old_docs)
             oldd = [i.document_file.url for i in new]
-            # print(oldd,"OOOOOOOOOOOOOOOOOOOOOOO")
-            # print(new, "newewewewe")
             for i in document_files_old:
                 if i in oldd:
-                    # print("OKOK") 
                     oldd.remove(i)
-            # print(oldd,"oldddd")
-            # print(document_files_old)
-                    
             for k in oldd:
                 try:
                     getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
-                    print("deleted")
                 except Exception as ex:
-                    print(ex, "exexexexe")
+                    pass
             if document_files:
                 for i in document_files:
-                    print("inside iiiii")
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
-                    print(data1, "data11111")
                     course_material_data.document_files.add(data1[0].id)
                
         except Exception as ex:
-            print(ex, "exexexexe")
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             old_videos = course_material_data.video_files.all()
             new1 = list(old_videos)
             oldd1 = [i.video_file.url for i in new1]
-            # print(oldd1,"OOOOOOOOOOOOOOOOOOOOOOO")
-            # print(new1, "newewewewe")
             for i in video_files_old:
                 if i in oldd1:
-                    # print("OKOK") 
                     oldd1.remove(i)
-            # print(oldd1,"oldddd")
-            print(video_files_old)
             for j in oldd1:
                 try:
                     getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
-                    print("deleted")
                 except Exception as ex:
-                    print(ex,"exexexexe")
+                    pass
         
             for p in video_files:
-                # print("inside pppp")
                 data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
-                # print(data3, "data3333")
                 course_material_data.video_files.add(data3[0].id)
                 
         except Exception as ex:
-            print(ex, "exexexexe")
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Material Edited successfully"}, status=status.HTTP_200_OK)
 
@@ -1239,11 +1058,8 @@ class SupplierOrganizationProfileview(APIView):
                     data1.is_first_time_login = False
                     data1.save()
                 except Exception as ex:
-                    print(ex,"exexe")
-
-                print("savedddd")
+                    pass
             except Exception as ex:
-                print(ex,"exexeex")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
@@ -1256,7 +1072,6 @@ class SupplierOrganizationProfileview(APIView):
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
-            print(ex,"exxexe")
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1315,7 +1130,6 @@ class SupplierOrganizationProfileview(APIView):
                 ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,data.organization_logo),
                 STATUS : request.POST.get(STATUS, data.status)
             }
-
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             for key,value in record_map.items():
                 setattr(data,key,value)
@@ -1328,11 +1142,9 @@ class SupplierOrganizationProfileview(APIView):
 class SupplierProfileView(APIView):
     def put(self, request):
         email_id = get_user_email_by_token(request)
-
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
-            print(ex, "exexexe")
             data= None
         if data is not None:
             try:
@@ -1384,126 +1196,46 @@ class SupplierProfileView(APIView):
 
 
 class MyProgressView(APIView):
-    def post(self, request, uuid=None):
+    def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
-        time_period = request.POST.get(TIME_PERIOD)
-        datee = datetime.datetime.now()
+        is_completed_count = 0
+        is_ongoing_count = 0
 
+        try:
+            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+        except Exception as ex:
+            enroll_data = None
+        try:
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+        except:
+            course_data = None
 
-        if time_period == WEEKLY:
-            # week = datee.strftime("%V")
-            today = datetime.datetime.now()
-            # week_list = {}
-            # try:
-            #     enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
-            # except Exception as ex:
-            #     enroll_data = None
-            # try:
-            #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
-            #     print(course_data, "course_dataaa")
-            # except:
-            #     course_data = None
+        try:
+            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+            
+        except Exception as ex:
+            course_data_uuid = None
 
-            # try:
-            #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
-            #     print(course_data_uuid, "course_dataaa_uuiddddd")
-            #     for i in list(course_data_uuid): 
-            #         # new_dict[f"course_{i}"] = i
-            #         # print(i, "iiiiiiiiiiiiiiiiii")
-            #         try:
-            #             var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
-            #         except Exception as ex:
-            #             var = None
-            #             print("hereeeeeeeeeeeeeeee")
-            #             # new_dict[f"course_{i}"] = "Ongoing"
-            #         all_video = var.video_files.all()
-            #         print(all_video, "videoooo")
-            #         complete = 0
-            #         ongoing = 0
-            #         l = []
-            #         for i in all_video:
-            #             print(i.uuid, "iiiiiii")
-            #             for j in range(0, 7):
-            #         # week_list = {}
-            #                 past = today - timedelta(days = j)
-            #                 try:
-            #                     # data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid,"created_date_time__date":past}).values_list("is_complete", flat=True)
-            #                     data = getattr(models,"CourseMaterialStatus").objects.get(**{"video_id":i.uuid, "user_email":email_id,"created_date_time__date":past})
-            #                     l.append(data.is_complete)
-            #                 except Exception as ex:
-            #                     print(ex, "ex")
-            #             print(l, "llllll")
-            #             if False in l or l == []:
-            #                 ongoing += 1
-            #             else:
-            #                 complete += 1
-            #     print(complete,"comppp")
-            #     print(ongoing,"ongoing")
-                
-            # except Exception as ex:
-            #     print(ex,"exexexe")
-            try:
-                l = []
-                for i in range(0, 7):
-                    week_list = {}
-                    past = today - timedelta(days = i)
-                    # print(past, "pastttt")
+        try:
+            for i in list(course_data_uuid): 
+                try:
+                    var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                    all_videos = var.video_files.all()
+                except Exception as ex:
+                        var = None
+                        is_ongoing_count += 1
+                        continue
+                l1 = []
+                for j in all_videos:
                     try:
-                        data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__date":past}).values_list("is_complete", flat=True)
-                        l.append(data)
-                        # print(data, "datatatatatata")
+                        material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
+                        l1.append(material_status.is_complete)
                     except Exception as ex:
-                        # print(ex,"exexexe")
-                        return Response({STATUS: ERROR, DATA: "Error in getting useremail"}, status=status.HTTP_400_BAD_REQUEST)
-                # print(l, "lllll")
-                is_complete_count = 0
-                is_ongoing_count = 0
-                for i in l:
-                    # print(i, "i")
-                    for j in i:
-                        # print(j,"j")
-                        if j == True:
-                            is_complete_count += 1
-                        else:
-                            is_ongoing_count += 1
-                # print(is_complete_count)
-                # print(is_ongoing_count)
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex: 
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif time_period == MONTHLY:
-            month = datee.strftime("%m")
-            # print(month,"monthhh")
-            is_complete_count = 0
-            is_ongoing_count = 0
-            try:
-                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__month":month}).values_list("is_complete", flat=True)
-                # print(data,"datatatat")
-                for i in data:
-                    if i == True:
-                        is_complete_count += 1
-                    else:
-                        is_ongoing_count += 1
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-
-        elif time_period == YEARLY:
-            year = datee.strftime("%Y")
-            # print(year)
-            is_complete_count = 0
-            is_ongoing_count = 0
-            try:
-                data = getattr(models,"CourseMaterialStatus").objects.filter(**{"user_email":email_id,"created_date_time__year":year}).values_list("is_complete", flat=True)
-                # print(data,"datatatat")
-                for i in data:
-                    if i == True:
-                        is_complete_count += 1
-                    else:
-                        is_ongoing_count += 1
-                return Response({STATUS: SUCCESS, "is_complete_count":is_complete_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-
-
+                        pass
+                if len(l1) != len(all_videos) or False in l1:
+                    is_ongoing_count += 1
+                else:
+                    is_completed_count += 1            
+            return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)

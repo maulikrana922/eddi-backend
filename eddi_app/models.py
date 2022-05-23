@@ -70,7 +70,6 @@ class UserType(models.Model):
 
 
 class approval_status(models.Model):
-    # status = models.ManyToManyField(utl_status,null=True,blank=True, verbose_name='Status')
     value = models.CharField(max_length=60,blank=True, verbose_name=_("Value"))
     created_by = models.CharField(max_length=100,blank=True)
     created_date_time = models.DateTimeField(auto_now_add=True)
@@ -241,14 +240,7 @@ class CourseCategoryDetails(models.Model):
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
-
-
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
-
-    # def  image_tag(self):
-    #     return mark_safe('<img src="/../../media/%s" width="150" height="150" />' % (self.category_image))
-
-    # image_tag.allow_tags = True
 
     class Meta:
         verbose_name = _("Course Category Table")
@@ -262,16 +254,12 @@ class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Sub Category Name'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('supplier'),blank=True,limit_choices_to={'user_type_id': 1})
-
     subcategory_name = models.CharField(max_length=150,verbose_name=_('Sub Category Name'),blank=True,null=True)
-
     subcategory_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
-
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
@@ -373,8 +361,6 @@ class SupplierOrganizationProfile(models.Model):
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('is_approved'))
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
-
-
     class Meta:
         verbose_name = _("Supplier Organization Profile Table")
 
@@ -408,8 +394,8 @@ class CourseDetails(models.Model):
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
+    course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
     
-
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -473,7 +459,8 @@ def bulk_email(sender, instance, created, **kwargs):
         except Exception as ex:
             pass
 
-################## CMS    ###################################
+
+#############################  CMS  ###################################
 
 class WhatsonEddiCMS(models.Model):
     content = RichTextField(verbose_name = _("Whats'on Eddi"),blank = True)
@@ -573,7 +560,8 @@ class BlogDetails(models.Model):
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
     review = RichTextField(blank=True,verbose_name = _('User Review'))
-    # profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
+    profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=('UserName'))
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Modified By'))
@@ -816,7 +804,6 @@ class TermsConditionCMSSupplier(models.Model):
         verbose_name = _("Terms & Condition Page Supplier")
 
 
-
 class UserProfile(models.Model):
 
     #personal information
@@ -861,7 +848,6 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = _("User Eddi Profile")
 
-
     def __str__(self):
         return str(self.email_id)
     
@@ -875,11 +861,7 @@ class CourseRating(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     class Meta:
-        verbose_name = _("Course Rating Table")
-
-    # def __str__(self):
-    #     return self.course_name
-    
+        verbose_name = _("Course Rating Table") 
 
 
 class UserPersonalProfile(models.Model):
@@ -941,8 +923,6 @@ class FavouriteCourse(models.Model):
     class Meta:
         verbose_name = _("Favourite Course")
     
-
-
 class CourseEnroll(models.Model):
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
     supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('supplier email'))
@@ -983,8 +963,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         print("TRUE")
 
 
-
-
 class EventAd(models.Model):    
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     event_image = models.FileField(upload_to='event_image/',verbose_name=_('Event Image'),blank=True,null=True)
@@ -1006,6 +984,8 @@ class EventAd(models.Model):
     event_location = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Location"))
     event_organizer = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Organizer"))
     event_subscriber = models.IntegerField(default=0,verbose_name=_('Course Subscriber'),blank=True,null=True)
+    event_for_organization = models.BooleanField(default=False,verbose_name=_('Event For Organization'))
+    organization_domain = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Domain'))
     is_featured = models.BooleanField(default=False,verbose_name=_('is_featured'))
     is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('EventAd Created Date Time'))
@@ -1017,7 +997,6 @@ class EventAd(models.Model):
 
     def __str__(self):
         return str(self.event_name)
-
 
 
 class EventAdPaymentDetail(models.Model):
@@ -1054,12 +1033,9 @@ class MaterialVideoMaterial(models.Model):
     video_file = models.FileField(upload_to='course_material_video/',verbose_name=_('Video Files'),blank=True,null=True)
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
-
-    # def __str__(self):
-    #     return str(self.video_file) + " " + str(self.uuid)
     
-    # class Meta:
-    #     verbose_name = _("Material Video Material")
+    class Meta:
+        verbose_name = _("Material Video Material")
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
@@ -1089,7 +1065,6 @@ class CourseMaterialStatus(models.Model):
         verbose_name = _("Course Material Status")
     
 
-
 class CourseMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True, verbose_name=_('UUID'))
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
@@ -1104,13 +1079,8 @@ class CourseMaterial(models.Model):
     def __str__(self):
         return self.course.course_name
     
-    # class Meta:
-    #     verbose_name = _("Course Material")
-
-
-# class CourseCompleteStatus(models.Model):
-#     course_material = models.ForeignKey(CourseMaterial,on_delete=models.CASCADE,blank=True,null=True,verbose_name="Course Material")
-#     user = models.ForeignKey(UserProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name="User")
+    class Meta:
+        verbose_name = _("Course Material")
 
 
 class RecruitmentAd(models.Model):

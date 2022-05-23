@@ -6,34 +6,25 @@ class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSignup
         depth = 1
-
         fields = '__all__'
 
 class CourseDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseDetails
         depth = 2
-
         fields = '__all__'
+
 class UerPaymentSerializer(serializers.ModelSerializer):
      class Meta:
         model = UserPaymentDetail
         depth = 1
-
         fields = '__all__'
         
 class CourseEnrollSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CourseEnroll
         depth = 2
-
-        # fields = ["supplier_email", "payment_detail", "user_profile"]
         fields = '__all__'
-
-
-
-
 
 
 class SubCategoryDetailsSerializer(serializers.ModelSerializer):
@@ -60,6 +51,13 @@ class HomePageCMSSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HomePageCMS
+        depth = 1
+        fields = '__all__'
+
+class TestinomialsDetailsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TestinomialsDetails
         depth = 1
         fields = '__all__'
 
@@ -121,7 +119,6 @@ class BlogDetailsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -149,9 +146,6 @@ class CourseRatingSerializer(serializers.ModelSerializer):
         depth = 2
 
         fields = '__all__'
-
-
-
 
 
 class HeaderFooterCMSSerializer(serializers.ModelSerializer):
@@ -185,11 +179,9 @@ class CourseMaterialStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseMaterialStatus
         depth = 2
-        # fields = ['user_email','id']
         fields = '__all__'
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
-    # coursestatus = CourseMaterialStatusSerializer(many=True)
 
     class Meta:
         model = CourseMaterial
@@ -197,23 +189,8 @@ class CourseMaterialSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
 class FavouriteCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavouriteCourse
         depth = 1
         fields = '__all__'
-
-
-# class CourseDetailSerializer4courseenroll(serializers.ModelSerializer):
-#     supplier1 = serializers.SerializerMethodField('get_org')
-#     class Meta:
-#         model = CourseDetails
-#         depth = 2
-
-#         fields = ['uuid', 'supplier', 'course_image', 'course_name', 'course_level', 'course_length', 'course_category', 'course_subcategory', 'course_language', 'course_starting_date', 'course_for_organization', 'organization_domain', 'course_type', 'fee_type', 'course_price', 'var_charges', 'additional_information', 'organization_location', 'sub_area', 'course_checkout_link', 'meeting_link', 'meeting_passcode', 'created_by', 'is_approved', 'status', 'is_deleted', 'supplier1']
-
-#     def get_org(self, SupplierOrganizationProfile):
-#         supplier1 = SupplierOrganizationProfile.organizational_name
-#         return supplier1
