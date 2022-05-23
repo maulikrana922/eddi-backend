@@ -15,32 +15,32 @@ from pathlib import Path
 import os
 from django.conf.global_settings import LANGUAGES as DJANGO_LANGUAGES
 import datetime
+import environ
 
 from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+env = environ.Env()
+environ.Env.read_env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '56bly)en(6j7r2!f5z_g-uo&rjclo9@irwvx1thds5xe*d2n$h'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
 
 
 
-ALLOWED_HOSTS = ['https://eddi-backend.testyourapp.online','127.0.0.1','https://eddi-frontend.testyourapp.online','https://eddi-supplier.testyourapp.online', '*'] 
+ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
 
-CORS_ALLOWED_ORIGINS = [
-    'https://eddi-backend.testyourapp.online','https://eddi-frontend.testyourapp.online','https://eddi-supplier.testyourapp.online'
-]
-CSRF_TRUSTED_ORIGINS=['https://eddi-backend.testyourapp.online','https://eddi-frontend.testyourapp.online','https://eddi-supplier.testyourapp.online'] 
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
+CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -222,11 +222,11 @@ CKEDITOR_CONFIGS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Eddi_db',
-        'USER': 'Eddi_db',
-        'PASSWORD': 'W0rxQxlWsKuCekrg',
-        'HOST': 'eddi-backend.testyourapp.online',
-        'PORT': '3306',
+        'NAME': env('NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASS'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('PORT'),
     }
 }
 
@@ -280,16 +280,16 @@ MEDIA_URL = '/media/'
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'testing.skillism@gmail.com'
-EMAIL_HOST_PASSWORD = 'Latitude@123' 
-WKHTMLTOPDF_CMD = '/usr/local/bin/wkhtmltopdf'
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+WKHTMLTOPDF_CMD = env('WKHTMLTOPDF_CMD')
 
 
 
 
-STRIPE_PUBLIC_KEY = 'pk_test_51KhDqeEjvkdtZsC4cUmvapGjtOYTru6hGp8EOK1KBdZkp7pQfBYMY4XAhkJ0WY2OAjIhpYXtXI2ia9slbSlnvPuy00XyRs254B'
-STRIPE_SECRET_KEY = 'sk_test_51KhDqeEjvkdtZsC4aOLUytltjWx0sYj5rZpkcphI6jbxtUHw7Lq5HxGxpRfX8aSO1jj2rNVyH74eTWVeeWZk01DX007SRf9wfX'
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = env('STRIPE_PUBLIC_KEY')
 STRIPE_WEBHOOK_SECRET = ""
