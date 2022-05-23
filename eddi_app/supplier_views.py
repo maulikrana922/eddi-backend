@@ -1115,7 +1115,7 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[IS_APPROVED_ID] = 2
                 else:
                     record_map1[IS_APPROVED_ID] = 3
-                    record_map1["rejection_count"] += 1
+                    record_map1["rejection_count"] = 1
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
             else:
