@@ -471,6 +471,12 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+        try:
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+        except Exception as ex:
+            data= None
+        if data is not None and data.rejection_count == 3:
+            return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
