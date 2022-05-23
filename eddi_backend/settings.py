@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rosetta'
 ]
+
 LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
 
 production_models = [

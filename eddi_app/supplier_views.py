@@ -1023,7 +1023,21 @@ class CourseMaterialUpload(APIView):
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Material Edited successfully"}, status=status.HTTP_200_OK)
 
-       
+@permission_classes([AllowAny])
+class SupplierOrganizationProfileviewall(APIView):
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type" : SUPPLIER_S}).values_list('email_id', flat=True)
+            print(all_supplier, "alalal")
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
+        except Exception as ex:
+            data= None
+        if serializer := SupplierOrganizationProfileSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
