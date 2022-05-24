@@ -91,7 +91,7 @@ urlpatterns = [
     path('supplier-organization-profile/',SupplierOrganizationProfileview.as_view()),
     path('supplier-organization-profile-all/',SupplierOrganizationProfileviewall.as_view()),
     path('supplier-profile/',SupplierProfileView.as_view()),
-
+    
     # Notification
     path('notification/',Notification.as_view())
 

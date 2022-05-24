@@ -933,11 +933,18 @@ class UserPaymentDetail_info(APIView):
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
                     try:
-                        supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":courseobj.supplier.email_ideiver})
+                        supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":courseobj.supplier.email_id})
                     except Exception as ex:
                         pass
-                    message = f"{sender_data.first_name}, has applied for {course_data.course_name}"
-                    send_notification(email_id, courseobj.supplier.email_id, )
+                    try:
+                        sender_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
+                    except Exception as ex:
+                        pass
+                    try:
+                        message = f"{sender_data.first_name}, has applied for {courseobj.course_name}"
+                        send_notification(email_id, courseobj.supplier.email_id, message)
+                    except Exception as ex:
+                        pass
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
