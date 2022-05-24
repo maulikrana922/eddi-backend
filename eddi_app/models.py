@@ -474,6 +474,17 @@ class WhatsonEddiCMS(models.Model):
     class Meta:
         verbose_name = _("Whats'on Eddi CMS")
 
+class WhatsonEddiCMS_SV(models.Model):
+    content = RichTextField(verbose_name = _("Whats'on Eddi"),blank = True)
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+    
+    class Meta:
+        verbose_name = _("Whats'on Eddi CMS SV")
+
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
     banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name=_("Banner Image"))
@@ -487,6 +498,21 @@ class HomePageCMSBanner(models.Model):
 
     class Meta:
         verbose_name = _("Home Page CMS Banner Table")
+
+
+class HomePageCMSBanner_SV(models.Model):
+    image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
+    banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name=_("Banner Image"))
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+
+    class Meta:
+        verbose_name = _("Home Page CMS Banner Table SV")
 
 
 class HomePageCMSPartners(models.Model):
@@ -505,6 +531,24 @@ class HomePageCMSPartners(models.Model):
 
     class Meta:
         verbose_name = _("Home Page CMS Partners Table")
+
+
+class HomePageCMSPartners_SV(models.Model):
+    image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
+    partner_logo = models.ImageField(upload_to = 'homepage_partner_logo/', verbose_name=_("Partner Logo"))
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+
+    def __str__(self):
+        return str(self.partner_logo.url)
+
+    class Meta:
+        verbose_name = _("Home Page CMS Partners Table SV")
 
 
 class ContactFormLead(models.Model):
@@ -540,6 +584,39 @@ def send_contact_usl(sender, instance, created, **kwargs):
     email_msg.send(fail_silently=False)
 
 
+class ContactFormLead_SV(models.Model):
+    fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_('Phone Number'))
+    message = models.TextField(max_length=500,blank=True,null=True,verbose_name=_('Message'))
+
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+
+    def __str__(self):
+        return str(self.email_id)
+
+    class Meta:
+        verbose_name = _("Contact Form Lead Table SV")
+
+@receiver(post_save, sender=ContactFormLead_SV)
+def send_contact_usl(sender, instance, created, **kwargs):
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = (settings.EMAIL_HOST_USER,)
+    message = f'''Full Name: {instance.fullname}
+    Email ID: {instance.email_id}
+    Phone Number: {instance.phone_number}
+    Message: {instance.message}
+
+    '''
+    email_msg = EmailMessage('Contact Us Email',message,email_from,recipient_list)
+    email_msg.send(fail_silently=False)
+
+
 class BlogDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name=_("Blog Image"))
@@ -558,6 +635,24 @@ class BlogDetails(models.Model):
     class Meta:
         verbose_name = _("Blog Table")
 
+
+class BlogDetails_SV(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    blog_image = models.ImageField(upload_to = 'blog_image/', verbose_name=_("Blog Image"))
+    blog_title = models.CharField(max_length=500,null=True,blank=True,verbose_name=_('Blog Title'))
+    blog_description = RichTextField(verbose_name = _('Blog Description'),blank = True)
+    blog_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_("Blog Category"))
+    written_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Written by'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
+
+    class Meta:
+        verbose_name = _("Blog Table SV")
+
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
     review = RichTextField(blank=True,verbose_name = _('User Review'))
@@ -572,6 +667,21 @@ class TestinomialsDetails(models.Model):
 
     class Meta:
         verbose_name = _("Testinomials Details Table")
+
+class TestinomialsDetails_SV(models.Model):
+    user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
+    review = RichTextField(blank=True,verbose_name = _('User Review'))
+    profile_image = models.ImageField(upload_to = 'blog_image/', blank=True,null=True,verbose_name="Profile Image")
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=('UserName'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=('Modified Date Time'))
+    is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=('Status'),blank=True,null=True)
+
+    class Meta:
+        verbose_name = _("Testinomials Details Table SV")
 
 class Header_FooterCMS(models.Model):
     # Header
@@ -603,6 +713,38 @@ class Header_FooterCMS(models.Model):
 
     class Meta:
         verbose_name = _("Header_FooterCMS")
+
+class Header_FooterCMS_SV(models.Model):
+    # Header
+    eddi_logo_header = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name=_("Eddi Logo Header"))
+    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 1 Text'))
+    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
+    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
+    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))
+    login_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Login Button Text'))
+
+    # Footer
+    eddi_logo_footer = models.ImageField(upload_to = 'eddi_logo/',blank=True,null=True,verbose_name=_("Eddi Logo Footer"))
+    description = RichTextField(verbose_name = _('Footer Description'),blank=True)
+    follow_us_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Follow Us Text'))
+    social_media_icon1 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 1"))
+    social_media_icon2 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 2"))
+    social_media_icon3 = models.ImageField(upload_to='social_media_icon/',blank=True,null=True,verbose_name=_("Social Media Icon 3"))
+    copyright_text = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Copyright Text'))
+
+    quick_link_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Text'))
+    quick_link_button_text1 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text1'))
+    quick_link_button_text2 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text2'))
+    quick_link_button_text3 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text3'))
+    quick_link_button_text4 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text4'))
+    quick_link_button_text5 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text5'))
+    quick_link_button_text6 = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Quicklink Button Text6'))
+    
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+
+    class Meta:
+        verbose_name = _("Header_FooterCMS SV")
+
 
 class HomePageCMS(models.Model):
 
@@ -663,6 +805,65 @@ def regions_changed(sender, **kwargs):
 m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 
 
+class HomePageCMS_SV(models.Model):
+
+    #section 1
+    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+
+
+    section_1_description = RichTextField(verbose_name = _('Description'),blank=True)
+
+
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_left_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Left Button Text'))
+    section_2_left_button_link = models.URLField(verbose_name=_('Left Button URL'),blank=True,null=True)
+    section_2_right_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Right Button Text'))
+    section_2_right_button_link = models.URLField(verbose_name=_('Right Button URL'),blank=True,null=True)
+
+    #section 3
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_3_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 4
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_4_logo = models.ManyToManyField(HomePageCMSPartners,verbose_name=_('Partner Logo'),blank=True,null=True)
+
+    #section 5
+    section_5_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_5_blog = models.ManyToManyField(BlogDetails,blank=True,null=True,verbose_name=_("Blog"))
+
+    #section 6
+    section_6_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_6_description = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Description"))
+    section_6_testinomials = models.ManyToManyField(TestinomialsDetails,blank=True,null=True,verbose_name=_('Testinomials'))
+
+    #section 8
+    section_8_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_8_image = models.ImageField(upload_to = 'homepage/',blank=True,null=True,verbose_name=_('Image'))
+    section_8_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_8_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_8_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+   
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Home Page")
+
+def regions_changed(sender, **kwargs):
+    if kwargs['instance'].section_5_blog.count() > 4:
+        raise ValidationError("You can't assign more than four regions")
+
+m2m_changed.connect(regions_changed, sender=HomePageCMS_SV.section_5_blog.through)
+
+
 class AboutUsPageCMS(models.Model):
 
     #section 1
@@ -697,6 +898,40 @@ class AboutUsPageCMS(models.Model):
         verbose_name = _("About Us Page")
 
 
+class AboutUsPageCMS_SV(models.Model):
+
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_video = models.FileField(verbose_name=_('Video Upload'),upload_to='about_us/',null=True,blank=True)
+
+    #section 3
+    section_3_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_3_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Image'))
+    section_3_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_3_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_3_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 4
+    section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_4_courses = models.ManyToManyField(CourseDetails,verbose_name=_('Newest Courses'),blank=True,null=True)
+    section_4_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_4_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+   
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("About Us Page SV")
+
+
 class ContactUsPageCMS(models.Model):
     
     #section 1
@@ -722,6 +957,31 @@ class ContactUsPageCMS(models.Model):
         verbose_name = _("Contact Us Page")
 
 
+class ContactUsPageCMS_SV(models.Model):
+    
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 2
+    section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_2_address = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Address"))
+    section_2_contact = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Contact Number"))
+    section_2_email = models.EmailField(blank=True,null=True,verbose_name=_("Email ID"))
+    section_2_latitude = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Latitude"))
+    section_2_longitude = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Longitude"))
+
+    section_2_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Contact Us Page SV")
+
+
 class PrivacyPolicyCMS(models.Model):
     #section 1
     section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name=_('Banner Image'))
@@ -743,6 +1003,29 @@ class PrivacyPolicyCMS(models.Model):
 
     class Meta:
         verbose_name = _("Privacy Policy Page")
+
+
+class PrivacyPolicyCMS_SV(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Sub Heading"))
+    section_2_sub_description = RichTextField(verbose_name = _('Sub Description'),blank=True)
+    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Last Heading"))
+    section_2_last_description = RichTextField(verbose_name = _('Last Description'),blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Privacy Policy Page SV")
 
 
 class PrivacyPolicyCMSSupplier(models.Model):
@@ -767,6 +1050,29 @@ class PrivacyPolicyCMSSupplier(models.Model):
     class Meta:
         verbose_name = _("Privacy Policy Page Supplier")
 
+
+class PrivacyPolicyCMSSupplier_SV(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'privacy_policy/',blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+    section_2_sub_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Sub Heading"))
+    section_2_sub_description = RichTextField(verbose_name = _('Sub Description'),blank=True)
+    section_2_last_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Last Heading"))
+    section_2_last_description = RichTextField(verbose_name = _('Last Description'),blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Privacy Policy Page Supplier SV")
+
 class TermsConditionCMS(models.Model):
     #section 1
     section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name=_('Banner Image'))
@@ -784,6 +1090,24 @@ class TermsConditionCMS(models.Model):
 
     class Meta:
         verbose_name = _("Terms & Condition Page")
+
+class TermsConditionCMS_SV(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name=_('Banner Image'))
+
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Terms & Condition Page SV")
 
 
 class TermsConditionCMSSupplier(models.Model):
@@ -803,6 +1127,24 @@ class TermsConditionCMSSupplier(models.Model):
 
     class Meta:
         verbose_name = _("Terms & Condition Page Supplier")
+
+class TermsConditionCMSSupplier_SV(models.Model):
+    #section 1
+    section_1_image = models.ImageField(upload_to = 'terms_conditon/',blank=True,null=True,verbose_name=_('Banner Image'))
+
+    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+    #section 2
+    section_2_main_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Main Heading"))
+    section_2_left_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Left Heading"))
+    section_2_description = RichTextField(verbose_name = _('Description'),blank=True)
+
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name = _("Terms & Condition Page Supplier SV")
 
 
 class UserProfile(models.Model):

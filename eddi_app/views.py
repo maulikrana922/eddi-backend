@@ -151,6 +151,7 @@ class Save_stripe_info(APIView):
                     pass
                 return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
             except Exception as ex:
+                print(ex,"exex")
                 return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
         return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -676,6 +677,18 @@ class Header_FooterCMSDetails(APIView):
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])
+class Header_FooterCMSDetails_sv(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,"Header_FooterCMS_SV").objects.latest(CREATED_AT)
+            if not (serializer := Header_FooterCMSSerializer_sv(data)):
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
 class Testimonial(APIView):
     def get(self, request):
         try:
@@ -684,6 +697,21 @@ class Testimonial(APIView):
             shuffle(l)
             data1 = getattr(models,"TestinomialsDetails").objects.filter(**{"pk__in":l[:3]})
             if serializer := TestinomialsDetailsSerializer(data1, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA:serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
+class Testimonial_sv(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,"TestinomialsDetails_SV").objects.all().values_list("id", flat=True)
+            l = list(data)
+            shuffle(l)
+            data1 = getattr(models,"TestinomialsDetails_SV").objects.filter(**{"pk__in":l[:3]})
+            if serializer := TestinomialsDetailsSerializer_sv(data1, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA:serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -706,11 +734,35 @@ class GetHomePageDetails(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
+
+@permission_classes([AllowAny])
+class GetHomePageDetails_sv(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest(CREATED_AT)
+            event_data = EventAd.objects.filter(Q(event_publish_on="Landing Page") | Q(event_publish_on="Both"))
+            if not (serializer := HomePageCMSSerializer(data)):
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            elif not (event_serializer := EventAdSerializer(event_data, many=True)):
+                return Response({STATUS: ERROR, DATA: event_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({STATUS: SUCCESS, DATA: serializer.data, EVENT_DATA:event_serializer.data}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
 @permission_classes([AllowAny])
 class GetPrivacyPolicyDetails(APIView): 
     def get(self, request):
         data = getattr(models,PRIVACY_POLICY_CMS_TABLE).objects.latest(CREATED_AT)
         if not (serializer := PrivacyPolicyPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
+class GetPrivacyPolicyDetails_sv(APIView): 
+    def get(self, request):
+        data = getattr(models,"PrivacyPolicyCMS_SV").objects.latest(CREATED_AT)
+        if not (serializer := PrivacyPolicyPageCMSSerializer_sv(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
@@ -723,6 +775,14 @@ class GetPrivacyPolicySupplierDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
+class GetPrivacyPolicySupplierDetails_sv(APIView): 
+    def get(self, request):
+        data = getattr(models,"PrivacyPolicyCMSSupplier_SV").objects.latest(CREATED_AT)
+        if not (serializer := PrivacyPolicySupplierPageCMSSerializer_sv(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
 class GetTermsConditionDetails(APIView): 
     def get(self, request):
         data = getattr(models,TERMS_CONDITION_CMS_TABLE).objects.latest(CREATED_AT)
@@ -731,9 +791,25 @@ class GetTermsConditionDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
+class GetTermsConditionDetails_sv(APIView): 
+    def get(self, request):
+        data = getattr(models,"TermsConditionCMS_SV").objects.latest(CREATED_AT)
+        if not (serializer := TermsConditionPageCMSSerializer_sv(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
 class GetTermsConditionSupplierDetails(APIView): 
     def get(self, request):
         data = getattr(models,TERMS_CONDITION_CMS_SUPPLIER_TABLE).objects.latest(CREATED_AT)
+        if not (serializer := TermsConditionSupplierPageCMSSerializer(data)):
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+
+@permission_classes([AllowAny])
+class GetTermsConditionSupplierDetails_sv(APIView): 
+    def get(self, request):
+        data = getattr(models,"TermsConditionCMSSupplier_SV").objects.latest(CREATED_AT)
         if not (serializer := TermsConditionSupplierPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -747,11 +823,29 @@ class GetAboutUsPageDetails(APIView):
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])   
+class GetAboutUsPageDetails_sv(APIView):
+    def get(self, request):
+            data = getattr(models,"AboutUsPageCMS_SV").objects.latest(CREATED_AT)
+            if serializer := AboutUsCMSSerializer_sv(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 @permission_classes([AllowAny])
 class GetContactUsPageDetails(APIView):
     def get(self, request):
             data = getattr(models,CONTACTUSCMS_TABLE).objects.latest(CREATED_AT)
             if serializer := ContactUsCMSSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
+class GetContactUsPageDetails_sv(APIView):
+    def get(self, request):
+            data = getattr(models,"ContactUsPageCMS_SV").objects.latest(CREATED_AT)
+            if serializer := ContactUsCMSSerializer_sv(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -779,6 +873,32 @@ class GetBlogDetails(APIView):
             
             data = getattr(models,BLOGDETAILS_TABLE).objects.all().order_by("-created_date_time")
             if serializer := BlogDetailsSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
+class GetBlogDetails_sv(APIView):
+    def get(self, request,uuid = None):
+        if uuid:
+            data = getattr(models,"BlogDetails_SV").objects.get(**{UUID:uuid})
+            try:
+                related_blog = list(getattr(models,"BlogDetails_SV").objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+                for i in related_blog:
+                    for key,value in i.items():
+                        if key == 'blog_image':
+                            i[key] = "/media/" + value
+            except:
+                related_blog = []
+            
+            if serializer := BlogDetailsSerializer_sv(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data, RELATED_BLOG:related_blog}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            
+            data = getattr(models,BLOGDETAILS_TABLE).objects.all().order_by("-created_date_time")
+            if serializer := BlogDetailsSerializer_sv(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -880,7 +1000,7 @@ class UserProfileView(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
-            return Response({STATUS: SUCCESS, DATA: "Edited Profile Data successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Profile Updated Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -945,7 +1065,7 @@ class UserPaymentDetail_info(APIView):
                         send_notification(email_id, courseobj.supplier.email_id, message)
                     except Exception as ex:
                         pass
-                    return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: "Created Successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
                     return Response({MESSAGE: ERROR, DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1024,7 +1144,7 @@ class FavCourseDetails(APIView):
         
         try:
             course_name = request.POST.get(COURSE_NAME)
-            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_name}).get(**{EMAIL_ID:email_id})
+            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_name}).get(**{EMAIL_ID:email_id}).order_by('-created_date_time')
         except Exception as ex:
             user_data_fav = None
             
@@ -1708,6 +1828,14 @@ class Whats_On_Eddi(APIView):
     def get(self, request):
         data = getattr(models,"WhatsonEddiCMS").objects.all()
         if serializer := WhatsOnEddiSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class Whats_On_Eddi_sv(APIView):
+    def get(self, request):
+        data = getattr(models,"WhatsonEddiCMS_SV").objects.all()
+        if serializer := WhatsOnEddiSerializer_sv(data, many=True):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
