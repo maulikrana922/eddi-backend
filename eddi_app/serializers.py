@@ -181,6 +181,14 @@ class CourseMaterialStatusSerializer(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        depth = 1
+        fields = '__all__'
+
+
 class CourseMaterialSerializer(serializers.ModelSerializer):
 
     class Meta:

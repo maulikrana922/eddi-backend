@@ -38,18 +38,18 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def send_notification(sender, receiver, sender_type, receiver_type, message):
-    url = "https://testyourapp.online:5001"
+def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
 
+    url = "https://testyourapp.online:5001"
     payload = json.dumps({
     "type": "type1",
     "json": {
         'sender': sender,
         'receiver': receiver,
-        "sender_type": sender_type,
-        "receiver_type" : receiver_type,
+        # "sender_type": sender_type,
+        # "receiver_type" : receiver_type,
         "message": message,
-        # "time" : datetime.now()
+        "time" : datetime.datetime.now()
     }
     })
     headers = {
@@ -477,6 +477,9 @@ class UserLoginView(APIView):
             data= None
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
+        elif data is not None and data.is_approved == "Pending":
+            return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
+
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -512,11 +515,19 @@ class UserLoginView(APIView):
                     return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as ex:
                 pass
+            
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
             data = None
+
+        try:
+            data2 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if check_password(password, data2.password) and data2.user_type.user_type == SUPPLIER_S:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data2.first_name, LAST_NAME:data2.last_name} ,USER_TYPE:str(data2.user_type),IS_FIRST_TIME_LOGIN: data2.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data2.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            pass
         try:
             user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
             if user_profile:
@@ -912,6 +923,12 @@ class UserPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
+                    try:
+                        supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":courseobj.supplier.email_ideiver})
+                    except Exception as ex:
+                        pass
+                    message = f"{sender_data.first_name}, has applied for {course_data.course_name}"
+                    send_notification(email_id, courseobj.supplier.email_id, )
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
@@ -1741,5 +1758,32 @@ class CourseRating(APIView):
         
         if serializer := CourseRatingSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+
+
+class Notification(APIView):
+    def put(self, request):
+        email_id = get_user_email_by_token(request)
+        receiver = request.POST.get("receiver")
+        is_clear = json.loads(request.POST.get("is_clear"))
+        if request.POST.get("is_clear"):
+            try:
+                data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":receiver})
+                data.delete()
+            except Exception as ex:
+                print(ex,"exexe")
+    
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id})
+        except Exception as ex:
+            print(ex,"exexe")
+            data = None
+        if serializer := NotificationSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+
+
+
+
