@@ -532,11 +532,17 @@ class UserLoginView(APIView):
         try:
             data2 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
             if check_password(password, data2.password) and data2.user_type.user_type == SUPPLIER_S:
-                print("insidedededededed")
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data2.first_name, LAST_NAME:data2.last_name} ,USER_TYPE:str(data2.user_type),IS_FIRST_TIME_LOGIN: data2.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data2.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
-        
+
+        try:
+            data3 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if check_password(password, data3.password) and data3.user_type.user_type == ADMIN_S:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data3.first_name, LAST_NAME:data3.last_name} ,USER_TYPE:str(data3.user_type),IS_FIRST_TIME_LOGIN: data3.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data3.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            pass
+
         if data is not None:
             if data.is_login_from == "google":
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
