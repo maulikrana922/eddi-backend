@@ -45,7 +45,6 @@ urlpatterns = [
     # Blog Details
     path('get-blog-details/',GetBlogDetails.as_view()),
     path('get-blog-details/<str:uuid>/',GetBlogDetails.as_view()),
-
     path('/sv/get-blog-details/',GetBlogDetails_sv.as_view()),
     path('/sv/get-blog-details/<str:uuid>/',GetBlogDetails_sv.as_view()),
 

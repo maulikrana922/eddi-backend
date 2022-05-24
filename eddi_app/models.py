@@ -348,6 +348,7 @@ class SupplierOrganizationProfile(models.Model):
     linkedIn_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("LinkedIn Profile"))
     facebook_profile = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Facebook Profile"))
     reject_reason = models.CharField(max_length=2000,blank=True,null=True,verbose_name=_("Reject_Rason"))
+    approved_once = models.BooleanField(default=False,verbose_name=_('is_deleted'))
 
     # Course Category
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))

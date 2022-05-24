@@ -1122,6 +1122,7 @@ class SupplierOrganizationProfileview(APIView):
                 if request.POST.get(APPROVAL_STATUS) == "Approved":
                     record_map1[IS_APPROVED_ID] = 1
                     data1.rejection_count = 0
+                    data1.approved_once = True
                 elif request.POST.get(APPROVAL_STATUS) == "Pending":
                     record_map1[IS_APPROVED_ID] = 2
                 else:
