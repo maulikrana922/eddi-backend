@@ -478,7 +478,7 @@ class UserLoginView(APIView):
             data= None
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
-        elif data is not None and data.is_approved == "Pending":
+        if data is not None and data.is_approved == "Pending":
             return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
 
         record_map = {}
