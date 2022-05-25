@@ -45,8 +45,8 @@ urlpatterns = [
     # Blog Details
     path('get-blog-details/',GetBlogDetails.as_view()),
     path('get-blog-details/<str:uuid>/',GetBlogDetails.as_view()),
-    path('/sv/get-blog-details/',GetBlogDetails_sv.as_view()),
-    path('/sv/get-blog-details/<str:uuid>/',GetBlogDetails_sv.as_view()),
+    path('/sw/get-blog-details/',GetBlogDetails_sv.as_view()),
+    path('/sw/get-blog-details/<str:uuid>/',GetBlogDetails_sv.as_view()),
 
     # Individual Profile
     path('view-individual-profile_User/',ViewIndividualProfile.as_view()),
@@ -55,25 +55,25 @@ urlpatterns = [
 
     # CMS Pages
     path('whats-on-eddi/',Whats_On_Eddi.as_view()),
-    path('/sv/whats-on-eddi/',Whats_On_Eddi_sv.as_view()),
+    path('/sw/whats-on-eddi/',Whats_On_Eddi_sv.as_view()),
     path('get-home-page-data/',GetHomePageDetails.as_view()),
-    path('/sv/get-home-page-data/',GetHomePageDetails_sv.as_view()),
+    path('/sw/get-home-page-data/',GetHomePageDetails_sv.as_view()),
     path('testimonial/',Testimonial.as_view()),
-    path('/sv/testimonial/',Testimonial_sv.as_view()),
+    path('/sw/testimonial/',Testimonial_sv.as_view()),
     path('get-header-footer-data/',Header_FooterCMSDetails.as_view()),
-    path('/sv/get-header-footer-data/',Header_FooterCMSDetails_sv.as_view()),
+    path('/sw/get-header-footer-data/',Header_FooterCMSDetails_sv.as_view()),
     path('get-aboutus-page-data/',GetAboutUsPageDetails.as_view()),
-    path('/sv/get-aboutus-page-data/',GetAboutUsPageDetails_sv.as_view()),
+    path('/sw/get-aboutus-page-data/',GetAboutUsPageDetails_sv.as_view()),
     path('get-contactus-page-data/',GetContactUsPageDetails.as_view()),
-    path('/sv/get-contactus-page-data/',GetContactUsPageDetails_sv.as_view()),
+    path('/sw/get-contactus-page-data/',GetContactUsPageDetails_sv.as_view()),
     path('get-privacy-page-data/',GetPrivacyPolicyDetails.as_view()),
-    path('/sv/get-privacy-page-data/',GetPrivacyPolicyDetails_sv.as_view()),
+    path('/sw/get-privacy-page-data/',GetPrivacyPolicyDetails_sv.as_view()),
     path('get-privacySupplier-page-data/',GetPrivacyPolicySupplierDetails.as_view()),
-    path('/sv/get-privacySupplier-page-data/',GetPrivacyPolicySupplierDetails_sv.as_view()),
+    path('/sw/get-privacySupplier-page-data/',GetPrivacyPolicySupplierDetails_sv.as_view()),
     path('get-terms-page-data/',GetTermsConditionDetails.as_view()),    
-    path('/sv/get-terms-page-data/',GetTermsConditionDetails_sv.as_view()),    
+    path('/sw/get-terms-page-data/',GetTermsConditionDetails_sv.as_view()),    
     path('get-termsSupplier-page-data/',GetTermsConditionSupplierDetails.as_view()),    
-    path('/sv/get-termsSupplier-page-data/',GetTermsConditionSupplierDetails_sv.as_view()),    
+    path('/sw/get-termsSupplier-page-data/',GetTermsConditionSupplierDetails_sv.as_view()),    
     path('contactus-form/',ContactFormView.as_view()),
 
 # Supplier Dashboard
