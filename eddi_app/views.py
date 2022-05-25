@@ -668,7 +668,10 @@ class Header_FooterCMSDetails(APIView):
    
     def get(self, request):
         try:
-            data = getattr(models,HEADER_FOOTERCMS_TABLE).objects.latest(CREATED_AT)
+            try:
+                data = getattr(models,HEADER_FOOTERCMS_TABLE).objects.latest(CREATED_AT)
+            except Exception as ex:
+                data = None
             if not (serializer := Header_FooterCMSSerializer(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -680,7 +683,10 @@ class Header_FooterCMSDetails(APIView):
 class Header_FooterCMSDetails_sv(APIView):
     def get(self, request):
         try:
-            data = getattr(models,"Header_FooterCMS_SV").objects.latest(CREATED_AT)
+            try:
+                data = getattr(models,"Header_FooterCMS_SV").objects.latest(CREATED_AT)
+            except Exception as ex:
+                data = None
             if not (serializer := Header_FooterCMSSerializer_sv(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -761,7 +767,10 @@ class GetPrivacyPolicyDetails(APIView):
 @permission_classes([AllowAny])
 class GetPrivacyPolicyDetails_sv(APIView): 
     def get(self, request):
-        data = getattr(models,"PrivacyPolicyCMS_SV").objects.latest(CREATED_AT)
+        try:
+            data = getattr(models,"PrivacyPolicyCMS_SV").objects.latest(CREATED_AT)
+        except Exception as ex:
+            data = None
         if not (serializer := PrivacyPolicyPageCMSSerializer_sv(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -777,7 +786,10 @@ class GetPrivacyPolicySupplierDetails(APIView):
 @permission_classes([AllowAny])
 class GetPrivacyPolicySupplierDetails_sv(APIView): 
     def get(self, request):
-        data = getattr(models,"PrivacyPolicyCMSSupplier_SV").objects.latest(CREATED_AT)
+        try:
+            data = getattr(models,"PrivacyPolicyCMSSupplier_SV").objects.latest(CREATED_AT)
+        except Exception as ex:
+            data = None
         if not (serializer := PrivacyPolicySupplierPageCMSSerializer_sv(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -793,7 +805,10 @@ class GetTermsConditionDetails(APIView):
 @permission_classes([AllowAny])
 class GetTermsConditionDetails_sv(APIView): 
     def get(self, request):
-        data = getattr(models,"TermsConditionCMS_SV").objects.latest(CREATED_AT)
+        try:
+            data = getattr(models,"TermsConditionCMS_SV").objects.latest(CREATED_AT)
+        except Exception as ex:
+            data = None
         if not (serializer := TermsConditionPageCMSSerializer_sv(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -809,7 +824,10 @@ class GetTermsConditionSupplierDetails(APIView):
 @permission_classes([AllowAny])
 class GetTermsConditionSupplierDetails_sv(APIView): 
     def get(self, request):
-        data = getattr(models,"TermsConditionCMSSupplier_SV").objects.latest(CREATED_AT)
+        try:
+            data = getattr(models,"TermsConditionCMSSupplier_SV").objects.latest(CREATED_AT)
+        except Exception as ex:
+            data = None
         if not (serializer := TermsConditionSupplierPageCMSSerializer(data)):
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -826,11 +844,17 @@ class GetAboutUsPageDetails(APIView):
 @permission_classes([AllowAny])   
 class GetAboutUsPageDetails_sv(APIView):
     def get(self, request):
-            data = getattr(models,"AboutUsPageCMS_SV").objects.latest(CREATED_AT)
+        try:
+            try:
+                data = getattr(models,"AboutUsPageCMS_SV").objects.latest(CREATED_AT)
+            except Exception as ex:
+                data = None
             if serializer := AboutUsCMSSerializer_sv(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            print(ex,"exexe")
 
 @permission_classes([AllowAny])
 class GetContactUsPageDetails(APIView):
@@ -844,7 +868,10 @@ class GetContactUsPageDetails(APIView):
 @permission_classes([AllowAny])
 class GetContactUsPageDetails_sv(APIView):
     def get(self, request):
-            data = getattr(models,"ContactUsPageCMS_SV").objects.latest(CREATED_AT)
+            try:
+                data = getattr(models,"ContactUsPageCMS_SV").objects.latest(CREATED_AT)
+            except Exception as ex:
+                data = None    
             if serializer := ContactUsCMSSerializer_sv(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
