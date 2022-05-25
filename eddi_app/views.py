@@ -472,10 +472,20 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+
+        # Supplier Exception Case
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             data= None
+        if data is not None:
+            # getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+            try:
+                data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+                if data1.is_approved == "Rejected":
+                    return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as ex:
+                pass
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
         if data is not None and data.is_approved == "Pending":
@@ -489,6 +499,7 @@ class UserLoginView(APIView):
             IS_LOGIN_FROM : request.POST.get(IS_LOGIN_FROM,None),
             STATUS_ID:1
         }
+        # User Social Login
         if request.POST.get("is_login_from"):
             try:
                 d = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
@@ -509,20 +520,20 @@ class UserLoginView(APIView):
                 record_map['USER_TYPE'] = "User"
                 getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
 
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-            try:
-                data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-                if data1.is_approved == "Rejected":
-                    return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as ex:
-                pass
+
+        # if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+        #     try:
+        #         data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+        #         if data1.is_approved == "Rejected":
+        #             return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+        #     except Exception as ex:
+        #         pass
             
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
             data = None
-
        
         try:
             user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -530,27 +541,28 @@ class UserLoginView(APIView):
                 user_profile = True
         except Exception as ex:
             user_profile = False
+
+        # Supplier General Login
         try:
-            data2 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-            if check_password(password, data2.password) and data2.user_type.user_type == SUPPLIER_S:
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data2.first_name, LAST_NAME:data2.last_name} ,USER_TYPE:str(data2.user_type),IS_FIRST_TIME_LOGIN: data2.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data2.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
-
+        
+        # General Admin Login
         try:
-            data3 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-
-            if check_password(password, data3.password) and data3.user_type.user_type == ADMIN_S:
-                print("admininiinin")
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data3.first_name, LAST_NAME:data3.last_name} ,USER_TYPE:str(data3.user_type),IS_FIRST_TIME_LOGIN: data3.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data3.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+            if check_password(password, data.password) and data.user_type.user_type == ADMIN_S:
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             print(ex,"exex")
             pass
 
+        # User Login Cases
         if data is not None:
             if data.is_approved == "Rejected":
                return Response({STATUS: ERROR, DATA: "You Are Rejected By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_login_from == "google":
+                print(data.user_type)
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
