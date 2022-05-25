@@ -102,7 +102,7 @@ class UserSignup(models.Model):
     is_active = models.BooleanField(default=False, verbose_name=_('is_active'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
     is_resetpassword = models.BooleanField(default=True, verbose_name=_('is_resetpassword'))
-
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
 
     class Meta:

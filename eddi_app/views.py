@@ -520,10 +520,6 @@ class UserLoginView(APIView):
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
-            if data.user_type.user_type == ADMIN_S and check_password(password, data.password):
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
-
-
         except Exception as ex:
             data = None
 
@@ -543,9 +539,12 @@ class UserLoginView(APIView):
 
         try:
             data3 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+
             if check_password(password, data3.password) and data3.user_type.user_type == ADMIN_S:
+                print("admininiinin")
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data3.first_name, LAST_NAME:data3.last_name} ,USER_TYPE:str(data3.user_type),IS_FIRST_TIME_LOGIN: data3.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data3.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex,"exex")
             pass
 
         if data is not None:
