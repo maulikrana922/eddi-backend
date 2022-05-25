@@ -520,6 +520,10 @@ class UserLoginView(APIView):
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
+            if data.user_type.user_type == ADMIN_S and check_password(password, data.password):
+                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+
+
         except Exception as ex:
             data = None
 
@@ -747,7 +751,10 @@ class GetHomePageDetails(APIView):
 class GetHomePageDetails_sv(APIView):
     def get(self, request):
         try:
-            data = getattr(models,HOMEPAGECMS_TABLE).objects.latest(CREATED_AT)
+            try:
+                data = getattr(models,"HomePageCMS_SV").objects.latest(CREATED_AT)
+            except Exception as ex:
+                data = None
             event_data = EventAd.objects.filter(Q(event_publish_on="Landing Page") | Q(event_publish_on="Both"))
             if not (serializer := HomePageCMSSerializer_sv(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
