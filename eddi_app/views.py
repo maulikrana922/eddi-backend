@@ -741,7 +741,7 @@ class GetHomePageDetails_sv(APIView):
         try:
             data = getattr(models,HOMEPAGECMS_TABLE).objects.latest(CREATED_AT)
             event_data = EventAd.objects.filter(Q(event_publish_on="Landing Page") | Q(event_publish_on="Both"))
-            if not (serializer := HomePageCMSSerializer(data)):
+            if not (serializer := HomePageCMSSerializer_sv(data)):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             elif not (event_serializer := EventAdSerializer(event_data, many=True)):
                 return Response({STATUS: ERROR, DATA: event_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
