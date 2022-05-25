@@ -33,7 +33,7 @@
     >
       Hello
       <span style="font-family: Arial, Helvetica, sans-serif; font-weight: bold"
-        >{{ fullname }},</span
+        >{{ supplier_name }},</span
       >
     </td>
   </tr>
@@ -42,28 +42,12 @@
   </tr>
   <tr>
     <td style="color: #3e3e3e">
-      Seems like you have requested for a new password, if this is correct please find the below link to reset your password.
+      {{fullname}} has provided {{star}} stars for your course “{{course_name}}”. 
+
     </td>
   </tr>
   <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
-    <td>
-      <a
-        href="https://eddi-frontend.testyourapp.online/#/resetpassword?email={{final_email}}"
-        style="
-          font-family: Arial, Helvetica, sans-serif;
-          font-weight: bold;
-          color: #3e3e3e;
-          text-decoration: none;
-        "
-        >Reset Password</a
-      >
-    </td>
-  </tr>
-  <tr>
-    <td height="45"></td>
+    <td height="45">Review: {{review}}</td>
   </tr>
   <tr>
     <td

@@ -102,7 +102,7 @@ class AddCourseView(APIView):
             else:
                 record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            record_map[CREATED_BY] = 'admin'
+            record_map[CREATED_BY] = supplier_id.user_type
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:

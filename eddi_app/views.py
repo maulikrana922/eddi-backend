@@ -559,7 +559,7 @@ class UserLoginView(APIView):
 
         # User Login Cases
         if data is not None:
-            if str(data.is_approved) == "Rejected":
+            if str(data.is_approved.value) == "Rejected":
                 return Response({STATUS: SUCCESS, DATA: "You Are Rejected By The Admin"}, status=status.HTTP_200_OK)
             if data.is_login_from == "google":
                 print(data.user_type)
@@ -1917,6 +1917,34 @@ class CourseRating(APIView):
                 return Response({STATUS: ERROR, DATA: "Error in record map"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 getattr(models,"CourseRating").objects.update_or_create(**record_map)
+                try:
+                    admin_email = getattr(models,USERSIGNUP_TABLE).objects.get(**{"user_type__user_type":"Admin"})
+                except Exception as ex:
+                    pass
+                if course.created_by == "Admin":
+                    try:
+                        html_path = "user_rate_to_admin.html"
+                        fullname = f'{user.first_name} {user.last_name}'
+                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment")}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (admin_email.email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        print("TRUE")
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                        print("TRUE")
+                    except Exception as ex:
+                        pass
                 return Response({STATUS: SUCCESS, DATA: "User Rating Saved Successfully"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
