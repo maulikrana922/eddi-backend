@@ -54,6 +54,7 @@ COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 INVOICE_HTML = "invoice.html"
 USER_WELCOME_HTML = 'user-welcome.html'
 RESETPASSWORD_HTML = 'email-link.html'
+RESETPASSWORDSupplierAdmin_HTML = 'reset-password-supplierAdmin.html'
 USER_TYPE_ID = 'user_type_id'
 ORGANIZATION_LOCATION = 'organization_location'
 SUB_AREA = 'sub_area'

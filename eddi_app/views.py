@@ -591,10 +591,31 @@ class ForgetPasswordView(APIView):
                     email_msg.attach(img)
                     email_msg.send(fail_silently=False)
                     return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
+
+            if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
+                html_path = RESETPASSWORDSupplierAdmin_HTML
+                fullname = data.first_name + " " + data.last_name
+                context_data = {"final_email": email_id,"fullname":fullname}
+                email_html_template = get_template(html_path).render(context_data)
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = (email_id,)
+                email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                email_msg.content_subtype = 'html'
+                path = 'eddi_app'
+                img_dir = 'static'
+                image = 'Logo.jpg'
+                file_path = os.path.join(path,img_dir,image)
+                with open(file_path,'rb') as f:
+                    img = MIMEImage(f.read())
+                    img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    img.add_header('Content-Disposition', 'inline', filename=image)
+                email_msg.attach(img)
+                email_msg.send(fail_silently=False)
+                return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
             else:
                 return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: 'error'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                 
 
 @permission_classes([AllowAny])

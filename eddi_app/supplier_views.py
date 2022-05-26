@@ -1168,6 +1168,7 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[IS_APPROVED_ID] = 1
                     data1.rejection_count = 0
                     data1.approved_once = True
+                    data1.save()
                     try:
                         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
@@ -1195,6 +1196,7 @@ class SupplierOrganizationProfileview(APIView):
                 else:
                     record_map1[IS_APPROVED_ID] = 3
                     data1.rejection_count += 1
+                    data1.save()
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
                     try:
