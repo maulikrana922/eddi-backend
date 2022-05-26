@@ -809,7 +809,7 @@ m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 class HomePageCMS_SV(models.Model):
 
     #section 1
-    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name=_('Banner Image'))
+    section_1_image = models.ManyToManyField(HomePageCMSBanner_SV,blank=True,null=True,verbose_name=_('Banner Image'))
     section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
 
 
@@ -834,16 +834,16 @@ class HomePageCMS_SV(models.Model):
 
     #section 4
     section_4_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
-    section_4_logo = models.ManyToManyField(HomePageCMSPartners,verbose_name=_('Partner Logo'),blank=True,null=True)
+    section_4_logo = models.ManyToManyField(HomePageCMSPartners_SV,verbose_name=_('Partner Logo'),blank=True,null=True)
 
     #section 5
     section_5_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
-    section_5_blog = models.ManyToManyField(BlogDetails,blank=True,null=True,verbose_name=_("Blog"))
+    section_5_blog = models.ManyToManyField(BlogDetails_SV,blank=True,null=True,verbose_name=_("Blog"))
 
     #section 6
     section_6_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
     section_6_description = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Description"))
-    section_6_testinomials = models.ManyToManyField(TestinomialsDetails,blank=True,null=True,verbose_name=_('Testinomials'))
+    section_6_testinomials = models.ManyToManyField(TestinomialsDetails_SV,blank=True,null=True,verbose_name=_('Testinomials'))
 
     #section 8
     section_8_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
@@ -856,7 +856,7 @@ class HomePageCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Home Page")
+        verbose_name = _("Home Page SV")
 
 def regions_changed(sender, **kwargs):
     if kwargs['instance'].section_5_blog.count() > 4:
