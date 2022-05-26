@@ -480,12 +480,13 @@ class UserLoginView(APIView):
             data= None
         if data is not None:
             # getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-            try:
-                data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-                if data1.is_approved == "Rejected":
-                    return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as ex:
-                pass
+            # try:
+                # data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+            if data.is_approved == "Rejected":
+                return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # except Exception as ex:
+            #     pass
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
         if data is not None and data.is_approved == "Pending":

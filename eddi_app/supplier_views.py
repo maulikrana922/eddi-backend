@@ -87,7 +87,6 @@ class AddCourseView(APIView):
             ORGANIZATION_DOMAIN:res,
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
-            COURSE_PRICE: request.POST.get(COURSE_PRICE,None),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             MEETING_LINK : request.POST.get(MEETING_LINK,None),
@@ -97,6 +96,9 @@ class AddCourseView(APIView):
             IS_APPROVED_ID : 2,
             STATUS_ID:1
             }
+            
+            if request.POST.get(COURSE_PRICE):
+                record_map[COURSE_PRICE] = float(request.POST.get(COURSE_PRICE))
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
