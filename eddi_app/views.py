@@ -561,8 +561,8 @@ class UserLoginView(APIView):
         if data is not None:
             if data.status.id == 2:
                 return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
-            if data.is_login_from == "google":
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+            # if data.is_login_from == "google":
+            #     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
             if not check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_active == True:
