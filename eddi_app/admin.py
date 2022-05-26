@@ -45,6 +45,21 @@ class HomePageCMSBannerAdmin(admin.ModelAdmin):
 
 admin.site.register(HomePageCMSBanner,HomePageCMSBannerAdmin)
 
+class HomePageCMSBanner_SVAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('image_title','banner',)
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('created_by','modified_by',)
+        }),
+
+    )
+
+
+admin.site.register(HomePageCMSBanner_SV,HomePageCMSBanner_SVAdmin)
+
 admin.site.register(InvoiceVATCMS)
 
 class BlogDetailsAdmin(admin.ModelAdmin):
@@ -65,6 +80,24 @@ class BlogDetailsAdmin(admin.ModelAdmin):
 
 admin.site.register(BlogDetails,BlogDetailsAdmin)
 
+class BlogDetails_SVAdmin(admin.ModelAdmin):
+    list_display = ('blog_title','written_by')
+    list_filter = ('written_by',)
+
+    fieldsets = (
+        (None, {
+            'fields': ('blog_image','blog_title','blog_description','blog_category','written_by')
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('created_by','modified_by',)
+        }),
+
+    )
+
+
+admin.site.register(BlogDetails_SV,BlogDetails_SVAdmin)
+
 class HomePageCMSPartnersAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
@@ -80,6 +113,21 @@ class HomePageCMSPartnersAdmin(admin.ModelAdmin):
 
 admin.site.register(HomePageCMSPartners,HomePageCMSPartnersAdmin)
 
+class HomePageCMSPartners_SVAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('image_title','partner_logo',)
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('created_by','modified_by',)
+        }),
+
+    )
+
+
+admin.site.register(HomePageCMSPartners_SV,HomePageCMSPartners_SVAdmin)
+
 class TestinomialsDetailsAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
@@ -94,6 +142,22 @@ class TestinomialsDetailsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TestinomialsDetails,TestinomialsDetailsAdmin)
+
+class TestinomialsDetails_SVAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('user_id','review',)
+        }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('created_by','modified_by',)
+        }),
+
+    )
+
+
+admin.site.register(TestinomialsDetails_SV,TestinomialsDetails_SVAdmin)
+
 class AboutUsPageCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -117,6 +181,32 @@ class AboutUsPageCMSAdmin(admin.ModelAdmin):
    
 
 admin.site.register(AboutUsPageCMS, AboutUsPageCMSAdmin)
+
+
+class AboutUsPageCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - How It Works', {
+            'classes': ('collapse',),
+            'fields': ('section_2_heading','section_2_description','section_2_video'),
+        }),
+         ('Section 3 - Why Eddi', {
+            'classes': ('collapse',),
+            'fields': ('section_3_heading','section_3_image','section_3_description','section_3_button_text','section_3_button_link',),
+        }),
+        ('Section 4 - Our Newest Courses', {
+            'classes': ('collapse',),
+            'fields': ('section_4_heading','section_4_courses','section_4_button_text','section_4_button_link'),
+        }),
+    )
+   
+
+admin.site.register(AboutUsPageCMS_SV, AboutUsPageCMS_SVAdmin)
+
 class HomePageCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -153,6 +243,42 @@ class HomePageCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(HomePageCMS, HomePageCMSAdmin)
 
+class HomePageCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_description','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - About Eddi', {
+            'classes': ('collapse',),
+            'fields': ('section_2_heading','section_2_description','section_2_left_button_text','section_2_left_button_link','section_2_right_button_text','section_2_right_button_link'),
+        }),
+         ('Section 3 - Courses Eddi Offers', {
+            'classes': ('collapse',),
+            'fields': ('section_3_heading','section_3_button_text','section_3_button_link',),
+        }),
+        ('Section 4 - Eddi Partners', {
+            'classes': ('collapse',),
+            'fields': ('section_4_heading','section_4_logo',),
+        }),
+        ('Section 5 - News and Articles', {
+            'classes': ('collapse',),
+            'fields': ('section_5_heading','section_5_blog',),
+        }),
+        ('Section 6 - Testinomials', {
+            'classes': ('collapse',),
+            'fields': ('section_6_heading','section_6_description','section_6_testinomials',),
+        }),
+        ('Section 8 - Become Supplier', {
+            'classes': ('collapse',),
+            'fields': ('section_8_heading','section_8_image','section_8_description','section_8_button_text','section_8_button_link'),
+        }),
+    )
+   
+
+admin.site.register(HomePageCMS_SV, HomePageCMS_SVAdmin)
+
 class ContactUsPageCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -167,6 +293,21 @@ class ContactUsPageCMSAdmin(admin.ModelAdmin):
        )
 
 admin.site.register(ContactUsPageCMS, ContactUsPageCMSAdmin)
+
+class ContactUsPageCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Get In Touch', {
+            'classes': ('collapse',),
+            'fields': ('section_2_heading','section_2_address','section_2_contact','section_2_email','section_2_latitude', 'section_2_longitude', 'section_2_button_text'),
+        }),
+       )
+
+admin.site.register(ContactUsPageCMS_SV, ContactUsPageCMS_SVAdmin)
 
 
 class Header_FooterCMSAdmin(admin.ModelAdmin):
@@ -184,6 +325,21 @@ class Header_FooterCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(Header_FooterCMS, Header_FooterCMSAdmin)
 
+class Header_FooterCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Header', {
+            'classes': ('collapse',),
+            'fields': ('eddi_logo_header','button_1_text','button_2_text','button_3_text','button_4_text','login_button_text')
+        }),
+        ('Footer', {
+            'classes': ('collapse',),
+            'fields': ('eddi_logo_footer','description','follow_us_text','social_media_icon1','social_media_icon2','social_media_icon3','copyright_text','quick_link_text','quick_link_button_text1','quick_link_button_text2','quick_link_button_text3','quick_link_button_text4','quick_link_button_text5','quick_link_button_text6'),
+        }),
+       )
+
+admin.site.register(Header_FooterCMS_SV, Header_FooterCMS_SVAdmin)
+
 class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -200,6 +356,22 @@ class PrivacyPolicyCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(PrivacyPolicyCMS, PrivacyPolicyCMSAdmin)
 
+class PrivacyPolicyCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Privacy Policy', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description','section_2_sub_heading','section_2_sub_description','section_2_last_heading','section_2_last_description'),
+        })
+    )
+   
+
+admin.site.register(PrivacyPolicyCMS_SV, PrivacyPolicyCMS_SVAdmin)
+
 class PrivacyPolicyCMSSupplierAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -215,6 +387,22 @@ class PrivacyPolicyCMSSupplierAdmin(admin.ModelAdmin):
    
 
 admin.site.register(PrivacyPolicyCMSSupplier, PrivacyPolicyCMSSupplierAdmin)
+
+class PrivacyPolicyCMSSupplier_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Privacy Policy', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description','section_2_sub_heading','section_2_sub_description','section_2_last_heading','section_2_last_description'),
+        })
+    )
+   
+
+admin.site.register(PrivacyPolicyCMSSupplier_SV, PrivacyPolicyCMSSupplier_SVAdmin)
 admin.site.register(NonBuiltInUserToken)
 
 
@@ -234,6 +422,22 @@ class TermsConditionCMSAdmin(admin.ModelAdmin):
 
 admin.site.register(TermsConditionCMS, TermsConditionCMSAdmin)
 
+class TermsConditionCMS_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Terms & Conditions', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description'),
+        })
+    )
+   
+
+admin.site.register(TermsConditionCMS_SV, TermsConditionCMS_SVAdmin)
+
 class TermsConditionCMSSupplierAdmin(admin.ModelAdmin):
     
        fieldsets = (
@@ -249,6 +453,22 @@ class TermsConditionCMSSupplierAdmin(admin.ModelAdmin):
    
 
 admin.site.register(TermsConditionCMSSupplier, TermsConditionCMSSupplierAdmin)
+
+class TermsConditionCMSSupplier_SVAdmin(admin.ModelAdmin):
+    
+       fieldsets = (
+        ('Section 1 - Main', {
+            'classes': ('collapse',),
+            'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
+        }),
+        ('Section 2 - Terms & Conditions', {
+            'classes': ('collapse',),
+            'fields': ('section_2_main_heading','section_2_left_heading','section_2_description'),
+        })
+    )
+   
+
+admin.site.register(TermsConditionCMSSupplier_SV, TermsConditionCMSSupplier_SVAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
     exclude = ('is_first_time_login','created_by','modified_by','status')
@@ -301,16 +521,16 @@ admin.site.register(WhatsonEddiCMS)
 
 
 admin.site.register(WhatsonEddiCMS_SV)
-admin.site.register(HomePageCMSBanner_SV)
-admin.site.register(HomePageCMSPartners_SV)
 admin.site.register(ContactFormLead_SV)
-admin.site.register(BlogDetails_SV)
-admin.site.register(TestinomialsDetails_SV)
-admin.site.register(Header_FooterCMS_SV)
-admin.site.register(HomePageCMS_SV)
-admin.site.register(AboutUsPageCMS_SV)
-admin.site.register(ContactUsPageCMS_SV)
-admin.site.register(PrivacyPolicyCMS_SV)
-admin.site.register(PrivacyPolicyCMSSupplier_SV)
-admin.site.register(TermsConditionCMS_SV)
-admin.site.register(TermsConditionCMSSupplier_SV)
+# admin.site.register(HomePageCMSBanner_SV)
+# admin.site.register(HomePageCMSPartners_SV)
+# admin.site.register(BlogDetails_SV)
+# admin.site.register(TestinomialsDetails_SV)
+# admin.site.register(Header_FooterCMS_SV)
+# admin.site.register(HomePageCMS_SV)
+# admin.site.register(AboutUsPageCMS_SV)
+# admin.site.register(ContactUsPageCMS_SV)
+# admin.site.register(PrivacyPolicyCMS_SV)
+# admin.site.register(PrivacyPolicyCMSSupplier_SV)
+# admin.site.register(TermsConditionCMS_SV)
+# admin.site.register(TermsConditionCMSSupplier_SV)

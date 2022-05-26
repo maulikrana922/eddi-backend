@@ -127,8 +127,18 @@ JAZZMIN_SETTINGS = {
             "icon": "fas fa-home",
         },
         {
+            "name": "Home Page SV", 
+            "url": "/admin/eddi_app/homepagecms_sv/1/change/", 
+            "icon": "fas fa-home",
+        },
+        {
             "name": "About Us Page", 
             "url": "/admin/eddi_app/aboutuspagecms/1/change/", 
+            "icon": "fas fa-info",
+        },
+        {
+            "name": "About Us Page SV", 
+            "url": "/admin/eddi_app/aboutuspagecms_sv/1/change/", 
             "icon": "fas fa-info",
         },
         {
@@ -137,13 +147,28 @@ JAZZMIN_SETTINGS = {
             "icon": "fas fa-phone",
         },
         {
+            "name": "Contact Us Page SV", 
+            "url": "/admin/eddi_app/contactuspagecms_sv/1/change/", 
+            "icon": "fas fa-phone",
+        },
+        {
             "name": "Privacy Policy Page", 
             "url": "/admin/eddi_app/privacypolicycms/1/change/", 
             "icon": "fas fa-file-contract",
         },
         {
+            "name": "Privacy Policy Page SV", 
+            "url": "/admin/eddi_app/privacypolicycms_sv/1/change/", 
+            "icon": "fas fa-file-contract",
+        },
+        {
             "name": "Terms & Conditions Page", 
             "url": "/admin/eddi_app/termsconditioncms/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
+        {
+            "name": "Terms & Conditions Page SV", 
+            "url": "/admin/eddi_app/termsconditioncms_sv/1/change/", 
             "icon": "fas fa-file-signature",
         },
         ],
