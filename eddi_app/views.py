@@ -478,18 +478,18 @@ class UserLoginView(APIView):
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             data= None
-        if data is not None:
+        if data is not None and str(data.is_approved.value) == "Rejected":
             # getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
             # try:
                 # data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-            if data.is_approved == "Rejected":
-                return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            # if str(data.is_approved.value) == "Rejected":
+            return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
 
             # except Exception as ex:
             #     pass
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
-        if data is not None and data.is_approved == "Pending":
+        if data is not None and str(data.is_approved.value) == "Pending":
             return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
 
         record_map = {}
@@ -531,7 +531,7 @@ class UserLoginView(APIView):
         #         pass
             
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
             data = None
@@ -545,7 +545,7 @@ class UserLoginView(APIView):
 
         # Supplier General Login
         try:
-            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S:
+            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S and str(data.status.value == "Active"):
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
@@ -555,13 +555,12 @@ class UserLoginView(APIView):
             if check_password(password, data.password) and data.user_type.user_type == ADMIN_S:
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
-            print(ex,"exex")
-            pass
+            return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         # User Login Cases
         if data is not None:
-            if str(data.is_approved.value) == "Rejected":
-                return Response({STATUS: SUCCESS, DATA: "You Are Rejected By The Admin"}, status=status.HTTP_200_OK)
+            if str(data.status.value) == "Inactive":
+                return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_login_from == "google":
                 print(data.user_type)
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)

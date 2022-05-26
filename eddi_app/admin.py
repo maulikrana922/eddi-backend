@@ -471,7 +471,7 @@ class TermsConditionCMSSupplier_SVAdmin(admin.ModelAdmin):
 admin.site.register(TermsConditionCMSSupplier_SV, TermsConditionCMSSupplier_SVAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
-    exclude = ('is_first_time_login','created_by','modified_by','status')
+    exclude = ('is_first_time_login','created_by','modified_by')
     list_display = ('email_id','user_type','status')
 
     list_filter = ('user_type','status')
