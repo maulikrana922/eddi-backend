@@ -96,7 +96,7 @@ class AddCourseView(APIView):
             IS_APPROVED_ID : 2,
             STATUS_ID:1
             }
-            
+
             if request.POST.get(COURSE_PRICE):
                 record_map[COURSE_PRICE] = float(request.POST.get(COURSE_PRICE))
             if request.POST.get(COURSE_STARTING_DATE) == "":
@@ -1069,6 +1069,28 @@ class SupplierOrganizationProfileview(APIView):
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
                 try:
+                    data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    html_path = "supplier_organization_approval.html"
+                    fullname = f'{data.first_name} {data.last_name}'
+                    context_data = {'fullname':fullname}
+                    email_html_template = get_template(html_path).render(context_data)
+                    email_from = settings.EMAIL_HOST_USER
+                    recipient_list = (email_id,)
+                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    email_msg.content_subtype = 'html'
+                    path = 'eddi_app'
+                    img_dir = 'static'
+                    image = 'Logo.jpg'
+                    file_path = os.path.join(path,img_dir,image)
+                    with open(file_path,'rb') as f:
+                        img = MIMEImage(f.read())
+                        img.add_header('Content-ID', '<{name}>'.format(name=image))
+                        img.add_header('Content-Disposition', 'inline', filename=image)
+                    email_msg.attach(img)
+                    email_msg.send(fail_silently=False)
+                except Exception as ex:
+                    pass
+                try:
                     data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     data1.is_resetpassword = False
                     data1.is_first_time_login = False
@@ -1117,6 +1139,28 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[STATUS_ID] = 1
                 else:
                     record_map1[STATUS_ID] = 2
+                    try:
+                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        html_path = "supplier_inactive.html"
+                        fullname = f'{data.first_name} {data.last_name}'
+                        context_data = {'fullname':fullname, "email_id":email_id}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except Exception as ex:
+                        pass
             else:
                 record_map1[STATUS] = data1.status
 
@@ -1125,6 +1169,28 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[IS_APPROVED_ID] = 1
                     data1.rejection_count = 0
                     data1.approved_once = True
+                    try:
+                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        html_path = "supplier_organization_approved.html"
+                        fullname = f'{data.first_name} {data.last_name}'
+                        context_data = {'fullname':fullname, "email_id":email_id}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except Exception as ex:
+                        pass
                 elif request.POST.get(APPROVAL_STATUS) == "Pending":
                     record_map1[IS_APPROVED_ID] = 2
                 else:
@@ -1132,6 +1198,29 @@ class SupplierOrganizationProfileview(APIView):
                     data1.rejection_count += 1
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
+                    try:
+                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        html_path = "supplier_organization_reject.html"
+                        fullname = f'{data.first_name} {data.last_name}'
+                        context_data = {'fullname':fullname, "email_id":email_id, "reason":request.POST.get("reject_reason")}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except Exception as ex:
+                        pass
+                    
             else:
                 record_map1[IS_APPROVED] = data1.is_approved
             for key,value in record_map1.items():
