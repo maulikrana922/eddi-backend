@@ -98,7 +98,7 @@ class AddCourseView(APIView):
             }
 
             if request.POST.get(COURSE_PRICE):
-                record_map[COURSE_PRICE] = float(request.POST.get(COURSE_PRICE))
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
@@ -1031,7 +1031,6 @@ class SupplierOrganizationProfileviewall(APIView):
         email_id = get_user_email_by_token(request)
         try:
             all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type" : SUPPLIER_S}).values_list('email_id', flat=True)
-            print(all_supplier, "alalal")
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
         except Exception as ex:
             data= None
