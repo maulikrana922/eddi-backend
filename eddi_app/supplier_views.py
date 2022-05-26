@@ -1130,6 +1130,7 @@ class SupplierOrganizationProfileview(APIView):
     def put(self, request):
         email_id = get_user_email_by_token(request)
         supplier_email = request.POST.get("supplier_email")
+        print(supplier_email,"supplierererer")
         if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
             record_map1 = {}
@@ -1195,6 +1196,7 @@ class SupplierOrganizationProfileview(APIView):
                     record_map1[IS_APPROVED_ID] = 2
                 else:
                     record_map1[IS_APPROVED_ID] = 3
+                    print("herererer")
                     data1.rejection_count += 1
                     data1.save()
                     if request.POST.get("reject_reason"):
