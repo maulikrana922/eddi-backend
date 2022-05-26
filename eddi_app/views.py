@@ -479,14 +479,7 @@ class UserLoginView(APIView):
         except Exception as ex:
             data= None
         if data is not None and str(data.is_approved.value) == "Rejected":
-            # getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-            # try:
-                # data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-            # if str(data.is_approved.value) == "Rejected":
             return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # except Exception as ex:
-            #     pass
         if data is not None and data.rejection_count == 3:
             return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
         if data is not None and str(data.is_approved.value) == "Pending":
@@ -501,34 +494,27 @@ class UserLoginView(APIView):
             STATUS_ID:1
         }
         # User Social Login
-        if request.POST.get("is_login_from") != "normal":
-            try:
-                d = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
-                if d.is_login_from == "google":
-                    try:
-                        user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                        if user_profile:
-                            user_profile = True
-                    except Exception as ex:
-                        user_profile = False
-                    token = NonBuiltInUserToken.objects.create(user_id = d.id)
-                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
-                else:
-                    d.is_login_from = "google"
-                    d.save()
-                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
-            except Exception as ex:
-                record_map['USER_TYPE'] = "User"
-                getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
-
-
-        # if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
-        #     try:
-        #         data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        #         if data1.is_approved == "Rejected":
-        #             return Response({STATUS: ERROR, DATA: "Your Profile is Rejected By Admin"}, status=status.HTTP_400_BAD_REQUEST)
-        #     except Exception as ex:
-        #         pass
+        if request.POST.get("is_login_from"):
+            if request.POST.get("is_login_from") != "normal":
+                print("inside googlglgl")
+                try:
+                    d = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
+                    if d.is_login_from == "google":
+                        try:
+                            user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                            if user_profile:
+                                user_profile = True
+                        except Exception as ex:
+                            user_profile = False
+                        token = NonBuiltInUserToken.objects.create(user_id = d.id)
+                        return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,"is_resetpassword" : d.is_resetpassword,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+                    else:
+                        d.is_login_from = "google"
+                        d.save()
+                        return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,"is_resetpassword" : d.is_resetpassword,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+                except Exception as ex:
+                    record_map['USER_TYPE'] = "User"
+                    getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
             
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
@@ -545,7 +531,7 @@ class UserLoginView(APIView):
 
         # Supplier General Login
         try:
-            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S and str(data.status.value == "Active"):
+            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S:
                 return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
@@ -624,7 +610,6 @@ class ResetPasswordView(APIView):
             if data:
                 setattr(data,PASSWORD,make_password(password))
                 setattr(data,"is_resetpassword",False)
-
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
                 setattr(data,MODIFIED_BY,'admin')
                 data.save()
