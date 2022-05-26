@@ -424,7 +424,8 @@ def add_organization_domain(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=CourseDetails)
 def bulk_email(sender, instance, created, **kwargs):
-    if instance.course_for_organization == True and instance.target_users:
+    if instance.course_for_organization == True:
+        print("insidedededed")
         connection = mail.get_connection()
         instance.target_users.split(",")
         try:
@@ -449,14 +450,18 @@ def bulk_email(sender, instance, created, **kwargs):
                     username = user_detail.first_name
                 except Exception as ex:
                     username = ""
-                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : instance.supplier_organization.organizational_name, "uuid":instance.uuid}
+                try:
+                    organization_data = instance.supplier_organization.organizational_name
+                except:
+                    organization_data = None
+                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "uuid":instance.uuid}
                 html_content = render_to_string(html_path, context_data)               
                 text_content = "..."                      
                 receiver = i,
                 msg = EmailMultiAlternatives("Hello", text_content, email_from, receiver, connection=connection)                                      
                 msg.attach_alternative(html_content, "text/html")
                 msg.attach(img)
-                msg.send()                
+                msg.send()
             connection.close()
         except Exception as ex:
             pass

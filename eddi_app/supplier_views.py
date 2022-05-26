@@ -54,6 +54,12 @@ class AddCourseView(APIView):
         email_id = get_user_email_by_token(request)
         course_organization = None
 
+        if request.POST.get(COURSE_NAME):
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+            if course_data.exist():
+                return Response({STATUS: ERROR, DATA: "Please Choose Unique Course Name"}, status=status.HTTP_400_BAD_REQUEST)
+
+
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
             course_organization = True
             test_str = email_id
@@ -63,15 +69,20 @@ class AddCourseView(APIView):
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
             sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,None)})
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
+            
         except Exception as ex:
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            organization_data = None
         try:
             record_map = {
             SUPPLIER_ID: supplier_id.id,
@@ -96,7 +107,8 @@ class AddCourseView(APIView):
             IS_APPROVED_ID : 2,
             STATUS_ID:1
             }
-
+            if organization_data != None:
+                record_map["supplier_organization_id"] = organization_data.id
             if request.POST.get(COURSE_PRICE):
                 record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             if request.POST.get(COURSE_STARTING_DATE) == "":
