@@ -559,7 +559,7 @@ class UserLoginView(APIView):
 
         # User Login Cases
         if data is not None:
-            if str(data.status.value) == "Inactive":
+            if data.status.id == 2:
                 return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
             if data.is_login_from == "google":
                 print(data.user_type)
