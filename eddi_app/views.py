@@ -333,7 +333,6 @@ class GetUserDetails(APIView):
                                 enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).count()
                                 individuals_useremail = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).values_list("email_id", flat=True)
                                 individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
-                                user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:data.email_id})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Error in filtering data"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -349,10 +348,7 @@ class GetUserDetails(APIView):
                                 if serializer := SupplierOrganizationProfileSerializer(organization_profile_data):
                                     if serializer1 := SupplierProfileSerializer(supplier_profile_data):
                                         if serializer2 := UserProfileSerializer(individuals_user, many=True):
-                                            if serializer3 := UserSignupSerializer(user_data):
-                                                return Response({STATUS: SUCCESS, 'organization_profile': serializer.data, 'supplier_profile':[serializer1.data,userSignup_serializer.data], 'total_course':supplier_course_count, "learners":enrolled_count, "individual_list":serializer2.data, "user_data":serializer3.data}, status=status.HTTP_200_OK)
-                                            else:
-                                                return Response({STATUS: ERROR, DATA:serializer3.errors}, status=status.HTTP_400_BAD_REQUEST)
+                                            return Response({STATUS: SUCCESS, 'organization_profile': serializer.data, 'supplier_profile':[serializer1.data,userSignup_serializer.data], 'total_course':supplier_course_count, "learners":enrolled_count, "individual_list":serializer2.data}, status=status.HTTP_200_OK)
                                         else:
                                             return Response({STATUS: ERROR, DATA:serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
                                     else:

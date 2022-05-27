@@ -1065,6 +1065,17 @@ class SupplierOrganizationProfileAdminview(APIView):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.all()
+        except Exception as ex:
+            data= None
+        if serializer := SupplierOrganizationProfileSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 
 class SupplierOrganizationProfileview(APIView):
