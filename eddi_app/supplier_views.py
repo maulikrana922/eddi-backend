@@ -1118,23 +1118,31 @@ class SupplierOrganizationProfileview(APIView):
 
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        supplier_email = request.POST.get("supplier_email")
-        if request.POST.get("supplier_email"):
-            try:
-                data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
-            except Exception as ex:
-                data= None
-            if serializer := SupplierOrganizationProfileSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        # supplier_email = request.POST.get("supplier_email")
+        # if request.POST.get("supplier_email"):
+            # try:
+            #     data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
+            # except Exception as ex:
+            #     data= None
+            # if serializer := SupplierOrganizationProfileSerializer(data):
+            #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            # else:
+            #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data_user = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            data_user = None
 
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             data= None
+            
         if serializer := SupplierOrganizationProfileSerializer(data):
-            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            if serializer1 := UserSignupSerializer(data_user):
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "user_data":serializer1.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
