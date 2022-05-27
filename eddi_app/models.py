@@ -560,7 +560,7 @@ class HomePageCMSPartners_SV(models.Model):
 class ContactFormLead(models.Model):
     fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_('Phone Number'))
+    phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Phone Number'))
     message = models.TextField(max_length=500,blank=True,null=True,verbose_name=_('Message'))
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
@@ -593,7 +593,7 @@ def send_contact_usl(sender, instance, created, **kwargs):
 class ContactFormLead_SV(models.Model):
     fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_('Phone Number'))
+    phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Phone Number'))
     message = models.TextField(max_length=500,blank=True,null=True,verbose_name=_('Message'))
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
@@ -1164,8 +1164,8 @@ class UserProfile(models.Model):
     gender = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Gender"))
     location = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("location"))
     dob = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Date of Birth"))
-    personal_number = models.IntegerField(blank=True,null=True,verbose_name=_("Personal Number"))
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
+    personal_number = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Personal Number"))
+    phone_number = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Phone Number"))
 
     #Educational Information
     highest_education = models.CharField(max_length=50,blank=True,null=True,verbose_name=_("Highest Level of Education"))
@@ -1218,7 +1218,7 @@ class UserPersonalProfile(models.Model):
     profile_image = models.ImageField(upload_to = 'profile_image/',blank=True,null=True,verbose_name=_('Profile Image'))
     full_name = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Full Name"))
     location = models.CharField(max_length=300, blank=True, null=True, verbose_name=_("Location"))
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
+    phone_number = models.CharField(max_length=50, blank=True, null=True,verbose_name=_("Phone Number"))
     email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name=_("Email Id"),unique=True)
 
     class Meta:
@@ -1232,7 +1232,7 @@ class SupplierProfile(models.Model):
     account_holder_name = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Account Holder Name"))
     ifsc_code = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("IFSC Code"))
     address = models.TextField(max_length=500,blank=True,null=True,verbose_name=_("Address"))
-    phone_number = models.BigIntegerField(blank=True,null=True,verbose_name=_("Phone Number"))
+    phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Phone Number"))
     about_me = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("About Me"))
     supplier_image = models.ImageField(upload_to = 'supplier_image/',blank=True,null=True,verbose_name=_('Supplier Image'))
     is_deleted = models.BooleanField(default=False,verbose_name=_('is_deleted'))
