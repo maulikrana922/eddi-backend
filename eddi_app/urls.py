@@ -102,6 +102,7 @@ urlpatterns = [
 
     # Supplier Organization Flow
     path('supplier-organization-profile/',SupplierOrganizationProfileview.as_view()),
+    path('supplier-organization-profile-adminview/',SupplierOrganizationProfileAdminview.as_view()),
     path('supplier-organization-profile-all/',SupplierOrganizationProfileviewall.as_view()),
     path('supplier-profile/',SupplierProfileView.as_view()),
     
