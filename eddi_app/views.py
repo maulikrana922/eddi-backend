@@ -403,9 +403,20 @@ class GetUserDetails(APIView):
                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile or user profile"}, status=status.HTTP_400_BAD_REQUEST)
        
         else:
-            data = getattr(models,USERSIGNUP_TABLE).objects.all()
+            try:
+                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
+                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
+            except Exception as ex:
+                supplier_data = None
+            try:
+                data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False})
+            except Exception as ex:
+                data = None
             if serializer := UserSignupSerializer(data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data, "supplier_organization":serializer2.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
