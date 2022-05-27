@@ -473,16 +473,6 @@ class UserLoginView(APIView):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
 
-        # Supplier Exception Case
-        try:
-            data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as ex:
-            data= None
-        if data is not None and data.rejection_count == 3:
-            return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
-        if data is not None and str(data.is_approved.value) == "Pending":
-            return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
-
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -514,11 +504,12 @@ class UserLoginView(APIView):
                     record_map['USER_TYPE'] = "User"
                     getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
             
+
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
-            data = None
+            return Response({STATUS: ERROR, DATA: "Entered User Credentials Might Be Deleted"}, status=status.HTTP_400_BAD_REQUEST)
        
         try:
             user_profile = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -529,33 +520,54 @@ class UserLoginView(APIView):
 
         # Supplier General Login
         try:
-            if check_password(password, data.password) and data.user_type.user_type == SUPPLIER_S:
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+            if data.user_type.user_type == SUPPLIER_S:
+                # Supplier Exception Cases
+                try:
+                    organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+                    if organization_data.rejection_count == 3:
+                        return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
+                    if str(organization_data.is_approved.value) == "Pending":
+                        return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as ex:
+                    pass
+               
+                if not check_password(password, data.password):
+                    return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+                if data.status.id == 2:
+                    return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
+                if check_password(password, data.password):
+                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            pass
             
         
         # General Admin Login
         try:
-            if check_password(password, data.password) and data.user_type.user_type == ADMIN_S:
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+            if data.user_type.user_type == ADMIN_S:
+                if not check_password(password, data.password):
+                    return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+                if data.status.id == 2:
+                    return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The SuperAdmin"}, status=status.HTTP_400_BAD_REQUEST)
+                if check_password(password, data.password):
+                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
+            pass
 
         # User Login Cases
-        if data is not None:
-            if data.status.id == 2:
-                return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
-            # if data.is_login_from == "google":
-            #     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
-            if not check_password(password, data.password):
-                return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
-            if data.is_active == True:
-                return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: "User not Authorized"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({STATUS: ERROR, DATA: "User Not Found or User not Authenticated "}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            if data.user_type.user_type == "User":
+                if data.status.id == 2:
+                    return Response({STATUS: ERROR, DATA: "Your Activation Has Been Cancelled By The Admin"}, status=status.HTTP_400_BAD_REQUEST)
+                # if data.is_login_from == "google":
+                #     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
+                if not check_password(password, data.password):
+                    return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+                if data.is_active == True:
+                    return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+        except Exception as ex:
+             return Response({STATUS: ERROR, DATA: "Please Varify Your Email Before Login"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @permission_classes([AllowAny])
