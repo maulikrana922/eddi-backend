@@ -490,17 +490,6 @@ class UserSignupAdmin(admin.ModelAdmin):
 
 admin.site.register(UserSignup, UserSignupAdmin)
 admin.site.site_header = 'Eddi Admin'
-
-#    fieldsets = (
-#         ('Section 1', {
-#             'fields': ('email_id','user_type',)
-#         }),
-#         ('Section 2', {
-#             'classes': ('collapse',),
-#             'fields': ('status',),
-#         }),
-#     )
-
 admin.site.register(EventAd)
 admin.site.register(UserProfile)
 admin.site.register(InvoiceData)
@@ -522,15 +511,5 @@ admin.site.register(WhatsonEddiCMS)
 
 admin.site.register(WhatsonEddiCMS_SV)
 admin.site.register(ContactFormLead_SV)
-# admin.site.register(HomePageCMSBanner_SV)
-# admin.site.register(HomePageCMSPartners_SV)
-# admin.site.register(BlogDetails_SV)
-# admin.site.register(TestinomialsDetails_SV)
-# admin.site.register(Header_FooterCMS_SV)
-# admin.site.register(HomePageCMS_SV)
-# admin.site.register(AboutUsPageCMS_SV)
-# admin.site.register(ContactUsPageCMS_SV)
-# admin.site.register(PrivacyPolicyCMS_SV)
-# admin.site.register(PrivacyPolicyCMSSupplier_SV)
-# admin.site.register(TermsConditionCMS_SV)
-# admin.site.register(TermsConditionCMSSupplier_SV)
+admin.site.register(ContactFormLead)
+

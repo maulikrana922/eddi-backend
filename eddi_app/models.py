@@ -176,15 +176,13 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         print("TRUE")
     
     if created and instance.user_type.user_type == 'User':
-        print("User")
-        # welcome user mail
-        html_path = USER_WELCOME_HTML
+        html_path = VARIFY_EMAIL
         fullname = f'{instance.first_name} {instance.last_name}'
         context_data = {'fullname':fullname, "uuid": instance.uuid}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage('Please Verify your Email Id',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         print("TRUE")
         path = 'eddi_app'
@@ -425,7 +423,6 @@ def add_organization_domain(sender, instance, created, **kwargs):
 @receiver(post_save, sender=CourseDetails)
 def bulk_email(sender, instance, created, **kwargs):
     if instance.course_for_organization == True:
-        print("insidedededed")
         connection = mail.get_connection()
         instance.target_users.split(",")
         try:
@@ -449,7 +446,7 @@ def bulk_email(sender, instance, created, **kwargs):
                     user_detail = UserSignup.objects.get(email_id = i)
                     username = user_detail.first_name
                 except Exception as ex:
-                    username = ""
+                    username = None
                 try:
                     organization_data = instance.supplier_organization.organizational_name
                 except:
@@ -458,7 +455,7 @@ def bulk_email(sender, instance, created, **kwargs):
                 html_content = render_to_string(html_path, context_data)               
                 text_content = "..."                      
                 receiver = i,
-                msg = EmailMultiAlternatives("Hello", text_content, email_from, receiver, connection=connection)                                      
+                msg = EmailMultiAlternatives("Congratulations!!", text_content, email_from, receiver, connection=connection)                                      
                 msg.attach_alternative(html_content, "text/html")
                 msg.attach(img)
                 msg.send()
@@ -576,19 +573,6 @@ class ContactFormLead(models.Model):
     class Meta:
         verbose_name = _("Contact Form Lead Table")
 
-@receiver(post_save, sender=ContactFormLead)
-def send_contact_usl(sender, instance, created, **kwargs):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = (settings.EMAIL_HOST_USER,)
-    message = f'''Full Name: {instance.fullname}
-    Email ID: {instance.email_id}
-    Phone Number: {instance.phone_number}
-    Message: {instance.message}
-
-    '''
-    email_msg = EmailMessage('Contact Us Email',message,email_from,recipient_list)
-    email_msg.send(fail_silently=False)
-
 
 class ContactFormLead_SV(models.Model):
     fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
@@ -608,6 +592,29 @@ class ContactFormLead_SV(models.Model):
 
     class Meta:
         verbose_name = _("Contact Form Lead Table SV")
+
+@receiver(post_save, sender=ContactFormLead)
+@receiver(post_save, sender=ContactFormLead_SV)
+def send_contactlead_email(sender, instance, created, **kwargs):
+    if created:
+        html_path = CONTACT_LEAD
+        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ('nishant.k@latitudetechnolabs.com',)
+        email_msg = EmailMessage('General Inquiry from User',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
+
 
 @receiver(post_save, sender=ContactFormLead_SV)
 def send_contact_usl(sender, instance, created, **kwargs):
@@ -1495,3 +1502,18 @@ class Notification(models.Model):
     class Meta:
         verbose_name = _("Notification Table")
 
+class UserProfileCMS(models.Model):
+    user_welcome = models.CharField(max_length=255,blank=True,null=True,verbose_name=_('User Welcome'))
+    content = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('content'))
+    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 1 Text'))
+    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
+    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
+    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))
+
+class UserProfileCMS_SV(models.Model):
+    user_welcome = models.CharField(max_length=255,blank=True,null=True,verbose_name=_('User Welcome'))
+    content = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('content'))
+    button_1_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 1 Text'))
+    button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
+    button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
+    button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))

@@ -31,21 +31,37 @@
         font-size: 18px;
       "
     >
-      Hello, {{fullname|capfirst}}
+      Hello, Admin
       <br>
-      <br>
-      <span style="font-family: Arial, Helvetica, sans-serif; font-weight: bold"
-        >You have successfully enrolled in the “{{course_name}}” course.
-        </span
+      <span style="font-family: Arial, Helvetica, sans-serif"
+        >You have received a new inquiry from <b>{{fullname}}</b>. Please find the details below</span
       >
     </td>
   </tr>
-  
-   
-  
+  <br>
   <tr>
-    <td height="45"></td>
+    <td height="45">
+        Name: {{fullname}}
+        <br>
+        Email Address: {{email}}
+        <br>
+        Phone Number: {{phone}}
+        <br>
+        Message: {{msg}}
+        <br>
+
+    </td>
   </tr>
+  <tr>
+   
+    <td
+    height="30"
+    style="color: #3e3e3e">
+      Thanks for registering on Eddi.
+    </td>
+  </tr>
+  
+  
   <tr>
     <td
       style="
@@ -56,42 +72,29 @@
         display: grid;
       "
     >
-    Thank You,
-    <br>
-The Eddi Team.
-      
+      If you are in need of assistance please contact
+      <a
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: 300;
+          color: #3e3e3e;
+          text-decoration: none;
+        "
+        href="mailto:support@eddi.nu"
+      >
+        support@eddi.nu</a
+      >
     </td>
   </tr>
-  <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
-    <td
-      style="
-        font-family: Arial, Helvetica, sans-serif;
-        font-weight: 300;
-        color: #3e3e3e;
-        text-decoration: none;
-      "
-    >
-    If you are in need of assistance please contact
-    <br>
-    <a href="Support@gmail.com"></a>
-
-      Thanks and Regards,
-    </td>
-  </tr>
+  
  
-  <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
     <td
-      height="30"
+      height="45"
       style="
         font-family: Arial, Helvetica, sans-serif;
         background-color: #3e8181;
       "
     ></td>
+    <br>
   </tr>
 </table>

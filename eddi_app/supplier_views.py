@@ -56,7 +56,7 @@ class AddCourseView(APIView):
 
         if request.POST.get(COURSE_NAME):
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
-            if course_data.exist():
+            if course_data.exists():
                 return Response({STATUS: ERROR, DATA: "Please Choose Unique Course Name"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -105,7 +105,8 @@ class AddCourseView(APIView):
             TARGET_USERS : request.POST.get(TARGET_USERS,None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
-            STATUS_ID:1
+            STATUS_ID:1,
+            "var_charges": getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
             }
             if organization_data != None:
                 record_map["supplier_organization_id"] = organization_data.id
@@ -395,6 +396,7 @@ class GetCourseDetails(APIView):
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     try:
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Error in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
                     if serializer := CourseDetailsSerializer(data_s,many=True):
@@ -423,7 +425,7 @@ class GetCourseDetails(APIView):
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
                  
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False,}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
@@ -552,7 +554,7 @@ class GetCourseDetails(APIView):
                             email_html_template = get_template(html_path).render(context_data)
                             email_from = settings.EMAIL_HOST_USER
                             recipient_list = (data.supplier.email_id,)
-                            email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                            email_msg = EmailMessage('Course Approved by Admin',email_html_template,email_from,recipient_list)
                             email_msg.content_subtype = 'html'
                             path = 'eddi_app'
                             img_dir = 'static'
@@ -687,27 +689,45 @@ class SupplierDashboardView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id')
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:supplier_email}).values_list("uuid")
             
             course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
             user_email = [x[2] for x in Individuals11]
+            user_uuid = [x[3] for x in Individuals11]
+      
             individual_details = {}
             final_dict = {}
             individual_details[USERNAME] = user_name
             individual_details[COURSENAME] = course_name
             individual_details[USER_EMAIL] = user_email
+            individual_details[USER_UUID] = user_uuid
+
             counter = 0
             for v in individual_details[COURSENAME]:
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
                     USER_EMAIL:individual_details[USER_EMAIL][counter],
+                    USER_UUID:individual_details[USER_UUID][counter],
                     COURSE_ID:str(Individuals.uuid),
                     COURSENAME:v,
                     COURSETYPE:Individuals.course_type.type_name,
                 }
                 counter +=1
+            # c  = 0
+            # for i in individual_details[USER_EMAIL]:
+            #     Individuals = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:i})
+            #     final_dict[c] = {
+            #         # USERNAME:individual_details[USERNAME][counter],
+            #         # USER_EMAIL:individual_details[USER_EMAIL][counter],
+            #         # COURSE_ID:str(Individuals.uuid),
+            #         # COURSENAME:v,
+            #         # COURSETYPE:Individuals.course_type.type_name,
+            #         UUID : Individuals.uuid
+            #     }
+            #     c +=1
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Individual Course list Error"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1112,7 +1132,7 @@ class SupplierOrganizationProfileview(APIView):
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (email_id,)
-                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    email_msg = EmailMessage('Profile Created Successfully',email_html_template,email_from,recipient_list)
                     email_msg.content_subtype = 'html'
                     path = 'eddi_app'
                     img_dir = 'static'
@@ -1164,6 +1184,28 @@ class SupplierOrganizationProfileview(APIView):
             if request.POST.get(STATUS):
                 if request.POST.get(STATUS) == "Active":
                     record_map1[STATUS_ID] = 1
+                    try:
+                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        html_path = "supplier_active.html"
+                        fullname = f'{data.first_name} {data.last_name}'
+                        context_data = {'fullname':fullname, "email_id":email_id}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Account has been Activated by the Admin',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except Exception as ex:
+                        pass
                 else:
                     record_map1[STATUS_ID] = 2
                     try:
@@ -1174,7 +1216,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Account has been Deactivated by the Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1205,7 +1247,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Profile Approved by Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1236,7 +1278,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Profile Rejected by Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'

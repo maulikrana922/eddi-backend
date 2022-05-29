@@ -54,6 +54,8 @@ urlpatterns = [
 
 
     # CMS Pages
+    path('userprofile-cms/',User_Profile_CMS.as_view()),
+    path('sw/userprofile-cms/',User_Profile_CMS_sv.as_view()),
     path('whats-on-eddi/',Whats_On_Eddi.as_view()),
     path('sw/whats-on-eddi/',Whats_On_Eddi_sv.as_view()),
     path('get-home-page-data/',GetHomePageDetails.as_view()),
@@ -75,6 +77,7 @@ urlpatterns = [
     path('get-termsSupplier-page-data/',GetTermsConditionSupplierDetails.as_view()),    
     path('sw/get-termsSupplier-page-data/',GetTermsConditionSupplierDetails_sv.as_view()),    
     path('contactus-form/',ContactFormView.as_view()),
+    path('sw/contactus-form/',ContactFormView_sv.as_view()),
 
 # Supplier Dashboard
     path('supplier-dashboard/',SupplierDashboardView.as_view()),
@@ -103,7 +106,7 @@ urlpatterns = [
     # Supplier Organization Flow
     path('supplier-organization-profile/',SupplierOrganizationProfileview.as_view()),
     path('supplier-organization-profile-adminview/',SupplierOrganizationProfileAdminview.as_view()),
-    path('supplier-organization-profile-all/',SupplierOrganizationProfileviewall.as_view()),
+    # path('supplier-organization-profile-all/',SupplierOrganizationProfileviewall.as_view()),
     path('supplier-profile/',SupplierProfileView.as_view()),
     
     # Notification

@@ -100,7 +100,7 @@ class Save_stripe_info(APIView):
                     instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
                     vat_val = int(vat[0])
-                    html_path = COURSE_ENROLL_HTML_TO_U
+                    html_path = INVOICE_TO_USER
                     fullname = f'{instance.first_name} {instance.last_name}'
                     context_data = {'fullname':fullname, "course_name":course_name}
                     email_html_template = get_template(html_path).render(context_data)
@@ -139,7 +139,7 @@ class Save_stripe_info(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                     except Exception as ex:
                         pass
-                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                    email_msg = EmailMessage('Payment Received Successfully!!',email_html_template,email_from,recipient_list)
                     email_msg.content_subtype = 'html'
                     email_msg.attach(img)
                     try:
@@ -287,8 +287,6 @@ class UserSignupView(APIView):
 class GetUserDetails(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method not allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{'user_type__user_type':request.POST.get('user_type')})
             if serializer := UserSignupSerializer(data, many=True):
@@ -430,8 +428,52 @@ class GetUserDetails(APIView):
             if request.POST.get("status"):
                 if request.POST.get("status") == "Active":
                     record_map1[STATUS_ID] = 1
+                    try:
+                        html_path = USER_ACTIVATED
+                        fullname = f'{user_data.first_name} {user_data.last_name}'
+                        context_data = {'fullname':fullname}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (user_data.email_id,)
+                        email_msg = EmailMessage('Account has been Activated by the Admin',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        print("TRUE")
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except:
+                        pass
                 else:
                     record_map1[STATUS_ID] = 2
+                    try:
+                        html_path = USER_DEACTIVATED
+                        fullname = f'{user_data.first_name} {user_data.last_name}'
+                        context_data = {'fullname':fullname}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (user_data.email_id,)
+                        email_msg = EmailMessage('Account has been deactivate by the Admin',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        print("TRUE")
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except:
+                        pass
                 for key,value in record_map1.items():
                     setattr(user_data,key,value)
                 user_data.save() 
@@ -600,7 +642,7 @@ class ForgetPasswordView(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
 
                         path = 'eddi_app'
@@ -677,6 +719,25 @@ class VerifyUser(APIView):
                 data.is_active = True
                 data.is_authenticated = True
                 data.save()
+                html_path = USER_WELCOME
+                fullname = f'{data.first_name} {data.last_name}'
+                context_data = {'fullname':fullname,}
+                email_html_template = get_template(html_path).render(context_data)
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = (data.email_id,)
+                email_msg = EmailMessage('Welcome To Eddi',email_html_template,email_from,recipient_list)
+                email_msg.content_subtype = 'html'
+                print("TRUE")
+                path = 'eddi_app'
+                img_dir = 'static'
+                image = 'Logo.jpg'
+                file_path = os.path.join(path,img_dir,image)
+                with open(file_path,'rb') as f:
+                    img = MIMEImage(f.read())
+                    img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    img.add_header('Content-Disposition', 'inline', filename=image)
+                email_msg.attach(img)
+                email_msg.send(fail_silently=False)
                 return Response({STATUS: SUCCESS, DATA: "User Verified Successfully"}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: "User not Verified"}, status=status.HTTP_400_BAD_REQUEST)
@@ -981,8 +1042,6 @@ class GetBlogDetails_sv(APIView):
 @permission_classes([AllowAny])
 class ContactFormView(APIView):
     def post(self, request):
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
                 FULLNAME : request.POST.get(FULLNAME),
@@ -992,7 +1051,30 @@ class ContactFormView(APIView):
             }
 
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            record_map[CREATED_BY] = 'admin'
+            record_map[CREATED_BY] = request.POST.get(EMAIL_ID)
+            try:
+                getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+
+
+@permission_classes([AllowAny])
+class ContactFormView_sv(APIView):
+    def post(self, request):
+        try:
+            record_map = {
+                FULLNAME : request.POST.get(FULLNAME),
+                EMAIL_ID : request.POST.get(EMAIL_ID),
+                PHONE_NUMBER : request.POST.get(PHONE_NUMBER),
+                MESSAGE : request.POST.get(MESSAGE)
+            }
+
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            record_map[CREATED_BY] = request.POST.get(EMAIL_ID)
             try:
                 getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
             except Exception as ex:
@@ -1087,6 +1169,7 @@ class UserPaymentDetail_info(APIView):
             course_name = request.POST.get(COURSE_NAME)
             email_id = request.POST.get(EMAIL_ID)
             user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
             else:
@@ -1127,6 +1210,29 @@ class UserPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
+
+                    try:
+                        html_path = COURSE_ENROLL_HTML_TO_U
+                        fullname = f"{user_data.first_name} {user_data.last_name}"
+                        context_data = {'fullname':fullname, "email":user_data.email_id}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Congratulations!!',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                    except:
+                        pass
+
                     try:
                         supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":courseobj.supplier.email_id})
                     except Exception as ex:
@@ -1210,57 +1316,48 @@ class EventPaymentDetail_info(APIView):
 
 class FavCourseDetails(APIView):
     def post(self, request):
-        data = None
-        email_id = None
-        user_data_fav = None
-        is_favourite_data = None
-        record_map = {}
         email_id = get_user_email_by_token(request)
-        
+        record_map = {}
         try:
             course_name = request.POST.get(COURSE_NAME)
-            user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_name}).get(**{EMAIL_ID:email_id}).order_by('-created_date_time')
-        except Exception as ex:
-            user_data_fav = None
-            
-        if user_data_fav:
             fav_data = request.POST.get(IS_FAVOURITE)
-            
-            if fav_data == 'true':
-                setattr(user_data_fav,IS_FAVOURITE,True)
-                user_data_fav.save()
-            else:
-                setattr(user_data_fav,IS_FAVOURITE,False)
-                user_data_fav.save()
-        else:
-            course_name = request.POST.get(COURSE_NAME)
-            fav_data = request.POST.get(IS_FAVOURITE)
-            
-            if fav_data == 'true':
-                is_favourite_data = True
-            else:
-                is_favourite_data = False
-                
+        except:
+            return Response({MESSAGE: ERROR, DATA: "Data Is Insufficient To Perform An Action"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if fav_data == 'true':
             record_map = {
-                EMAIL_ID: email_id,
-                COURSE_NAME : course_name,
-                IS_FAVOURITE: is_favourite_data,
-                CREATED_AT : make_aware(datetime.datetime.now())
-                }
+            EMAIL_ID: email_id,
+            COURSE_NAME : course_name,
+            IS_FAVOURITE: json.loads(fav_data),
+            CREATED_AT : make_aware(datetime.datetime.now())
+            }
             try:
-                getattr(models,FAVOURITE_COURSE_TABLE).objects.update_or_create(**record_map)
-                return Response({MESSAGE: SUCCESS, DATA: "Created"}, status=status.HTTP_200_OK)
-                
-            except Exception as e:
-                return Response({MESSAGE: ERROR, DATA: "ERROR creating data"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({MESSAGE: SUCCESS, DATA: "Done"}, status=status.HTTP_200_OK)
+                data = getattr(models,FAVOURITE_COURSE_TABLE).objects.get(**{EMAIL_ID:email_id,COURSE_NAME:course_name})
+            except Exception as ex:
+                data = None
+            if data == None:
+                try:
+                    getattr(models,FAVOURITE_COURSE_TABLE).objects.update_or_create(**record_map)
+                    return Response({MESSAGE: SUCCESS, DATA: "Created"}, status=status.HTTP_200_OK)
+                except Exception as ex:
+                    return Response({MESSAGE: ERROR, DATA: "ERROR creating data"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({MESSAGE: ERROR, DATA: "Selected Course Is Already In Favourite Table"}, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            try:
+                user_data_fav = getattr(models,FAVOURITE_COURSE_TABLE).objects.get(**{EMAIL_ID:email_id,COURSE_NAME:course_name})
+            except Exception as ex:
+                return Response({MESSAGE: ERROR, DATA: "ERROR In Getting Data From Favourite"}, status=status.HTTP_400_BAD_REQUEST)
+            user_data_fav.delete()
+            return Response({MESSAGE: SUCCESS, DATA: "Data Removed From Favourite"}, status=status.HTTP_200_OK)
             
     def get(self, request):
         email_id = get_user_email_by_token(request)
         try:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type =='User':
                 try:
-                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id, 'is_favourite':True}).values_list("course_name", flat = True).order_by("-created_date_time")
+                    data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{EMAIL_ID:email_id}).values_list("course_name", flat = True).order_by("-created_date_time")
                 except Exception as ex:
                     data= None
                 try:
@@ -1719,6 +1816,7 @@ class CourseEnrollView(APIView):
             course_data_uuid = None
 
         if var == "all":
+            view_material = True
             new_dict = OrderedDict()
             try:
                 for i in list(course_data_uuid): 
@@ -1726,9 +1824,10 @@ class CourseEnrollView(APIView):
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
                         all_videos = var.video_files.all()
                     except Exception as ex:
-                            var = None
-                            new_dict[f"course_{i}"] = "Ongoing"
-                            continue
+                        var = None
+                        new_dict[f"course_{i}"] = "Ongoing"
+                        view_material = False
+                        continue
                     l1 = []
                     for j in all_videos:
                         try:
@@ -1745,6 +1844,7 @@ class CourseEnrollView(APIView):
                 pass
 
         elif var == "ongoing":
+            view_material = True
             new_dict = OrderedDict()
             try:
                 ongoing_coures_uuid = []
@@ -1755,6 +1855,7 @@ class CourseEnrollView(APIView):
                     except Exception as ex:
                         var = None
                         new_dict[f"course_{i}"] = "Ongoing"
+                        view_material = False
                         ongoing_coures_uuid.append(i)
                         continue
                     l1 = []
@@ -1772,6 +1873,7 @@ class CourseEnrollView(APIView):
                 pass
 
         elif var == "completed":
+            view_material = True
             new_dict = OrderedDict()
             try:
                 completed_coures_uuid = []
@@ -1781,6 +1883,7 @@ class CourseEnrollView(APIView):
                         all_videos = var.video_files.all()
                     except Exception as ex:
                         var = None
+                        view_material = False
                         continue
                     l1 = []
                     for j in all_videos:
@@ -1815,7 +1918,7 @@ class CourseEnrollView(APIView):
             data_category = None
         if serializer := CourseDetailsSerializer(course_data, many=True):
             if serializer1 := CourseDetailsSerializer(data_category, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict}, status=status.HTTP_200_OK)   
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict, "view_material":view_material}, status=status.HTTP_200_OK)   
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1957,7 +2060,7 @@ class CourseRating(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (admin_email.email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Someone has Rated your Course',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         print("TRUE")
                         path = 'eddi_app'
@@ -1973,6 +2076,31 @@ class CourseRating(APIView):
                         print("TRUE")
                     except Exception as ex:
                         pass
+                else:
+                    try:
+                        html_path = "user_rate_to_supplier.html"
+                        fullname = f'{user.first_name} {user.last_name}'
+                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment")}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (admin_email.email_id,)
+                        email_msg = EmailMessage('Someone has Rated your Course',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        print("TRUE")
+                        path = 'eddi_app'
+                        img_dir = 'static'
+                        image = 'Logo.jpg'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                        print("TRUE")
+                    except Exception as ex:
+                        pass
+
                 return Response({STATUS: SUCCESS, DATA: "User Rating Saved Successfully"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2031,6 +2159,24 @@ class Notification(APIView):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
 
+@permission_classes([AllowAny])
+class User_Profile_CMS(APIView):
+    def get(self,request):
+        try:
+            data = getattr(models,"UserProfileCMS").objects.all()
+        except Exception as ex:
+            data = None
+        if serializer := UserProfileCMSSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
 
-
-
+@permission_classes([AllowAny])
+class User_Profile_CMS_sv(APIView):
+    def get(self,request):
+        try:
+            data = getattr(models,"UserProfileCMS_SV").objects.all()
+        except Exception as ex:
+            data = None
+        if serializer := UserProfileCMS_SVSerializer(data, many=True):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)

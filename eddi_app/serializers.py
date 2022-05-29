@@ -264,6 +264,19 @@ class NotificationSerializer(serializers.ModelSerializer):
         depth = 1
         fields = '__all__'
 
+class UserProfileCMSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfileCMS
+        depth = 1
+        fields = '__all__'
+
+
+class UserProfileCMS_SVSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfileCMS_SV
+        depth = 1
+        fields = '__all__'
+
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
 

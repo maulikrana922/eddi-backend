@@ -17,7 +17,7 @@
         background-color: #3e8181;
       "
     >
-      <img src="cid:Logo.jpg" style="width: 120px;height: 120px" />
+      <img src="cid:Logo.jpg" style="width: 120px" />
     </td>
   </tr>
   <tr>
@@ -31,34 +31,18 @@
         font-size: 18px;
       "
     >
-      Hello
+      Hello, {{fullname|capfirst}}
+      <br>
+      <br>
       <span style="font-family: Arial, Helvetica, sans-serif; font-weight: bold"
-        >{{ fullname }},</span
+        >We have received the payment of ${{total}} for the “{{course_name}}” course. Please find the below attached Invoice for the same.
+        </span
       >
     </td>
   </tr>
-  <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
-    <td style="color: #3e3e3e">
-      Seems like you have requested for a new password, if this is correct please find the below link to reset your password.
-    </td>
-  </tr>
-  <tr>
-    <td height="45"></td>
-  </tr>
-  <tr>
-    <td style="
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    color: #3e3e3e;
-    text-decoration: none;
-  ">
-      Reset Password URL: <a href="https://eddi-supplier.testyourapp.online/#/resetpassword?email={{final_email}}"></a>
-      
-    </td>
-  </tr>
+  
+   
+  
   <tr>
     <td height="45"></td>
   </tr>
@@ -73,19 +57,9 @@
       "
     >
     Thank You,
-    The Eddi Team.
-      <a
-        style="
-          font-family: Arial, Helvetica, sans-serif;
-          font-weight: 300;
-          color: #3e3e3e;
-          text-decoration: none;
-        "
-        href="mailto:support@eddi.nu"
-      >
-      If you are in need of assistance please contact
-        support@eddi.nu</a
-      >
+    <br>
+The Eddi Team.
+      
     </td>
   </tr>
   <tr>
@@ -100,21 +74,14 @@
         text-decoration: none;
       "
     >
+    If you are in need of assistance please contact
+    <br>
+    <a href="Support@gmail.com"></a>
+
       Thanks and Regards,
     </td>
   </tr>
-  <tr>
-    <td
-      style="
-        font-family: Arial, Helvetica, sans-serif;
-        font-weight: bold;
-        color: #3e3e3e;
-        text-decoration: none;
-      "
-    >
-      The Eddi Team
-    </td>
-  </tr>
+ 
   <tr>
     <td height="45"></td>
   </tr>
