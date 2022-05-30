@@ -16,7 +16,6 @@ from .serializers import *
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
-import datetime
 from datetime import date
 from django.db.models import Q
 from collections import OrderedDict
@@ -34,29 +33,30 @@ import datetime
 from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
+from .notification import send_notification
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
+# def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
+#     print('nxvdbsnp noti send',sender, receiver, message)
+#     url = "https://testyourapp.online:5001"
+#     payload = json.dumps({
+#     "type": "type1",
+#     "json": {
+#         'sender': sender,
+#         'receiver': receiver,
+#         # "sender_type": sender_type,
+#         # "receiver_type" : receiver_type,
+#         "message": message,
+#         "time" : datetime.datetime.now()
+#     }
+#     })
+#     headers = {
+#     'Content-Type': 'application/json'
+#     }
 
-    url = "https://testyourapp.online:5001"
-    payload = json.dumps({
-    "type": "type1",
-    "json": {
-        'sender': sender,
-        'receiver': receiver,
-        # "sender_type": sender_type,
-        # "receiver_type" : receiver_type,
-        "message": message,
-        "time" : datetime.datetime.now()
-    }
-    })
-    headers = {
-    'Content-Type': 'application/json'
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
+#     response = requests.request("POST", url, headers=headers, data=payload)
 
 @permission_classes([AllowAny])
 class Save_stripe_info(APIView):
@@ -403,10 +403,10 @@ class GetUserDetails(APIView):
             except Exception as ex:
                 supplier_data = None
             try:
-                data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False})
+                data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
             except Exception as ex:
                 data = None
-            if serializer := UserSignupSerializer(data, many=True):
+            if serializer := UserProfileSerializer(data, many=True):
                 if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "supplier_organization":serializer2.data}, status=status.HTTP_200_OK)
                 else:
@@ -1243,7 +1243,20 @@ class UserPaymentDetail_info(APIView):
                         pass
                     try:
                         message = f"{sender_data.first_name}, has applied for {courseobj.course_name}"
+                        # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(email_id, courseobj.supplier.email_id, message)
+                        try:
+                            record_map = {}
+                            record_map = {
+                                "sender" : email_id,
+                                "receiver" : courseobj.supplier.email_id,
+                                "message" : message
+                            }
+
+                            getattr(models,"Notification").objects.update_or_create(**record_map)
+                        except Exception as ex:
+                            print(ex,"exexe")
+                            pass
                     except Exception as ex:
                         pass
                     return Response({STATUS: SUCCESS, DATA: "Created Successfully"}, status=status.HTTP_200_OK)
@@ -1939,9 +1952,13 @@ class EventEnrollView(APIView):
 
             try:
                 category = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                
                 a = category.course_category.split(",")
             except Exception as ex:
-                a = category.course_category.split()
+                try:
+                    a = category.course_category.split()
+                except:
+                    a = None
             try:
                 category_event = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1, IS_DELETED:False}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = enroll_data).order_by("-created_date_time")
             except:
@@ -2139,12 +2156,12 @@ class CourseRating(APIView):
 class Notification(APIView):
     def put(self, request):
         email_id = get_user_email_by_token(request)
-        receiver = request.POST.get("receiver")
         is_clear = json.loads(request.POST.get("is_clear"))
         if request.POST.get("is_clear"):
             try:
-                data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":receiver})
-                data.delete()
+                data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id})
+                data.is_clear = True
+                data.save()
             except Exception as ex:
                 print(ex,"exexe")
     

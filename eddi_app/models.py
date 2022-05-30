@@ -24,6 +24,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
+from .notification import send_notification
 
 
 

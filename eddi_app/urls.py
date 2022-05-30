@@ -110,7 +110,7 @@ urlpatterns = [
     path('supplier-profile/',SupplierProfileView.as_view()),
     
     # Notification
-    path('notification/',Notification.as_view()),
+    path('notifications/',Notification.as_view()),
     
 
 ]
