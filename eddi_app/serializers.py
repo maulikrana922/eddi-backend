@@ -198,7 +198,7 @@ class BlogDetailsSerializer_sv(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        depth = 1
+        depth = 2
 
         fields = '__all__'
 

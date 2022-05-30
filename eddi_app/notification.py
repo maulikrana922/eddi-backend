@@ -15,7 +15,7 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
             # "sender_type": sender_type,
             # "receiver_type" : receiver_type,
             "message": message,
-            "time" : str(datetime.datetime.now())
+            "created_date_time" : str(datetime.datetime.now())
         }
         })
         headers = {
