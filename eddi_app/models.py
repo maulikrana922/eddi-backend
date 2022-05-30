@@ -114,7 +114,6 @@ class UserSignup(models.Model):
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     print("OUTER")
     if created and instance.user_type.user_type == ADMIN_S:
-        print("INNER")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
@@ -127,7 +126,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data.save()
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
-        print("TRUE")
         path = 'eddi_app'
         img_dir = 'static'
         image = 'Logo.jpg'
@@ -138,7 +136,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
-        print("TRUE")
 
     if created and instance.user_type.user_type == SUPPLIER_S:
         record_map = {}
@@ -150,7 +147,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         except Exception as ex:
             print(ex, "exexexexe")
 
-        print("INNER")
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
@@ -163,7 +159,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data.save()
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
-        print("TRUE")
         path = 'eddi_app'
         img_dir = 'static'
         image = 'Logo.jpg'
@@ -174,7 +169,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
-        print("TRUE")
     
     if created and instance.user_type.user_type == 'User':
         html_path = VARIFY_EMAIL
@@ -185,7 +179,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         recipient_list = (instance.email_id,)
         email_msg = EmailMessage('Please Verify your Email Id',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
-        print("TRUE")
         path = 'eddi_app'
         img_dir = 'static'
         image = 'Logo.jpg'
@@ -196,7 +189,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
-        print("TRUE")
 
     
 class NonBuiltInUserToken(Token):
