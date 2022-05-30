@@ -618,6 +618,8 @@ class UserLoginView(APIView):
                     return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
                 if data.is_active == True:
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: ERROR, DATA: "User Is Not Authorized"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
              return Response({STATUS: ERROR, DATA: "Please Varify Your Email Before Login"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1244,7 +1246,8 @@ class UserPaymentDetail_info(APIView):
                     try:
                         message = f"{sender_data.first_name}, has applied for {courseobj.course_name}"
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
-                        send_notification(email_id, courseobj.supplier.email_id, message)
+                        receiver = [courseobj.supplier.email_id]
+                        send_notification(email_id, receiver, message)
                         try:
                             record_map = {}
                             record_map = {

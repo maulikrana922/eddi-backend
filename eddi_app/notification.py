@@ -11,7 +11,7 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
         "type": "type1",
         "json": {
             'sender': sender,
-            'receiver': receiver,
+            'receiver': [i for i in receiver],
             # "sender_type": sender_type,
             # "receiver_type" : receiver_type,
             "message": message,
