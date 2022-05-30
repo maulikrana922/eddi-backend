@@ -1090,8 +1090,10 @@ class ContactFormView_sv(APIView):
 class UserProfileView(APIView):
     def post(self, request):
         email_id = get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
+            serializer.object.usersignup_id = user_data.id
             serializer.save()
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         else:

@@ -108,6 +108,10 @@ class UserSignup(models.Model):
 
     class Meta:
         verbose_name = _("User Signup Table")
+    
+    def __str__(self):
+        return self.email_id
+    
 
 
 @receiver(post_save, sender=UserSignup)
