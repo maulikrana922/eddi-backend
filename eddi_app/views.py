@@ -1255,7 +1255,6 @@ class UserPaymentDetail_info(APIView):
 
                             getattr(models,"Notification").objects.update_or_create(**record_map)
                         except Exception as ex:
-                            print(ex,"exexe")
                             pass
                     except Exception as ex:
                         pass
