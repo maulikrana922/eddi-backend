@@ -56,9 +56,12 @@ class AddCourseView(APIView):
         course_organization = None
 
         if request.POST.get(COURSE_NAME):
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
-            if course_data.exists():
-                return Response({STATUS: ERROR, DATA: "Please Choose Unique Course Name"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+                if course_data.exists():
+                    return Response({STATUS: ERROR, DATA: "Please Choose Unique Course Name"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
 
 
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':

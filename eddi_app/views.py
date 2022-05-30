@@ -2162,15 +2162,18 @@ class Notification(APIView):
         if request.POST.get("is_clear"):
             try:
                 data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id})
-                data.is_clear = True
-                data.save()
+                for i in data:
+                    i.is_clear = True
+                    i.save()
+                return Response({STATUS: SUCCESS, DATA: "Notification Cleared"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 print(ex,"exexe")
+                return Response({STATUS: SUCCESS, DATA: "Error Occured In Clear Notification"}, status=status.HTTP_200_OK)
     
     def get(self, request):
         email_id = get_user_email_by_token(request)
         try:
-            data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id})
+            data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id, "is_clear":False})
         except Exception as ex:
             print(ex,"exexe")
             data = None
