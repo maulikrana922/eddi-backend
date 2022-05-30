@@ -1093,7 +1093,7 @@ class UserProfileView(APIView):
         user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.object.usersignup_id = user_data.id
+            serializer.validated_data['usersignup_id'] = user_data.id
             serializer.save()
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         else:
