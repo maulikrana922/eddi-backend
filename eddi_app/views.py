@@ -2173,7 +2173,7 @@ class Notification(APIView):
     def get(self, request):
         email_id = get_user_email_by_token(request)
         try:
-            data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id, "is_clear":False})
+            data = getattr(models,"Notification").objects.filter(**{"receiver__icontains":email_id, "is_clear":False}).order_by("-created_date_time")
         except Exception as ex:
             print(ex,"exexe")
             data = None
