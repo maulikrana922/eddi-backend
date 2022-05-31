@@ -2204,3 +2204,19 @@ class User_Profile_CMS_sv(APIView):
         if serializer := UserProfileCMS_SVSerializer(data, many=True):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+
+
+class AllSubCategory(APIView):
+    def get(self, request):
+        try:
+            all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False})
+        except Exception as ex:
+            all_subcategory = None
+        try:
+            if all_subcategory_serializer := SubCategoryDetailsSerializer(all_subcategory, many=True):
+                return Response({STATUS: SUCCESS,
+                ALL_SUBCATEGORY: all_subcategory_serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: SUCCESS, DATA: all_subcategory_serializer.error}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            pass

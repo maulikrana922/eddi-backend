@@ -1414,6 +1414,7 @@ class Notification(models.Model):
     user_detail = models.ForeignKey(USER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name=_('User Email'),blank=True,null=True,default=None)
     supplier_detail = models.ForeignKey(SUPPLIER_PROFILE_TABLE,on_delete=models.CASCADE,verbose_name=_('Supplier Email'),blank=True,null=True,default=None)
     message = models.TextField(max_length=2000,blank=True,null=True,verbose_name=_("Address"))
+    message_sv = models.TextField(max_length=2000,blank=True,null=True,verbose_name=_("Address"))
     is_clear = models.BooleanField(default=False,verbose_name=_('is_clear'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 

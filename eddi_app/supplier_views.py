@@ -76,7 +76,10 @@ class AddCourseView(APIView):
             return Response({STATUS: ERROR, DATA: "Error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
-            sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
+            try:
+                sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
+            except:
+                sub_category_id = None
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,None)})
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
@@ -95,7 +98,6 @@ class AddCourseView(APIView):
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
             COURSE_CATEGORY_ID :category_id.id ,
-            COURSE_SUBCATEGORY_ID : sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             FEE_TYPE_ID: fee_type_id.id,
             COURSE_FOR_ORGANIZATION:course_organization,
@@ -112,6 +114,8 @@ class AddCourseView(APIView):
             STATUS_ID:1,
             "var_charges": getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
             }
+            if sub_category_id != None:
+                record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
             if organization_data != None:
                 record_map["supplier_organization_id"] = organization_data.id
             if request.POST.get(COURSE_PRICE):
