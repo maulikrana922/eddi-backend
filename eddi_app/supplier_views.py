@@ -1109,8 +1109,6 @@ class SupplierOrganizationProfileAdminview(APIView):
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
         email_id = get_user_email_by_token(request)
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Method Not Allowed"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
                 SUPPLIER_EMAIL : email_id,
@@ -1125,6 +1123,8 @@ class SupplierOrganizationProfileview(APIView):
                 CONTECT_PERSON : request.POST.get(CONTECT_PERSON,None),
                 COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,None),
                 SUB_CATEGORY : request.POST.get(SUB_CATEGORY,None),
+                "linkedIn_profile" : request.POST.get("linkedIn_profile",None),
+                "facebook_profile" : request.POST.get("facebook_profile",None),
                 ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,None),
             }
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
@@ -1327,9 +1327,12 @@ class SupplierOrganizationProfileview(APIView):
                 COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),
                 SUB_CATEGORY : request.POST.get(SUB_CATEGORY,data.sub_category),
                 ORGANIZATION_LOGO : request.FILES.get(ORGANIZATION_LOGO,data.organization_logo),
-                STATUS : request.POST.get(STATUS, data.status)
+                "linkedIn_profile" : request.POST.get("linkedIn_profile",data.linkedIn_profile),
+                "facebook_profile" : request.POST.get("facebook_profile",data.facebook_profile),
             }
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+            record_map[IS_APPROVED_ID] = 2
+            record_map[STATUS_ID] = 2
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
