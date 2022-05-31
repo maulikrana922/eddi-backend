@@ -114,85 +114,6 @@ class UserSignup(models.Model):
     
 
 
-@receiver(post_save, sender=UserSignup)
-def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    print("OUTER")
-    if created and instance.user_type.user_type == ADMIN_S:
-        html_path = OTP_EMAIL_HTML
-        otp = PasswordView()
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        data = UserSignup.objects.get(email_id = instance.email_id)
-        data.password = make_password(otp)
-        data.save()
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.jpg'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
-    if created and instance.user_type.user_type == SUPPLIER_S:
-        record_map = {}
-        try:
-            record_map = {
-                "supplier_name" : f"{instance.first_name}{instance.last_name}"
-            }
-            getattr(models,"SupplierProfile").objects.update_or_create(**record_map)
-        except Exception as ex:
-            print(ex, "exexexexe")
-
-        html_path = OTP_EMAIL_HTML
-        otp = PasswordView()
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        data = UserSignup.objects.get(email_id = instance.email_id)
-        data.password = make_password(otp)
-        data.save()
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.jpg'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-    
-    if created and instance.user_type.user_type == 'User':
-        html_path = VARIFY_EMAIL
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':fullname, "uuid": instance.uuid}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Please Verify your Email Id',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.jpg'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
 
     
 class NonBuiltInUserToken(Token):
@@ -1514,3 +1435,108 @@ class UserProfileCMS_SV(models.Model):
     button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
     button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
     button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))
+
+
+
+@receiver(post_save, sender=UserSignup)
+def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    print("OUTER")
+    if created and instance.user_type.user_type == ADMIN_S:
+        html_path = OTP_EMAIL_HTML
+        otp = PasswordView()
+        fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
+        data = UserSignup.objects.get(email_id = instance.email_id)
+        data.password = make_password(otp)
+        data.save()
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
+
+    if created and instance.user_type.user_type == SUPPLIER_S:
+        record_map = {}
+        try:
+            message = f"{instance.first_name}, as a Supplier has been added by the System. Please click below to view the details."
+            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+            data = UserSignup.objects.filter(user_type__user_type = "Admin")
+            receiver = [i.email_id for i in data]
+            print(receiver, "receiverer")
+            print(data,"datatat")
+            send_notification(instance.email_id, receiver, message)
+            for i in receiver:
+                try:
+                    record_map = {}
+                    record_map = {
+                        "sender" : instance.email_id,
+                        "receiver" : i,
+                        "message" : message
+                    }
+
+                    Notification.objects.update_or_create(**record_map)
+                except Exception as ex:
+                    print(ex,"exexe")
+                    pass
+        except:
+            pass
+        try:
+            record_map = {
+                "supplier_name" : f"{instance.first_name}{instance.last_name}"
+            }
+            getattr(models,"SupplierProfile").objects.update_or_create(**record_map)
+        except Exception as ex:
+            print(ex, "exexexexe")
+
+        html_path = OTP_EMAIL_HTML
+        otp = PasswordView()
+        fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
+        data = UserSignup.objects.get(email_id = instance.email_id)
+        data.password = make_password(otp)
+        data.save()
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
+    
+    if created and instance.user_type.user_type == 'User':
+        html_path = VARIFY_EMAIL
+        fullname = f'{instance.first_name} {instance.last_name}'
+        context_data = {'fullname':fullname, "uuid": instance.uuid}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
+        email_msg = EmailMessage('Please Verify your Email Id',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.jpg'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
