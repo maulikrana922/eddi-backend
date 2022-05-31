@@ -1469,12 +1469,12 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     if created and instance.user_type.user_type == SUPPLIER_S:
         record_map = {}
         try:
-            message = f"{instance.first_name}, as a Supplier has been added by the System. Please click below to view the details."
+            message = f"{instance.first_name}, as a Supplier has been added by the System."
+            message_sv = f"{instance.first_name}, as a Supplier has been added by the System."
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
-            print(receiver, "receiverer")
-            print(data,"datatat")
+            print(data,"daatat")
             send_notification(instance.email_id, receiver, message)
             for i in receiver:
                 try:
@@ -1482,7 +1482,8 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
                     record_map = {
                         "sender" : instance.email_id,
                         "receiver" : i,
-                        "message" : message
+                        "message" : message,
+                        "message_sv" : message_sv,
                     }
 
                     Notification.objects.update_or_create(**record_map)

@@ -579,7 +579,7 @@ class UserLoginView(APIView):
                     organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
                     if organization_data.rejection_count == 3:
                         return Response({STATUS: ERROR, DATA: "Your Profile Has Been Blocked. Please Contact Admin For Further Support"}, status=status.HTTP_400_BAD_REQUEST)
-                    if str(organization_data.is_approved.value) == "Pending":
+                    if str(organization_data.is_approved.value) == "Pending" and organization_data.approved_once == False:
                         return Response({STATUS: ERROR, DATA: "Your Profile Is Under Review. You Can't Login Until It's Approved"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as ex:
                     pass
@@ -1094,6 +1094,11 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['usersignup_id'] = user_data.id
+            try:
+                if serializer.validated_data['agree_ads_terms'] == True:
+                    pass
+            except:
+                pass
             serializer.save()
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         else:
@@ -1246,7 +1251,8 @@ class UserPaymentDetail_info(APIView):
                     except Exception as ex:
                         pass
                     try:
-                        message = f"{sender_data.first_name}, has applied for {courseobj.course_name}"
+                        message = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
+                        message_sv = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         receiver = [courseobj.supplier.email_id]
                         send_notification(email_id, receiver, message)
@@ -1255,7 +1261,8 @@ class UserPaymentDetail_info(APIView):
                             record_map = {
                                 "sender" : email_id,
                                 "receiver" : courseobj.supplier.email_id,
-                                "message" : message
+                                "message" : message,
+                                "message_sv" : message_sv
                             }
 
                             getattr(models,"Notification").objects.update_or_create(**record_map)
@@ -1320,6 +1327,32 @@ class EventPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,EVENTAD_ENROLL_TABLE).objects.update_or_create(**record_map)
+
+                    try:
+                        data_user = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:user_email_id})
+                        message = f"{data_user.first_name}, has Registered for the “{event_name}” "
+                        message_sv = f"{data_user.first_name}, has Registered for the “{event_name}” "
+
+                        data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                        receiver = [i.email_id for i in data]
+                        # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                        send_notification(user_email_id, receiver, message)
+                        for i in receiver:
+                            try:
+                                record_map = {}
+                                record_map = {
+                                    "sender" : user_email_id,
+                                    "receiver" : i,
+                                    "message" : message,
+                                    "message_sv" : message_sv
+                                }
+
+                                getattr(models,"Notification").objects.update_or_create(**record_map)
+                            except Exception as ex:
+                                print(ex,"exexe")
+                                pass
+                    except:
+                        pass
                     
                     return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -1690,6 +1723,30 @@ class RecruitmentAdView(APIView):
             record_map[UUID] = uuid4()
             
             getattr(models,RECRUITMENTAD_TABLE).objects.update_or_create(**record_map)
+            try:
+                data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                message = f"{data_supplier.first_name}, has added a new Recruitment Ad“{request.POST.get(RECRUITMENTAD_TITLE)}” to the system"
+                message_sv = f"{data_supplier.first_name}, has added a new Recruitment Ad“{request.POST.get(RECRUITMENTAD_TITLE)}” to the system"
+                data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                receiver = [i.email_id for i in data]
+                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                send_notification(email_id, receiver, message)
+                for i in receiver:
+                    try:
+                        record_map = {}
+                        record_map = {
+                            "sender" : email_id,
+                            "receiver" : i,
+                            "message" : message,
+                            "message_sv" : message_sv
+                        }
+
+                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                    except Exception as ex:
+                        print(ex,"exexe")
+                        pass
+            except:
+                pass
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2205,7 +2262,7 @@ class User_Profile_CMS_sv(APIView):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
 
-
+@permission_classes([AllowAny])
 class AllSubCategory(APIView):
     def get(self, request):
         try:

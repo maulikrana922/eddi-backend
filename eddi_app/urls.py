@@ -34,6 +34,7 @@ urlpatterns = [
     path('course-material-status/',CourseMaterialStatus.as_view()),
 
     # Sub Category Details
+    path('all-sub-category/',AllSubCategory.as_view()),
     path('add-sub-category/',AddSubCategoryView.as_view()),
     path('get-sub-category-details/<str:uuid>/',GetSubCategoryDetails.as_view()),
     path('get-sub-category-details/',GetSubCategoryDetails.as_view()),

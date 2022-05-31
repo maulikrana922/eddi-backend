@@ -127,6 +127,29 @@ class AddCourseView(APIView):
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = supplier_id.user_type
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
+            try:
+                message = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
+                message_sv = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
+                data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                receiver = [i.email_id for i in data]
+                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                send_notification(email_id, receiver, message)
+                for i in receiver:
+                    try:
+                        record_map = {}
+                        record_map = {
+                            "sender" : email_id,
+                            "receiver" : i,
+                            "message" : message,
+                            "message_sv" : message_sv,
+                        }
+
+                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                    except Exception as ex:
+                        print(ex,"exexe")
+                        pass
+            except:
+                pass
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
@@ -157,6 +180,29 @@ class AddSubCategoryView(APIView):
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
         record_map[CREATED_BY] = user_type
         getattr(models,COURSE_SUBCATEGORY_TABLE).objects.update_or_create(**record_map)
+        try:
+            message = f"{supplier_id.first_name}, has added a new “{request.POST.get(SUBCATEGORY_NAME)}”, under “{category_id.category_name}”  to the system. Click below to view the details."
+            message_sv = f"{supplier_id.first_name}, has added a new “{request.POST.get(SUBCATEGORY_NAME)}”, under “{category_id.category_name}”  to the system. Click below to view the details."
+            data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+            receiver = [i.email_id for i in data]
+            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+            send_notification(email_id, receiver, message)
+            for i in receiver:
+                try:
+                    record_map = {}
+                    record_map = {
+                        "sender" : email_id,
+                        "receiver" : i,
+                        "message" : message,
+                        "message_sv" : message_sv
+                    }
+
+                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                except Exception as ex:
+                    print(ex,"exexe")
+                    pass
+        except:
+            pass
         return Response({STATUS: SUCCESS, DATA: "Sub Category Created successfully"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
