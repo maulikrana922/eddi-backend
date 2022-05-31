@@ -150,6 +150,31 @@ class AddCourseView(APIView):
                         pass
             except:
                 pass
+
+            try:
+                users = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"user_interests__icontains":category_id.category_name})
+                message = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
+                message_sv = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
+                data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                receiver = [i.email_id for i in users]
+                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                send_notification(email_id, receiver, message)
+                for i in receiver:
+                    try:
+                        record_map = {}
+                        record_map = {
+                            "sender" : email_id,
+                            "receiver" : i,
+                            "message" : message,
+                            "message_sv" : message_sv,
+                        }
+
+                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                    except Exception as ex:
+                        print(ex,"exexe")
+                        pass
+            except:
+                pass
             return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
@@ -271,7 +296,6 @@ class GetSubCategoryDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Category Error"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
-
             CATEGORY_NAME_ID: dataa.id,
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
@@ -298,6 +322,30 @@ class GetSubCategoryDetails(APIView):
                 if request.POST.get(APPROVAL_STATUS):
                     if request.POST.get(APPROVAL_STATUS) == "Approved":
                         record_map[IS_APPROVED_ID] = 1
+                        try:
+                            message = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
+
+                            message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
+
+                            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                            receiver = [data.supplier.email_id]
+                            send_notification(email_id, receiver, message)
+                            for i in receiver:
+                                try:
+                                    record_map = {}
+                                    record_map = {
+                                        "sender" : email_id,
+                                        "receiver" : i,
+                                        "message" : message,
+                                        "message_sv" : message_sv
+                                    }
+
+                                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                                except Exception as ex:
+                                    pass
+                        except Exception as ex:
+                            pass
+
                     if request.POST.get(APPROVAL_STATUS) == "Pending":
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
@@ -316,6 +364,30 @@ class GetSubCategoryDetails(APIView):
                             return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Category"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[IS_APPROVED_ID] = 3
+                            try:
+                                message = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
+
+                                message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
+
+                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                                receiver = [data.supplier.email_id]
+                                send_notification(email_id, receiver, message)
+                                for i in receiver:
+                                    try:
+                                        record_map = {}
+                                        record_map = {
+                                            "sender" : email_id,
+                                            "receiver" : i,
+                                            "message" : message,
+                                            "message_sv" : message_sv
+                                        }
+
+                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                    except Exception as ex:
+                                        pass
+                            except Exception as ex:
+                                pass
+
                 else:
                     record_map[IS_APPROVED] = data.is_approved
 
@@ -603,23 +675,50 @@ class GetCourseDetails(APIView):
                     if request.POST.get(APPROVAL_STATUS):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
                             record_map[IS_APPROVED_ID] = 1
-                            html_path = APPROVE_COURSE_HTML
-                            context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
-                            email_html_template = get_template(html_path).render(context_data)
-                            email_from = settings.EMAIL_HOST_USER
-                            recipient_list = (data.supplier.email_id,)
-                            email_msg = EmailMessage('Course Approved by Admin',email_html_template,email_from,recipient_list)
-                            email_msg.content_subtype = 'html'
-                            path = 'eddi_app'
-                            img_dir = 'static'
-                            image = 'Logo.jpg'
-                            file_path = os.path.join(path,img_dir,image)
-                            with open(file_path,'rb') as f:
-                                img = MIMEImage(f.read())
-                                img.add_header('Content-ID', '<{name}>'.format(name=image))
-                                img.add_header('Content-Disposition', 'inline', filename=image)
-                            email_msg.attach(img)
-                            email_msg.send(fail_silently=False)
+                            try:
+                                # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                                message = f"Course {record_map[COURSE_NAME]}, has been Approved by the Admin"
+                                message_sv = f"Course {record_map[COURSE_NAME]}, has been Approved by the Admin"
+                                # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                                receiver = [data.supplier.email_id]
+                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                                send_notification(email_id, receiver, message)
+                                for i in receiver:
+                                    try:
+                                        record_map = {}
+                                        record_map = {
+                                            "sender" : email_id,
+                                            "receiver" : i,
+                                            "message" : message,
+                                            "message_sv" : message_sv
+                                        }
+
+                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                    except Exception as ex:
+                                        print(ex,"exexe")
+                                        pass
+                            except:
+                                pass
+                            try:
+                                html_path = APPROVE_COURSE_HTML
+                                context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                email_html_template = get_template(html_path).render(context_data)
+                                email_from = settings.EMAIL_HOST_USER
+                                recipient_list = (data.supplier.email_id,)
+                                email_msg = EmailMessage('Course Approved by Admin',email_html_template,email_from,recipient_list)
+                                email_msg.content_subtype = 'html'
+                                path = 'eddi_app'
+                                img_dir = 'static'
+                                image = 'Logo.jpg'
+                                file_path = os.path.join(path,img_dir,image)
+                                with open(file_path,'rb') as f:
+                                    img = MIMEImage(f.read())
+                                    img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                    img.add_header('Content-Disposition', 'inline', filename=image)
+                                email_msg.attach(img)
+                                email_msg.send(fail_silently=False)
+                            except:
+                                pass
 
                         if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
@@ -639,6 +738,30 @@ class GetCourseDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[IS_APPROVED_ID] = 3
+                                try:
+                                    # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                                    message = f"Course {record_map[COURSE_NAME]}, has been Rejected by the Admin"
+                                    message_sv = f"Course {record_map[COURSE_NAME]}, has been Rejected by the Admin"
+                                    # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                                    receiver = [data.supplier.email_id]
+                                    # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                                    send_notification(email_id, receiver, message)
+                                    for i in receiver:
+                                        try:
+                                            record_map = {}
+                                            record_map = {
+                                                "sender" : email_id,
+                                                "receiver" : i,
+                                                "message" : message,
+                                                "message_sv" : message_sv
+                                            }
+
+                                            getattr(models,"Notification").objects.update_or_create(**record_map)
+                                        except Exception as ex:
+                                            print(ex,"exexe")
+                                            pass
+                                except:
+                                    pass
                     else:
                         record_map[IS_APPROVED] = data.is_approved
 

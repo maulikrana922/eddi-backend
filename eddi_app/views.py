@@ -102,7 +102,7 @@ class Save_stripe_info(APIView):
                     vat_val = int(vat[0])
                     html_path = INVOICE_TO_USER
                     fullname = f'{instance.first_name} {instance.last_name}'
-                    context_data = {'fullname':fullname, "course_name":course_name}
+                    context_data = {'fullname':fullname, "course_name":course_name,"total":int(amount) + (int(amount)*vat_val)/100}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (instance.email_id,)
@@ -1096,7 +1096,31 @@ class UserProfileView(APIView):
             serializer.validated_data['usersignup_id'] = user_data.id
             try:
                 if serializer.validated_data['agree_ads_terms'] == True:
-                    pass
+                    try:
+                        user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        message = f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” "
+                        message_sv = f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” "
+
+                        data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                        receiver = [i.email_id for i in data]
+                        # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                        send_notification(email_id, receiver, message)
+                        for i in receiver:
+                            try:
+                                record_map = {}
+                                record_map = {
+                                    "sender" : email_id,
+                                    "receiver" : i,
+                                    "message" : message,
+                                    "message_sv" : message_sv
+                                }
+
+                                getattr(models,"Notification").objects.update_or_create(**record_map)
+                            except Exception as ex:
+                                print(ex,"exexe")
+                                pass
+                    except:
+                        pass
             except:
                 pass
             serializer.save()
@@ -1223,7 +1247,7 @@ class UserPaymentDetail_info(APIView):
                     try:
                         html_path = COURSE_ENROLL_HTML_TO_U
                         fullname = f"{user_data.first_name} {user_data.last_name}"
-                        context_data = {'fullname':fullname, "email":user_data.email_id}
+                        context_data = {'fullname':fullname, "email":user_data.email_id, "course_name":course_name}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -1547,6 +1571,30 @@ class EventView(APIView):
                 featured_data = False
             record_map[IS_FEATURED] = featured_data
             getattr(models,EVENT_AD_TABLE).objects.update_or_create(**record_map)
+            # try:
+            #     users = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"user_interests__icontains":category_id.category_name})
+            #     message = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
+            #     message_sv = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
+            #     data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+            #     receiver = [i.email_id for i in users]
+            #     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+            #     send_notification(email_id, receiver, message)
+            #     for i in receiver:
+            #         try:
+            #             record_map = {}
+            #             record_map = {
+            #                 "sender" : email_id,
+            #                 "receiver" : i,
+            #                 "message" : message,
+            #                 "message_sv" : message_sv,
+            #             }
+
+            #             getattr(models,"Notification").objects.update_or_create(**record_map)
+            #         except Exception as ex:
+            #             print(ex,"exexe")
+            #             pass
+            # except:
+            #     pass
             return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
@@ -1821,10 +1869,54 @@ class RecruitmentAdView(APIView):
                     if request.POST.get(APPROVAL_STATUS):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
                             record_map[IS_APPROVED_ID] = 1
+                            try:
+                                message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
+                                message_sv = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
+                                # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                                receiver = [data.supplier_profile.supplier_email]
+                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                                send_notification(email_id, receiver, message)
+                                for i in receiver:
+                                    try:
+                                        record_map = {}
+                                        record_map = {
+                                            "sender" : email_id,
+                                            "receiver" : i,
+                                            "message" : message,
+                                            "message_sv" : message_sv
+                                        }
+
+                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                    except Exception as ex:
+                                        print(ex,"exexe")
+                                        pass
+                            except:
+                                pass
                         elif request.POST.get(APPROVAL_STATUS) == "Pending":
                             record_map[IS_APPROVED_ID] = 2
                         else:
                             record_map[IS_APPROVED_ID] = 3
+                            try:
+                                message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
+                                message_sv = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
+                                receiver = [data.supplier_profile.supplier_email]
+                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                                send_notification(email_id, receiver, message)
+                                for i in receiver:
+                                    try:
+                                        record_map = {}
+                                        record_map = {
+                                            "sender" : email_id,
+                                            "receiver" : i,
+                                            "message" : message,
+                                            "message_sv" : message_sv
+                                        }
+                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                    except Exception as ex:
+                                        print(ex,"exexe")
+                                        pass
+                            except:
+                                pass
                     else:
                         record_map[IS_APPROVED] = data.is_approved
 
