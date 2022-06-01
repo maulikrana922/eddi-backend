@@ -306,9 +306,9 @@ class GetUserDetails(APIView):
                     # Below Line : To make Active or Inactive to Particular user or supplier 
                         if data.user_type.user_type =='User':
                             try:
-                                profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id, STATUS_ID:1})
+                                profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
                             except Exception as ex:
-                                return Response({STATUS: ERROR, DATA: "User profile data not data found"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "User profile data not found"}, status=status.HTTP_400_BAD_REQUEST)
 
                             try:
                                 course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course_name", flat=True)
