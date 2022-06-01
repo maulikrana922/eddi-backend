@@ -1170,7 +1170,7 @@ class UserProfileView(APIView):
             LEVEL_OF_ROLE : request.POST.get(LEVEL_OF_ROLE,data.level_of_role),
             FUTURE_PROFESSIONAL_ROLE : request.POST.get(FUTURE_PROFESSIONAL_ROLE,data.future_professional_role),
             COURSE_CATEGORY : request.POST.get(COURSE_CATEGORY,data.course_category),            
-            AREA_OF_INTEREST : request.POST.get(AREA_OF_INTEREST,data.area_of_interest),            
+            AREA_OF_INTEREST : request.POST.get(AREA_OF_INTEREST,data.area_of_interest)           
         }
             if request.POST.get(AGREE_ADS_TERMS):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
@@ -1192,6 +1192,7 @@ class UserProfileView(APIView):
             data.save()            
             return Response({STATUS: SUCCESS, DATA: "Profile Updated Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex,"exexex")
             return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
             
             
@@ -1297,6 +1298,7 @@ class UserPaymentDetail_info(APIView):
                     return Response({STATUS: SUCCESS, DATA: "Created Successfully"}, status=status.HTTP_200_OK)
 
                 except Exception as ex:
+                    print(ex,"exexex")
                     return Response({MESSAGE: ERROR, DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: ERROR, DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)

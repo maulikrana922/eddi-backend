@@ -1111,7 +1111,7 @@ class UserProfile(models.Model):
     future_professional_role = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Future Professional Role"))
 
     #area of interest
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Categories"))
+    course_category = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("Course Categories"))
     user_interests = models.JSONField(blank=True,null=True, verbose_name=_("User Interests"))
     area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Area of Interest"))
     agree_ads_terms = models.BooleanField(default=True,verbose_name=_('agree ads terms'))
