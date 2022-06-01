@@ -1281,15 +1281,15 @@ class UserPaymentDetail_info(APIView):
                         receiver = [courseobj.supplier.email_id]
                         send_notification(email_id, receiver, message)
                         try:
-                            record_map = {}
-                            record_map = {
+                            record_map1 = {}
+                            record_map1 = {
                                 "sender" : email_id,
                                 "receiver" : courseobj.supplier.email_id,
                                 "message" : message,
                                 "message_sv" : message_sv
                             }
 
-                            getattr(models,"Notification").objects.update_or_create(**record_map)
+                            getattr(models,"Notification").objects.update_or_create(**record_map1)
                         except Exception as ex:
                             pass
                     except Exception as ex:
@@ -1363,15 +1363,15 @@ class EventPaymentDetail_info(APIView):
                         send_notification(user_email_id, receiver, message)
                         for i in receiver:
                             try:
-                                record_map = {}
-                                record_map = {
+                                record_map1 = {}
+                                record_map1 = {
                                     "sender" : user_email_id,
                                     "receiver" : i,
                                     "message" : message,
                                     "message_sv" : message_sv
                                 }
 
-                                getattr(models,"Notification").objects.update_or_create(**record_map)
+                                getattr(models,"Notification").objects.update_or_create(**record_map1)
                             except Exception as ex:
                                 print(ex,"exexe")
                                 pass
@@ -1781,15 +1781,15 @@ class RecruitmentAdView(APIView):
                 send_notification(email_id, receiver, message)
                 for i in receiver:
                     try:
-                        record_map = {}
-                        record_map = {
+                        record_map1 = {}
+                        record_map1 = {
                             "sender" : email_id,
                             "receiver" : i,
                             "message" : message,
                             "message_sv" : message_sv
                         }
 
-                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                        getattr(models,"Notification").objects.update_or_create(**record_map1)
                     except Exception as ex:
                         print(ex,"exexe")
                         pass
@@ -1879,15 +1879,15 @@ class RecruitmentAdView(APIView):
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
-                                        record_map = {}
-                                        record_map = {
+                                        record_map1 = {}
+                                        record_map1 = {
                                             "sender" : email_id,
                                             "receiver" : i,
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
 
-                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                        getattr(models,"Notification").objects.update_or_create(**record_map1)
                                     except Exception as ex:
                                         print(ex,"exexe")
                                         pass
@@ -1905,14 +1905,14 @@ class RecruitmentAdView(APIView):
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
-                                        record_map = {}
-                                        record_map = {
+                                        record_map2 = {}
+                                        record_map2 = {
                                             "sender" : email_id,
                                             "receiver" : i,
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
-                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                        getattr(models,"Notification").objects.update_or_create(**record_map2)
                                     except Exception as ex:
                                         print(ex,"exexe")
                                         pass

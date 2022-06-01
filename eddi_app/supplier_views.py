@@ -138,15 +138,15 @@ class AddCourseView(APIView):
                 send_notification(email_id, receiver, message)
                 for i in receiver:
                     try:
-                        record_map = {}
-                        record_map = {
+                        record_map1 = {}
+                        record_map1 = {
                             "sender" : email_id,
                             "receiver" : i,
                             "message" : message,
                             "message_sv" : message_sv,
                         }
 
-                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                        getattr(models,"Notification").objects.update_or_create(**record_map1)
                     except Exception as ex:
                         print(ex,"exexe")
                         pass
@@ -170,15 +170,15 @@ class AddCourseView(APIView):
                 send_notification(email_id, receiver, message)
                 for i in receiver:
                     try:
-                        record_map = {}
-                        record_map = {
+                        record_map2 = {}
+                        record_map2 = {
                             "sender" : email_id,
                             "receiver" : i,
                             "message" : message,
                             "message_sv" : message_sv,
                         }
 
-                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                        getattr(models,"Notification").objects.update_or_create(**record_map2)
                     except Exception as ex:
                         print(ex,"exexeer")
                         pass
@@ -225,15 +225,15 @@ class AddSubCategoryView(APIView):
             send_notification(email_id, receiver, message)
             for i in receiver:
                 try:
-                    record_map = {}
-                    record_map = {
+                    record_map1 = {}
+                    record_map1 = {
                         "sender" : email_id,
                         "receiver" : i,
                         "message" : message,
                         "message_sv" : message_sv
                     }
 
-                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                    getattr(models,"Notification").objects.update_or_create(**record_map1)
                 except Exception as ex:
                     print(ex,"exexe")
                     pass
@@ -343,15 +343,15 @@ class GetSubCategoryDetails(APIView):
                             send_notification(email_id, receiver, message)
                             for i in receiver:
                                 try:
-                                    record_map = {}
-                                    record_map = {
+                                    record_map1 = {}
+                                    record_map1 = {
                                         "sender" : email_id,
                                         "receiver" : i,
                                         "message" : message,
                                         "message_sv" : message_sv
                                     }
 
-                                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                                    getattr(models,"Notification").objects.update_or_create(**record_map1)
                                 except Exception as ex:
                                     pass
                         except Exception as ex:
@@ -385,15 +385,15 @@ class GetSubCategoryDetails(APIView):
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
-                                        record_map = {}
-                                        record_map = {
+                                        record_map2 = {}
+                                        record_map2 = {
                                             "sender" : email_id,
                                             "receiver" : i,
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
 
-                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                        getattr(models,"Notification").objects.update_or_create(**record_map2)
                                     except Exception as ex:
                                         pass
                             except Exception as ex:
@@ -653,7 +653,7 @@ class GetCourseDetails(APIView):
                 record_map[COURSE_FOR_ORGANIZATION] = data.course_for_organization
                 res = data.organization_domain
 
-            if user_type_data:
+            if user_type_data != None:
                 if user_type_data == ADMIN_S:
                     if request.POST.get(STATUS):
                         if request.POST.get(STATUS) == "Active":
@@ -703,15 +703,15 @@ class GetCourseDetails(APIView):
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
-                                        record_map = {}
-                                        record_map = {
+                                        record_map1 = {}
+                                        record_map1 = {
                                             "sender" : email_id,
                                             "receiver" : i,
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
 
-                                        getattr(models,"Notification").objects.update_or_create(**record_map)
+                                        getattr(models,"Notification").objects.update_or_create(**record_map1)
                                     except Exception as ex:
                                         print(ex,"exexe")
                                         pass
@@ -766,15 +766,15 @@ class GetCourseDetails(APIView):
                                     send_notification(email_id, receiver, message)
                                     for i in receiver:
                                         try:
-                                            record_map = {}
-                                            record_map = {
+                                            record_map2 = {}
+                                            record_map2 = {
                                                 "sender" : email_id,
                                                 "receiver" : i,
                                                 "message" : message,
                                                 "message_sv" : message_sv
                                             }
 
-                                            getattr(models,"Notification").objects.update_or_create(**record_map)
+                                            getattr(models,"Notification").objects.update_or_create(**record_map2)
                                         except Exception as ex:
                                             print(ex,"exexe")
                                             pass
@@ -799,7 +799,6 @@ class GetCourseDetails(APIView):
                     else:
                         record_map[STATUS] = data.status
                         record_map[IS_APPROVED_ID] = 2
-
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 record_map[MODIFIED_BY] = 'admin'
                 for key,value in record_map.items():
