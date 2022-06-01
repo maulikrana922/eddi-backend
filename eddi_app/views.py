@@ -1642,11 +1642,13 @@ class EventView(APIView):
 
                 category_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).filter(Q(event_name__in = a) | Q(event_category__in = a)).exclude(event_name__in = user_data).values_list(EVENT_NAME, flat=True)
 
-                all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
+                # all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).exclude(event_name__in = category_event_data).order_by("-created_date_time")
 
-                if serializer := EventAdSerializer(category_event, many=True):
-                    if serializer1 := EventAdSerializer(all_event_data, many=True):
-                        return Response({STATUS: SUCCESS, DATA: serializer.data, "all_event":serializer1.data}, status=status.HTTP_200_OK)
+                all_event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1,IS_DELETED:False}).order_by("-created_date_time")
+
+                if serializer := EventAdSerializer(all_event_data, many=True):
+                    # if serializer1 := EventAdSerializer(all_event_data, many=True):
+                    #     return Response({STATUS: SUCCESS, DATA: serializer.data, "all_event":serializer1.data}, status=status.HTTP_200_OK)
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
