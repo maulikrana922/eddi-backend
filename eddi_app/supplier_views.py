@@ -1361,9 +1361,16 @@ class SupplierOrganizationProfileview(APIView):
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
             data= None
+        try:
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        except Exception as ex:
+            user_data= None
 
         if serializer := SupplierOrganizationProfileSerializer(data):
-            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            if serializer1 := UserSignupSerializer(user_data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data, "supplier_info":serializer1.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 

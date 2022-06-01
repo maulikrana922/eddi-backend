@@ -1468,7 +1468,6 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
     if created and instance.user_type.user_type == SUPPLIER_S:
-        record_map = {}
         try:
             message = f"{instance.first_name}, as a Supplier has been added by the System."
             message_sv = f"{instance.first_name}, as a Supplier has been added by the System."
@@ -1479,21 +1478,22 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             send_notification(instance.email_id, receiver, message)
             for i in receiver:
                 try:
-                    record_map = {}
-                    record_map = {
+                    record_map1 = {}
+                    record_map1 = {
                         "sender" : instance.email_id,
                         "receiver" : i,
                         "message" : message,
                         "message_sv" : message_sv,
                     }
 
-                    Notification.objects.update_or_create(**record_map)
+                    Notification.objects.update_or_create(**record_map1)
                 except Exception as ex:
                     print(ex,"exexe")
                     pass
         except:
             pass
         try:
+            record_map = {}
             record_map = {
                 "supplier_name" : f"{instance.first_name}{instance.last_name}"
             }
