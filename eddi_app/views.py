@@ -1061,7 +1061,7 @@ class ContactFormView(APIView):
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Message sent successfully"}, status=status.HTTP_200_OK)
 
 
 @permission_classes([AllowAny])
@@ -1084,7 +1084,7 @@ class ContactFormView_sv(APIView):
 
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Message sent successfully"}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):
@@ -1868,6 +1868,7 @@ class RecruitmentAdView(APIView):
 
                     if request.POST.get(APPROVAL_STATUS):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
+                            print("apapapapapap")
                             record_map[IS_APPROVED_ID] = 1
                             try:
                                 message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
@@ -1935,6 +1936,7 @@ class RecruitmentAdView(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
+            print("kokokokokokokoko")
             return Response({STATUS: SUCCESS, DATA: "Edited Data successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in saving data"}, status=status.HTTP_400_BAD_REQUEST)
