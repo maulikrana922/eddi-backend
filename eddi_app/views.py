@@ -1267,7 +1267,7 @@ class UserPaymentDetail_info(APIView):
                         pass
 
                     try:
-                        supplier_data = getattr(models,SupplierOrganizationProfile).objects.get(**{"supplier_email":courseobj.supplier.email_id})
+                        supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":courseobj.supplier.email_id})
                     except Exception as ex:
                         pass
                     try:
