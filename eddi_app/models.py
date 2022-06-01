@@ -50,7 +50,8 @@ class utl_status(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = _("Status Table")
+        verbose_name_plural = _("Status Table")
+
 
     def __str__(self):
         return str(self.value)
@@ -64,7 +65,7 @@ class UserType(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = _("User Type Table")
+        verbose_name_plural = _("User Type Table")
 
     def __str__(self):
         return str(self.user_type)
@@ -78,7 +79,7 @@ class approval_status(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = _("Approval Status Table")
+        verbose_name_plural = _("Approval Status Table")
 
     def __str__(self):
         return str(self.value)
@@ -107,7 +108,7 @@ class UserSignup(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
 
     class Meta:
-        verbose_name = _("User Signup Table")
+        verbose_name_plural = _("User Signup Table")
     
     def __str__(self):
         return self.email_id
@@ -128,7 +129,7 @@ class NonBuiltInUserToken(Token):
     )
 
     class Meta:
-        verbose_name = _('Non BuiltIn User Token')
+        verbose_name_plural = _('Non BuiltIn User Token')
 
 
 
@@ -159,7 +160,7 @@ class CourseCategoryDetails(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Course Category Table")
+        verbose_name_plural = _("Course Category Table")
 
     def __str__(self):
         return self.category_name
@@ -181,7 +182,7 @@ class CourseSubCategoryDetails(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Course Sub Category Table")
+        verbose_name_plural = _("Course Sub Category Table")
 
     def __str__(self):
         return self.subcategory_name
@@ -199,7 +200,7 @@ class CourseType(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Course Type Table")
+        verbose_name_plural = _("Course Type Table")
 
     def __str__(self):
         return self.type_name
@@ -217,7 +218,7 @@ class CourseLevel(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Course Level Table")
+        verbose_name_plural = _("Course Level Table")
 
 class FeeType(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -231,7 +232,7 @@ class FeeType(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Fee Type Table")
+        verbose_name_plural = _("Fee Type Table")
 
     def __str__(self):
         return self.fee_type_name
@@ -245,7 +246,7 @@ class InvoiceVATCMS(models.Model):
         return str(self.vat_value)
 
     class Meta:
-        verbose_name = _("Invoice VAT Table")
+        verbose_name_plural = _("Invoice VAT Table")
 
 
 
@@ -280,7 +281,7 @@ class SupplierOrganizationProfile(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Supplier Organization Profile Table")
+        verbose_name_plural = _("Supplier Organization Profile Table")
 
     def __str__(self):
         return self.supplier_email
@@ -324,7 +325,7 @@ class CourseDetails(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Course Details Table")
+        verbose_name_plural = _("Course Details Table")
 
     def __str__(self):
         return str(self.course_name)
@@ -393,7 +394,7 @@ class WhatsonEddiCMS(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
     
     class Meta:
-        verbose_name = _("Whats'on Eddi CMS")
+        verbose_name_plural = _("Whats'on Eddi CMS")
 
 class WhatsonEddiCMS_SV(models.Model):
     content = RichTextField(verbose_name = _("Whats'on Eddi"),blank = True)
@@ -404,7 +405,7 @@ class WhatsonEddiCMS_SV(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
     
     class Meta:
-        verbose_name = _("Whats'on Eddi CMS SV")
+        verbose_name_plural = _("Whats'on Eddi CMS SV")
 
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
@@ -418,7 +419,7 @@ class HomePageCMSBanner(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Home Page CMS Banner Table")
+        verbose_name_plural = _("Home Page CMS Banner Table")
 
 
 class HomePageCMSBanner_SV(models.Model):
@@ -433,7 +434,7 @@ class HomePageCMSBanner_SV(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Home Page CMS Banner Table SV")
+        verbose_name_plural = _("Home Page CMS Banner Table SV")
 
 
 class HomePageCMSPartners(models.Model):
@@ -451,7 +452,7 @@ class HomePageCMSPartners(models.Model):
         return str(self.partner_logo.url)
 
     class Meta:
-        verbose_name = _("Home Page CMS Partners Table")
+        verbose_name_plural = _("Home Page CMS Partners Table")
 
 
 class HomePageCMSPartners_SV(models.Model):
@@ -469,7 +470,7 @@ class HomePageCMSPartners_SV(models.Model):
         return str(self.partner_logo.url)
 
     class Meta:
-        verbose_name = _("Home Page CMS Partners Table SV")
+        verbose_name_plural = _("Home Page CMS Partners Table SV")
 
 
 class ContactFormLead(models.Model):
@@ -489,7 +490,7 @@ class ContactFormLead(models.Model):
         return str(self.email_id)
 
     class Meta:
-        verbose_name = _("Contact Form Lead Table")
+        verbose_name_plural = _("Contact Form Lead Table")
 
 
 class ContactFormLead_SV(models.Model):
@@ -509,7 +510,7 @@ class ContactFormLead_SV(models.Model):
         return str(self.email_id)
 
     class Meta:
-        verbose_name = _("Contact Form Lead Table SV")
+        verbose_name_plural = _("Contact Form Lead Table SV")
 
 @receiver(post_save, sender=ContactFormLead)
 @receiver(post_save, sender=ContactFormLead_SV)
@@ -564,7 +565,7 @@ class BlogDetails(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Blog Table")
+        verbose_name_plural = _("Blog Table")
 
 
 class BlogDetails_SV(models.Model):
@@ -582,7 +583,7 @@ class BlogDetails_SV(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Blog Table SV")
+        verbose_name_plural = _("Blog Table SV")
 
 class TestinomialsDetails(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
@@ -597,7 +598,7 @@ class TestinomialsDetails(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Testinomials Details Table")
+        verbose_name_plural = _("Testinomials Details Table")
 
 class TestinomialsDetails_SV(models.Model):
     user_id = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,blank=True,verbose_name=_('User Details'))
@@ -612,7 +613,7 @@ class TestinomialsDetails_SV(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=('Status'),blank=True,null=True)
 
     class Meta:
-        verbose_name = _("Testinomials Details Table SV")
+        verbose_name_plural = _("Testinomials Details Table SV")
 
 class Header_FooterCMS(models.Model):
     # Header
@@ -643,7 +644,7 @@ class Header_FooterCMS(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     class Meta:
-        verbose_name = _("Header_FooterCMS")
+        verbose_name_plural = _("Header_FooterCMS")
 
 class Header_FooterCMS_SV(models.Model):
     # Header
@@ -674,7 +675,7 @@ class Header_FooterCMS_SV(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     class Meta:
-        verbose_name = _("Header_FooterCMS SV")
+        verbose_name_plural = _("Header_FooterCMS SV")
 
 
 class HomePageCMS(models.Model):
@@ -727,7 +728,7 @@ class HomePageCMS(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Home Page")
+        verbose_name_plural = _("Home Page")
 
 def regions_changed(sender, **kwargs):
     if kwargs['instance'].section_5_blog.count() > 4:
@@ -786,7 +787,7 @@ class HomePageCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Home Page SV")
+        verbose_name_plural = _("Home Page SV")
 
 def regions_changed(sender, **kwargs):
     if kwargs['instance'].section_5_blog.count() > 4:
@@ -826,7 +827,7 @@ class AboutUsPageCMS(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("About Us Page")
+        verbose_name_plural = _("About Us Page")
 
 
 class AboutUsPageCMS_SV(models.Model):
@@ -860,7 +861,7 @@ class AboutUsPageCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("About Us Page SV")
+        verbose_name_plural = _("About Us Page SV")
 
 
 class ContactUsPageCMS(models.Model):
@@ -885,7 +886,7 @@ class ContactUsPageCMS(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Contact Us Page")
+        verbose_name_plural = _("Contact Us Page")
 
 
 class ContactUsPageCMS_SV(models.Model):
@@ -910,7 +911,7 @@ class ContactUsPageCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Contact Us Page SV")
+        verbose_name_plural = _("Contact Us Page SV")
 
 
 class PrivacyPolicyCMS(models.Model):
@@ -933,7 +934,7 @@ class PrivacyPolicyCMS(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Privacy Policy Page")
+        verbose_name_plural = _("Privacy Policy Page")
 
 
 class PrivacyPolicyCMS_SV(models.Model):
@@ -956,7 +957,7 @@ class PrivacyPolicyCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Privacy Policy Page SV")
+        verbose_name_plural = _("Privacy Policy Page SV")
 
 
 class PrivacyPolicyCMSSupplier(models.Model):
@@ -979,7 +980,7 @@ class PrivacyPolicyCMSSupplier(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Privacy Policy Page Supplier")
+        verbose_name_plural = _("Privacy Policy Page Supplier")
 
 
 class PrivacyPolicyCMSSupplier_SV(models.Model):
@@ -1002,7 +1003,7 @@ class PrivacyPolicyCMSSupplier_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Privacy Policy Page Supplier SV")
+        verbose_name_plural = _("Privacy Policy Page Supplier SV")
 
 class TermsConditionCMS(models.Model):
     #section 1
@@ -1020,7 +1021,7 @@ class TermsConditionCMS(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Terms & Condition Page")
+        verbose_name_plural = _("Terms & Condition Page")
 
 class TermsConditionCMS_SV(models.Model):
     #section 1
@@ -1038,7 +1039,7 @@ class TermsConditionCMS_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Terms & Condition Page SV")
+        verbose_name_plural = _("Terms & Condition Page SV")
 
 
 class TermsConditionCMSSupplier(models.Model):
@@ -1057,7 +1058,7 @@ class TermsConditionCMSSupplier(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Terms & Condition Page Supplier")
+        verbose_name_plural = _("Terms & Condition Page Supplier")
 
 class TermsConditionCMSSupplier_SV(models.Model):
     #section 1
@@ -1075,7 +1076,7 @@ class TermsConditionCMSSupplier_SV(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("Terms & Condition Page Supplier SV")
+        verbose_name_plural = _("Terms & Condition Page Supplier SV")
 
 
 class UserProfile(models.Model):
@@ -1120,7 +1121,7 @@ class UserProfile(models.Model):
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
     class Meta:
-        verbose_name = _("User Eddi Profile")
+        verbose_name_plural = _("User Eddi Profile")
 
     def __str__(self):
         return str(self.email_id)
@@ -1135,7 +1136,7 @@ class CourseRating(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
     class Meta:
-        verbose_name = _("Course Rating Table") 
+        verbose_name_plural = _("Course Rating Table") 
 
 
 class UserPersonalProfile(models.Model):
@@ -1147,7 +1148,7 @@ class UserPersonalProfile(models.Model):
     email_id = models.CharField(max_length=255,blank=True,null=True,verbose_name=_("Email Id"),unique=True)
 
     class Meta:
-        verbose_name = _("User Personal Profile")
+        verbose_name_plural = _("User Personal Profile")
 
 
 class SupplierProfile(models.Model):
@@ -1168,7 +1169,7 @@ class SupplierProfile(models.Model):
         return str(self.supplier_name)
 
     class Meta:
-        verbose_name = _("Supplier Profile")
+        verbose_name_plural = _("Supplier Profile")
 
 
 class UserPaymentDetail(models.Model):
@@ -1180,7 +1181,7 @@ class UserPaymentDetail(models.Model):
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
 
     class Meta:
-        verbose_name = _("User Payment Detail")
+        verbose_name_plural = _("User Payment Detail")
 
     def __str__(self):
         return self.course_name
@@ -1195,7 +1196,7 @@ class FavouriteCourse(models.Model):
         return str(self.course_name)
 
     class Meta:
-        verbose_name = _("Favourite Course")
+        verbose_name_plural = _("Favourite Course")
     
 class CourseEnroll(models.Model):
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
@@ -1209,7 +1210,7 @@ class CourseEnroll(models.Model):
         return str(self.payment_detail.course_name)
 
     class Meta:
-        verbose_name = _("Course Enroll")  
+        verbose_name_plural = _("Course Enroll")  
 
     
 @receiver(post_save, sender=CourseEnroll)
@@ -1267,7 +1268,7 @@ class EventAd(models.Model):
 
 
     class Meta:
-        verbose_name = _("EventAd Table")
+        verbose_name_plural = _("EventAd Table")
 
     def __str__(self):
         return str(self.event_name)
@@ -1286,7 +1287,7 @@ class EventAdPaymentDetail(models.Model):
         return str(self.event_name)
 
     class Meta:
-        verbose_name = _("Event Ad Payment Detail") 
+        verbose_name_plural = _("Event Ad Payment Detail") 
 
 class EventAdEnroll(models.Model):
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event name"))
@@ -1299,7 +1300,7 @@ class EventAdEnroll(models.Model):
         return str(self.event_name)
 
     class Meta:
-        verbose_name = _("Event Ad Enroll")
+        verbose_name_plural = _("Event Ad Enroll")
     
 
 class MaterialVideoMaterial(models.Model):
@@ -1309,7 +1310,7 @@ class MaterialVideoMaterial(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
     
     class Meta:
-        verbose_name = _("Material Video Material")
+        verbose_name_plural = _("Material Video Material")
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
@@ -1321,7 +1322,7 @@ class MaterialDocumentMaterial(models.Model):
         return str(self.document_file)
 
     class Meta:
-        verbose_name = _("Material Document Material")
+        verbose_name_plural = _("Material Document Material")
 
 
 class CourseMaterialStatus(models.Model):
@@ -1336,7 +1337,7 @@ class CourseMaterialStatus(models.Model):
         return str(self.video_id)
 
     class Meta:
-        verbose_name = _("Course Material Status")
+        verbose_name_plural = _("Course Material Status")
     
 
 class CourseMaterial(models.Model):
@@ -1354,7 +1355,7 @@ class CourseMaterial(models.Model):
         return self.course.course_name
     
     class Meta:
-        verbose_name = _("Course Material")
+        verbose_name_plural = _("Course Material")
 
 
 class RecruitmentAd(models.Model):
@@ -1374,7 +1375,7 @@ class RecruitmentAd(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True, default=None)
 
     class Meta:
-        verbose_name = _("Recruitment Ad")
+        verbose_name_plural = _("Recruitment Ad")
         
 
 class InvoiceData(models.Model):
@@ -1389,7 +1390,7 @@ class InvoiceData(models.Model):
         return str(self.course_name)
     
     class Meta:
-        verbose_name = _("Invoice Data")
+        verbose_name_plural = _("Invoice Data")
 
 
 class InvoiceDataEvent(models.Model):
@@ -1404,7 +1405,7 @@ class InvoiceDataEvent(models.Model):
         return str(self.event_name)
     
     class Meta:
-        verbose_name = _("Invoice Data Event")
+        verbose_name_plural = _("Invoice Data Event")
 
 
 class Notification(models.Model):
@@ -1419,7 +1420,7 @@ class Notification(models.Model):
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
     class Meta:
-        verbose_name = _("Notification Table")
+        verbose_name_plural = _("Notification Table")
 
 class UserProfileCMS(models.Model):
     user_welcome = models.CharField(max_length=255,blank=True,null=True,verbose_name=_('User Welcome'))
