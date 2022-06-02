@@ -277,9 +277,9 @@ class GetSubCategoryDetails(APIView):
                 user_type_data = None
             if user_type_data:
                 if user_type_data == ADMIN_S:
-                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.all().order_by("-created_date_time")
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{IS_DELETED:False}).order_by("-created_date_time")
                 elif user_type_data == SUPPLIER_S:
-                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+                    data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
                 else:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).order_by("-created_date_time")
             if serializer := SubCategoryDetailsSerializer(data, many=True):
@@ -532,14 +532,14 @@ class GetCourseDetails(APIView):
             if email_id:
                 if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     try:
-                        data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id}).order_by("-created_date_time")
+                        data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
 
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Error in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
-                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except Exception as ex:
