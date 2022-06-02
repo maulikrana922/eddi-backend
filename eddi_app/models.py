@@ -1534,7 +1534,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
-    
+        
     if created and instance.user_type.user_type == 'User':
         html_path = VARIFY_EMAIL
         fullname = f'{instance.first_name} {instance.last_name}'
