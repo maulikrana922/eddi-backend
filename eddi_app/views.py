@@ -2447,7 +2447,7 @@ class Manage_Payment(APIView):
             record_map = {}
             if request.POST.get(APPROVAL_STATUS) == "Approved":
                 record_map[IS_APPROVED_ID] = 1
-            elif request.POST.get(APPROVAL_STATUS) == "Pendreturn Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)ing":
+            elif request.POST.get(APPROVAL_STATUS) == "Pending":
                 record_map[IS_APPROVED_ID] = 2
             else:
                 record_map[IS_APPROVED_ID] = 3
@@ -2458,11 +2458,4 @@ class Manage_Payment(APIView):
             return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
-        try:
-            if serializer := UerPaymentSerializer(payment_data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            pass
 
