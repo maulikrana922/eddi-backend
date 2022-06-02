@@ -2016,7 +2016,7 @@ class CourseEnrollView(APIView):
         email_id =  get_user_email_by_token(request)
         var = request.POST.get("filter")
         try:
-            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course_name", flat = True)
         except Exception as ex:
             enroll_data = None
         try:
@@ -2455,7 +2455,7 @@ class Manage_Payment(APIView):
             else:
                 record_map[IS_APPROVED_ID] = 3
 
-            for key, value in record_map.item():
+            for key, value in record_map.items():
                 setattr(payment_data, key, value)
             payment_data.save()
             return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
