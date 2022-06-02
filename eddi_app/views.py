@@ -1695,7 +1695,8 @@ class EventView(APIView):
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})            
+            data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})   
+                     
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
         try:

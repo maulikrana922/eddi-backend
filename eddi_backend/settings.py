@@ -122,52 +122,52 @@ JAZZMIN_SETTINGS = {
 
 "custom_links": {
         "eddi_app": [{
-            "name": "Home Page", 
+            "name": _("Home Page"), 
             "url": "/admin/eddi_app/homepagecms/1/change/", 
             "icon": "fas fa-home",
         },
         {
-            "name": "Home Page SV", 
+            "name": _("Home Page SV"), 
             "url": "/admin/eddi_app/homepagecms_sv/1/change/", 
             "icon": "fas fa-home",
         },
         {
-            "name": "About Us Page", 
+            "name": _("About Us Page"), 
             "url": "/admin/eddi_app/aboutuspagecms/1/change/", 
             "icon": "fas fa-info",
         },
         {
-            "name": "About Us Page SV", 
+            "name": _("About Us Page SV"), 
             "url": "/admin/eddi_app/aboutuspagecms_sv/1/change/", 
             "icon": "fas fa-info",
         },
         {
-            "name": "Contact Us Page", 
+            "name": _("Contact Us Page"), 
             "url": "/admin/eddi_app/contactuspagecms/1/change/", 
             "icon": "fas fa-phone",
         },
         {
-            "name": "Contact Us Page SV", 
+            "name": _("Contact Us Page SV"), 
             "url": "/admin/eddi_app/contactuspagecms_sv/1/change/", 
             "icon": "fas fa-phone",
         },
         {
-            "name": "Privacy Policy Page", 
+            "name": _("Privacy Policy Page"), 
             "url": "/admin/eddi_app/privacypolicycms/1/change/", 
             "icon": "fas fa-file-contract",
         },
         {
-            "name": "Privacy Policy Page SV", 
+            "name": _("Privacy Policy Page SV"), 
             "url": "/admin/eddi_app/privacypolicycms_sv/1/change/", 
             "icon": "fas fa-file-contract",
         },
         {
-            "name": "Terms & Conditions Page", 
+            "name": _("Terms & Conditions Page"), 
             "url": "/admin/eddi_app/termsconditioncms/1/change/", 
             "icon": "fas fa-file-signature",
         },
         {
-            "name": "Terms & Conditions Page SV", 
+            "name": _("Terms & Conditions Page SV"), 
             "url": "/admin/eddi_app/termsconditioncms_sv/1/change/", 
             "icon": "fas fa-file-signature",
         },
@@ -292,7 +292,7 @@ LANGUAGES = [
     ('en', _(u'English')),
 ]
 CMS_TEMPLATES = (
-    ('page.html', 'Page'),  # any name should work
+    ('page.html', _('Page')),  # any name should work
 )
 
 # Static files (CSS, JavaScript, Images)
