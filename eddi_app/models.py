@@ -268,8 +268,8 @@ class SupplierOrganizationProfile(models.Model):
     approved_once = models.BooleanField(default=False,verbose_name=_('Approved Once'))
 
     # Course Category
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
-    sub_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Sub Category"))
+    course_category = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("Course Category"))
+    sub_category = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("Sub Category"))
     rejection_count = models.IntegerField(default=0,verbose_name=_('Rejection Count'),blank=True,null=True)
 
     # Additional Information

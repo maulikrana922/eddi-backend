@@ -57,9 +57,8 @@ class AddCourseView(APIView):
 
         if request.POST.get(COURSE_NAME):
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":request.POST.get(COURSE_NAME)})
             except Exception as ex:
-                print(ex,"exex")
                 course_data = None
             if course_data != None:
                 return Response({STATUS: ERROR, DATA: "Please Choose Unique Course Name"}, status=status.HTTP_400_BAD_REQUEST)
@@ -246,7 +245,7 @@ class AddSubCategoryView(APIView):
 class GetCategoryDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
-            data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{UUID:uuid})
+            data = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
             course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_category_id":data.id})
             if serializer := CategoryDetailsSerializer(data):
                 if serializer1 := CourseDetailsSerializer(course_list, many=True):
@@ -265,7 +264,7 @@ class GetCategoryDetails(APIView):
 class GetSubCategoryDetails(APIView):
     def get(self, request,uuid = None):
         if uuid:
-            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
+            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
             if serializer := SubCategoryDetailsSerializer(data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -477,7 +476,7 @@ class GetCourseDetails(APIView):
             except:
                 user = None
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
             except:
                 course_data = None
             try:
@@ -1356,6 +1355,7 @@ class SupplierOrganizationProfileview(APIView):
                 except Exception as ex:
                     pass
             except Exception as ex:
+                print(ex,"exexe")
                 return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
