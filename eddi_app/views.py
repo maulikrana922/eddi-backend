@@ -2452,10 +2452,11 @@ class Manage_Payment(APIView):
             else:
                 record_map[IS_APPROVED_ID] = 3
 
-            for key, value in payment_data.items():
+            for key, value in record_map.item():
                 setattr(payment_data, key, value)
             payment_data.save()
             return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex,"exex")
             return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
 
