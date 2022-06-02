@@ -399,19 +399,22 @@ class GetUserDetails(APIView):
        
         else:
             try:
-                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
-                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
+                all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
+                # print(all_data, "alalalal")
+                # all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
+                # supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
             except Exception as ex:
-                supplier_data = None
-            try:
-                data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
-            except Exception as ex:
-                data = None
-            if serializer := UserProfileSerializer(data, many=True):
-                if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data, "supplier_organization":serializer2.data}, status=status.HTTP_200_OK)
-                else:
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                all_data = None
+            # try:
+            #     data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
+            # except Exception as ex:
+            #     data = None
+            # if serializer := UserProfileSerializer(data, many=True):
+            if serializer := UserSignupSerializer(all_data, many=True):
+                # if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                # else:
+                #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1155,8 +1158,8 @@ class UserProfileView(APIView):
             DOB : request.POST.get(DOB,data.dob),
             PERSONAL_NUMBER : request.POST.get(PERSONAL_NUMBER,data.personal_number),
             PHONE_NUMBER : request.POST.get(PHONE_NUMBER,data.phone_number),
-            LOCATION : request.POST.get(USER_LOCATION,None),
-            USER_INTERESTS : request.POST.get(USER_INTERESTS,None),
+            LOCATION : request.POST.get(USER_LOCATION,data.location),
+            USER_INTERESTS : request.POST.get(USER_INTERESTS,data.user_interests),
             HIGHEST_EDUCATION : request.POST.get(HIGHEST_EDUCATION,data.highest_education),
             UNIVERSITY_NAME : request.POST.get(UNIVERSITY_NAME,data.university_name),
             HIGHEST_DEGREE : request.POST.get(HIGHEST_DEGREE,data.highest_degree),
