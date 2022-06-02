@@ -12,6 +12,7 @@ urlpatterns = [
 
 
     path('manage-payment/',Manage_Payment.as_view(), name="ManagePayment"),   
+    path('manage-payment/<str:uuid>/',Manage_Payment.as_view(), name="ManagePayment"),   
 
 
     # General Login/SignUp
