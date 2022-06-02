@@ -1173,6 +1173,7 @@ class SupplierProfile(models.Model):
 
 
 class UserPaymentDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course name"))
     supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Supplier name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
@@ -1280,6 +1281,7 @@ class EventAd(models.Model):
 
 
 class EventAdPaymentDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
