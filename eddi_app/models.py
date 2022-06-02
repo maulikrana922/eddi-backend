@@ -304,7 +304,7 @@ class CourseDetails(models.Model):
     organization_domain = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Domain'))
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name=_('Course Type'),blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name=_('Fee Type'),blank=True,null=True)
-    course_price = models.FloatField(default=0,verbose_name=_('Course Price'),blank=True,null=True)
+    course_price = models.CharField(max_length=100,verbose_name=_('Course Price'),blank=True,null=True)
     var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name=_('Invoice Vat'),blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name=_('Additional Information'),blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name=_('Organization Location'),blank=True,null=True)
@@ -1174,11 +1174,15 @@ class SupplierProfile(models.Model):
 
 class UserPaymentDetail(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course name"))
+    supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Supplier name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User name"))
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
     amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
+    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
 
     class Meta:
         verbose_name_plural = _("User Payment Detail")
@@ -1240,6 +1244,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
 
 class EventAd(models.Model):    
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
     event_image = models.FileField(upload_to='event_image/',verbose_name=_('Event Image'),blank=True,null=True)
     event_choose_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Choose Type"))
     event_publish_on = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Publish on"))
@@ -1250,7 +1255,7 @@ class EventAd(models.Model):
     start_time = models.TimeField(verbose_name=_('Event Start Time'), blank=True,null=True)
     fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Fees Type"))
     event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Type"))
-    event_price = models.FloatField(default=0,verbose_name=_('Event Price'),blank=True,null=True)
+    event_price = models.CharField(max_length=100,verbose_name=_('Event Price'),blank=True,null=True)
     checkout_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Checkout Link"))
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
@@ -1275,12 +1280,16 @@ class EventAd(models.Model):
 
 
 class EventAdPaymentDetail(models.Model):
+    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User Name"))
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
     amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
+    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
 
 
     def __str__(self):

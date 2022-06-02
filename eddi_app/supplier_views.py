@@ -126,6 +126,7 @@ class AddCourseView(APIView):
                 record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = supplier_id.user_type
+            print(record_map, "recordddd")
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
 
             # noti to Admin
@@ -631,9 +632,13 @@ class GetCourseDetails(APIView):
             TARGET_USERS : request.POST.get(TARGET_USERS,data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
-            COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
+            # COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
+            if request.POST.get(COURSE_PRICE):
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+            else:
+                record_map[COURSE_PRICE] = data.course_price
             if sub_category_id != None:
                 record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
             if request.POST.get(COURSE_STARTING_DATE) == "":
@@ -1579,7 +1584,7 @@ class SupplierProfileView(APIView):
                 }
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 getattr(models,SUPPLIER_PROFILE_TABLE).objects.update_or_create(**record_map)
-                return Response({STATUS: SUCCESS, DATA: "Profile Data created successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Profile Updated Successfully"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Error in saving Edited data"}, status=status.HTTP_400_BAD_REQUEST)
 

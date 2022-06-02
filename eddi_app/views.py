@@ -1201,7 +1201,9 @@ class UserPaymentDetail_info(APIView):
     def post(self, request):
         try:
             course_name = request.POST.get(COURSE_NAME)
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":course_name})
             email_id = request.POST.get(EMAIL_ID)
+            payment_mode = request.POST.get("payment_mode")
             user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
             user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
             if request.POST.get(CARD_BRAND):
@@ -1219,12 +1221,25 @@ class UserPaymentDetail_info(APIView):
             record_map = {}
             record_map = {
                 COURSE_NAME : course_name,
+                "supplier_name" : f"{course_data.supplier.first_name} {course_data.supplier.last_name}",
                 EMAIL_ID: email_id,
+                "user_name" : f"{user_data.first_name} {user_data.last_name}",
                 CARD_TYPE : card_type,
                 AMOUNT: float(amount),
                 STATUS: status_s,
                 CREATED_AT : make_aware(datetime.datetime.now())
                 }
+
+            if payment_mode == "eddi":
+                record_map["payment_mode"] = "Eddi Platform"
+                record_map[IS_APPROVED_ID] = 1
+            elif payment_mode == "external":
+                record_map["payment_mode"] = "External"
+                record_map[IS_APPROVED_ID] = 2
+            else:
+                record_map["payment_mode"] = "Invoice"
+                record_map[IS_APPROVED_ID] = 2
+
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
             except Exception as ex:
@@ -1313,6 +1328,9 @@ class EventPaymentDetail_info(APIView):
         user_email_id = get_user_email_by_token(request)
         try:
             event_name = request.POST.get(EVENT_NAME)
+            event_data = getattr(models,EVENT_AD_TABLE).objects.get(**{"event_name":event_name})
+            payment_mode = request.POST.get("payment_mode")
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:user_email_id})
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
             else:
@@ -1329,12 +1347,24 @@ class EventPaymentDetail_info(APIView):
             record_map = {}
             record_map = {
                 EVENT_NAME : event_name,
+                "admin_name" : event_data.admin_name,
+                "user_name" : user_data.first_name,
                 EMAIL_ID: user_email_id,
                 CARD_TYPE : card_type,
                 AMOUNT: float(amount),
                 STATUS: status_s,
                 CREATED_AT : make_aware(datetime.datetime.now())
                 }
+
+            if payment_mode == "eddi":
+                record_map["payment_mode"] = "Eddi Platform"
+                record_map[IS_APPROVED_ID] = 1
+            elif payment_mode == "external":
+                record_map["payment_mode"] = "External"
+                record_map[IS_APPROVED_ID] = 2
+            else:
+                record_map["payment_mode"] = "Invoice"
+                record_map[IS_APPROVED_ID] = 2
             try:
                 var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:user_email_id, EVENT_NAME:event_name,STATUS:'Success'})
             except Exception as ex:
@@ -1532,9 +1562,12 @@ class IncreaserecruitmentAdCount(APIView):
 
 class EventView(APIView):
     def post(self, request):
+        email_id = get_user_email_by_token(request)
+        admin = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}) 
         record_map = {}
         try:
             record_map = {
+            "admin_name" : admin.first_name,
             EVENT_IMAGE : request.FILES.get(EVENT_IMAGE,None),
             EVENT_PUBLISH_ON : request.POST.get(EVENT_PUBLISH_ON,None),
             EVENT_NAME : request.POST.get(EVENT_NAME,None),
@@ -1543,7 +1576,7 @@ class EventView(APIView):
             BANNER_VIDEO_LINK : request.POST.get(BANNER_VIDEO_LINK,None),
             FEES_TYPE : request.POST.get(FEES_TYPE,None),
             EVENT_TYPE : request.POST.get(EVENT_TYPE,None),
-            EVENT_PRICE : request.POST.get(EVENT_PRICE,None),
+            # EVENT_PRICE : request.POST.get(EVENT_PRICE,None),
             CHECKOUT_LINK : request.POST.get(CHECKOUT_LINK,None),
             MEETING_LINK : request.POST.get(MEETING_LINK,None),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
@@ -1555,6 +1588,8 @@ class EventView(APIView):
             STATUS_ID:1
            
         }
+            if request.POST.get(EVENT_PRICE):
+                record_map[EVENT_PRICE] = "{:.2f}".format(float(request.POST.get(EVENT_PRICE)))
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
             if request.POST.get(START_DATE) == "":
@@ -1680,7 +1715,7 @@ class EventView(APIView):
             BANNER_VIDEO_LINK : request.POST.get(BANNER_VIDEO_LINK,data.banner_video_link),  
             FEES_TYPE : request.POST.get(FEES_TYPE,data.fees_type),
             EVENT_TYPE : request.POST.get(EVENT_TYPE,data.event_type),
-            EVENT_PRICE : request.POST.get(EVENT_PRICE,data.event_price),
+            # EVENT_PRICE : request.POST.get(EVENT_PRICE,data.event_price),
             CHECKOUT_LINK : request.POST.get(CHECKOUT_LINK,data.checkout_link),
             MEETING_LINK : request.POST.get(MEETING_LINK,data.meeting_link),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,data.meeting_passcode),
@@ -1691,7 +1726,10 @@ class EventView(APIView):
             EVENT_SUBSCRIBER : request.POST.get(EVENT_SUBSCRIBER,data.event_subscriber),
             
             }
-        
+            if request.POST.get(EVENT_PRICE):
+                record_map[EVENT_PRICE] = "{:.2f}".format(float(request.POST.get(EVENT_PRICE)))
+            else:
+                 record_map[EVENT_PRICE] = data.event_price
             if request.POST.get(START_DATE) == "":
                 record_map[START_DATE] = None
             else:
@@ -1814,20 +1852,20 @@ class RecruitmentAdView(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == "User" and getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id}).agree_ads_terms == True:
-                data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"recruitmentAd_Expiry__gte":datetime.datetime.now().date()}).order_by("-created_date_time")
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"recruitmentAd_Expiry__gte":datetime.datetime.now().date(), IS_DELETED:False}).order_by("-created_date_time")
                 if serializer := RecruitmentAdSerializer(data, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
-                data = getattr(models,RECRUITMENTAD_TABLE).objects.all().order_by("-created_date_time")
+                data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{IS_DELETED:False}).order_by("-created_date_time")
                 if serializer := RecruitmentAdSerializer(data, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                 try:
-                    data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"supplier_profile__supplier_email":email_id}).order_by("-created_date_time")
+                    data = getattr(models,RECRUITMENTAD_TABLE).objects.filter(**{"supplier_profile__supplier_email":email_id, IS_DELETED:False}).order_by("-created_date_time")
                 except Exception as ex:
                     return Response({STATUS: ERROR, DATA: "You have not added Recruitment Ads Yet"}, status=status.HTTP_400_BAD_REQUEST)
                 if serializer := RecruitmentAdSerializer(data, many=True):
@@ -2375,3 +2413,35 @@ class AllSubCategory(APIView):
                 return Response({STATUS: SUCCESS, DATA: all_subcategory_serializer.error}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
+
+
+
+class Manage_Payment(APIView):
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            all_payment = getattr(models,"UserPaymentDetail").objects.all()
+        except Exception as ex:
+            all_payment = None
+        try:
+            if serializer := UerPaymentSerializer(all_payment, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            pass
+        
+    def put(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            all_payment = getattr(models,"UserPaymentDetail").objects.all()
+        except Exception as ex:
+            all_payment = None
+        try:
+            if serializer := UerPaymentSerializer(all_payment, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            pass
+
