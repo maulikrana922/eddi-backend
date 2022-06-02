@@ -280,6 +280,7 @@ class UserSignupView(APIView):
         try:
             getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
         except Exception as ex:
+            print(ex,"exexexexe")
             return Response({STATUS: ERROR, DATA: "User Already Exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
 
@@ -2431,15 +2432,34 @@ class Manage_Payment(APIView):
                 return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
-        
-    def put(self, request):
+
+    def put(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
+        approval_status = request.POST.get(APPROVAL_STATUS)
+        if not uuid:
+            return Response({STATUS: SUCCESS, DATA:"UUID not Provided"}, status=status.HTTP_200_OK)
         try:
-            all_payment = getattr(models,"UserPaymentDetail").objects.all()
+            try:
+                payment_data = getattr(models,"UserPaymentDetail").objects.get(**{UUID:uuid})
+            except Exception as ex:
+                payment_data = None
+
+            record_map = {}
+            if request.POST.get(APPROVAL_STATUS) == "Approved":
+                record_map[IS_APPROVED_ID] = 1
+            elif request.POST.get(APPROVAL_STATUS) == "Pendreturn Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)ing":
+                record_map[IS_APPROVED_ID] = 2
+            else:
+                record_map[IS_APPROVED_ID] = 3
+
+            for key, value in payment_data.items():
+                setattr(payment_data, key, value)
+            payment_data.save()
+            return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
-            all_payment = None
+            return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
         try:
-            if serializer := UerPaymentSerializer(all_payment, many=True):
+            if serializer := UerPaymentSerializer(payment_data):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
