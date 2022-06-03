@@ -1192,7 +1192,7 @@ class SupplierProfile(models.Model):
 class UserPaymentDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course name"))
-    supplier_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Supplier name"))
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('Supplier Email ID'))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
     user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User name"))
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))

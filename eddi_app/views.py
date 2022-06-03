@@ -1226,7 +1226,7 @@ class UserPaymentDetail_info(APIView):
             record_map = {}
             record_map = {
                 COURSE_NAME : course_name,
-                "supplier_name" : f"{course_data.supplier.first_name} {course_data.supplier.last_name}",
+                "supplier_email" : course_data.supplier.email_id,
                 EMAIL_ID: email_id,
                 "user_name" : f"{user_data.first_name} {user_data.last_name}",
                 CARD_TYPE : card_type,
@@ -2425,45 +2425,63 @@ class AllSubCategory(APIView):
 class Manage_Payment(APIView):
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        try:
-            all_payment = getattr(models,"UserPaymentDetail").objects.all()
-        except Exception as ex:
-            all_payment = None
-        try:
-            if serializer := UerPaymentSerializer(all_payment, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            pass
+        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        if data.user_type.user_type == ADMIN_S:
+            try:
+                all_payment = getattr(models,"UserPaymentDetail").objects.all()
+            except Exception as ex:
+                all_payment = None
+            try:
+                if serializer := UerPaymentSerializer(all_payment, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                pass
+        elif data.user_type.user_type == SUPPLIER_S:
+            try:
+                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"supplier_email":email_id})
+            except Exception as ex:
+                all_payment = None
+            try:
+                if serializer := UerPaymentSerializer(all_payment, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+            except Exception as ex:
+                pass
 
     def put(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         approval_status = request.POST.get(APPROVAL_STATUS)
+        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         if not uuid:
             return Response({STATUS: SUCCESS, DATA:"UUID not Provided"}, status=status.HTTP_200_OK)
-        try:
+        if data.user_type.user_type == ADMIN_S:
+            print("admininin")
             try:
-                payment_data = getattr(models,"UserPaymentDetail").objects.get(**{UUID:uuid})
+                try:
+                    payment_data = getattr(models,"UserPaymentDetail").objects.get(**{UUID:uuid})
+                except Exception as ex:
+                    payment_data = None
+
+                record_map = {}
+                if request.POST.get(APPROVAL_STATUS) == "Approved":
+                    record_map[IS_APPROVED_ID] = 1
+                elif request.POST.get(APPROVAL_STATUS) == "Pending":
+                    record_map[IS_APPROVED_ID] = 2
+                else:
+                    record_map[IS_APPROVED_ID] = 3
+
+                for key, value in record_map.items():
+                    setattr(payment_data, key, value)
+                payment_data.save()
+                return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
             except Exception as ex:
-                payment_data = None
-
-            record_map = {}
-            if request.POST.get(APPROVAL_STATUS) == "Approved":
-                record_map[IS_APPROVED_ID] = 1
-            elif request.POST.get(APPROVAL_STATUS) == "Pending":
-                record_map[IS_APPROVED_ID] = 2
-            else:
-                record_map[IS_APPROVED_ID] = 3
-
-            for key, value in record_map.items():
-                setattr(payment_data, key, value)
-            payment_data.save()
-            return Response({STATUS: SUCCESS, DATA:"Payment Status Changed Successfully"}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            print(ex,"exex")
-            return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
-
+                print(ex,"exex")
+                return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: SUCCESS, DATA: "You are not Authorized person"}, status=status.HTTP_200_OK)
 
 class AdminProfileView(APIView):
     def post(self, request):
