@@ -1,3 +1,4 @@
+import email
 from email.mime.image import MIMEImage
 import os
 from xhtml2pdf import pisa
@@ -2463,3 +2464,48 @@ class Manage_Payment(APIView):
             print(ex,"exex")
             return Response({STATUS: SUCCESS, DATA: "Something Went Wrong"}, status=status.HTTP_200_OK)
 
+
+class AdminProfileView(APIView):
+    def post(self, request):
+        email_id = get_user_email_by_token(request)
+        admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        try:
+            record_map = {
+                "admin_email" : email_id,
+                "admin_name" : f"{admin_data.first_name} {admin_data.last_name}",
+                "address" : request.POST.get("address",None),
+                "phone_number" : request.POST.get("phone_number",None),
+                "about_me" : request.POST.get("about_me",None),
+                "admin_image" : request.FILES.get("admin_image",None),
+            }
+            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+            getattr(models,"AdminProfile").objects.update_or_create(**record_map)
+            return Response({STATUS: SUCCESS, DATA: "Profile Created Successfully"}, status=status.HTTP_200_OK)
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
+        except Exception as ex:
+            data= None
+        if serializer := AdminProfileSerializer(data):
+            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
+        except Exception as ex:
+            data= None
+        record_map = {}
+        record_map = {
+            "address" : request.POST.get("address",data.address),
+            "phone_number" : request.POST.get("phone_number",data.phone_number),
+            "about_me" : request.POST.get("about_me",data.about_me),
+            "admin_image" : request.FILES.get("admin_image",data.admin_image),
+            }
+        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())

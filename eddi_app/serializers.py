@@ -243,6 +243,12 @@ class SupplierOrganizationProfileSerializer(serializers.ModelSerializer):
         depth = 1
         fields = '__all__'
 
+class AdminProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminProfile
+        depth = 1
+        fields = '__all__'
+
 
 class SupplierProfileSerializer(serializers.ModelSerializer):
     class Meta:

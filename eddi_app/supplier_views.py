@@ -845,33 +845,37 @@ class GetCourseDetails(APIView):
 class AdminDashboardView(APIView):
     def get(self, request,uuid = None): 
         admin_email = get_user_email_by_token(request)
-        try:
-            admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
-            total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
-            total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
-            total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
-            purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
-        except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
-            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
-        except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Error in getting tables data"}, status=status.HTTP_400_BAD_REQUEST)
-        if serializer :=  UserSignupSerializer(users, many = True):
-            if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
-                return Response({STATUS: SUCCESS,
-            "admin_name" : admin_data.first_name + " " + admin_data.last_name,
-            "supplier_count": total_supplier,
-            "user_count": total_user,
-            "total_course": total_course,
-            PURCHASED_COURSE_COUNT: purchased_course,
-            "users": serializer.data,
-            "suppliers": serializer1.data,
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
+        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+        if data.user_type.user_type == "Admin":
+            try:
+                admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+                total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
+                total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
+                total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
+                purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
+                course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Error in getting tables data"}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer :=  UserSignupSerializer(users, many = True):
+                if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
+                    return Response({STATUS: SUCCESS,
+                "admin_name" : admin_data.first_name + " " + admin_data.last_name,
+                "supplier_count": total_supplier,
+                "user_count": total_user,
+                "total_course": total_course,
+                PURCHASED_COURSE_COUNT: purchased_course,
+                "users": serializer.data,
+                "suppliers": serializer1.data,
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "Error in Coursedetail user data"}, status=status.HTTP_400_BAD_REQUEST)
 
+        else:
+            return Response({STATUS: ERROR, DATA: "You are not authorized"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SupplierDashboardView(APIView):
     def post(self, request,uuid = None):

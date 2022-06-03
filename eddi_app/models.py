@@ -1079,6 +1079,23 @@ class TermsConditionCMSSupplier_SV(models.Model):
         verbose_name_plural = _("Terms & Condition Page Supplier SV")
 
 
+class AdminProfile(models.Model):
+    admin_email = models.EmailField(blank=True,null=True,verbose_name=_("Admin Email"))
+    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
+    address = models.TextField(max_length=1000,blank=True,null=True,verbose_name=_("Address"))
+    phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Phone Number"))
+    about_me = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("About Me"))
+    admin_image = models.ImageField(upload_to = 'admin_image/',blank=True,null=True,verbose_name=_('Admin Image'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    def __str__(self):
+        return str(self.admin_name)
+
+    class Meta:
+        verbose_name_plural = _("Admin Profile")
+
+
 class UserProfile(models.Model):
 
     #personal information
@@ -1508,7 +1525,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             record_map = {
                 "supplier_name" : f"{instance.first_name}{instance.last_name}"
             }
-            getattr(models,"SupplierProfile").objects.update_or_create(**record_map)
+            SupplierProfile.objects.update_or_create(**record_map)
         except Exception as ex:
             print(ex, "exexexexe")
 
@@ -1534,7 +1551,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
-        
+
     if created and instance.user_type.user_type == 'User':
         html_path = VARIFY_EMAIL
         fullname = f'{instance.first_name} {instance.last_name}'
