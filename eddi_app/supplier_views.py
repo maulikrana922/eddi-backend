@@ -48,6 +48,7 @@ def get_user_email_by_token(request):
         data = None
         return data
 
+
 class AddCourseView(APIView):
     def post(self, request):
         res = None
