@@ -30,6 +30,7 @@ from itertools import chain
 import cv2
 # import pafy
 from .notification import send_notification
+from translate import Translator
 
 
 @permission_classes([AllowAny])
@@ -132,9 +133,14 @@ class AddCourseView(APIView):
             # noti to Admin
             try:
                 message = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
-                message_sv = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
                 data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                 receiver = [i.email_id for i in data]
+                course = request.POST.get(COURSE_NAME)
+                try:
+                    translator= Translator(from_lang='english',to_lang="swedish")
+                    message_sv = translator.translate(f"{supplier_id.first_name}, has added a new course {course}, under {category_id.category_name} to the system.")
+                except:
+                    pass
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
                 for i in receiver:
@@ -160,13 +166,20 @@ class AddCourseView(APIView):
                 print(users,"usersssss")
                 if organization_data != None:
                     message = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
-                    message_sv = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
+                    try:
+                        translator= Translator(from_lang='english',to_lang="swedish")
+                        message_sv = translator.translate(f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”")
+                    except:
+                        pass
                 else:
                     message = f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”"
-                    message_sv = f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”"
                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                    try:
+                        translator= Translator(from_lang='english',to_lang="swedish")
+                        message_sv = translator.translate(f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”")
+                    except:
+                        pass
                 receiver = [i.email_id for i in users]
-                print(receiver,"receiverererer")
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
                 for i in receiver:
@@ -186,7 +199,7 @@ class AddCourseView(APIView):
             except Exception as ex:
                 print(ex,"exexerr")
                 pass
-            return Response({STATUS: SUCCESS, DATA: "Course Created successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Course Created Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             print(ex,"exexex")
             return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
@@ -219,9 +232,14 @@ class AddSubCategoryView(APIView):
         getattr(models,COURSE_SUBCATEGORY_TABLE).objects.update_or_create(**record_map)
         try:
             message = f"{supplier_id.first_name}, has added a new “{request.POST.get(SUBCATEGORY_NAME)}”, under “{category_id.category_name}”  to the system. Click below to view the details."
-            message_sv = f"{supplier_id.first_name}, has added a new “{request.POST.get(SUBCATEGORY_NAME)}”, under “{category_id.category_name}”  to the system. Click below to view the details."
             data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
+            subcategory = request.POST.get(SUBCATEGORY_NAME)
+            try:
+                translator= Translator(from_lang='english',to_lang="swedish")
+                message_sv = translator.translate(f"{supplier_id.first_name}, has added a new “{subcategory}”, under “{category_id.category_name}”  to the system. Click below to view the details.")
+            except:
+                pass
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             send_notification(email_id, receiver, message)
             for i in receiver:

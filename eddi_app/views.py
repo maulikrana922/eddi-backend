@@ -35,7 +35,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from .notification import send_notification
-
+from translate import Translator
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -1104,10 +1104,14 @@ class UserProfileView(APIView):
                     try:
                         user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         message = f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” "
-                        message_sv = f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” "
 
                         data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                         receiver = [i.email_id for i in data]
+                        try:
+                            translator= Translator(from_lang='english',to_lang="swedish")
+                            message_sv = translator.translate(f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” ")
+                        except:
+                            pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(email_id, receiver, message)
                         for i in receiver:
@@ -1297,9 +1301,13 @@ class UserPaymentDetail_info(APIView):
                         pass
                     try:
                         message = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
-                        message_sv = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         receiver = [courseobj.supplier.email_id]
+                        try:
+                            translator= Translator(from_lang='english',to_lang="swedish")
+                            message_sv = translator.translate(f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}")
+                        except:
+                            pass
                         send_notification(email_id, receiver, message)
                         try:
                             record_map1 = {}
@@ -1392,10 +1400,13 @@ class EventPaymentDetail_info(APIView):
                     try:
                         data_user = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:user_email_id})
                         message = f"{data_user.first_name}, has Registered for the “{event_name}” "
-                        message_sv = f"{data_user.first_name}, has Registered for the “{event_name}” "
-
                         data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                         receiver = [i.email_id for i in data]
+                        try:
+                            translator= Translator(from_lang='english',to_lang="swedish")
+                            message_sv = translator.translate(f"{data_user.first_name}, has Registered for the “{event_name}” ")
+                        except:
+                            pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(user_email_id, receiver, message)
                         for i in receiver:
@@ -1822,9 +1833,14 @@ class RecruitmentAdView(APIView):
             try:
                 data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                 message = f"{data_supplier.first_name}, has added a new Recruitment Ad“{request.POST.get(RECRUITMENTAD_TITLE)}” to the system"
-                message_sv = f"{data_supplier.first_name}, has added a new Recruitment Ad“{request.POST.get(RECRUITMENTAD_TITLE)}” to the system"
                 data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                 receiver = [i.email_id for i in data]
+                title = request.POST.get(RECRUITMENTAD_TITLE)
+                try:
+                    translator= Translator(from_lang='english',to_lang="swedish")
+                    message_sv = translator.translate(f"{data_supplier.first_name}, has added a new Recruitment Ad“{title}” to the system")
+                except:
+                    pass
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
                 for i in receiver:
@@ -1923,6 +1939,12 @@ class RecruitmentAdView(APIView):
                                 message_sv = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
                                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                 receiver = [data.supplier_profile.supplier_email]
+                                title = record_map[RECRUITMENTAD_TITLE]
+                                try:
+                                    translator= Translator(from_lang='english',to_lang="swedish")
+                                    message_sv = translator.translate(f"RecruitmentAd {title}, has been Approved by the Admin")
+                                except:
+                                    pass
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
@@ -1947,8 +1969,13 @@ class RecruitmentAdView(APIView):
                             record_map[IS_APPROVED_ID] = 3
                             try:
                                 message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
-                                message_sv = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
                                 receiver = [data.supplier_profile.supplier_email]
+                                title = record_map[RECRUITMENTAD_TITLE]
+                                try:
+                                    translator= Translator(from_lang='english',to_lang="swedish")
+                                    message_sv = translator.translate(f"RecruitmentAd {title}, has been Rejected by the Admin")
+                                except:
+                                    pass
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
@@ -2457,7 +2484,7 @@ class Manage_Payment(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         if not uuid:
             return Response({STATUS: SUCCESS, DATA:"UUID not Provided"}, status=status.HTTP_200_OK)
-        if data.user_type.user_type == ADMIN_S:
+        if data.user_type.user_type == SUPPLIER_S:
             print("admininin")
             try:
                 try:

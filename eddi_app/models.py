@@ -25,6 +25,8 @@ from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
 from .notification import send_notification
+from translate import Translator
+
 
 
 
@@ -1506,11 +1508,14 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     if created and instance.user_type.user_type == SUPPLIER_S:
         try:
             message = f"{instance.first_name}, as a Supplier has been added by the System."
-            message_sv = f"{instance.first_name}, as a Supplier has been added by the System."
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
-            print(data,"daatat")
+            try:
+                translator= Translator(from_lang='english',to_lang="swedish")
+                message_sv = translator.translate(f"{instance.first_name}, as a Supplier has been added by the System.")
+            except:
+                pass
             send_notification(instance.email_id, receiver, message)
             for i in receiver:
                 try:
