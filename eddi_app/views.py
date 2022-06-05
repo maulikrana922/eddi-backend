@@ -39,6 +39,16 @@ from translate import Translator
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+# class test(APIView):
+#     def get(self, request):
+#         email_id = get_user_email_by_token(request)
+#         try:
+#             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+#         except Exception as ex:
+#             return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+#         serializer = testSerializer(data)
+#         return Response({MESSAGE: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK,)
+
 # def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
 #     print('nxvdbsnp noti send',sender, receiver, message)
 #     url = "https://testyourapp.online:5001"
@@ -400,22 +410,22 @@ class GetUserDetails(APIView):
        
         else:
             try:
-                all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
+                # all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
                 # print(all_data, "alalalal")
-                # all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
-                # supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
+                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
+                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
             except Exception as ex:
                 all_data = None
-            # try:
-            #     data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
-            # except Exception as ex:
-            #     data = None
-            # if serializer := UserProfileSerializer(data, many=True):
-            if serializer := UserSignupSerializer(all_data, many=True):
-                # if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-                # else:
-                #     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            try:
+                data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
+            except Exception as ex:
+                data = None
+            if serializer := UserProfileSerializer(data, many=True):
+            # if serializer := UserSignupSerializer(all_data, many=True):
+                if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
+                    return Response({STATUS: SUCCESS, DATA: [serializer.data,serializer2.data]}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA:serializer2.errors}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 

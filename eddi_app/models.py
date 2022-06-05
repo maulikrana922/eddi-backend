@@ -254,6 +254,7 @@ class InvoiceVATCMS(models.Model):
 
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
+    usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('User Signup'))
     supplier_email = models.EmailField(blank=True,null=True,verbose_name=_("Supplier Email"))
     organizational_name = models.CharField(max_length=150,blank=True,null=True,verbose_name=_("Organizational Name"))
     organization_email = models.EmailField(blank=True,null=True,verbose_name=_("Oraganization Email"))

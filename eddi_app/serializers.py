@@ -297,3 +297,10 @@ class FavouriteCourseSerializer(serializers.ModelSerializer):
         model = FavouriteCourse
         depth = 1
         fields = '__all__'
+
+
+# class testSerializer(SupplierProfileSerializer):
+#     class Meta (SupplierProfileSerializer.Meta):
+#         model = SupplierOrganizationProfile
+#         depth = 1
+#         fields = ('organizational_name', 'supplier_name')

@@ -89,7 +89,7 @@ class AddCourseView(APIView):
         except Exception as ex:
             return Response({STATUS:ERROR, DATA: "Error Getting Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":email_id})
         except Exception as ex:
             organization_data = None
         try:
@@ -1330,9 +1330,11 @@ class SupplierOrganizationProfileAdminview(APIView):
 class SupplierOrganizationProfileview(APIView):
     def post(self, request):
         email_id = get_user_email_by_token(request)
+        usersignup_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         try:
             record_map = {
                 SUPPLIER_EMAIL : email_id,
+                "usersignup":usersignup_data,
                 ORGANIZATIONAL_NAME : request.POST.get(ORGANIZATIONAL_NAME,None),
                 ORGANIZATION_EMAIL : request.POST.get(ORGANIZATION_EMAIL,None),
                 ORGANIZATION_WEBSITE : request.POST.get(ORGANIZATION_WEBSITE,None),
