@@ -410,24 +410,24 @@ class GetUserDetails(APIView):
        
         else:
             try:
-                # all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
+                all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
                 # print(all_data, "alalalal")
-                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S, IS_DELETED:False}).values_list('email_id', flat=True)
-                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier,IS_DELETED:False})
+                # all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S, IS_DELETED:False}).values_list('email_id', flat=True)
+                # supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier,IS_DELETED:False})
             except Exception as ex:
                 all_data = None
-            try:
-                data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
-            except Exception as ex:
-                data = None
-            if serializer := UserProfileSerializer(data, many=True):
-            # if serializer := UserSignupSerializer(all_data, many=True):
-                if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
-                    return Response({STATUS: SUCCESS, DATA: [serializer.data,serializer2.data]}, status=status.HTTP_200_OK)
-                else:
-                    return Response({STATUS: SUCCESS, DATA:serializer2.errors}, status=status.HTTP_200_OK)
+            # try:
+            #     data = getattr(models,USER_PROFILE_TABLE).objects.filter(**{IS_DELETED:False})
+            # except Exception as ex:
+            #     data = None
+            # if serializer := UserProfileSerializer(data, many=True):
+            if serializer := UserSignupSerializer(all_data, many=True):
+                # if serializer2 := SupplierOrganizationProfileSerializer(supplier_data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: SUCCESS, DATA:serializer.errors}, status=status.HTTP_200_OK)
+            # else:
+            #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def put(self,request,uuid = None):
