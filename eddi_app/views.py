@@ -2129,6 +2129,7 @@ class CourseEnrollView(APIView):
             new_dict = OrderedDict()
             try:
                 completed_coures_uuid = []
+                print(enroll_data, "enrolldatatat")
                 for i in enroll_data: 
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
@@ -2142,13 +2143,17 @@ class CourseEnrollView(APIView):
                         try:
                             material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
                             l1.append(material_status.is_complete)
+                            print(material_status.is_complete, "okok")
                         except Exception as ex:
                             material_status = None
                     if len(l1) == len(all_videos) and False not in l1:
+                        print("inside lenenene")
                         new_dict[f"course_{i}"] = "Completed"
                         completed_coures_uuid.append(i)
-                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':completed_coures_uuid})
+                print(completed_coures_uuid, "uuiddidid")
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':completed_coures_uuid})
             except Exception as ex:
+                print(ex,"exexexe")
                 enroll_data = None
                 
         try:
