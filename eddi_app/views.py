@@ -163,7 +163,6 @@ class Save_stripe_info(APIView):
                     pass
                 return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
             except Exception as ex:
-                print(ex,"exex")
                 return Response({MESSAGE: ERROR, DATA: ERROR,"res":str(ex)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1332,7 +1331,7 @@ class UserPaymentDetail_info(APIView):
 
                 except Exception as ex:
                     print(ex,"exexex")
-                    return Response({MESSAGE: ERROR, DATA: "Data Creation Error"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({MESSAGE: ERROR, DATA: "Data Creation Error", "res":str(ex)}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: ERROR, DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 
