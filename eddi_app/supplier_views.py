@@ -684,7 +684,7 @@ class GetCourseDetails(APIView):
                             record_map[STATUS_ID] = 1
                         else:
                             try:
-                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
                             except Exception as ex:
                                 data1 = None
                             if data1.exists():
@@ -764,7 +764,7 @@ class GetCourseDetails(APIView):
 
                         if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
-                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
                             except Exception as ex:
                                 data1 = None
                             if data1.exists():
@@ -773,7 +773,7 @@ class GetCourseDetails(APIView):
                                 record_map[IS_APPROVED_ID] = 2
                         if request.POST.get(APPROVAL_STATUS) == "Rejected":
                             try:
-                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
                             except Exception as ex:
                                 data1 = None
                             if data1.exists():
@@ -813,7 +813,7 @@ class GetCourseDetails(APIView):
                             record_map[STATUS_ID] = 1
                         else:
                             try:
-                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course_name":data.course_name})
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
                             except Exception as ex:
                                 data1 = None
                             if data1.exists():
@@ -911,7 +911,7 @@ class SupplierDashboardView(APIView):
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error in count details"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
+            Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
             user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:supplier_email}).values_list("uuid")
             
             course_name = [x[0] for x in Individuals11]
@@ -1010,7 +1010,7 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
@@ -1031,7 +1031,7 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
@@ -1051,7 +1051,7 @@ class SupplierDashboard_courseGraphView(APIView):
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
             try:
 
-                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course_name", flat=True)
+                purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "purchased course error"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
@@ -1635,16 +1635,16 @@ class MyProgressView(APIView):
         is_ongoing_count = 0
 
         try:
-            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course_name", flat = True)
+            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course__course_name", flat = True)
         except Exception as ex:
             enroll_data = None
         try:
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)})
+            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data})
         except:
             course_data = None
 
         try:
-            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data}).values_list('uuid', flat=True).order_by("-created_date_time")
             
         except Exception as ex:
             course_data_uuid = None
@@ -1671,4 +1671,5 @@ class MyProgressView(APIView):
                     is_completed_count += 1            
             return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
         except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
