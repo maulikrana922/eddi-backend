@@ -58,7 +58,7 @@ urlpatterns = [
     # Individual Profile
     path('view-individual-profile_User/',ViewIndividualProfile.as_view()),
     path('add-user-profile/',UserProfileView.as_view()),
-    path('admin-profile/',AdminProfileView.as_view()),
+    # path('admin-profile/',AdminProfileView.as_view()),
 
 
     # CMS Pages

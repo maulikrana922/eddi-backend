@@ -1082,21 +1082,21 @@ class TermsConditionCMSSupplier_SV(models.Model):
         verbose_name_plural = _("Terms & Condition Page Supplier SV")
 
 
-class AdminProfile(models.Model):
-    admin_email = models.EmailField(blank=True,null=True,verbose_name=_("Admin Email"))
-    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
-    address = models.TextField(max_length=1000,blank=True,null=True,verbose_name=_("Address"))
-    phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Phone Number"))
-    about_me = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("About Me"))
-    admin_image = models.ImageField(upload_to = 'admin_image/',blank=True,null=True,verbose_name=_('Admin Image'))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+# class AdminProfile(models.Model):
+#     admin_email = models.EmailField(blank=True,null=True,verbose_name=_("Admin Email"))
+#     admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
+#     address = models.TextField(max_length=1000,blank=True,null=True,verbose_name=_("Address"))
+#     phone_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Phone Number"))
+#     about_me = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_("About Me"))
+#     admin_image = models.ImageField(upload_to = 'admin_image/',blank=True,null=True,verbose_name=_('Admin Image'))
+#     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+#     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
-    def __str__(self):
-        return str(self.admin_name)
+#     def __str__(self):
+#         return str(self.admin_name)
 
-    class Meta:
-        verbose_name_plural = _("Admin Profile")
+#     class Meta:
+#         verbose_name_plural = _("Admin Profile")
 
 
 class UserProfile(models.Model):
@@ -1194,8 +1194,7 @@ class SupplierProfile(models.Model):
 
 class UserPaymentDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
-    course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course name"))
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('Supplier Email ID'))
+    course = models.ForeignKey(CourseDetails, on_delete=models.CASCADE, blank=True,null=True, default=None)
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
     user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User name"))
     card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))

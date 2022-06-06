@@ -412,8 +412,8 @@ class GetUserDetails(APIView):
             try:
                 # all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
                 # print(all_data, "alalalal")
-                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S}).values_list('email_id', flat=True)
-                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
+                all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":SUPPLIER_S, IS_DELETED:False}).values_list('email_id', flat=True)
+                supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier,IS_DELETED:False})
             except Exception as ex:
                 all_data = None
             try:
@@ -1223,7 +1223,7 @@ class UserPaymentDetail_info(APIView):
             course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":course_name})
             email_id = request.POST.get(EMAIL_ID)
             payment_mode = request.POST.get("payment_mode")
-            user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+            # user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
             user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
@@ -1239,8 +1239,7 @@ class UserPaymentDetail_info(APIView):
                 status_s = "Success"           
             record_map = {}
             record_map = {
-                COURSE_NAME : course_name,
-                "supplier_email" : course_data.supplier.email_id,
+                COURSE : course_data,
                 EMAIL_ID: email_id,
                 "user_name" : f"{user_data.first_name} {user_data.last_name}",
                 CARD_TYPE : card_type,
@@ -1299,11 +1298,6 @@ class UserPaymentDetail_info(APIView):
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
                     except:
-                        pass
-
-                    try:
-                        supplier_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":courseobj.supplier.email_id})
-                    except Exception as ex:
                         pass
                     try:
                         sender_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
@@ -1689,7 +1683,7 @@ class EventView(APIView):
         else:
             if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
                 try:
-                    data_a = getattr(models,EVENT_AD_TABLE).objects.all().order_by("-created_date_time")
+                    data_a = getattr(models,EVENT_AD_TABLE).objects.filter(**{IS_DELETED:False}).order_by("-created_date_time")
                 except Exception as ex:
                     return Response({STATUS: ERROR, DATA:ERROR }, status=status.HTTP_400_BAD_REQUEST)
                 if serializer := EventAdSerializer(data_a,many=True):
@@ -2054,27 +2048,32 @@ class CourseEnrollView(APIView):
         email_id =  get_user_email_by_token(request)
         var = request.POST.get("filter")
         try:
-            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course_name", flat = True)
+            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id})
         except Exception as ex:
             enroll_data = None
-        try:
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
-        except:
-            course_data = None
+        print(enroll_data)
+        # try:
+        #     enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course_name", flat = True)
+        # except Exception as ex:
+        #     enroll_data = None
+        # try:
+        #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).order_by("-created_date_time")
+        # except:
+        #     course_data = None
 
-        try:
-            course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
+        # try:
+        #     course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':list(enroll_data)}).values_list('uuid', flat=True).order_by("-created_date_time")
             
-        except Exception as ex:
-            course_data_uuid = None
+        # except Exception as ex:
+        #     course_data_uuid = None
 
         if var == "all":
             view_material = True
             new_dict = OrderedDict()
             try:
-                for i in list(course_data_uuid): 
+                for i in enroll_data: 
                     try:
-                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
                         all_videos = var.video_files.all()
                     except Exception as ex:
                         var = None
@@ -2101,9 +2100,9 @@ class CourseEnrollView(APIView):
             new_dict = OrderedDict()
             try:
                 ongoing_coures_uuid = []
-                for i in list(course_data_uuid): 
+                for i in enroll_data: 
                     try:
-                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
                         all_videos = var.video_files.all()
                     except Exception as ex:
                         var = None
@@ -2130,9 +2129,9 @@ class CourseEnrollView(APIView):
             new_dict = OrderedDict()
             try:
                 completed_coures_uuid = []
-                for i in list(course_data_uuid): 
+                for i in enroll_data: 
                     try:
-                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
+                        var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
                         all_videos = var.video_files.all()
                     except Exception as ex:
                         var = None
@@ -2169,7 +2168,7 @@ class CourseEnrollView(APIView):
             data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest) | Q(course_name__in = area_of_interest)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
         except Exception as ex:
             data_category = None
-        if serializer := CourseDetailsSerializer(course_data, many=True):
+        if serializer := UerPaymentSerializer(enroll_data, many=True):
             if serializer1 := CourseDetailsSerializer(data_category, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict, "view_material":view_material}, status=status.HTTP_200_OK)   
         else:
@@ -2520,47 +2519,47 @@ class Manage_Payment(APIView):
         else:
             return Response({STATUS: SUCCESS, DATA: "You are not Authorized person"}, status=status.HTTP_200_OK)
 
-class AdminProfileView(APIView):
-    def post(self, request):
-        email_id = get_user_email_by_token(request)
-        admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-        try:
-            record_map = {
-                "admin_email" : email_id,
-                "admin_name" : f"{admin_data.first_name} {admin_data.last_name}",
-                "address" : request.POST.get("address",None),
-                "phone_number" : request.POST.get("phone_number",None),
-                "about_me" : request.POST.get("about_me",None),
-                "admin_image" : request.FILES.get("admin_image",None),
-            }
-            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            getattr(models,"AdminProfile").objects.update_or_create(**record_map)
-            return Response({STATUS: SUCCESS, DATA: "Profile Created Successfully"}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+# class AdminProfileView(APIView):
+#     def post(self, request):
+#         email_id = get_user_email_by_token(request)
+#         admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+#         try:
+#             record_map = {
+#                 "admin_email" : email_id,
+#                 "admin_name" : f"{admin_data.first_name} {admin_data.last_name}",
+#                 "address" : request.POST.get("address",None),
+#                 "phone_number" : request.POST.get("phone_number",None),
+#                 "about_me" : request.POST.get("about_me",None),
+#                 "admin_image" : request.FILES.get("admin_image",None),
+#             }
+#             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+#             getattr(models,"AdminProfile").objects.update_or_create(**record_map)
+#             return Response({STATUS: SUCCESS, DATA: "Profile Created Successfully"}, status=status.HTTP_200_OK)
+#         except Exception as ex:
+#             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request):
-        email_id = get_user_email_by_token(request)
-        try:
-            data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
-        except Exception as ex:
-            data= None
-        if serializer := AdminProfileSerializer(data):
-            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-        else:
-            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#     def get(self, request):
+#         email_id = get_user_email_by_token(request)
+#         try:
+#             data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
+#         except Exception as ex:
+#             data= None
+#         if serializer := AdminProfileSerializer(data):
+#             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+#         else:
+#             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request):
-        email_id = get_user_email_by_token(request)
-        try:
-            data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
-        except Exception as ex:
-            data= None
-        record_map = {}
-        record_map = {
-            "address" : request.POST.get("address",data.address),
-            "phone_number" : request.POST.get("phone_number",data.phone_number),
-            "about_me" : request.POST.get("about_me",data.about_me),
-            "admin_image" : request.FILES.get("admin_image",data.admin_image),
-            }
-        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+#     def put(self, request):
+#         email_id = get_user_email_by_token(request)
+#         try:
+#             data = getattr(models,"AdminProfile").objects.get(**{"admin_email":email_id})
+#         except Exception as ex:
+#             data= None
+#         record_map = {}
+#         record_map = {
+#             "address" : request.POST.get("address",data.address),
+#             "phone_number" : request.POST.get("phone_number",data.phone_number),
+#             "about_me" : request.POST.get("about_me",data.about_me),
+#             "admin_image" : request.FILES.get("admin_image",data.admin_image),
+#             }
+#         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
