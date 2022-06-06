@@ -71,7 +71,7 @@ production_models = [
     'eddi_app.CourseCategoryDetails',
     'eddi_app.CourseSubCategoryDetails',
     'eddi_app.CourseDetails',
-    'eddi_app.TestinomialsDetails',
+    # 'eddi_app.TestinomialsDetails',
     'eddi_app.BlogDetails',
     'eddi_app.HomePageCMSPartners',
     'eddi_app.HomePageCMS',
@@ -99,6 +99,19 @@ production_models = [
     'eddi_app.MaterialDocumentMaterial',
     'eddi_app.SupplierOrganizationProfile',
     'eddi_app.SupplierProfile',
+    'eddi_app.Notification',
+    'eddi_app.TermsConditionCMS_SV',
+    'eddi_app.InvoiceData',
+    'eddi_app.HomePageCMS_SV',
+    'eddi_app.HomePageCMSPartners',
+    'eddi_app.HomePageCMSBanner_SV',
+    'eddi_app.Header_FooterCMS',
+    'eddi_app.Header_FooterCMS_SV',
+    'eddi_app.CourseRating',
+    'eddi_app.CourseMaterialStatus',
+    'eddi_app.ContactUsPageCMS_SV',
+    'eddi_app.BlogDetails_SV',
+    'eddi_app.AboutUsPageCMS_SV',
 
     ]
 local_models = []
