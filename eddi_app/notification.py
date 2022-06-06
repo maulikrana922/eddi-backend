@@ -12,6 +12,7 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
         "json": {
             'sender': sender,
             'receiver': [i for i in receiver],
+            'initials': "initials",
             # "sender_type": sender_type,
             # "receiver_type" : receiver_type,
             "message": message,
