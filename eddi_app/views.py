@@ -98,7 +98,7 @@ class Save_stripe_info(APIView):
                 # creating paymentIntent
                 try:
                     intent = stripe.PaymentIntent.create(
-                    amount=int(amount)*100,
+                    amount=float(amount)*100,
                     currency='usd',
                     description='helllo',
                     customer=customer['id'],
