@@ -504,21 +504,21 @@ class GetCourseDetails(APIView):
             except Exception as ex:
                 supplier_profile = None
             try:
-                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_data.course_name}).get(**{EMAIL_ID:email_id})
+                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE:course_data}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
             except Exception as ex:
                 fav_data = None
                 fav_dataa = None
 
             try:
-                user_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:course_data.course_name, STATUS:"Success"}).values_list("email_id", flat=True)
+                user_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:course_data, STATUS:"Success"}).values_list("email_id", flat=True)
                 individuals = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":user_data, IS_DELETED:False})
                 lerner_count = len(individuals)
             except Exception as e:
                 individuals = None
                 lerner_count = None
             try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_data.course_name, STATUS:"Success"})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE:course_data, STATUS:"Success"})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
@@ -578,7 +578,7 @@ class GetCourseDetails(APIView):
                     except Exception as ex:
                         pass
 
-                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course_name", flat=True)
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course__course_name", flat=True)
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
                  
@@ -612,7 +612,7 @@ class GetCourseDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE_NAME:data.course_name})
+            enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
             if enrolled.exists():
                 return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course You Can't Edit"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:

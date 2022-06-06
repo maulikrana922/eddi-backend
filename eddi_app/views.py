@@ -79,7 +79,7 @@ class Save_stripe_info(APIView):
             course_name = request.POST.get(COURSE_NAME)
             extra_msg = ''
             try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
                 if var is not None:
                     return Response({MESSAGE: ERROR, DATA: "You already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as ex:
@@ -323,7 +323,7 @@ class GetUserDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: "User profile data not found"}, status=status.HTTP_400_BAD_REQUEST)
 
                             try:
-                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course_name", flat=True)
+                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course__course_name", flat=True)
                                 course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Error in User Course Listing"}, status=status.HTTP_400_BAD_REQUEST)
@@ -340,8 +340,8 @@ class GetUserDetails(APIView):
                             try:
                                 supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).count()
                                 supplier_all_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).values_list("course_name", flat=True)
-                                enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).count()
-                                individuals_useremail = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course_name__in":supplier_all_course, "status":"Success"}).values_list("email_id", flat=True)
+                                enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).count()
+                                individuals_useremail = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).values_list("email_id", flat=True)
                                 individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Error in filtering data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -386,7 +386,7 @@ class GetUserDetails(APIView):
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "User profile data not data found"}, status=status.HTTP_400_BAD_REQUEST)
                             try:
-                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course_name", flat=True)
+                                course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course__course_name", flat=True)
                                 course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Error in User Course Listing"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1259,14 +1259,14 @@ class UserPaymentDetail_info(APIView):
                 record_map[IS_APPROVED_ID] = 2
 
             try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_name,STATUS:'Success'})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
-                    var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE_NAME:course_data.course_name,STATUS:'Success'})
+                    var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE:course_data,STATUS:'Success'})
                     courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     record_map = {}
                     record_map = {
