@@ -17,7 +17,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
 class UerPaymentSerializer(serializers.ModelSerializer):
      class Meta:
         model = UserPaymentDetail
-        depth = 1
+        depth = 2
         fields = '__all__'
         
 class CourseEnrollSerializer(serializers.ModelSerializer):

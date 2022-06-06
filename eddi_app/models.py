@@ -300,7 +300,7 @@ class CourseDetails(models.Model):
     course_level = models.ForeignKey(CourseLevel,on_delete=models.CASCADE,verbose_name=_('Course Level'),blank=True,null=True)
     course_length = models.IntegerField(default=0,verbose_name=_('Course Length'),blank=True,null=True)
     course_category = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Course Category'),blank=True,null=True)
-    course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Course Category'),blank=True,null=True)
+    course_subcategory = models.ForeignKey(CourseSubCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Course SubCategory'),blank=True,null=True)
     course_language = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Course Language'))
     course_starting_date = models.DateField(verbose_name=_('Course Start Date'), blank=True,null=True)
     course_for_organization = models.BooleanField(default=False,verbose_name=_('Course For Organization'))
