@@ -112,6 +112,8 @@ production_models = [
     'eddi_app.ContactUsPageCMS_SV',
     'eddi_app.BlogDetails_SV',
     'eddi_app.AboutUsPageCMS_SV',
+    'eddi_app.HomePageCMSPartners_SV',
+    'eddi_app.PrivacyPolicyCMS_SV',
 
     ]
 local_models = []
