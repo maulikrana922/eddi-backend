@@ -2120,7 +2120,8 @@ class CourseEnrollView(APIView):
                     if len(l1) != len(all_videos) or False in l1:
                         new_dict[f"course_{i}"] = "Ongoing"
                         ongoing_coures_uuid.append(i)
-                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':ongoing_coures_uuid})
+                print(ongoing_coures_uuid, "ongoingggg")
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':ongoing_coures_uuid, EMAIL_ID:email_id})
             except Exception as ex:
                 enroll_data = None
 
@@ -2151,7 +2152,7 @@ class CourseEnrollView(APIView):
                         new_dict[f"course_{i}"] = "Completed"
                         completed_coures_uuid.append(i)
                 print(completed_coures_uuid, "uuiddidid")
-                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':completed_coures_uuid})
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':completed_coures_uuid, EMAIL_ID:email_id})
             except Exception as ex:
                 print(ex,"exexexe")
                 enroll_data = None
