@@ -1336,7 +1336,7 @@ class UserPaymentDetail_info(APIView):
                 return Response({MESSAGE: ERROR, DATA: "You Already Enrolled"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as ex:
-            return Response({STATUS:ERROR, DATA:"ERROR"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA:"ERROR", "res":str(ex)}, status=status.HTTP_400_BAD_REQUEST)
                 
 
 @permission_classes([AllowAny])
