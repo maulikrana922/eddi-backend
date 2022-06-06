@@ -73,6 +73,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):
         if request.method == POST_METHOD:
+            intent = None
             email_id = request.POST.get(EMAIL_ID)
             amount = request.POST.get(PRICE)
             payment_method_id = request.POST.get(PAYMENT_METHOD_ID)
