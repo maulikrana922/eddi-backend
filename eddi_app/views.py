@@ -2120,9 +2120,9 @@ class CourseEnrollView(APIView):
                     if len(l1) != len(all_videos) or False in l1:
                         new_dict[f"course_{i}"] = "Ongoing"
                         ongoing_coures_uuid.append(i)
-                course_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':ongoing_coures_uuid})
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':ongoing_coures_uuid})
             except Exception as ex:
-                pass
+                enroll_data = None
 
         elif var == "completed":
             view_material = True
@@ -2147,9 +2147,9 @@ class CourseEnrollView(APIView):
                     if len(l1) == len(all_videos) and False not in l1:
                         new_dict[f"course_{i}"] = "Completed"
                         completed_coures_uuid.append(i)
-                course_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':completed_coures_uuid})
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__uuid__in':completed_coures_uuid})
             except Exception as ex:
-                pass
+                enroll_data = None
                 
         try:
             cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -2168,7 +2168,7 @@ class CourseEnrollView(APIView):
             data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest) | Q(course_name__in = area_of_interest)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
         except Exception as ex:
             data_category = None
-        if serializer := UerPaymentSerializer(course_data, many=True):
+        if serializer := UerPaymentSerializer(enroll_data, many=True):
             if serializer1 := CourseDetailsSerializer(data_category, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict, "view_material":view_material}, status=status.HTTP_200_OK)   
         else:
