@@ -106,8 +106,8 @@ class Save_stripe_info(APIView):
                     payment_method=payment_method_id,
                     confirm=True)
 
-                except Exception as e:
-                    pass
+                except Exception as ex:
+                    return Response({MESSAGE: ERROR, DATA: ERROR,"res":str(ex)}, status=status.HTTP_400_BAD_REQUEST) 
                 try:
                     instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
