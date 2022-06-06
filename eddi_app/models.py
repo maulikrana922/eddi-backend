@@ -1207,8 +1207,7 @@ class UserPaymentDetail(models.Model):
     class Meta:
         verbose_name_plural = _("User Payment Detail")
 
-    def __str__(self):
-        return self.course.course_name
+    
     
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Name"))
