@@ -1307,6 +1307,30 @@ class CourseMaterialUpload(APIView):
         
             for p in video_files:
                 data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
+                try:
+                    # video = cv2.VideoCapture(str(data2[0].video_file))
+                    # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
+                    live_path = "/var/www/html/eddi-backend/media/"
+                    actual_path = live_path+str(data3[0].video_file)
+                    video = cv2.VideoCapture(actual_path)
+                    video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+                    duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                    frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                    fps = int(video.get(cv2.CAP_PROP_FPS))
+                    seconds = int(frame_count / fps)
+                    video_time = str(timedelta(seconds=seconds))
+                    dict1 = {
+                        "sec":seconds,
+                        "vid":video_time
+                    }
+                    data3[0].actual_duration = video_time
+                    data3[0].save()
+                    print(dict1, "dicccc")
+                    print(frame_count, "framememem")
+                    print(duration, "durationnnnnnn")
+                except Exception as ex:
+                    return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+
                 course_material_data.video_files.add(data3[0].id)
                 
         except Exception as ex:
@@ -1669,13 +1693,13 @@ class MyProgressView(APIView):
         is_ongoing_count = 0
 
         try:
-            enroll_data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{'user_profile__email_id':email_id}).values_list("payment_detail__course__course_name", flat = True)
+            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course__course_name", flat = True)
         except Exception as ex:
             enroll_data = None
-        try:
-            course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data})
-        except:
-            course_data = None
+        # try:
+        #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data})
+        # except:
+        #     course_data = None
 
         try:
             course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data}).values_list('uuid', flat=True).order_by("-created_date_time")
