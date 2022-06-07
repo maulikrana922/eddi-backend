@@ -14,7 +14,7 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
-class UerPaymentSerializer(serializers.ModelSerializer):
+class UserPaymentSerializer(serializers.ModelSerializer):
      class Meta:
         model = UserPaymentDetail
         depth = 2
@@ -233,7 +233,7 @@ class HeaderFooterCMSSerializer(serializers.ModelSerializer):
 class RecruitmentAdSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecruitmentAd
-        depth = 1
+        depth = 2
         fields = '__all__'
 
 

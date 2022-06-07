@@ -681,7 +681,7 @@ class ForgetPasswordView(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -2048,7 +2048,7 @@ class CourseEnrollView(APIView):
         email_id =  get_user_email_by_token(request)
         var = request.POST.get("filter")
         try:
-            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id})
+            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).order_by("-created_date_time")
         except Exception as ex:
             enroll_data = None
         print(enroll_data)
@@ -2121,7 +2121,7 @@ class CourseEnrollView(APIView):
                         new_dict[f"course_{i}"] = "Ongoing"
                         ongoing_coures_uuid.append(i)
                 print(ongoing_coures_uuid, "ongoingggg")
-                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':ongoing_coures_uuid, EMAIL_ID:email_id})
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':ongoing_coures_uuid, EMAIL_ID:email_id}).order_by("-created_date_time")
             except Exception as ex:
                 enroll_data = None
 
@@ -2152,7 +2152,7 @@ class CourseEnrollView(APIView):
                         new_dict[f"course_{i}"] = "Completed"
                         completed_coures_uuid.append(i)
                 print(completed_coures_uuid, "uuiddidid")
-                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':completed_coures_uuid, EMAIL_ID:email_id})
+                enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':completed_coures_uuid, EMAIL_ID:email_id}).order_by("-created_date_time")
             except Exception as ex:
                 print(ex,"exexexe")
                 enroll_data = None
@@ -2174,7 +2174,7 @@ class CourseEnrollView(APIView):
             data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest) | Q(course_name__in = area_of_interest)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
         except Exception as ex:
             data_category = None
-        if serializer := UerPaymentSerializer(enroll_data, many=True):
+        if serializer := UserPaymentSerializer(enroll_data, many=True):
             if serializer1 := CourseDetailsSerializer(data_category, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data, "related_course":serializer1.data, "final_course_status":new_dict, "view_material":view_material}, status=status.HTTP_200_OK)   
         else:
@@ -2474,7 +2474,7 @@ class Manage_Payment(APIView):
             except Exception as ex:
                 all_payment = None
             try:
-                if serializer := UerPaymentSerializer(all_payment, many=True):
+                if serializer := UserPaymentSerializer(all_payment, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
@@ -2482,11 +2482,11 @@ class Manage_Payment(APIView):
                 pass
         elif data.user_type.user_type == SUPPLIER_S:
             try:
-                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"supplier_email":email_id})
+                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"course__supplier__email_id":email_id})
             except Exception as ex:
                 all_payment = None
             try:
-                if serializer := UerPaymentSerializer(all_payment, many=True):
+                if serializer := UserPaymentSerializer(all_payment, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
