@@ -1184,6 +1184,7 @@ class CourseMaterialUpload(APIView):
                 try:
                     for j in video_files:
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
+                        data[0].video_files.add(data2[0].id)
                         print(data2,"data222")
                         print(data2[0].video_file,"data222")
                         print(type(data2[0].video_file),"data222")
