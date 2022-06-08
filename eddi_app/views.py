@@ -2066,10 +2066,11 @@ class CourseEnrollView(APIView):
         #     course_data_uuid = None
 
         if var == "all":
-            view_material = False
+            
             new_dict = OrderedDict()
             try:
                 for i in enroll_data: 
+                    view_material = False
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
                         all_videos = var.video_files.all()
@@ -2094,18 +2095,21 @@ class CourseEnrollView(APIView):
                 pass
 
         elif var == "ongoing":
-            view_material = False
             new_dict = OrderedDict()
             try:
                 ongoing_coures_uuid = []
                 for i in enroll_data: 
+                    view_material = False
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
+                        print(var,"vararar")
                         all_videos = var.video_files.all()
                         view_material = True
                     except Exception as ex:
                         var = None
+                        print(i,"ii")
                         new_dict[f"course_{i}"] = f"Ongoing {view_material}"
+                        print(new_dict,"neww")
                         ongoing_coures_uuid.append(i)
                         continue
                     l1 = []
@@ -2116,7 +2120,9 @@ class CourseEnrollView(APIView):
                         except Exception as ex:
                             material_status = None
                     if len(l1) != len(all_videos) or False in l1:
+                        print(i,"iii")
                         new_dict[f"course_{i}"] = f"Ongoing {view_material}"
+                        print(new_dict,"new")
                         ongoing_coures_uuid.append(i)
                 print(ongoing_coures_uuid, "ongoingggg")
                 enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'course__course_name__in':ongoing_coures_uuid, EMAIL_ID:email_id}).order_by("-created_date_time")
@@ -2124,12 +2130,12 @@ class CourseEnrollView(APIView):
                 enroll_data = None
 
         elif var == "completed":
-            view_material = False
             new_dict = OrderedDict()
             try:
                 completed_coures_uuid = []
                 print(enroll_data, "enrolldatatat")
                 for i in enroll_data: 
+                    view_material = False
                     try:
                         var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i.course.uuid})
                         all_videos = var.video_files.all()

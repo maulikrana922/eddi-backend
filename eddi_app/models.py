@@ -1292,11 +1292,12 @@ class EventAd(models.Model):
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True, default=1)
 
 
-    class Meta:
-        verbose_name_plural = _("EventAd Table")
 
     def __str__(self):
         return str(self.event_name)
+        
+    class Meta:
+        verbose_name_plural = _("EventAd Table")
 
 
 class EventAdPaymentDetail(models.Model):
