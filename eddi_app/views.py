@@ -1142,7 +1142,7 @@ class UserProfileView(APIView):
             except:
                 pass
             serializer.save()
-            return Response({STATUS: SUCCESS, DATA: "Created successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Profile Created Successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
 

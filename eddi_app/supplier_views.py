@@ -132,35 +132,36 @@ class AddCourseView(APIView):
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
 
             # noti to Admin
-            try:
-                message = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
-                data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
-                receiver = [i.email_id for i in data]
-                course = request.POST.get(COURSE_NAME)
+            if supplier_id.user_type.user_type != ADMIN_S:
                 try:
-                    translator= Translator(from_lang='english',to_lang="swedish")
-                    message_sv = translator.translate(f"{supplier_id.first_name}, has added a new course {course}, under {category_id.category_name} to the system.")
-                except:
-                    pass
-                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
-                send_notification(email_id, receiver, message)
-                for i in receiver:
+                    message = f"{supplier_id.first_name}, has added a new course {request.POST.get(COURSE_NAME)}, under {category_id.category_name} to the system."
+                    data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                    receiver = [i.email_id for i in data]
+                    course = request.POST.get(COURSE_NAME)
                     try:
-                        record_map1 = {}
-                        record_map1 = {
-                            "sender" : email_id,
-                            "receiver" : i,
-                            "message" : message,
-                            "message_sv" : message_sv,
-                        }
-
-                        getattr(models,"Notification").objects.update_or_create(**record_map1)
-                    except Exception as ex:
-                        print(ex,"exexe")
+                        translator= Translator(from_lang='english',to_lang="swedish")
+                        message_sv = translator.translate(f"{supplier_id.first_name}, has added a new course {course}, under {category_id.category_name} to the system.")
+                    except:
                         pass
-            except Exception as ex:
-                print(ex,"exexeeee")
-                pass
+                    # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
+                    send_notification(email_id, receiver, message)
+                    for i in receiver:
+                        try:
+                            record_map1 = {}
+                            record_map1 = {
+                                "sender" : email_id,
+                                "receiver" : i,
+                                "message" : message,
+                                "message_sv" : message_sv,
+                            }
+
+                            getattr(models,"Notification").objects.update_or_create(**record_map1)
+                        except Exception as ex:
+                            print(ex,"exexe")
+                            pass
+                except Exception as ex:
+                    print(ex,"exexeeee")
+                    pass
             # noti to user
             try:
                 users = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"user_interests__icontains":category_id.category_name})
@@ -1533,6 +1534,7 @@ class SupplierOrganizationProfileview(APIView):
             if request.POST.get(APPROVAL_STATUS):
                 if request.POST.get(APPROVAL_STATUS) == "Approved":
                     record_map1[IS_APPROVED_ID] = 1
+                    record_map1[STATUS_ID] = 1
                     data1.rejection_count = 0
                     data1.approved_once = True
                     data1.save()
@@ -1691,7 +1693,6 @@ class MyProgressView(APIView):
         email_id = get_user_email_by_token(request)
         is_completed_count = 0
         is_ongoing_count = 0
-
         try:
             enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course__course_name", flat = True)
         except Exception as ex:
