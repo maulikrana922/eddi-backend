@@ -1477,7 +1477,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         try:
             record_map = {}
             record_map = {
-                "supplier_name" : f"{instance.first_name }{instance.last_name}",
+                "supplier_name" : f"{instance.first_name} {instance.last_name}",
                 "supplier_email" : f"{instance.email_id}"
             }
             SupplierProfile.objects.update_or_create(**record_map)
@@ -1537,7 +1537,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         try:
             record_map = {}
             record_map = {
-                "supplier_name" : f"{instance.first_name }{instance.last_name}",
+                "supplier_name" : f"{instance.first_name} {instance.last_name}",
                 "supplier_email" : f"{instance.email_id}"
             }
             SupplierProfile.objects.update_or_create(**record_map)

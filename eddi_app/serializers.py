@@ -216,6 +216,13 @@ class EventAdEnrollSerializer(serializers.ModelSerializer):
 
         fields = '__all__'
 
+class EventAdPaymentDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventAdPaymentDetail
+        depth = 2
+
+        fields = '__all__'
+
 class CourseRatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseRating

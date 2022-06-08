@@ -1665,14 +1665,13 @@ class EventView(APIView):
             vat_val = None
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            individuals = getattr(models,EVENTAD_ENROLL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
+            individuals = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
             subscriber = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name, "status":"Success"}).count()
             try:
                 var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:email_id, EVENT_NAME:data.event_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
-           
             if serializer := EventAdSerializer(data):
                 if serializer2 := EventAdEnrollSerializer(individuals, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, SUBSCRIBER_COUNT:subscriber, "is_enrolled":var1, "VAT_charges":vat_val, "individuals":serializer2.data}, status=status.HTTP_200_OK)
@@ -2470,12 +2469,19 @@ class Manage_Payment(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         if data.user_type.user_type == ADMIN_S:
             try:
-                all_payment = getattr(models,"UserPaymentDetail").objects.all()
+                all_payment = getattr(models,"UserPaymentDetail").objects.all().order_by("-created_date_time")
             except Exception as ex:
                 all_payment = None
             try:
+                all_event = getattr(models,"EventAdPaymentDetail").objects.all().order_by("-created_date_time")
+            except Exception as ex:
+                all_event = None
+            try:
                 if serializer := UserPaymentSerializer(all_payment, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    if serializer1 := EventAdPaymentDetailSerializer(all_event, many=True):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data, "event":serializer1.data}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({STATUS: SUCCESS, DATA: serializer1.error}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
             except Exception as ex:
