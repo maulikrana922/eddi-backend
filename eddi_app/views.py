@@ -2076,7 +2076,7 @@ class CourseEnrollView(APIView):
                         view_material = True
                     except Exception as ex:
                         var = None
-                        new_dict[f"course_{i}"] = "Ongoing"
+                        new_dict[f"course_{i}"] = f"Ongoing {view_material}"
                         continue
                     l1 = []
                     for j in all_videos:
