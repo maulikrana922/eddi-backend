@@ -648,7 +648,7 @@ class ForgetPasswordView(APIView):
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
         except:
-            data = None
+            return Response({STATUS: ERROR, DATA: "You Are Not a Registered User"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             if data:
                 if request.session.has_key('forget-password'):
@@ -673,6 +673,7 @@ class ForgetPasswordView(APIView):
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
                         return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
+                    
 
                     if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
                         html_path = RESETPASSWORDSupplierAdmin_HTML
@@ -694,8 +695,6 @@ class ForgetPasswordView(APIView):
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
                         return Response({STATUS: SUCCESS, DATA: "Email Sent Successfully"}, status=status.HTTP_200_OK) 
-                    else:
-                        return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                 
