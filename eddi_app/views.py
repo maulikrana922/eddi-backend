@@ -400,7 +400,7 @@ class GetUserDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                         
                         else:
-                            return Response({STATUS: ERROR, DATA: "Requested UUID in not find in UserSignUPtable"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Requested UUID is not matches with any request"}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found in UserSignUp Table"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -569,7 +569,7 @@ class UserLoginView(APIView):
                         d.save()
                         return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,"is_resetpassword" : d.is_resetpassword,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
                 except Exception as ex:
-                    record_map['USER_TYPE'] = "User"
+                    record_map['user_type'] = "User"
                     getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
             
 
@@ -706,6 +706,9 @@ class ResetPasswordView(APIView):
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             password = request.POST.get(PASSWORD)
+            if check_password(password, data.password):
+                print("insidedededed")
+                return Response({STATUS: ERROR, DATA: "Entered password already used. Please choose another password"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             data = None
         try:

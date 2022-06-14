@@ -215,12 +215,12 @@ class AddSubCategoryView(APIView):
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Error Getting Suppier Details"}, status=status.HTTP_400_BAD_REQUEST)
         user_type = supplier_id.user_type.user_type
         try:    
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,None)})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "error Getting Category Name"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Error Getting Category Name"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SUPPLIER_ID: supplier_id.id,
             CATEGORY_NAME_ID: category_id.id,

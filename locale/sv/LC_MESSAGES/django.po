@@ -29,7 +29,7 @@ msgstr "Statustabell för godkännande"
 #: eddi_app/models.py:1362
 msgid "UUID"
 msgstr "UUID"
-#: eddi_app/models.py:89 eddi_app/models.py:1088
+#: eddi_app/models.py:89 Statustabell/models.py:1088
 msgid "First Name"
 msgstr "Förnamn"
 #: eddi_app/models.py:90 eddi_app/models.py:1089
@@ -371,7 +371,7 @@ msgid "Partner Logo"
 msgstr "Partnerlogotyp"
 #: eddi_app/models.py:455
 msgid "Home Page CMS Partners Table"
-msgstr "Hemsida CMS-partnertabell"
+msgstr "Hemsida CMS Partners"
 #: eddi_app/models.py:473
 msgid "Home Page CMS Partners Table SV"
 msgstr "Hemsida CMS Partners Tabell SV"
@@ -490,10 +490,10 @@ msgid "Quicklink Button Text6"
 msgstr "Snabblänkknapp Text6"
 #: eddi_app/models.py:647
 msgid "Header_FooterCMS"
-msgstr "Header_FooterCMS"
+msgstr "Header_Footer_Svensk"
 #: eddi_app/models.py:678
 msgid "Header_FooterCMS SV"
-msgstr "Header_FooterCMS SV"
+msgstr "Header_Footer_Svensk"
 #: eddi_app/models.py:685 eddi_app/models.py:695 eddi_app/models.py:703
 #: eddi_app/models.py:708 eddi_app/models.py:712 eddi_app/models.py:716
 #: eddi_app/models.py:721 eddi_app/models.py:744 eddi_app/models.py:754
@@ -564,7 +564,7 @@ msgid "Home Page"
 msgstr "Hemsida"
 #: eddi_app/models.py:790 eddi_backend/settings.py:130
 msgid "Home Page SV"
-msgstr "Hemsida SV"
+msgstr "Hemsida Svensk"
 #: eddi_app/models.py:810 eddi_app/models.py:844
 msgid "Video Upload"
 msgstr "Videouppladdning"
@@ -573,7 +573,7 @@ msgid "Newest Courses"
 msgstr "Nyaste kurserna"
 #: eddi_app/models.py:830 eddi_backend/settings.py:135
 msgid "About Us Page"
-msgstr "Om oss sida"
+msgstr "Om oss "
 #: eddi_app/models.py:864 eddi_backend/settings.py:140
 msgid "About Us Page SV"
 msgstr "Om oss Sida SV"
@@ -720,7 +720,7 @@ msgid "agree ads terms"
 msgstr "godkänn annonsvillkoren"
 #: eddi_app/models.py:1124
 msgid "User Eddi Profile"
-msgstr "Användar Eddi-profil"
+msgstr "Användarprofiler"
 #: eddi_app/models.py:1132
 msgid "user"
 msgstr "användare"
