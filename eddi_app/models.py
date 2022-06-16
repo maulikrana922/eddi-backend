@@ -413,6 +413,9 @@ class WhatsonEddiCMS_SV(models.Model):
 class HomePageCMSBanner(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
     banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
@@ -428,6 +431,9 @@ class HomePageCMSBanner(models.Model):
 class HomePageCMSBanner_SV(models.Model):
     image_title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Image Title'))
     banner = models.ImageField(upload_to = 'homepage_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
@@ -684,15 +690,8 @@ class Header_FooterCMS_SV(models.Model):
 class HomePageCMS(models.Model):
 
     #section 1
-    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name=_('Banner Image'))
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
+    section_1_image = models.ManyToManyField(HomePageCMSBanner,blank=True,null=True,verbose_name=_('Banner'))
 
-
-    section_1_description = RichTextField(verbose_name = _('Description'),blank=True)
-
-
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
-    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
 
     #section 2
     section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
@@ -743,15 +742,7 @@ m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 class HomePageCMS_SV(models.Model):
 
     #section 1
-    section_1_image = models.ManyToManyField(HomePageCMSBanner_SV,blank=True,null=True,verbose_name=_('Banner Image'))
-    section_1_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))
-
-
-    section_1_description = RichTextField(verbose_name = _('Description'),blank=True)
-
-
-    section_1_button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
-    section_1_button_link = models.URLField(verbose_name=_('Button URL'),blank=True,null=True)
+    section_1_image = models.ManyToManyField(HomePageCMSBanner_SV,blank=True,null=True,verbose_name=_('Banner'))
 
     #section 2
     section_2_heading = models.CharField(max_length=80,blank=True,null=True,verbose_name=_("Heading"))

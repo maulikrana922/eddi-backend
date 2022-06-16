@@ -33,7 +33,7 @@ admin.site.unregister(Group)
 class HomePageCMSBannerAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            'fields': ('image_title','banner',)
+            'fields': ('image_title','banner','description', 'button_text', 'button_link')
         }),
         ('Advanced', {
             'classes': ('collapse',),
@@ -48,7 +48,7 @@ admin.site.register(HomePageCMSBanner,HomePageCMSBannerAdmin)
 class HomePageCMSBanner_SVAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            'fields': ('image_title','banner',)
+            'fields': ('image_title','banner','description', 'button_text', 'button_link')
         }),
         ('Advanced', {
             'classes': ('collapse',),

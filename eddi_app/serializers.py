@@ -57,14 +57,14 @@ class HomePageCMSSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HomePageCMS
-        depth = 1
+        depth = 2
         fields = '__all__'
 
 class HomePageCMSSerializer_sv(serializers.ModelSerializer):
 
     class Meta:
         model = HomePageCMS_SV
-        depth = 1
+        depth = 2
         fields = '__all__'
 
 class TestinomialsDetailsSerializer(serializers.ModelSerializer):
