@@ -76,6 +76,7 @@ LOCATION = "location"
 COURSE_CHECKOUT_LINK = 'course_checkout_link'
 COURSE_FOR_ORGANIZATION='course_for_organization'
 COURSE_LANGUAGE='course_language'
+ORIGINAL_PRICE='original_price'
 MESSAGE = 'message'
 ORGANIZATION_DOMAIN = 'organization_domain'
 EVENT_IMAGE = "event_image"

@@ -1624,6 +1624,8 @@ class EventView(APIView):
         }
             if request.POST.get(EVENT_PRICE):
                 record_map[EVENT_PRICE] = "{:.2f}".format(float(request.POST.get(EVENT_PRICE)))
+            if request.POST.get(ORIGINAL_PRICE):
+                record_map[ORIGINAL_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[UUID] = uuid4()
             if request.POST.get(START_DATE) == "":
@@ -1764,6 +1766,10 @@ class EventView(APIView):
                 record_map[EVENT_PRICE] = "{:.2f}".format(float(request.POST.get(EVENT_PRICE)))
             else:
                  record_map[EVENT_PRICE] = data.event_price
+            if request.POST.get(ORIGINAL_PRICE):
+                record_map[ORIGINAL_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
+            else:
+                record_map[ORIGINAL_PRICE] = data.original_price
             if request.POST.get(START_DATE) == "":
                 record_map[START_DATE] = None
             else:
