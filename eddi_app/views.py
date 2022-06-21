@@ -1599,6 +1599,14 @@ class EventView(APIView):
         email_id = get_user_email_by_token(request)
         admin = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}) 
         record_map = {}
+
+        if request.POST.get(EVENT_NAME):
+            try:
+                event_data = getattr(models,EVENT_AD_TABLE).objects.get(**{"event_name":request.POST.get(EVENT_NAME)})
+            except Exception as ex:
+                event_data = None
+            if event_data != None:
+                return Response({STATUS: ERROR, DATA: "Please choose unique event name"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
             "admin_name" : admin.first_name,
@@ -1610,7 +1618,6 @@ class EventView(APIView):
             BANNER_VIDEO_LINK : request.POST.get(BANNER_VIDEO_LINK,None),
             FEES_TYPE : request.POST.get(FEES_TYPE,None),
             EVENT_TYPE : request.POST.get(EVENT_TYPE,None),
-            # EVENT_PRICE : request.POST.get(EVENT_PRICE,None),
             CHECKOUT_LINK : request.POST.get(CHECKOUT_LINK,None),
             MEETING_LINK : request.POST.get(MEETING_LINK,None),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
@@ -1681,15 +1688,19 @@ class EventView(APIView):
             vat_val = None
         if uuid:
             data = getattr(models,EVENT_AD_TABLE).objects.get(**{UUID:uuid})
-            individuals = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
+            user_email = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name}).values_list('email_id', flat=True)
+            print(user_email,"eeeeeeeeeeeee")
             subscriber = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name, "status":"Success"}).count()
+            individuals = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":user_email})
+            print(individuals, "indididi")
+
             try:
                 var = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.get(**{EMAIL_ID:email_id, EVENT_NAME:data.event_name,STATUS:'Success'})
             except Exception as ex:
                 var = None
             var1 = True if var is not None else False
             if serializer := EventAdSerializer(data):
-                if serializer2 := EventAdEnrollSerializer(individuals, many=True):
+                if serializer2 := UserProfileSerializer(individuals, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, SUBSCRIBER_COUNT:subscriber, "is_enrolled":var1, "VAT_charges":vat_val, "individuals":serializer2.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: serializer2.errors}, status=status.HTTP_400_BAD_REQUEST)
