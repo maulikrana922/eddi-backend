@@ -116,7 +116,7 @@ class PayByInvoice(APIView):
                 }
                 record_map1[STATUS_ID] = 2
                 record_map1[IS_APPROVED_ID] = 2
-                getattr(models,"PaybyInvoice").objects.update_or_create(**record_map1)
+                getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
             except Exception as ex:
                 return Response({MESSAGE: ERROR,"ex":str(ex), DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
