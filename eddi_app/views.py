@@ -71,6 +71,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class PayByInvoice(APIView):
     def post(self, request):
+        email_id =  get_user_email_by_token(request)
         record_map = {}
         try:
             if request.POST.get("product_type") == "course":
@@ -90,7 +91,7 @@ class PayByInvoice(APIView):
             "contry" : request.POST.get("Country"),
             "city" : request.POST.get("City"),
             "invoice_address" : request.POST.get("invoiceAddress"),
-            "email_id" : request.POST.get("email_id"),
+            "email_id" : email_id,
             "price" : request.POST.get("price"),
             "payment_mode" : request.POST.get("payment_mode"),
             "product_type" : request.POST.get("product_type"),
@@ -107,17 +108,17 @@ class PayByInvoice(APIView):
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get("email_id")})
                 record_map1 = {}
                 record_map1 = {
-                    "course" : course,
+                    "course_id" : course.id,
                     "email_id" : request.POST.get("email_id"),
                     "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                    "amount" : request.POST.get("price"),
+                    "amount" : float(request.POST.get("price")),
                     "payment_mode" : "PayByInvoice",
                 }
                 record_map1[STATUS_ID] = 2
                 record_map1[IS_APPROVED_ID] = 2
                 getattr(models,"PaybyInvoice").objects.update_or_create(**record_map1)
             except Exception as ex:
-                return Response({MESSAGE: ERROR, DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({MESSAGE: ERROR,"ex":str(ex), DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             print(ex,"Exex")
             return Response({MESSAGE: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)

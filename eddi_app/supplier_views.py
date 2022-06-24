@@ -1203,17 +1203,20 @@ class CourseMaterialUpload(APIView):
                 "course_id" : course_data.id
                 }
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
-            if request.FILES.getlist(DOCUMENT_FILES):
-                try:
-                    for i in document_files:
-                        li = i.split(",")
-                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":li[0], "document_title":li[1]})
-                        data[0].document_files.add(data1[0].id)
-                except Exception as ex:
-                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            # if request.FILES.getlist(DOCUMENT_FILES):
+            #     try:
+            #         for i in document_files:
+            #             li = i.split(",")
+            #             data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":li[0], "document_title":li[1]})
+            #             data[0].document_files.add(data1[0].id)
+            #     except Exception as ex:
+            #         return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
             if request.FILES.getlist("video_files"):
                 try:
                     for j in video_files:
+                        print(j, "jjjjjjjjj")
+                        print(type(j), "jjjjjjjjj")
+                        return
                         li = j.split(",")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":li[0], "video_title":li[1]})
                         data[0].video_files.add(data2[0].id)

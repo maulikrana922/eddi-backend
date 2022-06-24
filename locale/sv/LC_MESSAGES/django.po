@@ -561,7 +561,7 @@ msgid "Image"
 msgstr "Bild"
 #: eddi_app/models.py:731 eddi_backend/settings.py:125
 msgid "Home Page"
-msgstr "Hemsida"
+msgstr "Hemsidaf"
 #: eddi_app/models.py:790 eddi_backend/settings.py:130
 msgid "Home Page SV"
 msgstr "Hemsida Svensk"

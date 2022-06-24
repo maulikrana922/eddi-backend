@@ -2,6 +2,7 @@ from dataclasses import fields
 import imp
 from multiprocessing import Event
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 from .models import *
 from  django.contrib.auth.models  import  Group 
 from .forms import CategoryForm
@@ -161,7 +162,7 @@ admin.site.register(TestinomialsDetails_SV,TestinomialsDetails_SVAdmin)
 class AboutUsPageCMSAdmin(admin.ModelAdmin):
     
        fieldsets = (
-        ('Section 1 - Main', {
+        (_('Section 1 - Main'), {
             'classes': ('collapse',),
             'fields': ('section_1_image','section_1_heading','section_1_button_text','section_1_button_link')
         }),
@@ -507,6 +508,7 @@ admin.site.register(MaterialDocumentMaterial)
 admin.site.register(CourseMaterial)
 admin.site.register(CourseMaterialStatus)
 admin.site.register(WhatsonEddiCMS)
+admin.site.register(PaybyInvoice)
 
 
 admin.site.register(WhatsonEddiCMS_SV)
