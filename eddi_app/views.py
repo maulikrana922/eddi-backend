@@ -114,7 +114,6 @@ class PayByInvoice(APIView):
                     "amount" : float(request.POST.get("price")),
                     "payment_mode" : "PayByInvoice",
                 }
-                record_map1[STATUS_ID] = 2
                 record_map1[IS_APPROVED_ID] = 2
                 getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
             except Exception as ex:
@@ -122,10 +121,6 @@ class PayByInvoice(APIView):
         except Exception as ex:
             print(ex,"Exex")
             return Response({MESSAGE: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
 
 
 
@@ -643,8 +638,6 @@ class UserLoginView(APIView):
                 except Exception as ex:
                     pass
                     
-            
-
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
@@ -733,7 +726,6 @@ class ForgetPasswordView(APIView):
                         recipient_list = (email_id,)
                         email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
-
                         path = 'eddi_app'
                         img_dir = 'static'
                         image = 'Logo.jpg'

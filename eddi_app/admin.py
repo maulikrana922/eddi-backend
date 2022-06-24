@@ -78,7 +78,6 @@ class BlogDetailsAdmin(admin.ModelAdmin):
 
     )
 
-
 admin.site.register(BlogDetails,BlogDetailsAdmin)
 
 class BlogDetails_SVAdmin(admin.ModelAdmin):

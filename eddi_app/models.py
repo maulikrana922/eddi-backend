@@ -1467,7 +1467,6 @@ class UserProfileCMS_SV(models.Model):
 
 
 class PaybyInvoice(models.Model):
-
     student_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Student Name'))
     personal_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Personal Number'))
     organization_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Name'))
