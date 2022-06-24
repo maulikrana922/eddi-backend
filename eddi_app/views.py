@@ -78,7 +78,6 @@ class PayByInvoice(APIView):
                 course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
         except:
             course = None
-
         try:
             record_map = {
             "student_name" : request.POST.get("NameOfStudent"),
@@ -116,6 +115,7 @@ class PayByInvoice(APIView):
                 }
                 record_map1[IS_APPROVED_ID] = 2
                 getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
+                return Response({STATUS: SUCCESS, DATA: "Data succesfully added"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({MESSAGE: ERROR,"ex":str(ex), DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
