@@ -574,13 +574,36 @@ class GetCourseDetails(APIView):
                 else:
                     try:
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        print(cat.user_interests, "userrrr")
+                        print(type(cat.user_interests), "userrrr")
+                        ab = json.loads(cat.user_interests)
+                        user_category = []
+                        user_subcategory = []
+                        user_areaofinterest = []
+                        print(type(ab), "abbbb")
+                        for i in ab:
+                            print(i, "iii")
+                            user_category.append(i["category"])
+                            user_subcategory.append(i["subcategory"][0])
+                        print(user_category, "cate")
+                        print(user_subcategory, "ssscate")
                         try:
-                            a = cat.course_category.split(",")
+                            user_areaofinterest = cat.area_of_interest.split(",")
                         except Exception as ex:
-                            a = cat.course_category.split()
+                            user_areaofinterest = cat.area_of_interest.split()
+                        print(user_areaofinterest, "arererere")
+                        # try:
+                        #     a = cat.course_category.split(",")
+                        # except Exception as ex:
+                        #     a = cat.course_category.split()
                     except Exception as ex:
                         pass
-
+                    user_category_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_category__category_name__in":list(user_category)})
+                    user_subcategory_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_subcategory__subcategory_name__in":list(user_subcategory)})
+                    user_areaofinterest_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_subcategory__subcategory_name__in":list(user_areaofinterest),"course_category__category_name__in":list(user_areaofinterest), "course_name__in":list(user_areaofinterest)})
+                    print(user_category_courses, "ccccccccccccccc")
+                    print(user_subcategory_courses, "ssssssssssss")
+                    print(user_areaofinterest_courses, "areaaaaaa")
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course__course_name", flat=True)
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
@@ -1183,14 +1206,16 @@ class CourseMaterialUpload(APIView):
             if request.FILES.getlist(DOCUMENT_FILES):
                 try:
                     for i in document_files:
-                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                        li = i.split(",")
+                        data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":li[0], "document_title":li[1]})
                         data[0].document_files.add(data1[0].id)
                 except Exception as ex:
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
             if request.FILES.getlist("video_files"):
                 try:
                     for j in video_files:
-                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":j})
+                        li = j.split(",")
+                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":li[0], "video_title":li[1]})
                         data[0].video_files.add(data2[0].id)
                         print(data2,"data222")
                         print(data2[0].video_file,"data222")
@@ -1284,7 +1309,8 @@ class CourseMaterialUpload(APIView):
             new = list(old_docs)
             oldd = [i.document_file.url for i in new]
             for i in document_files_old:
-                if i in oldd:
+                l = i.split(",")
+                if l[0] in oldd:
                     oldd.remove(i)
             for k in oldd:
                 try:
@@ -1293,27 +1319,31 @@ class CourseMaterialUpload(APIView):
                     pass
             if document_files:
                 for i in document_files:
-                    data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":i})
+                    l = i.split(",")
+                    data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":l[0], "document_title":l[1]})
                     course_material_data.document_files.add(data1[0].id)
                
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             old_videos = course_material_data.video_files.all()
             new1 = list(old_videos)
             oldd1 = [i.video_file.url for i in new1]
             for i in video_files_old:
-                if i in oldd1:
+                l = i.split(",")
+                if l[0] in oldd1:
+                    # removing already existing videos from the list oldd1
                     oldd1.remove(i)
             for j in oldd1:
                 try:
+                    # deleting rest videos from the list
                     getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
                 except Exception as ex:
                     pass
         
             for p in video_files:
-                data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p})
+                l = p.split(",")
+                data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p[0], "video_title":l[1]})
                 try:
                     # video = cv2.VideoCapture(str(data2[0].video_file))
                     # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")

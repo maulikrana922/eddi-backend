@@ -6,6 +6,7 @@ urlpatterns = [
     # path('test/',test.as_view(), name="test"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
+    path('paybyinvoice/',PayByInvoice.as_view(), name="PayByInvoice"),   
 
     # Event Payment Flow
     path('save-stripe-infoevent/',Save_stripe_infoEvent.as_view(), name="eventstripe"),   

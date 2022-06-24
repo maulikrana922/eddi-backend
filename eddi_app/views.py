@@ -69,6 +69,65 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 #     response = requests.request("POST", url, headers=headers, data=payload)
 
+class PayByInvoice(APIView):
+    def post(self, request):
+        record_map = {}
+        try:
+            if request.POST.get("product_type") == "course":
+                course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+        except:
+            course = None
+
+        try:
+            record_map = {
+            "student_name" : request.POST.get("NameOfStudent"),
+            "personal_number" : request.POST.get("PersonalNumber"),
+            "organization_name" : request.POST.get("OrganizationName"),
+            "organization_number" : request.POST.get("OrganizationNumber"),
+            "street_number" : request.POST.get("StreetNumber"),
+            "reference" : request.POST.get("Reference"),
+            "zip_code" : request.POST.get("Zip"),
+            "contry" : request.POST.get("Country"),
+            "city" : request.POST.get("City"),
+            "invoice_address" : request.POST.get("invoiceAddress"),
+            "email_id" : request.POST.get("email_id"),
+            "price" : request.POST.get("price"),
+            "payment_mode" : request.POST.get("payment_mode"),
+            "product_type" : request.POST.get("product_type"),
+            }
+            if course != None:
+                record_map["course"] = course
+            if request.POST.get("product_type") == "event":
+                record_map["product_name"] = request.POST.get("event_name")
+            else:
+                record_map["product_name"] = request.POST.get("course_name")
+
+            getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
+            try:
+                user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get("email_id")})
+                record_map1 = {}
+                record_map1 = {
+                    "course" : course,
+                    "email_id" : request.POST.get("email_id"),
+                    "user_name" : f"{user_data.first_name} {user_data.last_name}",
+                    "amount" : request.POST.get("price"),
+                    "payment_mode" : "PayByInvoice",
+                }
+                record_map1[STATUS_ID] = 2
+                record_map1[IS_APPROVED_ID] = 2
+                getattr(models,"PaybyInvoice").objects.update_or_create(**record_map1)
+            except Exception as ex:
+                return Response({MESSAGE: ERROR, DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            print(ex,"Exex")
+            return Response({MESSAGE: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
 @permission_classes([AllowAny])
 class Save_stripe_info(APIView):
     def post(self, request, *args, **kwargs):

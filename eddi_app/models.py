@@ -1330,6 +1330,7 @@ class EventAdEnroll(models.Model):
 class MaterialVideoMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     video_file = models.FileField(upload_to='course_material_video/',verbose_name=_('Video Files'),blank=True,null=True)
+    video_title = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Video Title"))
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
     
@@ -1339,6 +1340,7 @@ class MaterialVideoMaterial(models.Model):
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name=_('Document Files'),blank=True,null=True)
+    document_title = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Document Title"))
     file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Size"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
@@ -1464,6 +1466,26 @@ class UserProfileCMS_SV(models.Model):
 
 
 
+class PaybyInvoice(models.Model):
+
+    student_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Student Name'))
+    personal_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Personal Number'))
+    organization_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Name'))
+    organization_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Number'))
+    street_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Street Number'))
+    reference = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Reference'))
+    zip_code = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Zip'))
+    contry = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Contry'))
+    city = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('City'))
+    invoice_address = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Invoice Address'))
+    email_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Email_id'))
+    price = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Price'))
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,default=None,null=True,blank=True,verbose_name=_('Course'))
+    product_type = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Product Type'))
+    product_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Product Name'))
+    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Payment Mode'))
+
+
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     print("OUTER")
@@ -1580,3 +1602,5 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
+
+
