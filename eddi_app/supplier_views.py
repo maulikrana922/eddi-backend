@@ -574,51 +574,45 @@ class GetCourseDetails(APIView):
                 else:
                     try:
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                        print(cat.user_interests, "userrrr")
-                        print(type(cat.user_interests), "userrrr")
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Something went wrong with userprofile"}, status=status.HTTP_400_BAD_REQUEST)
+                    if cat.user_interests != None:
                         ab = json.loads(cat.user_interests)
                         user_category = []
                         user_subcategory = []
-                        user_areaofinterest = []
-                        print(type(ab), "abbbb")
                         for i in ab:
-                            print(i, "iii")
                             user_category.append(i["category"])
                             user_subcategory.append(i["subcategory"][0])
-                        print(user_category, "cate")
-                        print(user_subcategory, "ssscate")
+                    user_areaofinterest = []
+                    if cat.area_of_interest != None:
                         try:
                             user_areaofinterest = cat.area_of_interest.split(",")
                         except Exception as ex:
                             user_areaofinterest = cat.area_of_interest.split()
-                        print(user_areaofinterest, "arererere")
-                        # try:
-                        #     a = cat.course_category.split(",")
-                        # except Exception as ex:
-                        #     a = cat.course_category.split()
-                    except Exception as ex:
-                        pass
-                    user_category_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_category__category_name__in":list(user_category)})
-                    user_subcategory_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_subcategory__subcategory_name__in":list(user_subcategory)})
-                    user_areaofinterest_courses = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_subcategory__subcategory_name__in":list(user_areaofinterest),"course_category__category_name__in":list(user_areaofinterest), "course_name__in":list(user_areaofinterest)})
-                    print(user_category_courses, "ccccccccccccccc")
-                    print(user_subcategory_courses, "ssssssssssss")
-                    print(user_areaofinterest_courses, "areaaaaaa")
+                    
+
+                    user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category)  | Q(course_name__in=user_areaofinterest))
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course__course_name", flat=True)
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
-                 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = target_course_data and course_enrolled).order_by("-created_date_time")
+                    data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = target_course_data and course_enrolled and user_profile_interest).order_by("-created_date_time"))
+
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK) 
+                    else:
+                        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK) 
+                else:
+                    return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
-            if serializer := CourseDetailsSerializer(data_s):
-                return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Token authentication required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # else:
+            #     data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
+            # if serializer := CourseDetailsSerializer(data_s):
+            #     return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
+            # else:
+            #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
        
 
     def put(self,request,uuid = None):
@@ -646,12 +640,10 @@ class GetCourseDetails(APIView):
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
 
-          
             try:
                 sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,data.course_subcategory.subcategory_name)})
             except Exception as ex:
                 sub_category_id = None
-
 
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
 
