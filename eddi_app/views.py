@@ -1712,6 +1712,7 @@ class EventView(APIView):
         try:
             record_map = {
             "admin_name" : admin.first_name,
+            "admin_email" : email_id,
             EVENT_IMAGE : request.FILES.get(EVENT_IMAGE,None),
             EVENT_PUBLISH_ON : request.POST.get(EVENT_PUBLISH_ON,None),
             EVENT_NAME : request.POST.get(EVENT_NAME,None),
