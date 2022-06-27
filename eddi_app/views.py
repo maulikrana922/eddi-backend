@@ -39,15 +39,17 @@ from translate import Translator
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-# class test(APIView):
-#     def get(self, request):
-#         email_id = get_user_email_by_token(request)
-#         try:
-#             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-#         except Exception as ex:
-#             return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
-#         serializer = testSerializer(data)
-#         return Response({MESSAGE: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK,)
+class test(APIView):
+    def get(self, request):
+        email_id = get_user_email_by_token(request)
+        try:
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:"Finansforbundet_1234@yahoo.com"})
+            a = check_password()
+            print
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = testSerializer(data)
+        return Response({MESSAGE: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK,)
 
 # def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
 #     print('nxvdbsnp noti send',sender, receiver, message)
@@ -115,6 +117,35 @@ class PayByInvoice(APIView):
                 }
                 record_map1[IS_APPROVED_ID] = 2
                 getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
+
+                try:
+                    if request.POST.get("product_type") == "course":
+                        course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+                        fullname = f'{course.supplier.first_name} {course.supplier.last_name}'
+                        recipient_list = (course.supplier.email_id,)
+                    else:
+                        event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
+                        fullname = f'{event.admin_name}'
+                        recipient_list = (course.supplier.email_id,)
+
+                    html_path = "pay_by_invoice.html"
+                    context_data = {'fullname':fullname, "student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"), "organization_name":request.POST.get("OrganizationName"), "organization_number":request.POST.get("OrganizationNumber"), "street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"invoice_address" : request.POST.get("invoiceAddress"),"email_id" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type")}
+                    email_html_template = get_template(html_path).render(context_data)
+                    email_from = settings.EMAIL_HOST_USER
+                    email_msg = EmailMessage('Pay By Invoice!!',email_html_template,email_from,recipient_list)
+                    email_msg.content_subtype = 'html'
+                    path = 'eddi_app'
+                    img_dir = 'static'
+                    image = 'Logo.jpg'
+                    file_path = os.path.join(path,img_dir,image)
+                    with open(file_path,'rb') as f:
+                        img = MIMEImage(f.read())
+                        img.add_header('Content-ID', '<{name}>'.format(name=image))
+                        img.add_header('Content-Disposition', 'inline', filename=image)
+                    email_msg.attach(img)
+                    email_msg.send(fail_silently=False)
+                except Exception as ex:
+                    pass
                 return Response({STATUS: SUCCESS, DATA: "Data succesfully added"}, status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({MESSAGE: ERROR,"ex":str(ex), DATA: "Something went wrong with userpayment"}, status=status.HTTP_400_BAD_REQUEST)
@@ -595,7 +626,6 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
-
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -628,9 +658,12 @@ class UserLoginView(APIView):
                             except Exception as ex:
                                 user_profile = False
                             token = NonBuiltInUserToken.objects.create(user_id = d.id)
+                            d.modified_date_time = make_aware(datetime.datetime.now())
+                            d.save()
                             return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,"is_resetpassword" : d.is_resetpassword,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
                         else:
                             d.is_login_from = "google"
+                            d.modified_date_time = make_aware(datetime.datetime.now())
                             d.save()
                             return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:d.first_name, LAST_NAME:d.last_name} ,USER_TYPE:str(d.user_type),IS_FIRST_TIME_LOGIN: d.is_first_time_login,"is_resetpassword" : d.is_resetpassword,USER_PROFILE:user_profile,"Authorization":"Token "+ str(token.key)}, status=status.HTTP_200_OK)
                     except Exception as ex:
@@ -669,6 +702,8 @@ class UserLoginView(APIView):
                 if data.status.id == 2:
                     return Response({STATUS: ERROR, DATA: "Your activation has been cancelled by the admin"}, status=status.HTTP_400_BAD_REQUEST)
                 if check_password(password, data.password):
+                    data.modified_date_time = make_aware(datetime.datetime.now())
+                    data.save()
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
         except Exception as ex:
@@ -683,6 +718,8 @@ class UserLoginView(APIView):
                 if data.status.id == 2:
                     return Response({STATUS: ERROR, DATA: "Your activation has been cancelled by the superAdmin"}, status=status.HTTP_400_BAD_REQUEST)
                 if check_password(password, data.password):
+                    data.modified_date_time = make_aware(datetime.datetime.now())
+                    data.save()
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
@@ -697,11 +734,24 @@ class UserLoginView(APIView):
                 if not check_password(password, data.password):
                     return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
                 if data.is_active == True:
+                    # print("herererer")
+                    data.modified_date_time = make_aware(datetime.datetime.now())
+                    data.save()
+
+                    # print(datetime.datetime.now())
+                    # print(str(data.modified_date_time).split("+")[0])
+                    # a = datetime.datetime.strptime(str(data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
+                    # # print(a, "a")
+                    # time_diff = datetime.datetime.now() - datetime.datetime.strptime(str(data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
+                    # print(type(time_diff.seconds), "timeeeeeeeeeeeee")
+                    # print(divmod(time_diff.seconds, 3600)[0] , "timeeeeeeeeeeeee")
+
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: "User is not authorized"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
-             return Response({STATUS: ERROR, DATA: "Please varify your email before login"}, status=status.HTTP_400_BAD_REQUEST)
+            print(ex,"exexe")
+            return Response({STATUS: ERROR, DATA: "Please varify your email before login"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -2594,7 +2644,7 @@ class Manage_Payment(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         if not uuid:
             return Response({STATUS: SUCCESS, DATA:"UUID not provided"}, status=status.HTTP_200_OK)
-        if data.user_type.user_type == SUPPLIER_S:
+        if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
             print("admininin")
             try:
                 try:
@@ -2605,6 +2655,7 @@ class Manage_Payment(APIView):
                 record_map = {}
                 if request.POST.get(APPROVAL_STATUS) == "Approved":
                     record_map[IS_APPROVED_ID] = 1
+                    record_map["status"] = "Success"
                 elif request.POST.get(APPROVAL_STATUS) == "Pending":
                     record_map[IS_APPROVED_ID] = 2
                 else:
@@ -2618,4 +2669,4 @@ class Manage_Payment(APIView):
                 print(ex,"exex")
                 return Response({STATUS: SUCCESS, DATA: "Something went wrong"}, status=status.HTTP_200_OK)
         else:
-            return Response({STATUS: SUCCESS, DATA: "You are not authorized person"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "You are not authorized person"}, status=status.HTTP_400_BAD_REQUEST)

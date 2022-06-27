@@ -22,6 +22,34 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# LOGGING = {
+#     'version': 1,
+#     # 'disable_existing_loggers': False,
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             # 'handlers': ['file'],
+#             # 'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+#             'level': 'DEBUG',
+#             # 'propagate': False,
+#             # 'filename': './logs/debug.log',
+#         }
+#     },
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': './logs/debug.log',
+#         # 'console': {
+#         #     'class': 'logging.StreamHandler',
+#         }
+#     },
+#     # 'root': {
+#     #     'handlers': ['console'],
+#     #     'level': 'WARNING',
+#     # },
+# }
+
 env = environ.Env()
 environ.Env.read_env()
 
@@ -44,6 +72,7 @@ CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
 
 # Application definition
 INSTALLED_APPS = [
+    'django_crontab',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -59,6 +88,7 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rosetta'
 ]
+
 
 LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
 
@@ -334,3 +364,11 @@ STRIPE_PUBLIC_KEY='pk_test_51KhDqeEjvkdtZsC4cUmvapGjtOYTru6hGp8EOK1KBdZkp7pQfBYM
 STRIPE_SECRET_KEY='sk_test_51KhDqeEjvkdtZsC4aOLUytltjWx0sYj5rZpkcphI6jbxtUHw7Lq5HxGxpRfX8aSO1jj2rNVyH74eTWVeeWZk01DX007SRf9wfX'
 
 STRIPE_WEBHOOK_SECRET = ""
+
+
+CRONJOBS = [
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
+]

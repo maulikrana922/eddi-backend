@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     # Stripe Link
-    # path('test/',test.as_view(), name="test"),   
+    path('test/',test.as_view(), name="test"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
     path('paybyinvoice/',PayByInvoice.as_view(), name="PayByInvoice"),   

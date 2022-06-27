@@ -495,7 +495,7 @@ class GetCourseDetails(APIView):
         if uuid:
             email_id = get_user_email_by_token(request)
             try:
-                user = getattr(models,USER_PROFILE).objects.get(**{"email_id":email_id})
+                user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
             except:
                 user = None
             try:
@@ -592,7 +592,7 @@ class GetCourseDetails(APIView):
                     
 
                     user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category)  | Q(course_name__in=user_areaofinterest))
-                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id,STATUS:'Success'}).values_list("course__course_name", flat=True)
+                    course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id}).values_list("course__course_name", flat=True)
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
                     data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = target_course_data and course_enrolled and user_profile_interest).order_by("-created_date_time"))
@@ -741,8 +741,8 @@ class GetCourseDetails(APIView):
                             record_map[IS_APPROVED_ID] = 1
                             try:
                                 # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-                                message = f"Course {record_map[COURSE_NAME]}, has been Approved by the Admin"
-                                message_sv = f"Course {record_map[COURSE_NAME]}, has been Approved by the Admin"
+                                message = f"{record_map[COURSE_NAME]}, has been Approved by the Admin"
+                                message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin. Klicka på länken nedan för mer information "
                                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                 receiver = [data.supplier.email_id]
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
@@ -804,8 +804,8 @@ class GetCourseDetails(APIView):
                                 record_map[IS_APPROVED_ID] = 3
                                 try:
                                     # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-                                    message = f"Course {record_map[COURSE_NAME]}, has been Rejected by the Admin"
-                                    message_sv = f"Course {record_map[COURSE_NAME]}, has been Rejected by the Admin"
+                                    message = f"{record_map[COURSE_NAME]}, has been Rejected by the Admin"
+                                    message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin Klicka på länken nedan för mer information"
                                     # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                     receiver = [data.supplier.email_id]
                                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
@@ -1196,59 +1196,78 @@ class CourseMaterialUpload(APIView):
                 }
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
             # if request.FILES.getlist(DOCUMENT_FILES):
-            #     try:
-            #         for i in document_files:
-            #             li = i.split(",")
-            #             data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":li[0], "document_title":li[1]})
-            #             data[0].document_files.add(data1[0].id)
-            #     except Exception as ex:
-            #         return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
-            if request.FILES.getlist("video_files"):
+            for i in range(1,int(request.POST.get("new_document_count"))+1):
                 try:
-                    for j in video_files:
+                #     for i in document_files:
+                        # li = i.split(",")
+                    data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{i}'), "file_name":request.POST.get('document_title_'f'{i}')})
+                    data[0].document_files.add(data1[0].id)
+                except Exception as ex:
+                    print(ex,"exe")
+                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
+            # if request.FILES.getlist("video_files"):
+            try:
+                try:
+                    for j in range(1,int(request.POST.get("new_video_count"))+1):
                         print(j, "jjjjjjjjj")
                         print(type(j), "jjjjjjjjj")
-                        return
-                        li = j.split(",")
-                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":li[0], "video_title":li[1]})
+                        # return
+                        # li = j.split(",")
+                        # print(request.FILES.get('video_file_1'), "11111111111")
+                        # video = request.FILES.get('video_file_'f'{j}')
+                        # print(video,"vi")
+                        # video_name = request.POST.get('video_title_'f'{j}')
+                        # print(video_name,"vi")
+                        # print(video, "vivivi")
+                        data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":request.FILES.get('video_file_'f'{j}'), "video_name":request.POST.get('video_title_'f'{j}')})
+                        print(data2,"data2222")
                         data[0].video_files.add(data2[0].id)
                         print(data2,"data222")
                         print(data2[0].video_file,"data222")
                         print(type(data2[0].video_file),"data222")
-                        try:
-                            # video = cv2.VideoCapture(str(data2[0].video_file))
-                            # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
-                            live_path = "/var/www/html/eddi-backend/media/"
-                            actual_path = live_path+str(data2[0].video_file)
-                            video = cv2.VideoCapture(actual_path)
-                            video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
-                            duration = video.get(cv2.CAP_PROP_POS_MSEC)
-                            frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                            fps = int(video.get(cv2.CAP_PROP_FPS))
-                            seconds = int(frame_count / fps)
-                            video_time = str(timedelta(seconds=seconds))
-                            dict1 = {
-                                "sec":seconds,
-                                "vid":video_time
-                            }
-                            data2[0].actual_duration = video_time
-                            data2[0].save()
-                            print(dict1, "dicccc")
-                            print(frame_count, "framememem")
-                            print(duration, "durationnnnnnn")
-                        except Exception as ex:
-                            return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
-
-                        # video = moviepy.editor.VideoFileClip(str(data2[0].video_file))
-                        # print(video, "videoo")
-                        # video_duration = int(video.duration)
-                        # print(video_duration, "dyrationnn")
-                        # # hours, mins, secs = convert(video_duration)
-                        # # print(hours,mins,secs, "okonjlhbttv")
-                
                 except Exception as ex:
-                    return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Material Uploaded successfully"}, status=status.HTTP_200_OK)
+                    print(ex,"exe")
+                    
+                try:
+                    # video = cv2.VideoCapture(str(data2[0].video_file))
+                    # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
+                    live_path = "/var/www/html/eddi-backend/media/"
+                    actual_path = live_path+str(data2[0].video_file)
+                    print(actual_path, "pathh")
+                    video = cv2.VideoCapture(actual_path)
+                    video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+                    duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                    print(duration, "durarara")
+                    frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                    print(frame_count, "frames")
+                    fps = int(video.get(cv2.CAP_PROP_FPS))
+                    print(fps,"fpssssss")
+                    seconds = int(frame_count / fps)
+                    video_time = str(timedelta(seconds=seconds))
+                    dict1 = {
+                        "sec":seconds,
+                        "vid":video_time
+                    }
+                    data2[0].actual_duration = video_time
+                    data2[0].save()
+                    print(dict1, "dicccc")
+                    print(frame_count, "framememem")
+                    print(duration, "durationnnnnnn")
+                except Exception as ex:
+                    print(ex,"exe")
+                    # return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+
+                    # video = moviepy.editor.VideoFileClip(str(data2[0].video_file))
+                    # print(video, "videoo")
+                    # video_duration = int(video.duration)
+                    # print(video_duration, "dyrationnn")
+                    # # hours, mins, secs = convert(video_duration)
+                    # # print(hours,mins,secs, "okonjlhbttv")
+            
+            except Exception as ex:
+                print(ex,"Exex")
+                return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
+        return Response({STATUS: SUCCESS, DATA: "Material uploaded successfully"}, status=status.HTTP_200_OK)
     
     def get(self, request, uuid=None):
         email_id = get_user_email_by_token(request) 
@@ -1306,19 +1325,22 @@ class CourseMaterialUpload(APIView):
             for i in document_files_old:
                 l = i.split(",")
                 if l[0] in oldd:
-                    oldd.remove(i)
+                    getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":l[0], "file_name":l[1]})
+                     # removing already existing doc from the list oldd
+                    oldd.remove(l[0])
             for k in oldd:
                 try:
                     getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
                 except Exception as ex:
                     pass
-            if document_files:
-                for i in document_files:
-                    l = i.split(",")
-                    data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":l[0], "document_title":l[1]})
-                    course_material_data.document_files.add(data1[0].id)
+            # if document_files:
+            for j in range(1,int(request.POST.get("new_document_count"))+1):
+                # l = i.split(",")
+                data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{j}'), "file_name":request.POST.get('document_file_'f'{j}')})
+                course_material_data.document_files.add(data1[0].id)
                
         except Exception as ex:
+            print(ex,"exe")
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             old_videos = course_material_data.video_files.all()
@@ -1328,7 +1350,7 @@ class CourseMaterialUpload(APIView):
                 l = i.split(",")
                 if l[0] in oldd1:
                     # removing already existing videos from the list oldd1
-                    oldd1.remove(i)
+                    oldd1.remove(l[0])
             for j in oldd1:
                 try:
                     # deleting rest videos from the list
@@ -1366,6 +1388,7 @@ class CourseMaterialUpload(APIView):
                 course_material_data.video_files.add(data3[0].id)
                 
         except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Material Edited successfully"}, status=status.HTTP_200_OK)
 

@@ -95,17 +95,17 @@ class UserSignup(models.Model):
     password = models.CharField(max_length=150,blank=True,null=True,verbose_name=_('Password'))
 
     user_type = models.ForeignKey(UserType,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("User Type"))
-    is_first_time_login = models.BooleanField(default=True,verbose_name = _('is First Time Login'))
+    is_first_time_login = models.BooleanField(default=True,verbose_name = _('Is First Time Login'))
 
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-    is_authenticated = models.BooleanField(default=False, verbose_name=_('is_authenticated'))
+    is_authenticated = models.BooleanField(default=False, verbose_name=_('Is_authenticated'))
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
-    is_active = models.BooleanField(default=False, verbose_name=_('is_active'))
-    is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
-    is_resetpassword = models.BooleanField(default=True, verbose_name=_('is_resetpassword'))
+    is_active = models.BooleanField(default=False, verbose_name=_('Is_active'))
+    is_deleted = models.BooleanField(default=False, verbose_name=_('Is_deleted'))
+    is_resetpassword = models.BooleanField(default=True, verbose_name=_('Is_resetpassword'))
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
 
@@ -172,14 +172,14 @@ class CourseCategoryDetails(models.Model):
 class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Sub Category Name'),blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('supplier'),blank=True,limit_choices_to={'user_type_id': 1})
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('Supplier'),blank=True,limit_choices_to={'user_type_id': 1})
     subcategory_name = models.CharField(max_length=150,verbose_name=_('Sub Category Name'),blank=True,null=True)
     subcategory_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
+    is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('Is_approved'),blank=True,null=True)
     is_deleted = models.BooleanField(default=False)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
 
@@ -347,11 +347,13 @@ def add_organization_domain(sender, instance, created, **kwargs):
 def bulk_email(sender, instance, created, **kwargs):
     if instance.course_for_organization == True:
         connection = mail.get_connection()
-        instance.target_users.split(",")
-        try:
-            reciever_list = instance.target_users.split(",")
-        except Exception as ex:
-            reciever_list = instance.target_users.split()
+        if instance.target_users != None:
+            try:
+                reciever_list = instance.target_users.split(",")
+            except Exception as ex:
+                reciever_list = instance.target_users.split()
+        else:
+            reciever_list = []
         try:
             path = 'eddi_app'
             img_dir = 'static'
@@ -1257,6 +1259,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
 class EventAd(models.Model):    
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
+    admin_email = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Email"))
     event_image = models.FileField(upload_to='event_image/',verbose_name=_('Event Image'),blank=True,null=True)
     event_choose_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Choose Type"))
     event_publish_on = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Publish on"))
@@ -1330,7 +1333,7 @@ class EventAdEnroll(models.Model):
 class MaterialVideoMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     video_file = models.FileField(upload_to='course_material_video/',verbose_name=_('Video Files'),blank=True,null=True)
-    video_title = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Video Title"))
+    video_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Video Name"))
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
     
@@ -1340,7 +1343,7 @@ class MaterialVideoMaterial(models.Model):
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     document_file = models.FileField(upload_to='course_material_doc/',verbose_name=_('Document Files'),blank=True,null=True)
-    document_title = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Document Title"))
+    file_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("File Name"))
     file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Size"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 

@@ -29,3 +29,4 @@ django-rosetta==0.9.8
 opencv-python==4.5.5.64
 django-environ==0.8.1
 translate==3.6.1
+django-crontab==0.7.1
