@@ -576,10 +576,16 @@ class GetCourseDetails(APIView):
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Something went wrong with userprofile"}, status=status.HTTP_400_BAD_REQUEST)
+                    user_only_category = []
+                    if cat.course_category != None:
+                        try:
+                            user_only_category = cat.course_category.split(",")
+                        except Exception:
+                           user_only_category = cat.course_category.split()
+                    user_category = []
+                    user_subcategory = []
                     if cat.user_interests != None:
                         ab = json.loads(cat.user_interests)
-                        user_category = []
-                        user_subcategory = []
                         for i in ab:
                             user_category.append(i["category"])
                             user_subcategory.append(i["subcategory"][0])
@@ -591,11 +597,23 @@ class GetCourseDetails(APIView):
                             user_areaofinterest = cat.area_of_interest.split()
                     
 
-                    user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category)  | Q(course_name__in=user_areaofinterest))
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id}).values_list("course__course_name", flat=True)
+                    print(course_enrolled, "enrolleddd")
+
+                    user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_name__in = course_enrolled)
+                    print(user_profile_interest, "intererer")
+
                     target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
+
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
-                    data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = target_course_data).exclude(course_name__in = course_enrolled).exclude(course_name__in = user_profile_interest).order_by("-created_date_time"))
+
+                    print(target_course_data, "datata")
+
+                    data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time"))
+
+                    print(data_all, "dataaaaa")
+                    # .exclude(course_name__in = target_course_data)
+                    # .exclude(course_name__in = user_profile_interest)
 
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
