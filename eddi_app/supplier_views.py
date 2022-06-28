@@ -120,9 +120,9 @@ class AddCourseView(APIView):
                 record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
             if organization_data != None:
                 record_map["supplier_organization_id"] = organization_data.id
-            if request.POST.get(COURSE_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
             if request.POST.get(ORIGINAL_PRICE):
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
+            if request.POST.get(COURSE_PRICE):
                 record_map["offer_price"] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
@@ -690,17 +690,16 @@ class GetCourseDetails(APIView):
             TARGET_USERS : request.POST.get(TARGET_USERS,data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
-            # COURSE_PRICE: request.POST.get(COURSE_PRICE,data.course_price),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
-            if request.POST.get(COURSE_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+            if request.POST.get(ORIGINAL_PRICE):
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
             else:
                 record_map[COURSE_PRICE] = data.course_price
-            if request.POST.get(ORIGINAL_PRICE):
-                record_map[ORIGINAL_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
+            if request.POST.get(COURSE_PRICE):
+                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             else:
-                record_map[ORIGINAL_PRICE] = data.original_price
+                record_map["offer_price"] = data.offer_price
             if sub_category_id != None:
                 record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
             if request.POST.get(COURSE_STARTING_DATE) == "":
