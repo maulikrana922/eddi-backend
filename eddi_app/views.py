@@ -107,17 +107,30 @@ class PayByInvoice(APIView):
             getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
             try:
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get("email_id")})
-                record_map1 = {}
-                record_map1 = {
-                    "course_id" : course.id,
-                    "email_id" : request.POST.get("email_id"),
-                    "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                    "amount" : float(request.POST.get("price")),
-                    "payment_mode" : "PayByInvoice",
-                }
-                record_map1[IS_APPROVED_ID] = 2
-                getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
-
+                if request.POST.get("product_type") == "course":
+                    record_map1 = {}
+                    record_map1 = {
+                        "course_id" : course.id,
+                        "email_id" : request.POST.get("email_id"),
+                        "user_name" : f"{user_data.first_name} {user_data.last_name}",
+                        "amount" : float(request.POST.get("price")),
+                        "payment_mode" : "PayByInvoice",
+                    }
+                    record_map1[IS_APPROVED_ID] = 2
+                    getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
+                else:
+                    event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
+                    record_map2 = {}
+                    record_map2 = {
+                        "admin_name" : event.admin_name,
+                        "event_name" : request.POST.get("event_name"),
+                        "email_id" : request.POST.get("email_id"),
+                        "user_name" : f"{user_data.first_name} {user_data.last_name}",
+                        "amount" : float(request.POST.get("price")),
+                        "payment_mode" : "PayByInvoice",
+                    }
+                    record_map1[IS_APPROVED_ID] = 2
+                    getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.update_or_create(**record_map2)
                 try:
                     if request.POST.get("product_type") == "course":
                         course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})

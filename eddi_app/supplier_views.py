@@ -584,11 +584,14 @@ class GetCourseDetails(APIView):
                            user_only_category = cat.course_category.split()
                     user_category = []
                     user_subcategory = []
-                    if cat.user_interests != None:
-                        ab = json.loads(cat.user_interests)
-                        for i in ab:
-                            user_category.append(i["category"])
-                            user_subcategory.append(i["subcategory"][0])
+                    try:
+                        if cat.user_interests != None:
+                            ab = json.loads(cat.user_interests)
+                            for i in ab:
+                                user_category.append(i["category"])
+                                user_subcategory.append(i["subcategory"][0])
+                    except Exception as ex:
+                        pass
                     user_areaofinterest = []
                     if cat.area_of_interest != None:
                         try:
@@ -1341,21 +1344,32 @@ class CourseMaterialUpload(APIView):
             new = list(old_docs)
             oldd = [i.document_file.url for i in new]
             for i in document_files_old:
+                print(document_files_old, "oldldldld")
                 l = i.split(",")
+                print(l, "lll")
                 if l[0] in oldd:
-                    getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":l[0], "file_name":l[1]})
+                    print("insidedede")
+                    print(l[0], "l[0000]")
+                    var = getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":l[0][7:]})
+                    print(var, "vararararar")
+                    var.file_name = l[1]
+                    var.save()
                      # removing already existing doc from the list oldd
                     oldd.remove(l[0])
             for k in oldd:
+                print("hii")
                 try:
                     getattr(models,"MaterialDocumentMaterial").objects.get(**{"document_file":k[7:]}).delete()
                 except Exception as ex:
+                    print(ex,"ex")
                     pass
-            # if document_files:
-            for j in range(1,int(request.POST.get("new_document_count"))+1):
-                # l = i.split(",")
-                data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{j}'), "file_name":request.POST.get('document_file_'f'{j}')})
-                course_material_data.document_files.add(data1[0].id)
+            # print(request.FILES.get('document_file_'f'{j}'))
+            print(int(request.POST.get("new_document_count")), "countttt")
+            if int(request.POST.get("new_document_count")) > 0:
+                for j in range(1,int(request.POST.get("new_document_count"))+1):
+                    # l = i.split(",")
+                    data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{j}'), "file_name":request.POST.get('document_title_'f'{j}')})
+                    course_material_data.document_files.add(data1[0].id)
                
         except Exception as ex:
             print(ex,"exe")
@@ -1367,6 +1381,10 @@ class CourseMaterialUpload(APIView):
             for i in video_files_old:
                 l = i.split(",")
                 if l[0] in oldd1:
+                    var = getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":l[0][7:]})
+                    print(var, "vararararar")
+                    var.video_name = l[1]
+                    var.save()
                     # removing already existing videos from the list oldd1
                     oldd1.remove(l[0])
             for j in oldd1:
@@ -1374,8 +1392,14 @@ class CourseMaterialUpload(APIView):
                     # deleting rest videos from the list
                     getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
                 except Exception as ex:
+                    print(ex,"exex")
                     pass
-        
+            if int(request.POST.get("new_video_count")) > 0:
+                for j in range(1,int(request.POST.get("new_video_count"))+1):
+                    print(request.POST.get('video_title_'f'{j}'), "countttt video")
+                    # l = i.split(",")
+                    data1 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":request.FILES.get('video_file_'f'{j}'), "video_name":request.POST.get('video_title_'f'{j}')})
+                    course_material_data.video_files.add(data1[0].id)
             for p in video_files:
                 l = p.split(",")
                 data3 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":p[0], "video_title":l[1]})

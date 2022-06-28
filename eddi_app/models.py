@@ -308,7 +308,7 @@ class CourseDetails(models.Model):
     course_type = models.ForeignKey(CourseType,on_delete=models.CASCADE,verbose_name=_('Course Type'),blank=True,null=True)
     fee_type = models.ForeignKey(FeeType,on_delete=models.CASCADE,verbose_name=_('Fee Type'),blank=True,null=True)
     course_price = models.CharField(max_length=100,verbose_name=_('Course Price'),blank=True,null=True)
-    original_price = models.CharField(max_length=100,verbose_name=_('Course Original Price'),blank=True,null=True)
+    offer_price = models.CharField(max_length=100,verbose_name=_('Offer Price'),blank=True,null=True)
     var_charges = models.ForeignKey(InvoiceVATCMS,on_delete=models.CASCADE,verbose_name=_('Invoice Vat'),blank=True,null=True)
     additional_information = models.TextField(max_length=1500,verbose_name=_('Additional Information'),blank=True,null=True)
     organization_location = models.CharField(max_length=500,verbose_name=_('Organization Location'),blank=True,null=True)
@@ -1332,7 +1332,7 @@ class EventAdEnroll(models.Model):
 
 class MaterialVideoMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
-    video_file = models.FileField(upload_to='course_material_video/',verbose_name=_('Video Files'),blank=True,null=True)
+    video_file = models.FileField(upload_to='course_material_video/',max_length=1000, verbose_name=_('Video Files'),blank=True,null=True)
     video_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Video Name"))
     actual_duration = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Actual Video Duration"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
@@ -1342,7 +1342,7 @@ class MaterialVideoMaterial(models.Model):
 
 class MaterialDocumentMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
-    document_file = models.FileField(upload_to='course_material_doc/',verbose_name=_('Document Files'),blank=True,null=True)
+    document_file = models.FileField(upload_to='course_material_doc/',max_length=1000, verbose_name=_('Document Files'),blank=True,null=True)
     file_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("File Name"))
     file_size = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("File Size"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
