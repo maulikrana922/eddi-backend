@@ -121,9 +121,9 @@ class AddCourseView(APIView):
             if organization_data != None:
                 record_map["supplier_organization_id"] = organization_data.id
             if request.POST.get(COURSE_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
             if request.POST.get(ORIGINAL_PRICE):
-                record_map[ORIGINAL_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
+                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
@@ -206,7 +206,7 @@ class AddCourseView(APIView):
             return Response({STATUS: SUCCESS, DATA: "Course Created Successfully"}, status=status.HTTP_200_OK)
         except Exception as ex:
             print(ex,"exexex")
-            return Response({STATUS:ERROR, DATA: "Error Saving in record map"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AddSubCategoryView(APIView):
