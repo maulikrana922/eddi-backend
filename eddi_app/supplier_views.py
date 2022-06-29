@@ -743,7 +743,7 @@ class GetCourseDetails(APIView):
                                     email_msg.content_subtype = 'html'
                                     path = 'eddi_app'
                                     img_dir = 'static'
-                                    image = 'Logo.jpg'
+                                    image = 'Logo.png'
                                     file_path = os.path.join(path,img_dir,image)
                                     with open(file_path,'rb') as f:
                                         img = MIMEImage(f.read())
@@ -793,7 +793,7 @@ class GetCourseDetails(APIView):
                                 email_msg.content_subtype = 'html'
                                 path = 'eddi_app'
                                 img_dir = 'static'
-                                image = 'Logo.jpg'
+                                image = 'Logo.png'
                                 file_path = os.path.join(path,img_dir,image)
                                 with open(file_path,'rb') as f:
                                     img = MIMEImage(f.read())
@@ -1521,7 +1521,7 @@ class SupplierOrganizationProfileview(APIView):
                     email_msg.content_subtype = 'html'
                     path = 'eddi_app'
                     img_dir = 'static'
-                    image = 'Logo.jpg'
+                    image = 'Logo.png'
                     file_path = os.path.join(path,img_dir,image)
                     with open(file_path,'rb') as f:
                         img = MIMEImage(f.read())
@@ -1589,7 +1589,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -1613,7 +1613,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -1645,7 +1645,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -1676,7 +1676,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())

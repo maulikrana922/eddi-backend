@@ -75,10 +75,10 @@ class PayByInvoice(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)
         record_map = {}
-        try:
-            if request.POST.get("product_type") == "course":
-                course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
-        except:
+        # try:
+        if request.POST.get("product_type") == "course":
+            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
+        else:
             course = None
         try:
             record_map = {
@@ -97,6 +97,7 @@ class PayByInvoice(APIView):
             "payment_mode" : request.POST.get("payment_mode"),
             "product_type" : request.POST.get("product_type"),
             }
+            print(course,"coursewwwwww")
             if course != None:
                 record_map["course"] = course
             if request.POST.get("product_type") == "event":
@@ -123,13 +124,14 @@ class PayByInvoice(APIView):
                     record_map2 = {}
                     record_map2 = {
                         "admin_name" : event.admin_name,
+                        "admin_email" : event.admin_email,
                         "event_name" : request.POST.get("event_name"),
                         "email_id" : request.POST.get("email_id"),
                         "user_name" : f"{user_data.first_name} {user_data.last_name}",
                         "amount" : float(request.POST.get("price")),
                         "payment_mode" : "PayByInvoice",
                     }
-                    record_map1[IS_APPROVED_ID] = 2
+                    record_map2[IS_APPROVED_ID] = 2
                     getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.update_or_create(**record_map2)
                 try:
                     if request.POST.get("product_type") == "course":
@@ -139,7 +141,7 @@ class PayByInvoice(APIView):
                     else:
                         event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                         fullname = f'{event.admin_name}'
-                        recipient_list = (course.supplier.email_id,)
+                        recipient_list = (event.admin_email,)
 
                     html_path = "pay_by_invoice.html"
                     context_data = {'fullname':fullname, "student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"), "organization_name":request.POST.get("OrganizationName"), "organization_number":request.POST.get("OrganizationNumber"), "street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"invoice_address" : request.POST.get("invoiceAddress"),"email_id" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type")}
@@ -149,7 +151,7 @@ class PayByInvoice(APIView):
                     email_msg.content_subtype = 'html'
                     path = 'eddi_app'
                     img_dir = 'static'
-                    image = 'Logo.jpg'
+                    image = 'Logo.png'
                     file_path = os.path.join(path,img_dir,image)
                     with open(file_path,'rb') as f:
                         img = MIMEImage(f.read())
@@ -242,7 +244,7 @@ class Save_stripe_info(APIView):
                     try:
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -340,7 +342,7 @@ class Save_stripe_infoEvent(APIView):
                             pass
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -554,7 +556,7 @@ class GetUserDetails(APIView):
                         print("TRUE")
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -578,7 +580,7 @@ class GetUserDetails(APIView):
                         print("TRUE")
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -791,7 +793,7 @@ class ForgetPasswordView(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -813,7 +815,7 @@ class ForgetPasswordView(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -876,7 +878,7 @@ class VerifyUser(APIView):
                 print("TRUE")
                 path = 'eddi_app'
                 img_dir = 'static'
-                image = 'Logo.jpg'
+                image = 'Logo.png'
                 file_path = os.path.join(path,img_dir,image)
                 with open(file_path,'rb') as f:
                     img = MIMEImage(f.read())
@@ -1418,7 +1420,7 @@ class UserPaymentDetail_info(APIView):
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -1724,7 +1726,7 @@ class EventView(APIView):
                 return Response({STATUS: ERROR, DATA: "Please choose unique event name"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
-            "admin_name" : admin.first_name,
+            "admin_name" : f"{admin.first_name} {admin.last_name}",
             "admin_email" : email_id,
             EVENT_IMAGE : request.FILES.get(EVENT_IMAGE,None),
             EVENT_PUBLISH_ON : request.POST.get(EVENT_PUBLISH_ON,None),
@@ -2479,7 +2481,7 @@ class CourseRating(APIView):
                         print("TRUE")
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())
@@ -2503,7 +2505,7 @@ class CourseRating(APIView):
                         print("TRUE")
                         path = 'eddi_app'
                         img_dir = 'static'
-                        image = 'Logo.jpg'
+                        image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
                             img = MIMEImage(f.read())

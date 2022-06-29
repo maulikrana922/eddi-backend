@@ -35,7 +35,7 @@ def my_cron_job_course():
                 connection = mail.get_connection()
                 path = 'eddi_app'
                 img_dir = 'static'
-                image = 'Logo.jpg'
+                image = 'Logo.png'
                 file_path = os.path.join(path,img_dir,image)
                 with open(file_path,'rb') as f:
                     img = MIMEImage(f.read())
@@ -122,7 +122,7 @@ def my_cron_job_login():
                 email_msg.content_subtype = 'html'
                 path = 'eddi_app'
                 img_dir = 'static'
-                image = 'Logo.jpg'
+                image = 'Logo.png'
                 file_path = os.path.join(path,img_dir,image)
                 with open(file_path,'rb') as f:
                     img = MIMEImage(f.read())

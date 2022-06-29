@@ -357,7 +357,7 @@ def bulk_email(sender, instance, created, **kwargs):
         try:
             path = 'eddi_app'
             img_dir = 'static'
-            image = 'Logo.jpg'
+            image = 'Logo.png'
             file_path = os.path.join(path,img_dir,image)
             with open(file_path,'rb') as f:
                 img = MIMEImage(f.read())
@@ -537,7 +537,7 @@ def send_contactlead_email(sender, instance, created, **kwargs):
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
-        image = 'Logo.jpg'
+        image = 'Logo.png'
         file_path = os.path.join(path,img_dir,image)
         with open(file_path,'rb') as f:
             img = MIMEImage(f.read())
@@ -1245,7 +1245,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
-        image = 'Logo.jpg'
+        image = 'Logo.png'
         file_path = os.path.join(path,img_dir,image)
         with open(file_path,'rb') as f:
             img = MIMEImage(f.read())
@@ -1515,7 +1515,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
-        image = 'Logo.jpg'
+        image = 'Logo.png'
         file_path = os.path.join(path,img_dir,image)
         with open(file_path,'rb') as f:
             img = MIMEImage(f.read())
@@ -1576,7 +1576,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
-        image = 'Logo.jpg'
+        image = 'Logo.png'
         file_path = os.path.join(path,img_dir,image)
         with open(file_path,'rb') as f:
             img = MIMEImage(f.read())
@@ -1596,7 +1596,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
-        image = 'Logo.jpg'
+        image = 'Logo.png'
         file_path = os.path.join(path,img_dir,image)
         with open(file_path,'rb') as f:
             img = MIMEImage(f.read())
