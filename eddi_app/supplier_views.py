@@ -1200,9 +1200,7 @@ class CourseMaterialUpload(APIView):
             return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             video_title = request.POST.get(VIDEO_TITLE,None)
-            video_files = request.FILES.getlist(VIDEO_FILES,None)
             file_title = request.POST.get(FILE_TITLE,None)
-            document_files = request.FILES.getlist(DOCUMENT_FILES,None)
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except Exception as ex:
@@ -1214,67 +1212,52 @@ class CourseMaterialUpload(APIView):
                 "course_id" : course_data.id
                 }
             data = getattr(models,"CourseMaterial").objects.update_or_create(**reccord_map)
-            # if request.FILES.getlist(DOCUMENT_FILES):
             for i in range(1,int(request.POST.get("new_document_count"))+1):
                 try:
-                #     for i in document_files:
-                        # li = i.split(",")
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{i}'), "file_name":request.POST.get('document_title_'f'{i}')})
                     data[0].document_files.add(data1[0].id)
                 except Exception as ex:
                     print(ex,"exe")
                     return Response({STATUS: ERROR, DATA: "Error While Saving Data"}, status=status.HTTP_400_BAD_REQUEST)
-            # if request.FILES.getlist("video_files"):
             try:
                 try:
                     for j in range(1,int(request.POST.get("new_video_count"))+1):
-                        print(j, "jjjjjjjjj")
-                        print(type(j), "jjjjjjjjj")
-                        # return
-                        # li = j.split(",")
-                        # print(request.FILES.get('video_file_1'), "11111111111")
-                        # video = request.FILES.get('video_file_'f'{j}')
-                        # print(video,"vi")
-                        # video_name = request.POST.get('video_title_'f'{j}')
-                        # print(video_name,"vi")
-                        # print(video, "vivivi")
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":request.FILES.get('video_file_'f'{j}'), "video_name":request.POST.get('video_title_'f'{j}')})
-                        print(data2,"data2222")
                         data[0].video_files.add(data2[0].id)
-                        print(data2,"data222")
-                        print(data2[0].video_file,"data222")
-                        print(type(data2[0].video_file),"data222")
                 except Exception as ex:
                     print(ex,"exe")
                     
                 try:
                     # video = cv2.VideoCapture(str(data2[0].video_file))
+                    # below link is for testing in local
                     # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
+
                     live_path = "/var/www/html/eddi-backend/media/"
+                    # print(str(data2[0].video_file), "oooooooooo")
                     actual_path = live_path+str(data2[0].video_file)
-                    print(actual_path, "pathh")
+                    # print(actual_path, "pathh")
                     video = cv2.VideoCapture(actual_path)
                     video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
                     duration = video.get(cv2.CAP_PROP_POS_MSEC)
-                    print(duration, "durarara")
+                    # print(duration, "durarara")
                     frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                    print(frame_count, "frames")
+                    # print(frame_count, "frames")
                     fps = int(video.get(cv2.CAP_PROP_FPS))
-                    print(fps,"fpssssss")
+                    # print(fps,"fpssssss")
                     seconds = int(frame_count / fps)
                     video_time = str(timedelta(seconds=seconds))
-                    dict1 = {
-                        "sec":seconds,
-                        "vid":video_time
-                    }
+                    # dict1 = {
+                    #     "sec":seconds,
+                    #     "vid":video_time
+                    # }
                     data2[0].actual_duration = video_time
                     data2[0].save()
-                    print(dict1, "dicccc")
-                    print(frame_count, "framememem")
-                    print(duration, "durationnnnnnn")
+                    # print(dict1, "dicccc")
+                    # print(frame_count, "framememem")
+                    # print(duration, "durationnnnnnn")
                 except Exception as ex:
                     print(ex,"exe")
-                    # return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
                     # video = moviepy.editor.VideoFileClip(str(data2[0].video_file))
                     # print(video, "videoo")
