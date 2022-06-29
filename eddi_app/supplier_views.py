@@ -1224,40 +1224,72 @@ class CourseMaterialUpload(APIView):
                     for j in range(1,int(request.POST.get("new_video_count"))+1):
                         data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":request.FILES.get('video_file_'f'{j}'), "video_name":request.POST.get('video_title_'f'{j}')})
                         data[0].video_files.add(data2[0].id)
+                        try:
+                            # video = cv2.VideoCapture(str(data2[0].video_file))
+                            # below link is for testing in local
+                            # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
+
+                            live_path = "/var/www/html/eddi-backend/media/"
+                            # print(str(data2[0].video_file), "oooooooooo")
+                            actual_path = live_path+str(data2[0].video_file)
+                            # print(actual_path, "pathh")
+                            video = cv2.VideoCapture(actual_path)
+                            video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+                            duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                            # print(duration, "durarara")
+                            frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                            # print(frame_count, "frames")
+                            fps = int(video.get(cv2.CAP_PROP_FPS))
+                            # print(fps,"fpssssss")
+                            seconds = int(frame_count / fps)
+                            video_time = str(timedelta(seconds=seconds))
+                            # dict1 = {
+                            #     "sec":seconds,
+                            #     "vid":video_time
+                            # }
+                            data2[0].actual_duration = video_time
+                            data2[0].save()
+                            # print(dict1, "dicccc")
+                            # print(frame_count, "framememem")
+                            # print(duration, "durationnnnnnn")
+                        except Exception as ex:
+                            print(ex,"exe")
+                            return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+
                 except Exception as ex:
                     print(ex,"exe")
                     
-                try:
-                    # video = cv2.VideoCapture(str(data2[0].video_file))
-                    # below link is for testing in local
-                    # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
+                # try:
+                #     # video = cv2.VideoCapture(str(data2[0].video_file))
+                #     # below link is for testing in local
+                #     # video = cv2.VideoCapture("/home/nishant/Documents/eddi_Nishant/4K_54.mp4")
 
-                    live_path = "/var/www/html/eddi-backend/media/"
-                    # print(str(data2[0].video_file), "oooooooooo")
-                    actual_path = live_path+str(data2[0].video_file)
-                    # print(actual_path, "pathh")
-                    video = cv2.VideoCapture(actual_path)
-                    video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
-                    duration = video.get(cv2.CAP_PROP_POS_MSEC)
-                    # print(duration, "durarara")
-                    frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
-                    # print(frame_count, "frames")
-                    fps = int(video.get(cv2.CAP_PROP_FPS))
-                    # print(fps,"fpssssss")
-                    seconds = int(frame_count / fps)
-                    video_time = str(timedelta(seconds=seconds))
-                    # dict1 = {
-                    #     "sec":seconds,
-                    #     "vid":video_time
-                    # }
-                    data2[0].actual_duration = video_time
-                    data2[0].save()
-                    # print(dict1, "dicccc")
-                    # print(frame_count, "framememem")
-                    # print(duration, "durationnnnnnn")
-                except Exception as ex:
-                    print(ex,"exe")
-                    return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+                #     live_path = "/var/www/html/eddi-backend/media/"
+                #     # print(str(data2[0].video_file), "oooooooooo")
+                #     actual_path = live_path+str(data2[0].video_file)
+                #     # print(actual_path, "pathh")
+                #     video = cv2.VideoCapture(actual_path)
+                #     video.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+                #     duration = video.get(cv2.CAP_PROP_POS_MSEC)
+                #     # print(duration, "durarara")
+                #     frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
+                #     # print(frame_count, "frames")
+                #     fps = int(video.get(cv2.CAP_PROP_FPS))
+                #     # print(fps,"fpssssss")
+                #     seconds = int(frame_count / fps)
+                #     video_time = str(timedelta(seconds=seconds))
+                #     # dict1 = {
+                #     #     "sec":seconds,
+                #     #     "vid":video_time
+                #     # }
+                #     data2[0].actual_duration = video_time
+                #     data2[0].save()
+                #     # print(dict1, "dicccc")
+                #     # print(frame_count, "framememem")
+                #     # print(duration, "durationnnnnnn")
+                # except Exception as ex:
+                #     print(ex,"exe")
+                #     return Response({STATUS: ERROR, DATA: str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
                     # video = moviepy.editor.VideoFileClip(str(data2[0].video_file))
                     # print(video, "videoo")
