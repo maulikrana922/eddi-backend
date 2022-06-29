@@ -120,10 +120,10 @@ class AddCourseView(APIView):
                 record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
             if organization_data != None:
                 record_map["supplier_organization_id"] = organization_data.id
-            if request.POST.get(ORIGINAL_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
             if request.POST.get(COURSE_PRICE):
-                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+            if request.POST.get("offer_price"):
+                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
@@ -680,7 +680,6 @@ class GetCourseDetails(APIView):
             COURSE_LEVEL_ID : course_level_id.id,
             COURSE_LENGTH : request.POST.get(COURSE_LENGTH,data.course_length),
             COURSE_CATEGORY_ID : category_id.id,
-            # COURSE_SUBCATEGORY_ID: sub_category_id.id,
             COURSE_TYPE_ID : course_type_id.id,
             COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE,data.course_language),
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,data.organization_location),
@@ -692,12 +691,12 @@ class GetCourseDetails(APIView):
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
             ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,data.additional_information),
         }
-            if request.POST.get(ORIGINAL_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(ORIGINAL_PRICE)))
+            if request.POST.get(COURSE_PRICE):
+                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             else:
                 record_map[COURSE_PRICE] = data.course_price
-            if request.POST.get(COURSE_PRICE):
-                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+            if request.POST.get("offer_price"):
+                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
             else:
                 record_map["offer_price"] = data.offer_price
             if sub_category_id != None:
@@ -785,7 +784,7 @@ class GetCourseDetails(APIView):
                                 pass
                             try:
                                 html_path = APPROVE_COURSE_HTML
-                                context_data = {"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                context_data = {"supplier_name":f"{data.supplier.first_name} {data.supplier.last_name}","course_name":request.POST.get(COURSE_NAME,data.course_name)}
                                 email_html_template = get_template(html_path).render(context_data)
                                 email_from = settings.EMAIL_HOST_USER
                                 recipient_list = (data.supplier.email_id,)
