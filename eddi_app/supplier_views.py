@@ -170,19 +170,21 @@ class AddCourseView(APIView):
                 print(users,"usersssss")
                 if organization_data != None:
                     message = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
-                    try:
-                        translator= Translator(from_lang='english',to_lang="swedish")
-                        message_sv = translator.translate(f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”")
-                    except:
-                        pass
+                    message_sv = f"{supplier_id.first_name} från {organization_data.organizational_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
+                    # try:
+                    #     translator= Translator(from_lang='english',to_lang="swedish")
+                    #     message_sv = translator.translate(f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”")
+                    # except:
+                    #     pass
                 else:
                     message = f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”"
+                    message_sv = f"{supplier_id.first_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
-                    try:
-                        translator= Translator(from_lang='english',to_lang="swedish")
-                        message_sv = translator.translate(f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”")
-                    except:
-                        pass
+                    # try:
+                    #     translator= Translator(from_lang='english',to_lang="swedish")
+                    #     message_sv = translator.translate(f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”")
+                    # except:
+                    #     pass
                 receiver = [i.email_id for i in users]
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
@@ -357,9 +359,9 @@ class GetSubCategoryDetails(APIView):
                     if request.POST.get(APPROVAL_STATUS) == "Approved":
                         record_map[IS_APPROVED_ID] = 1
                         try:
-                            message = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
+                            message = f"{record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
 
-                            message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
+                            message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
                             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                             receiver = [data.supplier.email_id]
@@ -761,7 +763,7 @@ class GetCourseDetails(APIView):
                             try:
                                 # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                                 message = f"{record_map[COURSE_NAME]}, has been Approved by the Admin"
-                                message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin. Klicka på länken nedan för mer information "
+                                message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin"
                                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                 receiver = [data.supplier.email_id]
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
@@ -824,7 +826,7 @@ class GetCourseDetails(APIView):
                                 try:
                                     # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                                     message = f"{record_map[COURSE_NAME]}, has been Rejected by the Admin"
-                                    message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin Klicka på länken nedan för mer information"
+                                    message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin"
                                     # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                     receiver = [data.supplier.email_id]
                                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)

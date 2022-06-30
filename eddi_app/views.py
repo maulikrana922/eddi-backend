@@ -36,7 +36,6 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from .notification import send_notification
 from translate import Translator
 import datetime
-from datetime import datetime
 from datetime import date
 import time
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -65,6 +64,8 @@ class test(APIView):
                     print(type(datetime.today()), "okokok")
                     # print(type(date.today()), "dateeee")
                     # if i.start_date < date.today() and i.start_time > datetime_str.time():
+                    # print(datetime.date.today(), "dateeeeeeee")
+                    print(date.today(), "dateeeeeeee")
                     if i.start_date < date.today():
                     # if i.start_time > datetime_str.time():
                         i.status_id = 2
@@ -1465,13 +1466,14 @@ class UserPaymentDetail_info(APIView):
                         pass
                     try:
                         message = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
+                        message_sv = f"{sender_data.first_name}, har registrerat sig på  {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         receiver = [courseobj.supplier.email_id]
-                        try:
-                            translator= Translator(from_lang='english',to_lang="swedish")
-                            message_sv = translator.translate(f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}")
-                        except:
-                            pass
+                        # try:
+                        #     translator= Translator(from_lang='english',to_lang="swedish")
+                        #     message_sv = translator.translate(f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}")
+                        # except:
+                        #     pass
                         send_notification(email_id, receiver, message)
                         try:
                             record_map1 = {}
@@ -2116,16 +2118,16 @@ class RecruitmentAdView(APIView):
                             print("apapapapapap")
                             record_map[IS_APPROVED_ID] = 1
                             try:
-                                message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
-                                message_sv = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
+                                message = f"{record_map[RECRUITMENTAD_TITLE]}, has been Approved by the Admin"
+                                message_sv = f"Rekryteringsannonsen {record_map[RECRUITMENTAD_TITLE]} har godkänts av Eddi Admin"
                                 # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                 receiver = [data.supplier_profile.supplier_email]
                                 title = record_map[RECRUITMENTAD_TITLE]
-                                try:
-                                    translator= Translator(from_lang='english',to_lang="swedish")
-                                    message_sv = translator.translate(f"RecruitmentAd {title}, has been Approved by the Admin")
-                                except:
-                                    pass
+                                # try:
+                                #     translator= Translator(from_lang='english',to_lang="swedish")
+                                #     message_sv = translator.translate(f"RecruitmentAd {title}, has been Approved by the Admin")
+                                # except:
+                                #     pass
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
@@ -2149,14 +2151,15 @@ class RecruitmentAdView(APIView):
                         else:
                             record_map[IS_APPROVED_ID] = 3
                             try:
-                                message = f"RecruitmentAd {record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
+                                message = f"{record_map[RECRUITMENTAD_TITLE]}, has been Rejected by the Admin"
+                                message_sv = f"Rekryteringsannonsen {record_map[RECRUITMENTAD_TITLE]}, har inte godkänts av Eddi Admin"
                                 receiver = [data.supplier_profile.supplier_email]
                                 title = record_map[RECRUITMENTAD_TITLE]
-                                try:
-                                    translator= Translator(from_lang='english',to_lang="swedish")
-                                    message_sv = translator.translate(f"RecruitmentAd {title}, has been Rejected by the Admin")
-                                except:
-                                    pass
+                                # try:
+                                #     translator= Translator(from_lang='english',to_lang="swedish")
+                                #     message_sv = translator.translate(f"RecruitmentAd {title}, has been Rejected by the Admin")
+                                # except:
+                                #     pass
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
