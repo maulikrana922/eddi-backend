@@ -1267,6 +1267,7 @@ class EventAd(models.Model):
     event_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Category"))
     banner_video_link =  models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Banner Link"))
     start_date = models.DateField(verbose_name=_('Event Start Date'), blank=True,null=True)
+    end_date = models.DateField(verbose_name=_('Event End Date'), blank=True,null=True)
     start_time = models.TimeField(verbose_name=_('Event Start Time'), blank=True,null=True)
     fees_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Fees Type"))
     event_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Type"))

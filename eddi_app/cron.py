@@ -1,9 +1,11 @@
-from datetime import datetime
 import logging
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
+from datetime import datetime
 import datetime
+from datetime import date
+import time
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import get_template
@@ -13,7 +15,6 @@ from django.template.loader import render_to_string
 from email.mime.image import MIMEImage
 from django.core import mail
 from django.core.mail import get_connection, EmailMultiAlternatives
-
 logger = logging.getLogger(__name__)
 
 def my_cron_job():
@@ -97,13 +98,33 @@ def my_cron_job_course():
     # logger.info("Running...logger")
     # print("Running...")
 
-# def my_cron_job_event():
-#     event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1})
-#     for i in event_data:
-#         end_date = i.course_starting_date + datetime.timedelta(days=i.course_length)
-#         if datetime.date.today() >= end_date:
-#             i.status_id = 2
-#             i.save()
+def my_cron_job_event():
+    event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1})
+    for i in event_data:
+        # print(i.event_name, "namememe")
+        # print(type(i.start_date), "event")
+        # print(i.start_time, "time")
+        # print(type(i.start_time), "time")
+        # print(datetime.now().strftime("%H:%M:%S"), "time")
+        # print(type(datetime.now().strftime("%H:%M:%S")), "time")
+
+        # print(time.strftime("%H:%M:%S", time.localtime()))
+        # datetime_str = datetime.strptime(time.strftime("%H:%M:%S", time.localtime()), "%H:%M:%S").time()
+        # print(type(datetime_str.time()), "strrr")
+        # print(type(time.strftime("%H:%M:%S", time.localtime())))
+        # print(type(datetime.strptime(str(datetime.now().strftime("%H:%M:%S")), '%H:%M:%S')))
+        # print(datetime.strptime(str(datetime.now().strftime("%H:%M:%S")), '%H:%M:%S'), "okokok")
+        # print(date.today(), "okokok")
+        # print(type(datetime.today()), "okokok")
+        # print(type(date.today()), "dateeee")
+        # if i.start_date < date.today() and i.start_time > datetime_str:
+        # if i.start_date < date.today():
+        #     i.status_id = 1
+        #     i.save()
+        if datetime.date.today() > i.start_date:
+        # if i.start_time > datetime_str.time():
+            i.status_id = 1
+            i.save()
 
 
 def my_cron_job_login():

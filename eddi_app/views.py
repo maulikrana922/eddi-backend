@@ -30,26 +30,55 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.http import HttpResponse
 from moviepy.editor import VideoFileClip
-import datetime
 from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from .notification import send_notification
 from translate import Translator
-
+import datetime
+from datetime import datetime
+from datetime import date
+import time
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class test(APIView):
     def get(self, request):
         email_id = get_user_email_by_token(request)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:"Finansforbundet_1234@yahoo.com"})
-            a = check_password()
-            print
+            event_data = getattr(models,EVENT_AD_TABLE).objects.filter(**{STATUS_ID:1})
+            try:
+                for i in event_data:
+                    print(i.event_name, "namememe")
+                    # print(type(i.start_date), "event")
+                    print(i.start_time, "time")
+                    print(type(i.start_time), "time")
+                    print(datetime.now().strftime("%H:%M:%S"), "time")
+                    print(type(datetime.now().strftime("%H:%M:%S")), "time")
+
+                    print(time.strftime("%H:%M:%S", time.localtime()))
+                    datetime_str = datetime.strptime(time.strftime("%H:%M:%S", time.localtime()), "%H:%M:%S")
+                    print(type(datetime_str.time()), "strrr")
+                    print(type(time.strftime("%H:%M:%S", time.localtime())))
+                    # print(type(datetime.strptime(str(datetime.now().strftime("%H:%M:%S")), '%H:%M:%S')))
+                    # print(datetime.strptime(str(datetime.now().strftime("%H:%M:%S")), '%H:%M:%S'), "okokok")
+                    print(date.today(), "okokok")
+                    print(type(datetime.today()), "okokok")
+                    # print(type(date.today()), "dateeee")
+                    # if i.start_date < date.today() and i.start_time > datetime_str.time():
+                    if i.start_date < date.today():
+                    # if i.start_time > datetime_str.time():
+                        i.status_id = 2
+                        i.save()
+                        # print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+            except Exception as e:
+                print(e,"ee")
+                # if datetime.date.today() >= end_date:
+                #     i.status_id = 2
+                #     i.save()
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = testSerializer(data)
-        return Response({MESSAGE: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK,)
+        # serializer = testSerializer(data)
+        # return Response({MESSAGE: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK,)
 
 # def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
 #     print('nxvdbsnp noti send',sender, receiver, message)
