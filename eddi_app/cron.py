@@ -123,8 +123,9 @@ def my_cron_job_event():
         #     i.save()
         if datetime.date.today() > i.start_date:
         # if i.start_time > datetime_str.time():
-            i.status_id = 1
-            i.save()
+            # i.status_id = 1
+            # i.save()
+            pass
 
 
 def my_cron_job_login():
