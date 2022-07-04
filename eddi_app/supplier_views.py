@@ -52,11 +52,8 @@ def get_user_email_by_token(request):
 class AddCourseView(APIView):
     def post(self, request):
         res = None
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: "Requested method is not valid"}, status=status.HTTP_400_BAD_REQUEST)
         email_id = get_user_email_by_token(request)
         course_organization = None
-
         if request.POST.get(COURSE_NAME):
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":request.POST.get(COURSE_NAME)})
@@ -316,7 +313,7 @@ class GetSubCategoryDetails(APIView):
         except Exception:
             user_type_data = None
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "Not able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
@@ -326,7 +323,7 @@ class GetSubCategoryDetails(APIView):
         try:
             dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Category error"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong with category"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
             CATEGORY_NAME_ID: dataa.id,
@@ -452,7 +449,7 @@ class GetSubCategoryDetails(APIView):
     def delete(self,request,uuid = None):
         email_id =  get_user_email_by_token(request)
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except:
@@ -649,7 +646,7 @@ class GetCourseDetails(APIView):
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Not Able to get data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Somethoing went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
@@ -816,7 +813,7 @@ class GetCourseDetails(APIView):
                             except Exception as ex:
                                 data1 = None
                             if data1.exists():
-                                return Response({STATUS: ERROR, DATA: "Someone Already Enrolled in This Course"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[IS_APPROVED_ID] = 3
                                 try:
@@ -875,7 +872,7 @@ class GetCourseDetails(APIView):
     def delete(self,request,uuid = None):
         email_id =  get_user_email_by_token(request)
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except Exception:
@@ -989,7 +986,7 @@ class SupplierDashboardView(APIView):
             #         UUID : Individuals.uuid
             #     }
             #     c +=1
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong with course"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -1045,8 +1042,8 @@ class SupplierDashboard_courseGraphView(APIView):
             week = date.strftime("%V")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
-            except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course__course_name", flat=True)
@@ -1066,12 +1063,12 @@ class SupplierDashboard_courseGraphView(APIView):
             month = date.strftime("%m")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
@@ -1187,7 +1184,7 @@ class SupplierDashboard_earningGraphView(APIView):
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({STATUS: "Invalid time_period added", DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
@@ -1667,7 +1664,7 @@ class SupplierProfileView(APIView):
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
-            return Response({STATUS: ERROR, DATA: "Requested Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Requested data not found"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer := SupplierProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
