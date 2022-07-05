@@ -44,7 +44,7 @@ def get_user_email_by_token(request):
     try:
         data = getattr(models,TOKEN_TABLE).objects.get(key = token)
         return data.user.email_id
-    except Exception as ex:
+    except:
         data = None
         return data
 
@@ -57,7 +57,7 @@ class AddCourseView(APIView):
         if request.POST.get(COURSE_NAME):
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":request.POST.get(COURSE_NAME)})
-            except Exception as ex:
+            except:
                 course_data = None
             if course_data != None:
                 return Response({STATUS: ERROR, DATA: "Please choose unique course name"}, status=status.HTTP_400_BAD_REQUEST)
@@ -71,7 +71,7 @@ class AddCourseView(APIView):
             course_organization = False
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
@@ -83,11 +83,11 @@ class AddCourseView(APIView):
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
             
-        except Exception as ex:
+        except:
             return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":email_id})
-        except Exception as ex:
+        except:
             organization_data = None
         try:
             record_map = {
@@ -155,11 +155,9 @@ class AddCourseView(APIView):
                             }
 
                             getattr(models,"Notification").objects.update_or_create(**record_map1)
-                        except Exception as ex:
-                            print(ex,"exexe")
+                        except:
                             pass
-                except Exception as ex:
-                    print(ex,"exexeeee")
+                except:
                     pass
             # noti to user
             try:
@@ -207,17 +205,15 @@ class AddCourseView(APIView):
 
 class AddSubCategoryView(APIView):
     def post(self, request):
-        if request.method != POST_METHOD:
-            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
         email_id = get_user_email_by_token(request)
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         user_type = supplier_id.user_type.user_type
         try:    
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,None)})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SUPPLIER_ID: supplier_id.id,
@@ -253,8 +249,7 @@ class AddSubCategoryView(APIView):
                     }
 
                     getattr(models,"Notification").objects.update_or_create(**record_map1)
-                except Exception as ex:
-                    print(ex,"exexe")
+                except:
                     pass
         except:
             pass
@@ -310,19 +305,17 @@ class GetSubCategoryDetails(APIView):
         email_id =  get_user_email_by_token(request)
         try:
             user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
-        except Exception:
+        except:
             user_type_data = None
         if not uuid:
             return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong with category"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -330,7 +323,7 @@ class GetSubCategoryDetails(APIView):
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
          }
-        except Exception as ex:
+        except:
             pass
         if user_type_data:
             if user_type_data == ADMIN_S:
@@ -340,7 +333,7 @@ class GetSubCategoryDetails(APIView):
                     else:
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except Exception as ex:
+                        except:
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -371,15 +364,15 @@ class GetSubCategoryDetails(APIView):
                                     }
 
                                     getattr(models,"Notification").objects.update_or_create(**record_map1)
-                                except Exception as ex:
+                                except:
                                     pass
-                        except Exception as ex:
+                        except:
                             pass
 
                     if request.POST.get(APPROVAL_STATUS) == "Pending":
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except Exception as ex:
+                        except:
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -388,7 +381,7 @@ class GetSubCategoryDetails(APIView):
                     if request.POST.get(APPROVAL_STATUS) == "Rejected":
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except Exception as ex:
+                        except:
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
@@ -413,9 +406,9 @@ class GetSubCategoryDetails(APIView):
                                         }
 
                                         getattr(models,"Notification").objects.update_or_create(**record_map2)
-                                    except Exception as ex:
+                                    except:
                                         pass
-                            except Exception as ex:
+                            except:
                                 pass
 
                 else:
@@ -428,7 +421,7 @@ class GetSubCategoryDetails(APIView):
                     else:
                         try:
                             data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except Exception as ex:
+                        except:
                             data1 = None
                         if data1.exists():
                             return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -486,7 +479,7 @@ class GetCourseDetails(APIView):
         try:
             vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
             vat_val = int(vat[0])
-        except Exception as ex:
+        except:
             vat_val = None
         if uuid:
             email_id = get_user_email_by_token(request)
@@ -500,12 +493,12 @@ class GetCourseDetails(APIView):
                 course_data = None
             try:
                 supplier_profile = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":course_data.supplier.email_id})
-            except Exception as ex:
+            except:
                 supplier_profile = None
             try:
                 fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE:course_data}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
-            except Exception as ex:
+            except:
                 fav_data = None
                 fav_dataa = None
 
@@ -518,7 +511,7 @@ class GetCourseDetails(APIView):
                 lerner_count = None
             try:
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE:course_data, STATUS:"Success"})
-            except Exception as ex:
+            except:
                 var = None
             var1 = True if var is not None else False
 
@@ -528,7 +521,7 @@ class GetCourseDetails(APIView):
                 for i in rating:
                     l.append(float(i.star))
                 final_rating = "{:.1f}".format(sum(l)/len(l))
-            except Exception as ex:
+            except:
                 rating = None
                 final_rating = None
             
@@ -553,7 +546,7 @@ class GetCourseDetails(APIView):
                     try:
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
 
-                    except Exception as ex:
+                    except:
                         return Response({STATUS: ERROR, DATA: "Somethong went wrong in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -561,7 +554,7 @@ class GetCourseDetails(APIView):
                 elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
-                    except Exception as ex:
+                    except:
                         return Response({STATUS: ERROR, DATA: "Something went wrong with admin data"}, status=status.HTTP_400_BAD_REQUEST)
 
                     if serializer := CourseDetailsSerializer(data_a,many=True):
@@ -570,7 +563,7 @@ class GetCourseDetails(APIView):
                 else:
                     try:
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    except Exception as ex:
+                    except:
                         return Response({STATUS: ERROR, DATA: "Something went wrong with userprofile data"}, status=status.HTTP_400_BAD_REQUEST)
                     user_only_category = []
                     if cat.course_category != None:
@@ -586,13 +579,13 @@ class GetCourseDetails(APIView):
                             for i in ab:
                                 user_category.append(i["category"])
                                 user_subcategory.append(i["subcategory"][0])
-                    except Exception as ex:
+                    except:
                         pass
                     user_areaofinterest = []
                     if cat.area_of_interest != None:
                         try:
                             user_areaofinterest = cat.area_of_interest.split(",")
-                        except Exception as ex:
+                        except:
                             user_areaofinterest = cat.area_of_interest.split()
                     
 
@@ -645,21 +638,21 @@ class GetCourseDetails(APIView):
         
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Somethoing went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
             if enrolled.exists():
                 return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as ex:
+        except:
             pass
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
 
             try:
                 sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,data.course_subcategory.subcategory_name)})
-            except Exception as ex:
+            except:
                 sub_category_id = None
 
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
@@ -667,7 +660,7 @@ class GetCourseDetails(APIView):
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
 
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
-        except Exception as ex:
+        except:
             return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -722,7 +715,7 @@ class GetCourseDetails(APIView):
                         else:
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
-                            except Exception as ex:
+                            except:
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -746,7 +739,7 @@ class GetCourseDetails(APIView):
                                         img.add_header('Content-Disposition', 'inline', filename=image)
                                     email_msg.attach(img)
                                     email_msg.send(fail_silently=False)
-                                except Exception as ex:
+                                except:
                                     pass
                     else:
                         record_map[STATUS] = data.status
@@ -801,7 +794,7 @@ class GetCourseDetails(APIView):
                         if request.POST.get(APPROVAL_STATUS) == "Pending":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
-                            except Exception as ex:
+                            except:
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -810,7 +803,7 @@ class GetCourseDetails(APIView):
                         if request.POST.get(APPROVAL_STATUS) == "Rejected":
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
-                            except Exception as ex:
+                            except:
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -835,8 +828,7 @@ class GetCourseDetails(APIView):
                                             }
 
                                             getattr(models,"Notification").objects.update_or_create(**record_map2)
-                                        except Exception as ex:
-                                            print(ex,"exexe")
+                                        except:
                                             pass
                                 except:
                                     pass
@@ -850,7 +842,7 @@ class GetCourseDetails(APIView):
                         else:
                             try:
                                 data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{"payment_detail__course__course_name":data.course_name})
-                            except Exception as ex:
+                            except:
                                 data1 = None
                             if data1.exists():
                                 return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
@@ -865,7 +857,7 @@ class GetCourseDetails(APIView):
                     setattr(data,key,value)
                 data.save()
                 return Response({STATUS: SUCCESS, DATA: "Data succesfully edited"}, status=status.HTTP_200_OK)
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -908,12 +900,12 @@ class AdminDashboardView(APIView):
                 total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
                 total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
                 purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
                 course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Somethiong went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
@@ -944,7 +936,7 @@ class SupplierDashboardView(APIView):
             purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).count()
             Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).order_by("-created_date_time")
 
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
@@ -991,12 +983,12 @@ class SupplierDashboardView(APIView):
 
         try:
             all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False})
-        except Exception as ex:
+        except:
             all_subcategory = None
         try:
             if all_subcategory_serializer := SubCategoryDetailsSerializer(all_subcategory, many=True):
                 newvar = all_subcategory_serializer.data
-        except Exception as ex:
+        except:
             newvar = None
         if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
             return Response({STATUS: SUCCESS,
@@ -1018,7 +1010,7 @@ class SupplierDashboard_Active_InActiveView(APIView):
         course_name = request.POST.get(COURSE_NAME)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {}
         record_map = {STATUS_ID: 1,} if status_s == "Active" else {STATUS_ID: 2,}
@@ -1047,13 +1039,13 @@ class SupplierDashboard_courseGraphView(APIView):
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course__course_name", flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong with purchased course"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list(COURSE_NAME, flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
             set_all = set(all_supplier_course)
@@ -1074,7 +1066,7 @@ class SupplierDashboard_courseGraphView(APIView):
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list(COURSE_NAME, flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
@@ -1083,18 +1075,18 @@ class SupplierDashboard_courseGraphView(APIView):
             year = date.strftime("%Y")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
             try:
 
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list(COURSE_NAME, flat=True)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
@@ -1127,7 +1119,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
-            except Exception as ex: 
+            except: 
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == MONTHLY:
@@ -1150,7 +1142,7 @@ class SupplierDashboard_earningGraphView(APIView):
 
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:month_list}, status=status.HTTP_200_OK)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif time_period == YEARLY:
@@ -1193,7 +1185,7 @@ class CourseMaterialUpload(APIView):
         else:
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
-            except Exception as ex:
+            except:
                  return Response({STATUS: ERROR, DATA: "Course details object not matched with uuid"}, status=status.HTTP_400_BAD_REQUEST)
             reccord_map = {}
             reccord_map = {
@@ -1240,7 +1232,7 @@ class CourseMaterialUpload(APIView):
                     try:
                         course_material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'video_id':i.uuid})
                         video.append(course_material_status)
-                    except Exception as ex:
+                    except:
                         course_material_status = None
                 course_material_final_video = getattr(models,"CourseMaterialStatus").objects.filter(**{'video_id__in':video})
             except:
@@ -1281,7 +1273,7 @@ class CourseMaterialUpload(APIView):
                 for j in range(1,int(request.POST.get("new_document_count"))+1):
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{j}'), "file_name":request.POST.get('document_title_'f'{j}')})
                     course_material_data.document_files.add(data1[0].id)
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -1299,7 +1291,7 @@ class CourseMaterialUpload(APIView):
             for j in oldd1:
                 try:
                     getattr(models,"MaterialVideoMaterial").objects.get(**{"video_file":j[7:]}).delete()
-                except Exception as ex:
+                except:
                     pass
             if int(request.POST.get("new_video_count")) > 0:
                 for j in range(1,int(request.POST.get("new_video_count"))+1):
@@ -1329,7 +1321,7 @@ class SupplierOrganizationProfileviewall(APIView):
         try:
             all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type" : SUPPLIER_S}).values_list('email_id', flat=True)
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
-        except Exception as ex:
+        except:
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data, many=True):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1344,11 +1336,11 @@ class SupplierOrganizationProfileAdminview(APIView):
         if request.POST.get("supplier_email"):
             try:
                 data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
-            except Exception as ex:
+            except:
                 data= None
             try:
                 user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:supplier_email})
-            except Exception as ex:
+            except:
                 user_data= None
             if serializer := SupplierOrganizationProfileSerializer(data):
                 if serializer1 := UserSignupSerializer(user_data):
@@ -1362,7 +1354,7 @@ class SupplierOrganizationProfileAdminview(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.all()
-        except Exception as ex:
+        except:
             data= None
         if serializer := SupplierOrganizationProfileSerializer(data, many=True):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1418,20 +1410,19 @@ class SupplierOrganizationProfileview(APIView):
                         img.add_header('Content-Disposition', 'inline', filename=image)
                     email_msg.attach(img)
                     email_msg.send(fail_silently=False)
-                except Exception as ex:
+                except:
                     pass
                 try:
                     data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     data1.is_resetpassword = False
                     data1.is_first_time_login = False
                     data1.save()
-                except Exception as ex:
+                except:
                     pass
-            except Exception as ex:
-                print(ex,"exexe")
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong with saving data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Profile created successfully. Your profile is under review"}, status=status.HTTP_200_OK)
 
@@ -1440,11 +1431,11 @@ class SupplierOrganizationProfileview(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as ex:
+        except:
             data= None
         try:
             user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-        except Exception as ex:
+        except:
             user_data= None
 
         if serializer := SupplierOrganizationProfileSerializer(data):
@@ -1486,7 +1477,7 @@ class SupplierOrganizationProfileview(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                    except Exception as ex:
+                    except:
                         pass
                 else:
                     record_map1[STATUS_ID] = 2
@@ -1510,7 +1501,7 @@ class SupplierOrganizationProfileview(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                    except Exception as ex:
+                    except:
                         pass
             else:
                 record_map1[STATUS] = data1.status
@@ -1542,7 +1533,7 @@ class SupplierOrganizationProfileview(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                    except Exception as ex:
+                    except:
                         pass
                 elif request.POST.get(APPROVAL_STATUS) == "Pending":
                     record_map1[IS_APPROVED_ID] = 2
@@ -1573,7 +1564,7 @@ class SupplierOrganizationProfileview(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                    except Exception as ex:
+                    except:
                         pass
                     
             else:
@@ -1585,7 +1576,7 @@ class SupplierOrganizationProfileview(APIView):
 
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong getting organization data"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -1612,7 +1603,7 @@ class SupplierOrganizationProfileview(APIView):
                 setattr(data,key,value)
             data.save()            
             return Response({STATUS: SUCCESS, DATA: "Organization profile data updated successfully"}, status=status.HTTP_200_OK)
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong with saving updated data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1621,7 +1612,7 @@ class SupplierProfileView(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as ex:
+        except:
             data= None
         if data is not None:
             try:
@@ -1639,7 +1630,7 @@ class SupplierProfileView(APIView):
                     setattr(data,key,value)
                 data.save()            
                 return Response({STATUS: SUCCESS, DATA: "Profile data updated successfully"}, status=status.HTTP_200_OK)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
@@ -1654,7 +1645,7 @@ class SupplierProfileView(APIView):
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 getattr(models,SUPPLIER_PROFILE_TABLE).objects.update_or_create(**record_map)
                 return Response({STATUS: SUCCESS, DATA: "Profile updated successfully"}, status=status.HTTP_200_OK)
-            except Exception as ex:
+            except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1663,7 +1654,7 @@ class SupplierProfileView(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as ex:
+        except:
             return Response({STATUS: ERROR, DATA: "Requested data not found"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer := SupplierProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1679,7 +1670,7 @@ class MyProgressView(APIView):
         is_ongoing_count = 0
         try:
             enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course__course_name", flat = True)
-        except Exception as ex:
+        except:
             enroll_data = None
         # try:
         #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data})
@@ -1689,7 +1680,7 @@ class MyProgressView(APIView):
         try:
             course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data}).values_list('uuid', flat=True).order_by("-created_date_time")
             
-        except Exception as ex:
+        except:
             course_data_uuid = None
 
         try:
@@ -1697,22 +1688,22 @@ class MyProgressView(APIView):
                 try:
                     var = getattr(models,"CourseMaterial").objects.get(**{'course__uuid':i})
                     all_videos = var.video_files.all()
-                except Exception as ex:
-                        var = None
-                        is_ongoing_count += 1
-                        continue
+                except:
+
+                    var = None
+                    is_ongoing_count += 1
+                    continue
                 l1 = []
                 for j in all_videos:
                     try:
                         material_status = getattr(models,"CourseMaterialStatus").objects.get(**{'user_email':email_id, 'video_id':j.uuid})
                         l1.append(material_status.is_complete)
-                    except Exception as ex:
+                    except:
                         pass
                 if len(l1) != len(all_videos) or False in l1:
                     is_ongoing_count += 1
                 else:
                     is_completed_count += 1            
             return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-        except Exception as ex:
-            print(ex,"exexe")
+        except:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
