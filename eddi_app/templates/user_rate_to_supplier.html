@@ -1,0 +1,91 @@
+{% load static %}
+<table
+  cellpadding="0"
+  cellspacing="0"
+  style="
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 100%;
+    width: 630px;
+    margin: 0 auto;
+  "
+>
+  <tr>
+    <td
+      height="70"
+      style="
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #3e8181;
+      "
+    >
+      <img src="cid:Logo.png" style="width: 120px;height: 120px" />
+    </td>
+  </tr>
+  <tr>
+    <td height="45"></td>
+  </tr>
+  <tr>
+    <td
+      style="
+        font-family: Arial, Helvetica, sans-serif;
+        color: #3e3e3e;
+        font-size: 18px;
+      "
+    >
+      Hello {{supplier_name}}
+      
+    </td>
+  </tr>
+  <tr>
+    <td height="45"></td>
+  </tr>
+  <tr>
+    <td style="color: #3e3e3e">
+      {{fullname}} has provided {{star}} stars for your course “{{course_name}}”. 
+
+    </td>
+  </tr>
+  <tr>
+    <td height="45">Review: {{review}}</td>
+  </tr>
+  <tr>
+    <td
+      style="
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: 300;
+        color: #3e3e3e;
+        text-decoration: none;
+        display: grid;
+      "
+    >
+    Thank You,
+    <br>
+    The Eddi Team.
+      <a
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: 300;
+          color: #3e3e3e;
+          text-decoration: none;
+        "
+        href="mailto:support@eddi.nu"
+      >
+      If you are in need of assistance please contact
+      <br>
+        support@eddi.nu</a
+      >
+    </td>
+  </tr>
+  <tr>
+    <td height="45"></td>
+  </tr>
+ 
+  <tr>
+    <td
+      height="30"
+      style="
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #3e8181;
+      "
+    ></td>
+  </tr>
+</table>
