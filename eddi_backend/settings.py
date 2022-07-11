@@ -67,8 +67,8 @@ DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
 
-CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
-CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
+# CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
+# CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -291,14 +291,20 @@ CKEDITOR_CONFIGS = {
 
 
 DATABASES = {
+     
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('NAME'),
-        'USER': env('DATABASE_USER'),
-        'PASSWORD': env('DATABASE_PASS'),
-        'HOST': env('DATABASE_HOST'),
-        'PORT': env('PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': env('NAME'),
+    #     'USER': env('DATABASE_USER'),
+    #     'PASSWORD': env('DATABASE_PASS'),
+    #     'HOST': env('DATABASE_HOST'),
+    #     'PORT': env('PORT'),
+    # }
 }
 
 # Password validation
@@ -351,13 +357,21 @@ MEDIA_URL = '/media/'
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_USE_TLS = env('EMAIL_USE_TLS')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-WKHTMLTOPDF_CMD = env('WKHTMLTOPDF_CMD')
-
+# EMAIL_HOST = 'smtp.mailtrap.io'
+# EMAIL_HOST_USER = 'cdfc9d61864f08'
+# EMAIL_HOST_PASSWORD = '9eacd4588b999d'
+# EMAIL_PORT = '2525'
+# EMAIL_HOST = env('EMAIL_HOST')
+# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+# EMAIL_PORT = env('EMAIL_PORT')
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+# WKHTMLTOPDF_CMD = env('WKHTMLTOPDF_CMD')
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'testing.skillism@gmail.com'
+EMAIL_HOST_PASSWORD = 'vyzhcuaabfqutufz'
 
 
 STRIPE_PUBLIC_KEY='pk_test_51KhDqeEjvkdtZsC4cUmvapGjtOYTru6hGp8EOK1KBdZkp7pQfBYMY4XAhkJ0WY2OAjIhpYXtXI2ia9slbSlnvPuy00XyRs254B'

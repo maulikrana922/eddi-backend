@@ -416,9 +416,16 @@ class UserSignupView(APIView):
 
         record_map[CREATED_AT] = make_aware(datetime.datetime.now())
         record_map[CREATED_BY] = 'admin'
+        
         try:
-            getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            record_data1 = {
+                    DEVICE_TOKEN:request.POST.get(DEVICE_TOKEN,None),
+                    USER_TYPE:data[0]
+                }
+            getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
         except Exception as ex:
+            print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong or user already exists"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "User created successfully"}, status=status.HTTP_200_OK)
 
@@ -663,6 +670,7 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+        user_device_token = request.POST.get(DEVICE_TOKEN)
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -710,8 +718,10 @@ class UserLoginView(APIView):
                     
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
+           
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
+            print(ex)
             return Response({STATUS: ERROR, DATA: "Entered user credentials might be deleted"}, status=status.HTTP_400_BAD_REQUEST)
        
         try:
@@ -720,10 +730,11 @@ class UserLoginView(APIView):
                 user_profile = True
         except Exception as ex:
             user_profile = False
-
+       
         # Supplier General Login
         try:
             if data.user_type.user_type == SUPPLIER_S:
+               
                 # Supplier Exception Cases
                 try:
                     organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
@@ -732,8 +743,9 @@ class UserLoginView(APIView):
                     if str(organization_data.is_approved.value) == "Pending" and organization_data.approved_once == False:
                         return Response({STATUS: ERROR, DATA: "Your profile is under review. You can't login until it's approved"}, status=status.HTTP_400_BAD_REQUEST)
                 except Exception as ex:
+                    print(ex)
                     pass
-               
+              
                 if not check_password(password, data.password):
                     return Response({STATUS: ERROR, DATA: "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
                 if data.status.id == 2:
@@ -741,6 +753,11 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
+                    record_data1 = {
+                        DEVICE_TOKEN:user_device_token,
+                        USER_TYPE:data
+                    }
+                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
         except Exception as ex:
@@ -757,6 +774,11 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
+                    record_data1 = {
+                        DEVICE_TOKEN:user_device_token,
+                        USER_TYPE:data
+                    }
+                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
@@ -782,7 +804,13 @@ class UserLoginView(APIView):
                     # time_diff = datetime.datetime.now() - datetime.datetime.strptime(str(data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
                     # print(type(time_diff.seconds), "timeeeeeeeeeeeee")
                     # print(divmod(time_diff.seconds, 3600)[0] , "timeeeeeeeeeeeee")
-
+                    print(user_profile)
+                    record_data1 = {
+                        DEVICE_TOKEN:user_device_token,
+                        USER_TYPE:data
+                    }
+                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(device_token=user_device_token)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: "User is not authorized"}, status=status.HTTP_400_BAD_REQUEST)
@@ -814,7 +842,7 @@ class ForgetPasswordView(APIView):
                         email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
-                        img_dir = 'static'
+                        img_dir = 'static'  
                         image = 'Logo.png'
                         file_path = os.path.join(path,img_dir,image)
                         with open(file_path,'rb') as f:
@@ -1163,6 +1191,7 @@ class GetBlogDetails(APIView):
             data = getattr(models,BLOGDETAILS_TABLE).objects.get(**{UUID:uuid})
             try:
                 related_blog = list(getattr(models,BLOGDETAILS_TABLE).objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+                
                 for i in related_blog:
                     for key,value in i.items():
                         if key == 'blog_image':
@@ -1278,6 +1307,14 @@ class UserProfileView(APIView):
                         #     pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(email_id, receiver, message)
+                        receiver_device_token = []
+                        for i in data:
+                            device_data = UserDeviceToken.objects.filter(user_type=i)
+                            for j in device_data:
+                                receiver_device_token.append(j.device_token)
+
+                        print(receiver_device_token)
+                        send_push_notification(receiver_device_token)
                         for i in receiver:
                             try:
                                 record_map = {}
@@ -1467,6 +1504,12 @@ class UserPaymentDetail_info(APIView):
                         # except:
                         #     pass
                         send_notification(email_id, receiver, message)
+                        receiver_device_token = []
+                        device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
+                        receiver_device_token.append(device_data.device_token)
+
+                        print(receiver_device_token)
+                        send_push_notification(receiver_device_token)
                         try:
                             record_map1 = {}
                             record_map1 = {
@@ -1567,6 +1610,14 @@ class EventPaymentDetail_info(APIView):
                             pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(user_email_id, receiver, message)
+                        receiver_device_token = []
+                        for i in data:
+                            device_data = UserDeviceToken.objects.filter(user_type=i)
+                            for j in device_data:
+                                receiver_device_token.append(j.device_token)
+
+                        print(receiver_device_token)
+                        send_push_notification(receiver_device_token)
                         for i in receiver:
                             try:
                                 record_map1 = {}
@@ -2014,6 +2065,13 @@ class RecruitmentAdView(APIView):
                     pass
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
+                receiver_device_token = []
+                for i in data:
+                    device_data = UserDeviceToken.objects.filter(user_type=i)
+                    for j in device_data:
+                        receiver_device_token.append(j.device_token)
+                print(receiver_device_token)
+                send_push_notification(receiver_device_token)
                 for i in receiver:
                     try:
                         record_map1 = {}
@@ -2118,6 +2176,13 @@ class RecruitmentAdView(APIView):
                                 #     pass
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
+                                # receiver_device_token = []
+                                # for i in data:
+                                #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                                #     for j in device_data:
+                                #         receiver_device_token.append(j.device_token)
+                                # print(receiver_device_token)
+                                # send_push_notification(receiver_device_token)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}

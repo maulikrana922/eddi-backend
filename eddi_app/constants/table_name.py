@@ -1,3 +1,6 @@
+from eddi_app.constants.constants import DEVICE_TOKEN
+
+
 USERSIGNUP_TABLE = 'UserSignup'
 COURSEDETAILS_TABLE='CourseDetails'
 COURSE_SUBCATEGORY_TABLE = 'CourseSubCategoryDetails'
@@ -14,6 +17,7 @@ USER_PAYMENT_DETAIL ='UserPaymentDetail' # Add table
 FAVOURITE_COURSE_TABLE = "FavouriteCourse"
 TOKEN_TABLE = 'NonBuiltInUserToken'
 EVENT_AD_TABLE = "EventAd"
+DEVICE_TOKEN_TABLE = 'UserDeviceToken'
 
 
 # CMS

@@ -144,6 +144,14 @@ class AddCourseView(APIView):
                         pass
                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                     send_notification(email_id, receiver, message)
+                    receiver_device_token = []
+                    for i in data:
+                        device_data = UserDeviceToken.objects.filter(user_type=i)
+                        for j in device_data:
+                            receiver_device_token.append(j.device_token)
+
+                    print(receiver_device_token)
+                    send_push_notification(receiver_device_token)
                     for i in receiver:
                         try:
                             record_map1 = {}
@@ -185,6 +193,14 @@ class AddCourseView(APIView):
                 receiver = [i.email_id for i in users]
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
+                receiver_device_token = []
+                for i in users:
+                    device_data = UserDeviceToken.objects.filter(user_type=i)
+                    for j in device_data:
+                        receiver_device_token.append(j.device_token)
+
+                print(receiver_device_token)
+                send_push_notification(receiver_device_token)
                 for i in receiver:
                     try:
                         record_map2 = {}
@@ -242,6 +258,14 @@ class AddSubCategoryView(APIView):
                 pass
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             send_notification(email_id, receiver, message)
+            receiver_device_token = []
+            for i in data:
+                device_data = UserDeviceToken.objects.filter(user_type=i)
+                for j in device_data:
+                    receiver_device_token.append(j.device_token)
+
+            print(receiver_device_token)
+            send_push_notification(receiver_device_token)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -360,6 +384,13 @@ class GetSubCategoryDetails(APIView):
                             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                             receiver = [data.supplier.email_id]
                             send_notification(email_id, receiver, message)
+                            receiver_device_token = []
+                            device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                            receiver_device_token.append(device_data.device_token)
+
+                            print(receiver_device_token)
+                            send_push_notification(receiver_device_token)
+                            
                             for i in receiver:
                                 try:
                                     record_map1 = {}
@@ -402,6 +433,13 @@ class GetSubCategoryDetails(APIView):
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 receiver = [data.supplier.email_id]
                                 send_notification(email_id, receiver, message)
+                                receiver_device_token = []
+                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                receiver_device_token.append(device_data.device_token)
+
+                                print(receiver_device_token)
+                                send_push_notification(receiver_device_token)
+
                                 for i in receiver:
                                     try:
                                         record_map2 = {}
@@ -762,6 +800,12 @@ class GetCourseDetails(APIView):
                                 receiver = [data.supplier.email_id]
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
+                                receiver_device_token = []
+                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                receiver_device_token.append(device_data.device_token)
+
+                                print(receiver_device_token)
+                                send_push_notification(receiver_device_token)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -824,6 +868,12 @@ class GetCourseDetails(APIView):
                                     receiver = [data.supplier.email_id]
                                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                     send_notification(email_id, receiver, message)
+                                    receiver_device_token = []
+                                    device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                    receiver_device_token.append(device_data.device_token)
+
+                                    print(receiver_device_token)
+                                    send_push_notification(receiver_device_token)
                                     for i in receiver:
                                         try:
                                             record_map2 = {}
@@ -1175,7 +1225,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 year = datee.strftime("%Y")
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
                 total_earning = "{:.2f}".format(sum(list(data)))
-                final_data = {}
+                final_data = {} 
                 for i in range(0, 12):
                     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
                     final_data[month_List[i].split()[0]] = "{:.2f}".format(sum(list(data1)))

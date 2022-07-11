@@ -1,6 +1,10 @@
 import requests
 import datetime
 import json
+# from pyfcm import FCMNotification
+# push_service = FCMNotification(api_key="AAAAM5_RpBI:APA91bHFuextvmhZyyu0dAirqqpPFqnmN14HbRhoiTNqhcadSboOMrjUPzLedK_yX45Q7lydrgVHn1q5LvnwoZUZZRNJ8PPgfpcrlT5DvXUi7i02GJj4G3jncZQLgXuGL_1sds1t16NP")
+
+
 
 def send_notification(sender, receiver, message, sender_type=None, receiver_type=None):
     print('nxvdbsnp noti send',sender, receiver, message)
@@ -30,3 +34,23 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
     except Exception as ex:
         print(ex,"ececece")
 
+def send_push_notification(receivers):
+    try:
+        payload = {
+            "to":receivers,
+            "notification": {
+            "title": "Check this Notification",
+            "body": "Rich Notification testing",
+            }
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "key=AAAAM5_RpBI:APA91bHFuextvmhZyyu0dAirqqpPFqnmN14HbRhoiTNqhcadSboOMrjUPzLedK_yX45Q7lydrgVHn1q5LvnwoZUZZRNJ8PPgfpcrlT5DvXUi7i02GJj4G3jncZQLgXuGL_1sds1t16NP"
+        }
+        try:
+            response = requests.request("POST", 'https://fcm.googleapis.com/fcm/send', headers=headers, data=payload)
+            print(response, "responseeesees")
+        except Exception as ex:
+            print(ex,"exexe")
+    except Exception as ex:
+        print(ex,"exec")

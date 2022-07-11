@@ -24,7 +24,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
-from .notification import send_notification
+from .notification import send_notification, send_push_notification
 from translate import Translator
 
 
@@ -1452,6 +1452,14 @@ class Notification(models.Model):
     class Meta:
         verbose_name_plural = _("Notification Table")
 
+class UserDeviceToken(models.Model):
+    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name=_('User Type'),related_name='device_token',blank=True,null=True,default=None)
+    device_token = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_('Device Token'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+
+    class Meta:
+        verbose_name_plural = _("Notification Device Token")
+
 class UserProfileCMS(models.Model):
     user_welcome = models.CharField(max_length=255,blank=True,null=True,verbose_name=_('User Welcome'))
     content = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('content'))
@@ -1531,12 +1539,20 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
+            receiver_device_token = []
+            for i in data:
+                device_data = UserDeviceToken.objects.filter(user_type=i)
+                for j in device_data:
+                    receiver_device_token.append(j.device_token)
+
+            print(receiver_device_token)
             try:
                 translator= Translator(from_lang='english',to_lang="swedish")
                 message_sv = translator.translate(f"{instance.first_name}, as a Supplier has been added by the System.")
             except:
                 pass
             send_notification(instance.email_id, receiver, message)
+            send_push_notification(receiver_device_token)
             for i in receiver:
                 try:
                     record_map1 = {}

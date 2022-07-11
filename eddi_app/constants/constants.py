@@ -10,6 +10,7 @@ IS_DELETED = "is_deleted"
 IS_LOGIN_FROM ="is_login_from"
 UUID = 'uuid'
 PASSWORD = 'password'
+DEVICE_TOKEN = 'device_token'
 STATUS = 'status'
 DATA = 'data'
 SUCCESS = 'success'
