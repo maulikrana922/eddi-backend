@@ -1130,7 +1130,6 @@ class UserProfile(models.Model):
     area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Area of Interest"))
     agree_ads_terms = models.BooleanField(default=True,verbose_name=_('agree ads terms'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
-
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 

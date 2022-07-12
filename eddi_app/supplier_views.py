@@ -60,9 +60,7 @@ class AddCourseView(APIView):
             except:
                 course_data = None
             if course_data != None:
-                return Response({STATUS: ERROR, DATA: "Please choose unique course name"}, status=status.HTTP_400_BAD_REQUEST)
-
-
+                return Response({STATUS: ERROR, DATA: "Please choose unique course name", DATA_SV:"Vänligen, välj ett unikt namn på utbildningen"}, status=status.HTTP_400_BAD_REQUEST)
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
             course_organization = True
             test_str = email_id
@@ -72,7 +70,7 @@ class AddCourseView(APIView):
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,None)})
             try:
@@ -84,7 +82,7 @@ class AddCourseView(APIView):
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
             
         except:
-            return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":email_id})
         except:
@@ -142,7 +140,6 @@ class AddCourseView(APIView):
                         message_sv = translator.translate(f"{supplier_id.first_name}, has added a new course {course}, under {category_id.category_name} to the system.")
                     except:
                         pass
-                    # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                     send_notification(email_id, receiver, message)
                     for i in receiver:
                         try:
@@ -166,22 +163,10 @@ class AddCourseView(APIView):
                 if organization_data != None:
                     message = f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”"
                     message_sv = f"{supplier_id.first_name} från {organization_data.organizational_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
-                    # try:
-                    #     translator= Translator(from_lang='english',to_lang="swedish")
-                    #     message_sv = translator.translate(f"{supplier_id.first_name} from {organization_data.organizational_name}, has added a new Course under “{category_id.category_name}”")
-                    # except:
-                    #     pass
                 else:
                     message = f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”"
                     message_sv = f"{supplier_id.first_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
-                # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
-                    # try:
-                    #     translator= Translator(from_lang='english',to_lang="swedish")
-                    #     message_sv = translator.translate(f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”")
-                    # except:
-                    #     pass
                 receiver = [i.email_id for i in users]
-                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
                 for i in receiver:
                     try:
@@ -198,9 +183,9 @@ class AddCourseView(APIView):
                         pass
             except:
                 pass
-            return Response({STATUS: SUCCESS, DATA: "Course created successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Congratulations! Course created successfully", DATA_SV:"Grattis, er utbildning har nu lagts till!"}, status=status.HTTP_200_OK)
         except:
-            return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AddSubCategoryView(APIView):
@@ -209,12 +194,12 @@ class AddSubCategoryView(APIView):
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         user_type = supplier_id.user_type.user_type
         try:    
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,None)})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SUPPLIER_ID: supplier_id.id,
             CATEGORY_NAME_ID: category_id.id,
@@ -236,7 +221,6 @@ class AddSubCategoryView(APIView):
                 message_sv = translator.translate(f"{supplier_id.first_name}, has added a new “{subcategory}”, under “{category_id.category_name}”  to the system. Click below to view the details.")
             except:
                 pass
-            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             send_notification(email_id, receiver, message)
             for i in receiver:
                 try:
@@ -247,13 +231,12 @@ class AddSubCategoryView(APIView):
                         "message" : message,
                         "message_sv" : message_sv
                     }
-
                     getattr(models,"Notification").objects.update_or_create(**record_map1)
                 except:
                     pass
         except:
             pass
-        return Response({STATUS: SUCCESS, DATA: "Sub-category created successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Sub-category created successfully", DATA_SV:"Underkategori har nu skapats"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class GetCategoryDetails(APIView):
@@ -308,15 +291,15 @@ class GetSubCategoryDetails(APIView):
         except:
             user_type_data = None
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
         except:
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Requested data not found", DATA_SV:"Efterfrågad information kan inte hittas"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong with category"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
             CATEGORY_NAME_ID: dataa.id,
@@ -336,7 +319,7 @@ class GetSubCategoryDetails(APIView):
                         except:
                             data1 = None
                         if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[STATUS_ID] = 2
                 else:
@@ -350,7 +333,6 @@ class GetSubCategoryDetails(APIView):
 
                             message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
-                            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                             receiver = [data.supplier.email_id]
                             send_notification(email_id, receiver, message)
                             for i in receiver:
@@ -375,7 +357,7 @@ class GetSubCategoryDetails(APIView):
                         except:
                             data1 = None
                         if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[IS_APPROVED_ID] = 2
                     if request.POST.get(APPROVAL_STATUS) == "Rejected":
@@ -384,7 +366,7 @@ class GetSubCategoryDetails(APIView):
                         except:
                             data1 = None
                         if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this category"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[IS_APPROVED_ID] = 3
                             try:
@@ -392,7 +374,6 @@ class GetSubCategoryDetails(APIView):
 
                                 message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
 
-                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 receiver = [data.supplier.email_id]
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
@@ -424,7 +405,7 @@ class GetSubCategoryDetails(APIView):
                         except:
                             data1 = None
                         if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
                         else:
                             record_map[STATUS_ID] = 2
                 else:
@@ -437,23 +418,22 @@ class GetSubCategoryDetails(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data Succesfully Edited"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Information succesfully edited", DATA_SV:"Informationen är nu uppdaterad"}, status=status.HTTP_200_OK)
 
     def delete(self,request,uuid = None):
         email_id =  get_user_email_by_token(request)
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except:
-            return Response({STATUS: ERROR, DATA: "Data Not Found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             CATEGORY_NAME_ID: request.POST.get(CATEGORY_NAME,data.category_name_id),
             SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
             SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
             STATUS_ID:2,
             IS_DELETED:True
-
         }
         record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
         record_map[MODIFIED_BY] = email_id
@@ -461,7 +441,7 @@ class GetSubCategoryDetails(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Information succesfully deleted", DATA_SV:"Data har nu raderats"}, status=status.HTTP_200_OK)
 
 class GetCourseDetails(APIView):
     res = None
@@ -524,7 +504,6 @@ class GetCourseDetails(APIView):
             except:
                 rating = None
                 final_rating = None
-            
 
             if serializer := CourseDetailsSerializer(course_data):
                 if serializer1 := UserProfileSerializer(individuals, many=True):
@@ -547,7 +526,7 @@ class GetCourseDetails(APIView):
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
 
                     except:
-                        return Response({STATUS: ERROR, DATA: "Somethong went wrong in getting supplier data"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
@@ -555,7 +534,7 @@ class GetCourseDetails(APIView):
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except:
-                        return Response({STATUS: ERROR, DATA: "Something went wrong with admin data"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
                     if serializer := CourseDetailsSerializer(data_a,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -564,7 +543,7 @@ class GetCourseDetails(APIView):
                     try:
                         cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                     except:
-                        return Response({STATUS: ERROR, DATA: "Something went wrong with userprofile data"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     user_only_category = []
                     if cat.course_category != None:
                         try:
@@ -603,10 +582,6 @@ class GetCourseDetails(APIView):
 
                     data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time"))
 
-                    print(data_all, "dataaaaa")
-                    # .exclude(course_name__in = target_course_data)
-                    # .exclude(course_name__in = user_profile_interest)
-
                 if serializer := CourseDetailsSerializer(target_course,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
@@ -615,14 +590,7 @@ class GetCourseDetails(APIView):
                 else:
                     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({STATUS: ERROR, DATA: "Token authentication required"}, status=status.HTTP_400_BAD_REQUEST)
-
-            # else:
-            #     data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS:1}).exclude(**{'course_for_organization':True})
-            # if serializer := CourseDetailsSerializer(data_s):
-            #     return Response({STATUS: SUCCESS, DATA: data_s}, status=status.HTTP_200_OK)
-            # else:
-            #     return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Token authentication required", DATA_SV:"Token auktorisering krävs"}, status=status.HTTP_400_BAD_REQUEST)
        
 
     def put(self,request,uuid = None):
@@ -634,17 +602,17 @@ class GetCourseDetails(APIView):
             
         res = None
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
         except:
-            return Response({STATUS: ERROR, DATA: "Somethoing went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
             if enrolled.exists():
-                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             pass
         try:
@@ -661,7 +629,7 @@ class GetCourseDetails(APIView):
 
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
         except:
-            return Response({STATUS:ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
@@ -718,7 +686,7 @@ class GetCourseDetails(APIView):
                             except:
                                 data1 = None
                             if data1.exists():
-                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
                                 try:
@@ -748,12 +716,9 @@ class GetCourseDetails(APIView):
                         if request.POST.get(APPROVAL_STATUS) == "Approved":
                             record_map[IS_APPROVED_ID] = 1
                             try:
-                                # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                                 message = f"{record_map[COURSE_NAME]}, has been Approved by the Admin"
                                 message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin"
-                                # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                 receiver = [data.supplier.email_id]
-                                # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
@@ -764,7 +729,6 @@ class GetCourseDetails(APIView):
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
-
                                         getattr(models,"Notification").objects.update_or_create(**record_map1)
                                     except:
                                         pass
@@ -797,7 +761,7 @@ class GetCourseDetails(APIView):
                             except:
                                 data1 = None
                             if data1.exists():
-                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[IS_APPROVED_ID] = 2
                         if request.POST.get(APPROVAL_STATUS) == "Rejected":
@@ -806,16 +770,13 @@ class GetCourseDetails(APIView):
                             except:
                                 data1 = None
                             if data1.exists():
-                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[IS_APPROVED_ID] = 3
                                 try:
-                                    # data_supplier = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                                     message = f"{record_map[COURSE_NAME]}, has been Rejected by the Admin"
                                     message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin"
-                                    # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                                     receiver = [data.supplier.email_id]
-                                    # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                     send_notification(email_id, receiver, message)
                                     for i in receiver:
                                         try:
@@ -845,7 +806,7 @@ class GetCourseDetails(APIView):
                             except:
                                 data1 = None
                             if data1.exists():
-                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
                             else:
                                 record_map[STATUS_ID] = 2
                     else:
@@ -856,19 +817,19 @@ class GetCourseDetails(APIView):
                 for key,value in record_map.items():
                     setattr(data,key,value)
                 data.save()
-                return Response({STATUS: SUCCESS, DATA: "Data succesfully edited"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self,request,uuid = None):
         email_id =  get_user_email_by_token(request)
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid,STATUS:1})
         except Exception:
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Requested data not found", DATA_SV:"Efterfrågad information kan inte hittas"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,data.course_image),
             COURSE_NAME: request.POST.get(COURSE_NAME,data.course_name),
@@ -887,7 +848,7 @@ class GetCourseDetails(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Information successfully deleted", DATA_SV:"Data har nu raderats"}, status=status.HTTP_200_OK)
     
 class AdminDashboardView(APIView):
     def get(self, request,uuid = None): 
@@ -901,16 +862,16 @@ class AdminDashboardView(APIView):
                 total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
                 purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
                 course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
             except:
-                return Response({STATUS: ERROR, DATA: "Somethiong went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
                     return Response({STATUS: SUCCESS,
-                "admin_name" : admin_data.first_name + " " + admin_data.last_name,
+                "admin_name" : f"{admin_data.first_name} {admin_data.last_name}",
                 "supplier_count": total_supplier,
                 "user_count": total_user,
                 "total_course": total_course,
@@ -919,10 +880,9 @@ class AdminDashboardView(APIView):
                 "suppliers": serializer1.data,
                 }, status=status.HTTP_200_OK)
             else:
-                return Response({STATUS: ERROR, DATA: "Something went wrong with user data"}, status=status.HTTP_400_BAD_REQUEST)
-
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({STATUS: ERROR, DATA: "You are not authorized"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SupplierDashboardView(APIView):
     def post(self, request,uuid = None):
@@ -937,10 +897,9 @@ class SupplierDashboardView(APIView):
             Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).order_by("-created_date_time")
 
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
-            user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:supplier_email}).values_list("uuid")
             
             course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
@@ -966,20 +925,8 @@ class SupplierDashboardView(APIView):
                     COURSETYPE:Individuals.course_type.type_name,
                 }
                 counter +=1
-            # c  = 0
-            # for i in individual_details[USER_EMAIL]:
-            #     Individuals = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:i})
-            #     final_dict[c] = {
-            #         # USERNAME:individual_details[USERNAME][counter],
-            #         # USER_EMAIL:individual_details[USER_EMAIL][counter],
-            #         # COURSE_ID:str(Individuals.uuid),
-            #         # COURSENAME:v,
-            #         # COURSETYPE:Individuals.course_type.type_name,
-            #         UUID : Individuals.uuid
-            #     }
-            #     c +=1
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong with course"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             all_subcategory = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False})
@@ -1001,7 +948,7 @@ class SupplierDashboardView(APIView):
             INDIVIDUALS: final_dict,
             ALL_SUBCATEGORY: newvar}, status=status.HTTP_200_OK)
         else:
-            return Response({STATUS: ERROR, DATA: "Something went wrong with user data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
        
 
 class SupplierDashboard_Active_InActiveView(APIView):
@@ -1011,7 +958,7 @@ class SupplierDashboard_Active_InActiveView(APIView):
         try:
             data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {}
         record_map = {STATUS_ID: 1,} if status_s == "Active" else {STATUS_ID: 2,}
 
@@ -1020,7 +967,7 @@ class SupplierDashboard_Active_InActiveView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data edited succesfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
 
 
 
@@ -1035,18 +982,18 @@ class SupplierDashboard_courseGraphView(APIView):
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course__course_name", flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong with purchased course"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list(COURSE_NAME, flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
@@ -1056,18 +1003,18 @@ class SupplierDashboard_courseGraphView(APIView):
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).count()
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__month":month,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__month":month}).values_list(COURSE_NAME, flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
@@ -1076,18 +1023,18 @@ class SupplierDashboard_courseGraphView(APIView):
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).count()
             except:
-                return Response({STATUS: ERROR, DATA: "course offered error"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             try:
 
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year,'payment_detail__status':'Success'}).values_list("payment_detail__course__course_name", flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__year":year}).values_list(COURSE_NAME, flat=True)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set_all = set(all_supplier_course)
             non_purchased = len(set_all-set1)
 
@@ -1120,7 +1067,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
             except: 
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == MONTHLY:
             month_list = {}
@@ -1143,7 +1090,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:month_list}, status=status.HTTP_200_OK)
             except:
-                return Response({STATUS: ERROR, DATA: "Error in getting data"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif time_period == YEARLY:
             month = datee.strftime("%m")
@@ -1174,19 +1121,19 @@ class SupplierDashboard_earningGraphView(APIView):
                 return Response({STATUS: SUCCESS,
                 "total_earning": total_earning, DATA:final_data}, status=status.HTTP_200_OK)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 class CourseMaterialUpload(APIView):
     def post(self, request, uuid=None):
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
             except:
-                 return Response({STATUS: ERROR, DATA: "Course details object not matched with uuid"}, status=status.HTTP_400_BAD_REQUEST)
+                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             reccord_map = {}
             reccord_map = {
                 "course_id" : course_data.id
@@ -1197,7 +1144,7 @@ class CourseMaterialUpload(APIView):
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{i}'), "file_name":request.POST.get('document_title_'f'{i}')})
                     data[0].document_files.add(data1[0].id)
                 except:
-                    return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 for j in range(1,int(request.POST.get("new_video_count"))+1):
                     data2 = getattr(models,"MaterialVideoMaterial").objects.update_or_create(**{"video_file":request.FILES.get('video_file_'f'{j}'), "video_name":request.POST.get('video_title_'f'{j}')})
@@ -1216,10 +1163,10 @@ class CourseMaterialUpload(APIView):
                     except:
                         pass
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Course material uploaded successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)      
+        return Response({STATUS: SUCCESS, DATA: "Course material uploaded successfully", DATA_SV:"Utbildningsunderlag är nu upplagda"}, status=status.HTTP_200_OK)
     
-    def get(self, request, uuid=None):
+    def get(self, uuid=None):
         if uuid:
             video = []
             try:
@@ -1243,12 +1190,12 @@ class CourseMaterialUpload(APIView):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
     def put(self, request, uuid=None):
         if not uuid:
-            return Response({STATUS: ERROR, DATA: "uuid not given"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         course_material_data = getattr(models,"CourseMaterial").objects.get(**{"course__uuid":uuid})
         video_files_old = request.POST.getlist("video_files_old",None)
         document_files_old = request.POST.getlist("document_files_old",None)
@@ -1274,7 +1221,7 @@ class CourseMaterialUpload(APIView):
                     data1 = getattr(models,"MaterialDocumentMaterial").objects.update_or_create(**{"document_file":request.FILES.get('document_file_'f'{j}'), "file_name":request.POST.get('document_title_'f'{j}')})
                     course_material_data.document_files.add(data1[0].id)
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             old_videos = course_material_data.video_files.all()
@@ -1311,13 +1258,12 @@ class CourseMaterialUpload(APIView):
                     except:
                         pass
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)      
-        return Response({STATUS: SUCCESS, DATA: "Material edited successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)      
+        return Response({STATUS: SUCCESS, DATA: "Material edited successfully", DATA_SV:"Utbildningsunderlag är nu uppdaterade"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class SupplierOrganizationProfileviewall(APIView):
     def get(self, request):
-        email_id = get_user_email_by_token(request)
         try:
             all_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type" : SUPPLIER_S}).values_list('email_id', flat=True)
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.filter(**{"supplier_email__in":all_supplier})
@@ -1331,7 +1277,6 @@ class SupplierOrganizationProfileviewall(APIView):
 
 class SupplierOrganizationProfileAdminview(APIView):
     def post(self, request):
-        email_id = get_user_email_by_token(request)
         supplier_email = request.POST.get("supplier_email")
         if request.POST.get("supplier_email"):
             try:
@@ -1351,7 +1296,6 @@ class SupplierOrganizationProfileAdminview(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.all()
         except:
@@ -1420,11 +1364,11 @@ class SupplierOrganizationProfileview(APIView):
                 except:
                     pass
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong with saving data"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({STATUS: SUCCESS, DATA: "Profile created successfully. Your profile is under review"}, status=status.HTTP_200_OK)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({STATUS: SUCCESS, DATA: "Profile created successfully. Your profile is under review by admin", DATA_SV:"Din profil är nu skapad,och granskas av admin"}, status=status.HTTP_200_OK)
 
 
     def get(self, request):
@@ -1572,12 +1516,12 @@ class SupplierOrganizationProfileview(APIView):
             for key,value in record_map1.items():
                 setattr(data1,key,value)
             data1.save()
-            return Response({STATUS: SUCCESS, DATA: "Organization profile data updated successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
 
         try:
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong getting organization data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             record_map = {
@@ -1602,9 +1546,9 @@ class SupplierOrganizationProfileview(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
-            return Response({STATUS: SUCCESS, DATA: "Organization profile data updated successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong with saving updated data"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SupplierProfileView(APIView):
@@ -1629,9 +1573,9 @@ class SupplierProfileView(APIView):
                 for key,value in record_map.items():
                     setattr(data,key,value)
                 data.save()            
-                return Response({STATUS: SUCCESS, DATA: "Profile data updated successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Profile data updated successfully", DATA_SV:"Profilinformation har nu uppdaterats"}, status=status.HTTP_200_OK)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 record_map = {
@@ -1644,9 +1588,9 @@ class SupplierProfileView(APIView):
                 }
                 record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
                 getattr(models,SUPPLIER_PROFILE_TABLE).objects.update_or_create(**record_map)
-                return Response({STATUS: SUCCESS, DATA: "Profile updated successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
             except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
     
@@ -1655,7 +1599,7 @@ class SupplierProfileView(APIView):
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except:
-            return Response({STATUS: ERROR, DATA: "Requested data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer := SupplierProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
@@ -1672,11 +1616,6 @@ class MyProgressView(APIView):
             enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).values_list("course__course_name", flat = True)
         except:
             enroll_data = None
-        # try:
-        #     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data})
-        # except:
-        #     course_data = None
-
         try:
             course_data_uuid = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'course_name__in':enroll_data}).values_list('uuid', flat=True).order_by("-created_date_time")
             
@@ -1706,4 +1645,4 @@ class MyProgressView(APIView):
                     is_completed_count += 1            
             return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
         except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
