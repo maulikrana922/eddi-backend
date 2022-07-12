@@ -34,23 +34,24 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
     except Exception as ex:
         print(ex,"ececece")
 
-def send_push_notification(receivers):
+def send_push_notification(receivers,message):
     try:
-        payload = {
-            "to":receivers,
-            "notification": {
-            "title": "Check this Notification",
-            "body": "Rich Notification testing",
+        for receiver in receivers:
+            payload = {
+                "to":receiver,
+                "notification": {
+                "title": "You Got New Notification",
+                "body": message
+                }
             }
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "key=AAAAM5_RpBI:APA91bHFuextvmhZyyu0dAirqqpPFqnmN14HbRhoiTNqhcadSboOMrjUPzLedK_yX45Q7lydrgVHn1q5LvnwoZUZZRNJ8PPgfpcrlT5DvXUi7i02GJj4G3jncZQLgXuGL_1sds1t16NP"
-        }
-        try:
-            response = requests.request("POST", 'https://fcm.googleapis.com/fcm/send', headers=headers, data=payload)
-            print(response, "responseeesees")
-        except Exception as ex:
-            print(ex,"exexe")
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "key=AAAAM5_RpBI:APA91bHFuextvmhZyyu0dAirqqpPFqnmN14HbRhoiTNqhcadSboOMrjUPzLedK_yX45Q7lydrgVHn1q5LvnwoZUZZRNJ8PPgfpcrlT5DvXUi7i02GJj4G3jncZQLgXuGL_1sds1t16NP"
+            }
+            try:
+                response = requests.post('https://fcm.googleapis.com/fcm/send',json=payload,headers=headers,)
+                print(response, "responseeesees")
+            except Exception as ex:
+                print(ex,"exexe")
     except Exception as ex:
         print(ex,"exec")

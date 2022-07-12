@@ -1314,7 +1314,7 @@ class UserProfileView(APIView):
                                 receiver_device_token.append(j.device_token)
 
                         print(receiver_device_token)
-                        send_push_notification(receiver_device_token)
+                        send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map = {}
@@ -1509,7 +1509,7 @@ class UserPaymentDetail_info(APIView):
                         receiver_device_token.append(device_data.device_token)
 
                         print(receiver_device_token)
-                        send_push_notification(receiver_device_token)
+                        send_push_notification(receiver_device_token,message)
                         try:
                             record_map1 = {}
                             record_map1 = {
@@ -1617,7 +1617,7 @@ class EventPaymentDetail_info(APIView):
                                 receiver_device_token.append(j.device_token)
 
                         print(receiver_device_token)
-                        send_push_notification(receiver_device_token)
+                        send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map1 = {}
@@ -2071,7 +2071,7 @@ class RecruitmentAdView(APIView):
                     for j in device_data:
                         receiver_device_token.append(j.device_token)
                 print(receiver_device_token)
-                send_push_notification(receiver_device_token)
+                send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map1 = {}

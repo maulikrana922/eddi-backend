@@ -151,7 +151,7 @@ class AddCourseView(APIView):
                             receiver_device_token.append(j.device_token)
 
                     print(receiver_device_token)
-                    send_push_notification(receiver_device_token)
+                    send_push_notification(receiver_device_token,message)
                     for i in receiver:
                         try:
                             record_map1 = {}
@@ -195,12 +195,12 @@ class AddCourseView(APIView):
                 send_notification(email_id, receiver, message)
                 receiver_device_token = []
                 for i in users:
-                    device_data = UserDeviceToken.objects.filter(user_type=i)
+                    device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
                     for j in device_data:
                         receiver_device_token.append(j.device_token)
 
                 print(receiver_device_token)
-                send_push_notification(receiver_device_token)
+                send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map2 = {}
@@ -265,7 +265,7 @@ class AddSubCategoryView(APIView):
                     receiver_device_token.append(j.device_token)
 
             print(receiver_device_token)
-            send_push_notification(receiver_device_token)
+            send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -389,7 +389,7 @@ class GetSubCategoryDetails(APIView):
                             receiver_device_token.append(device_data.device_token)
 
                             print(receiver_device_token)
-                            send_push_notification(receiver_device_token)
+                            send_push_notification(receiver_device_token,message)
                             
                             for i in receiver:
                                 try:
@@ -438,7 +438,7 @@ class GetSubCategoryDetails(APIView):
                                 receiver_device_token.append(device_data.device_token)
 
                                 print(receiver_device_token)
-                                send_push_notification(receiver_device_token)
+                                send_push_notification(receiver_device_token,message)
 
                                 for i in receiver:
                                     try:
@@ -805,7 +805,7 @@ class GetCourseDetails(APIView):
                                 receiver_device_token.append(device_data.device_token)
 
                                 print(receiver_device_token)
-                                send_push_notification(receiver_device_token)
+                                send_push_notification(receiver_device_token,message)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -873,7 +873,7 @@ class GetCourseDetails(APIView):
                                     receiver_device_token.append(device_data.device_token)
 
                                     print(receiver_device_token)
-                                    send_push_notification(receiver_device_token)
+                                    send_push_notification(receiver_device_token,message)
                                     for i in receiver:
                                         try:
                                             record_map2 = {}
