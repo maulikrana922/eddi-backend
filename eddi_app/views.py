@@ -226,7 +226,7 @@ class Save_stripe_info(APIView):
                     email_msg.send(fail_silently=False)
                 except:
                     pass
-                return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
+                return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK)
             except:
                 return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
         return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
@@ -259,7 +259,6 @@ class Save_stripe_infoEvent(APIView):
                         
                     # creating paymentIntent
                     try:
-
                         intent = stripe.PaymentIntent.create(
                         amount=int(float(amount)*100),
                         currency='usd',
@@ -268,7 +267,6 @@ class Save_stripe_infoEvent(APIView):
                         payment_method_types=["card"],
                         payment_method=payment_method_id,
                         confirm=True)
-
                     except:
                         return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -343,6 +341,7 @@ class UserSignupView(APIView):
             USER_TYPE_ID: user_type_id.id,
             STATUS_ID:1
         }
+
         try:
             if request.POST.get(PASSWORD):
                 record_map[PASSWORD] = make_password(request.POST.get(PASSWORD))
@@ -461,7 +460,7 @@ class GetUserDetails(APIView):
                                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                         
                         else:
-                            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV: "Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found in usersignUp table"}, status=status.HTTP_400_BAD_REQUEST)
 

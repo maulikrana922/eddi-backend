@@ -105,11 +105,12 @@ class AddCourseView(APIView):
             ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
             MEETING_LINK : request.POST.get(MEETING_LINK,None),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
+            IS_POST : json.loads(request.POST.get(IS_POST)),
             TARGET_USERS : request.POST.get(TARGET_USERS,None),
             SUB_AREA:request.POST.get(SUB_AREA,None),
             IS_APPROVED_ID : 2,
             STATUS_ID:1,
-            "var_charges": getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
+            VAR_CHARGES : getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
             }
             if sub_category_id != None:
                 record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id

@@ -316,6 +316,7 @@ class CourseDetails(models.Model):
     course_checkout_link = models.CharField(max_length=255,verbose_name=_('Checkout Link'),blank=True,null=True)
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
+    is_post = models.BooleanField(default=False,verbose_name=_('Is_post'))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
     
@@ -345,7 +346,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=CourseDetails)
 def bulk_email(sender, instance, created, **kwargs):
-    if instance.course_for_organization == True:
+    if instance.course_for_organization == True and instance.is_post == True:
         connection = mail.get_connection()
         if instance.target_users != None:
             try:
