@@ -860,7 +860,6 @@ class AdminDashboardView(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
             try:
-                admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
                 total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
                 total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
                 total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
@@ -875,7 +874,7 @@ class AdminDashboardView(APIView):
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
                     return Response({STATUS: SUCCESS,
-                "admin_name" : f"{admin_data.first_name} {admin_data.last_name}",
+                "admin_name" : f"{data.first_name} {data.last_name}",
                 "supplier_count": total_supplier,
                 "user_count": total_user,
                 "total_course": total_course,

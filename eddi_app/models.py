@@ -193,7 +193,6 @@ class CourseSubCategoryDetails(models.Model):
 class CourseType(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     type_name = models.CharField(max_length=150,verbose_name=_('Course Type Name'),blank=True,null=True)
-
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -386,6 +385,8 @@ def bulk_email(sender, instance, created, **kwargs):
                 msg.attach(img)
                 msg.send()
             connection.close()
+            instance.is_post = False
+            instance.save()
         except Exception as ex:
             pass
 
