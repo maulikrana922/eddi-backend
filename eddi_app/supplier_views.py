@@ -118,11 +118,11 @@ class AddCourseView(APIView):
                 record_map["supplier_organization_id"] = organization_data.id
             if request.POST.get(COURSE_PRICE):
                 record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
-            if request.POST.get("offer_price"):
-                try:
+            try:
+                if request.POST.get("offer_price"):
                     record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
-                except:
-                    pass
+            except:
+                pass
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
