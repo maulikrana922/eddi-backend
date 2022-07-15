@@ -446,7 +446,8 @@ class GetUserDetails(APIView):
         if uuid:
             try:
                 data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+                user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type 
+                if user_type == ADMIN_S:
                     if userSignup_serializer :=  UserSignupSerializer(data):
                     # Below Line : To make Active or Inactive to Particular user or supplier 
                         if data.user_type.user_type =='User':
@@ -471,10 +472,14 @@ class GetUserDetails(APIView):
 
                         elif data.user_type.user_type ==SUPPLIER_S:
                             try:
-                                supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).count()
                                 supplier_all_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).values_list("course_name", flat=True)
-                                enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).count()
                                 individuals_useremail = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).values_list("email_id", flat=True)
+                                # supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":data.email_id}).count()
+                                # enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).count()
+                                supplier_course_count = supplier_all_course.count()
+                                enrolled_count = individuals_useremail.count()
+                                print(individuals_useremail.count())
+                                print(supplier_all_course.count())
                                 individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong with filtering data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -501,17 +506,17 @@ class GetUserDetails(APIView):
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA:"Something went wrong in getting supplier profile"}, status=status.HTTP_400_BAD_REQUEST)
             
-                        elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
-                            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-                            if serializer := UserSignupSerializer(data):
-                                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-                            else:
-                                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                        # elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
+                        #     data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                        #     if serializer := UserSignupSerializer(data):
+                        #         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                        #     else:
+                        #         return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+                elif user_type == SUPPLIER_S:
                     if userSignup_serializer :=  UserSignupSerializer(data):
                         if data.user_type.user_type =='User':
                             try:
@@ -827,6 +832,7 @@ class ForgetPasswordView(APIView):
         request.session['forget-password'] = email_id
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
+            print(data.uuid)
         except:
             return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -835,7 +841,7 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == "User":
                         html_path = RESETPASSWORD_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"final_email": email_id,"fullname":fullname}
+                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -857,7 +863,7 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
                         html_path = RESETPASSWORDSupplierAdmin_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"final_email": email_id,"fullname":fullname}
+                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -880,10 +886,10 @@ class ForgetPasswordView(APIView):
 
 @permission_classes([AllowAny])
 class ResetPasswordView(APIView):
-    def post(self,request,slug=None):
-        email_id = request.POST.get(EMAIL_ID)
+    def post(self,request,uuid=None):
+        # email_id = request.POST.get(EMAIL_ID)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS_ID:1,IS_DELETED:False})
             password = request.POST.get(PASSWORD)
             if check_password(password, data.password):
                 print("insidedededed")
@@ -896,6 +902,7 @@ class ResetPasswordView(APIView):
                 setattr(data,"is_resetpassword",False)
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
                 setattr(data,MODIFIED_BY,'admin')
+                data.uuid = uuid4()
                 data.save()
                 return Response({STATUS: SUCCESS, DATA: "Password changed successfully"}, status=status.HTTP_200_OK)
             else:

@@ -528,10 +528,10 @@ class GetCourseDetails(APIView):
             vat_val = None
         if uuid:
             email_id = get_user_email_by_token(request)
-            try:
-                user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
-            except:
-                user = None
+            # try:
+            #     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
+            # except:
+            #     user = None
             try:
                 course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
             except:
@@ -953,7 +953,8 @@ class AdminDashboardView(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
             try:
-                admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+                # admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+                admin_data = data
                 total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
                 total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
                 total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
