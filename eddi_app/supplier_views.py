@@ -88,48 +88,52 @@ class AddCourseView(APIView):
         except:
             organization_data = None
         try:
-            record_map = {
-            SUPPLIER_ID: supplier_id.id,
-            COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
-            COURSE_NAME: request.POST.get(COURSE_NAME,None),
-            COURSE_LEVEL_ID : course_level_id.id,
-            COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
-            COURSE_CATEGORY_ID :category_id.id ,
-            COURSE_TYPE_ID : course_type_id.id,
-            FEE_TYPE_ID: fee_type_id.id,
-            COURSE_FOR_ORGANIZATION:course_organization,
-            ORGANIZATION_DOMAIN:res,
-            COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
-            COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
-            ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
-            ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
-            MEETING_LINK : request.POST.get(MEETING_LINK,None),
-            MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
-            IS_POST : json.loads(request.POST.get(IS_POST)),
-            TARGET_USERS : request.POST.get(TARGET_USERS,None),
-            SUB_AREA:request.POST.get(SUB_AREA,None),
-            IS_APPROVED_ID : 2,
-            STATUS_ID:1,
-            VAR_CHARGES : getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
-            }
-            if sub_category_id != None:
-                record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
-            if organization_data != None:
-                record_map["supplier_organization_id"] = organization_data.id
-            if request.POST.get(COURSE_PRICE):
-                record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             try:
-                if request.POST.get("offer_price"):
-                    record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
-            except:
-                pass
-            if request.POST.get(COURSE_STARTING_DATE) == "":
-                record_map[COURSE_STARTING_DATE] = None
-            else:
-                record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
-            record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-            record_map[CREATED_BY] = supplier_id.user_type
-            print(record_map, "recordddd")
+                record_map = {
+                SUPPLIER_ID: supplier_id.id,
+                COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
+                COURSE_NAME: request.POST.get(COURSE_NAME,None),
+                COURSE_LEVEL_ID : course_level_id.id,
+                COURSE_LENGTH : request.POST.get(COURSE_LENGTH,None),
+                COURSE_CATEGORY_ID :category_id.id ,
+                COURSE_TYPE_ID : course_type_id.id,
+                FEE_TYPE_ID: fee_type_id.id,
+                COURSE_FOR_ORGANIZATION:course_organization,
+                ORGANIZATION_DOMAIN:res,
+                COURSE_LANGUAGE:request.POST.get(COURSE_LANGUAGE),
+                COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,None),
+                ADDITIONAL_INFORMATION: request.POST.get(ADDITIONAL_INFORMATION,None),
+                ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
+                MEETING_LINK : request.POST.get(MEETING_LINK,None),
+                MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
+                IS_POST : json.loads(request.POST.get(IS_POST)),
+                TARGET_USERS : request.POST.get(TARGET_USERS,None),
+                SUB_AREA:request.POST.get(SUB_AREA,None),
+                IS_APPROVED_ID : 2,
+                STATUS_ID:1,
+                VAR_CHARGES : getattr(models,"InvoiceVATCMS").objects.latest(CREATED_AT)
+                }
+                if sub_category_id != None:
+                    record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
+                if organization_data != None:
+                    record_map["supplier_organization_id"] = organization_data.id
+                if request.POST.get(COURSE_PRICE):
+                    record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
+                try:
+                    if request.POST.get("offer_price"):
+                        record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
+                except:
+                    pass
+                if request.POST.get(COURSE_STARTING_DATE) == "":
+                    record_map[COURSE_STARTING_DATE] = None
+                else:
+                    record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
+                record_map[CREATED_AT] = make_aware(datetime.datetime.now())
+                record_map[CREATED_BY] = supplier_id.user_type
+                print(record_map, "recordddd")
+            except Exception as ex:
+                return Response({STATUS:ERROR, "var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                
             getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
 
             # noti to Admin
