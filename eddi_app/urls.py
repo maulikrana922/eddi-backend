@@ -22,7 +22,7 @@ urlpatterns = [
     path('forgot/',ForgetPasswordView.as_view()),
     path('changepassword/<str:uuid>/',ChangePasswordView.as_view(), name="changepassword"),
     path('verify-user/<str:uuid>/',VerifyUser.as_view(), name="VerifyUser"),
-    path('resetpassword/',ResetPasswordView.as_view(), name="resetpassword"),
+    path('resetpassword/<str:uuid>/',ResetPasswordView.as_view(), name="resetpassword"),
 
     # User Details
     path('get-user-details/<str:uuid>/',GetUserDetails.as_view()),

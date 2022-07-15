@@ -428,12 +428,12 @@ class GetUserDetails(APIView):
                             except:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             
-                        elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
-                            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-                            if serializer := UserSignupSerializer(data):
-                                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-                            else:
-                                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                        # elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
+                        #     data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
+                        #     if serializer := UserSignupSerializer(data):
+                        #         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                        #     else:
+                        #         return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({STATUS: ERROR, DATA: serializer.errors, DATA: "Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -444,7 +444,7 @@ class GetUserDetails(APIView):
                             try:
                                 profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
                             except:
-                                return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
+                                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                             try:
                                 course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"email_id":data.email_id, "status":"Success"}).values_list("course__course_name", flat=True)
                                 course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
@@ -462,7 +462,7 @@ class GetUserDetails(APIView):
                         else:
                             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV: "Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found in usersignUp table"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: serializer.errors, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
 
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -717,7 +717,7 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == "User":
                         html_path = RESETPASSWORD_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"final_email": email_id,"fullname":fullname}
+                        context_data = {"final_email": email_id,"fullname":fullname,"uuid": data.uuid}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -762,10 +762,10 @@ class ForgetPasswordView(APIView):
 
 @permission_classes([AllowAny])
 class ResetPasswordView(APIView):
-    def post(self,request,slug=None):
-        email_id = request.POST.get(EMAIL_ID)
+    def post(self,request,uuid=None):
+        # email_id = request.POST.get(EMAIL_ID)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
+            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS_ID:1,IS_DELETED:False})
             password = request.POST.get(PASSWORD)
             if check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "You have already used this password, please choose an other one", DATA_SV:"Du har redan använt detta lösenord, vänligen välj ett nytt"}, status=status.HTTP_400_BAD_REQUEST)
@@ -777,6 +777,7 @@ class ResetPasswordView(APIView):
                 setattr(data,"is_resetpassword",False)
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))
                 setattr(data,MODIFIED_BY,'admin')
+                data.uuid = uuid4()
                 data.save()
                 return Response({STATUS: SUCCESS, DATA: "Password changed successfully", DATA_SV:"Lösenordet är nu ändrat"}, status=status.HTTP_200_OK)
             else:

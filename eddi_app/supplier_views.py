@@ -119,7 +119,10 @@ class AddCourseView(APIView):
             if request.POST.get(COURSE_PRICE):
                 record_map[COURSE_PRICE] = "{:.2f}".format(float(request.POST.get(COURSE_PRICE)))
             if request.POST.get("offer_price"):
-                record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
+                try:
+                    record_map["offer_price"] = "{:.2f}".format(float(request.POST.get("offer_price")))
+                except:
+                    pass
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
@@ -185,8 +188,8 @@ class AddCourseView(APIView):
             except:
                 pass
             return Response({STATUS: SUCCESS, DATA: "Congratulations! Course created successfully", DATA_SV:"Grattis, er utbildning har nu lagts till!"}, status=status.HTTP_200_OK)
-        except:
-            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as ex:
+            return Response({STATUS:ERROR, "var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AddSubCategoryView(APIView):
