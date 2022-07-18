@@ -1301,7 +1301,7 @@ class UserProfileView(APIView):
             try:
                 if serializer.validated_data['agree_ads_terms'] == True:
                     try:
-                        user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         message = f"{user_data.first_name}, has Agreed to view  “Recruitment Ad” "
                         message_sv = f"{user_data.first_name}, har accepterat rekryteringsannonsen"
 
@@ -1916,6 +1916,7 @@ class EventView(APIView):
             else:
                 try:
                     cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    print(cat)
                     a = cat.course_category.split(",")
                 except Exception as ex:
                     a = cat.course_category.split()

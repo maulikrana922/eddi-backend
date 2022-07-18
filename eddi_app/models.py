@@ -293,7 +293,7 @@ class SupplierOrganizationProfile(models.Model):
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'))
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'),related_name='supplier')
     supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Organization'))
     course_image = models.FileField(upload_to='course_image/',verbose_name=_('Course Image'),blank=True,null=True)
     course_name = models.CharField(max_length=150,verbose_name=_('Course Name'),blank=True,null=True)

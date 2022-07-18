@@ -533,13 +533,16 @@ class GetCourseDetails(APIView):
             # except:
             #     user = None
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.select_related().get(**{UUID:uuid, IS_DELETED:False})
+                
             except:
                 course_data = None
+            print(course_data)
             try:
                 supplier_profile = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":course_data.supplier.email_id})
             except Exception as ex:
                 supplier_profile = None
+            print(supplier_profile)
             try:
                 fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE:course_data}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
@@ -954,7 +957,6 @@ class AdminDashboardView(APIView):
         if data.user_type.user_type == "Admin":
             try:
                 # admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
-                admin_data = data
                 total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
                 total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:2}).count()
                 total_course = getattr(models,COURSEDETAILS_TABLE).objects.all().count()
@@ -965,11 +967,11 @@ class AdminDashboardView(APIView):
                 users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
                 course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
             except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Somethiong went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({STATUS: ERROR, DATA: "Something went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
                     return Response({STATUS: SUCCESS,
-                "admin_name" : admin_data.first_name + " " + admin_data.last_name,
+                "admin_name" : data.first_name + " " + data.last_name,
                 "supplier_count": total_supplier,
                 "user_count": total_user,
                 "total_course": total_course,
@@ -999,7 +1001,7 @@ class SupplierDashboardView(APIView):
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             Individuals11 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).values_list("payment_detail__course__course_name",'user_profile__first_name','user_profile__email_id','user_profile__usersignup__uuid')
-            user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:supplier_email}).values_list("uuid")
+            # user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{EMAIL_ID:supplier_email}).values_list("uuid")
             
             course_name = [x[0] for x in Individuals11]
             user_name = [x[1] for x in Individuals11]
@@ -1450,9 +1452,9 @@ class SupplierOrganizationProfileview(APIView):
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
                 try:
-                    data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     html_path = "supplier_organization_approval.html"
-                    fullname = f'{data.first_name} {data.last_name}'
+                    fullname = f'{usersignup_data.first_name} {usersignup_data.last_name}'
                     context_data = {'fullname':fullname}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
@@ -1472,10 +1474,10 @@ class SupplierOrganizationProfileview(APIView):
                 except Exception as ex:
                     pass
                 try:
-                    data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    data1.is_resetpassword = False
-                    data1.is_first_time_login = False
-                    data1.save()
+                    # data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    usersignup_data.is_resetpassword = False
+                    usersignup_data.is_first_time_login = False
+                    usersignup_data.save()
                 except Exception as ex:
                     pass
             except Exception as ex:
@@ -1511,14 +1513,15 @@ class SupplierOrganizationProfileview(APIView):
         email_id = get_user_email_by_token(request)
         supplier_email = request.POST.get("supplier_email")
         print(supplier_email,"supplierererer")
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+        data =  getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        if data.user_type.user_type == ADMIN_S:
             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
             record_map1 = {}
             if request.POST.get(STATUS):
                 if request.POST.get(STATUS) == "Active":
                     record_map1[STATUS_ID] = 1
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_active.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1542,7 +1545,7 @@ class SupplierOrganizationProfileview(APIView):
                 else:
                     record_map1[STATUS_ID] = 2
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_inactive.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1574,7 +1577,7 @@ class SupplierOrganizationProfileview(APIView):
                     data1.approved_once = True
                     data1.save()
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1605,7 +1608,7 @@ class SupplierOrganizationProfileview(APIView):
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_reject.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id, "reason":request.POST.get("reject_reason")}
@@ -1670,6 +1673,7 @@ class SupplierOrganizationProfileview(APIView):
 class SupplierProfileView(APIView):
     def put(self, request):
         email_id = get_user_email_by_token(request)
+
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except Exception as ex:
