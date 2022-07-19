@@ -39,6 +39,7 @@ import datetime
 from datetime import date
 import time
 stripe.api_key = settings.STRIPE_SECRET_KEY
+from django.db import connection,reset_queries
 
 class test(APIView):
     def get(self, request):
@@ -445,8 +446,8 @@ class GetUserDetails(APIView):
         email_id =  get_user_email_by_token(request)
         if uuid:
             try:
-                data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-                user_type = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type 
+                data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{UUID:uuid})
+                user_type = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type
                 if user_type == ADMIN_S:
                     if userSignup_serializer :=  UserSignupSerializer(data):
                     # Below Line : To make Active or Inactive to Particular user or supplier 
@@ -461,7 +462,7 @@ class GetUserDetails(APIView):
                                 course_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"course_name__in":course_enrolled})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong with course listing"}, status=status.HTTP_400_BAD_REQUEST)
-                                
+                            print(len(connection.queries))
                             if serializer := UserProfileSerializer(profile_data):
                                 if serializer2 := CourseDetailsSerializer(course_list, many=True):
                                     return Response({STATUS: SUCCESS, DATA: [serializer.data,userSignup_serializer.data], "course_list":serializer2.data}, status=status.HTTP_200_OK)
@@ -478,8 +479,8 @@ class GetUserDetails(APIView):
                                 # enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).count()
                                 supplier_course_count = supplier_all_course.count()
                                 enrolled_count = individuals_useremail.count()
-                                print(individuals_useremail.count())
-                                print(supplier_all_course.count())
+                                # print(individuals_useremail.count())
+                                # print(supplier_all_course.count())
                                 individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
                             except Exception as ex:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong with filtering data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -493,6 +494,7 @@ class GetUserDetails(APIView):
                                     supplier_profile_data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{'supplier_email':data.email_id})
                                 except Exception as ex:
                                     supplier_profile_data= None
+                                print(len(connection.queries))
                                 if serializer := SupplierOrganizationProfileSerializer(organization_profile_data):
                                     if serializer1 := SupplierProfileSerializer(supplier_profile_data):
                                         if serializer2 := UserProfileSerializer(individuals_user, many=True):
@@ -722,7 +724,7 @@ class UserLoginView(APIView):
                     pass
                     
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,IS_DELETED:False})
+            data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id,IS_DELETED:False})
            
             token = NonBuiltInUserToken.objects.create(user_id = data.id)
         except Exception as ex:
@@ -831,7 +833,7 @@ class ForgetPasswordView(APIView):
         email_id = request.POST.get(EMAIL_ID)
         request.session['forget-password'] = email_id
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
+            data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             print(data.uuid)
         except:
             return Response({STATUS: ERROR, DATA: "You are not a registered user"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1464,7 +1466,7 @@ class UserPaymentDetail_info(APIView):
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
                     profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:request.POST.get(EMAIL_ID)})
                     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, COURSE:course_data,STATUS:'Success'})
-                    courseobj = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    courseobj = getattr(models,COURSEDETAILS_TABLE).objects.select_related('supplier').get(**{COURSE_NAME:course_name})
                     record_map = {}
                     record_map = {
                     COURSE_CATEGORY : courseobj.course_category,
@@ -2531,7 +2533,7 @@ class CourseRating(APIView):
         email_id = get_user_email_by_token(request)
         try:
             user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
-            course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"uuid":uuid})
+            course = getattr(models,COURSEDETAILS_TABLE).objects.select_related().get(**{"uuid":uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -2710,7 +2712,7 @@ class AllSubCategory(APIView):
 class Manage_Payment(APIView):
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if data.user_type.user_type == ADMIN_S:
             try:
                 all_payment = getattr(models,"UserPaymentDetail").objects.all().order_by("-created_date_time")
@@ -2746,7 +2748,7 @@ class Manage_Payment(APIView):
     def put(self, request, uuid=None):
         email_id = get_user_email_by_token(request)
         # approval_status = request.POST.get(APPROVAL_STATUS)
-        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if not uuid:
             return Response({STATUS: SUCCESS, DATA:"UUID is required"}, status=status.HTTP_200_OK)
         if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:

@@ -86,7 +86,8 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'corsheaders',
     'wkhtmltopdf',
-    'rosetta'
+    'rosetta',
+    'debug_toolbar',
 ]
 
 
@@ -237,6 +238,7 @@ JAZZMIN_SETTINGS = {
      "custom_js": "main.js"
 }
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware', #added here
@@ -246,6 +248,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
 ]
 REST_AUTH_TOKEN_MODEL = "eddi_app.models.NonBuiltInUserToken"
 REST_AUTH_TOKEN_CREATOR = "eddi_app.utils.custom_create_token"

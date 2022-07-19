@@ -34,7 +34,8 @@ urlpatterns = [
     path('docs/7e3f7124d67d0b6471842d311388b818/', TemplateView.as_view(
         template_name='documentation.html',
         extra_context={'schema_url':'openapi-schema'}
-    ), name ='swagger-ui'), 
+    ), name ='swagger-ui'),
+    path('__debug__/', include('debug_toolbar.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns +=staticfiles_urlpatterns()

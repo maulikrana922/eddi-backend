@@ -31,7 +31,7 @@ import cv2
 # import pafy
 from .notification import send_notification
 from translate import Translator
-
+from django.db import connection,reset_queries
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -70,7 +70,7 @@ class AddCourseView(APIView):
         else:
             course_organization = False
         try:    
-            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -315,13 +315,13 @@ class GetSubCategoryDetails(APIView):
         else:
             email_id = get_user_email_by_token(request)
             try:
-                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+                user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
             except Exception:
-                user_type_data = None
-            if user_type_data:
-                if user_type_data == ADMIN_S:
+                user_data.user_type.user_type = None
+            if user_data.user_type.user_type:
+                if user_data.user_type.user_type == ADMIN_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{IS_DELETED:False}).order_by("-created_date_time")
-                elif user_type_data == SUPPLIER_S:
+                elif user_data.user_type.user_type == SUPPLIER_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
                 else:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).order_by("-created_date_time")
@@ -533,7 +533,7 @@ class GetCourseDetails(APIView):
             # except:
             #     user = None
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.select_related().get(**{UUID:uuid, IS_DELETED:False})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.select_related('supplier').get(**{UUID:uuid, IS_DELETED:False})
                 
             except:
                 course_data = None
@@ -590,7 +590,7 @@ class GetCourseDetails(APIView):
         else:
             email_id =  get_user_email_by_token(request)
             if email_id:
-                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+                if getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     try:
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
 
@@ -599,7 +599,7 @@ class GetCourseDetails(APIView):
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
-                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
+                elif getattr(models,USERSIGNUP_TABLE).objects.selected_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except Exception as ex:
@@ -685,7 +685,7 @@ class GetCourseDetails(APIView):
             return Response({STATUS: ERROR, DATA: "UUID required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid})
+            data = getattr(models,COURSEDETAILS_TABLE).objects.select_related('supplier').get(**{UUID:uuid})
         except Exception as ex:
             return Response({STATUS: ERROR, DATA: "Somethoing went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -951,9 +951,9 @@ class GetCourseDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
     
 class AdminDashboardView(APIView):
-    def get(self, request,uuid = None): 
+    def get(self, request,uuid = None):
         admin_email = get_user_email_by_token(request)
-        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
             try:
                 # admin_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
@@ -970,15 +970,16 @@ class AdminDashboardView(APIView):
                 return Response({STATUS: ERROR, DATA: "Something went wrong with data"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
+                    print(len(connection.queries))
                     return Response({STATUS: SUCCESS,
-                "admin_name" : data.first_name + " " + data.last_name,
-                "supplier_count": total_supplier,
-                "user_count": total_user,
-                "total_course": total_course,
-                PURCHASED_COURSE_COUNT: purchased_course,
-                "users": serializer.data,
-                "suppliers": serializer1.data,
-                }, status=status.HTTP_200_OK)
+                        "admin_name" : data.first_name + " " + data.last_name,
+                        "supplier_count": total_supplier,
+                        "user_count": total_user,
+                        "total_course": total_course,
+                        PURCHASED_COURSE_COUNT: purchased_course,
+                        "users": serializer.data,
+                        "suppliers": serializer1.data,
+                        }, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: "Something went wrong with user data"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1017,7 +1018,7 @@ class SupplierDashboardView(APIView):
 
             counter = 0
             for v in individual_details[COURSENAME]:
-                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
+                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.select_related('course_type').get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
                     USER_EMAIL:individual_details[USER_EMAIL][counter],
@@ -1513,7 +1514,7 @@ class SupplierOrganizationProfileview(APIView):
         email_id = get_user_email_by_token(request)
         supplier_email = request.POST.get("supplier_email")
         print(supplier_email,"supplierererer")
-        data =  getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+        data =  getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if data.user_type.user_type == ADMIN_S:
             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
             record_map1 = {}
