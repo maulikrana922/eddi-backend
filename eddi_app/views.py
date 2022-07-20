@@ -245,12 +245,12 @@ class Save_stripe_info(APIView):
                     vat_val = int(vat[0])
                     html_path = INVOICE_TO_USER
                     fullname = f'{instance.first_name} {instance.last_name}'
-                    context_data = {'fullname':fullname, "course_name":course_name,"total":int(amount) + (int(amount)*vat_val)/100}
+                    context_data = {'fullname':fullname, "course_name":course_name,"total":int(float(amount)) + (int(float(amount))*vat_val)/100}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (instance.email_id,)
                     invoice_number = random.randrange(100000,999999)
-                    context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
+                    context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(float(amount)) + (int(float(amount))*vat_val)/100}
                     template = get_template('invoice.html').render(context_data1)
                     try: 
                         result = BytesIO()
@@ -260,7 +260,7 @@ class Save_stripe_info(APIView):
                     except Exception as ex:
                         pass
                     record = {}
-                    try:
+                    try: 
                         record = {
                         "invoice_number" : invoice_number,
                         "user_address" : "Address",
@@ -291,6 +291,7 @@ class Save_stripe_info(APIView):
                         pass
                     email_msg.send(fail_silently=False)
                 except Exception as ex:
+                    print(ex)
                     pass
                 return Response({MESSAGE: SUCCESS, DATA: {PAYMENT_INTENT:intent, EXTRA_MSG: extra_msg}}, status=status.HTTP_200_OK,)
             except Exception as ex:
@@ -812,12 +813,12 @@ class UserLoginView(APIView):
                     # print(type(time_diff.seconds), "timeeeeeeeeeeeee")
                     # print(divmod(time_diff.seconds, 3600)[0] , "timeeeeeeeeeeeee")
                     print(user_profile)
-                    record_data1 = {
-                        DEVICE_TOKEN:user_device_token,
-                        USER_TYPE:data
-                    }
-                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
-                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(device_token=user_device_token)
+                    # record_data1 = {
+                    #     DEVICE_TOKEN:user_device_token,
+                    #     USER_TYPE:data
+                    # }
+                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(device_token=user_device_token)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: "User is not authorized"}, status=status.HTTP_400_BAD_REQUEST)

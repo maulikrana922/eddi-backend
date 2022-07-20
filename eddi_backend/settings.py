@@ -299,19 +299,19 @@ CKEDITOR_CONFIGS = {
 
 DATABASES = {
      
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-
     # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': env('NAME'),
-    #     'USER': env('DATABASE_USER'),
-    #     'PASSWORD': env('DATABASE_PASS'),
-    #     'HOST': env('DATABASE_HOST'),
-    #     'PORT': env('PORT'),
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
+
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASS'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('PORT'),
+    }
 }
 
 # Password validation
