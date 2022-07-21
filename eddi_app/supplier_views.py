@@ -144,14 +144,14 @@ class AddCourseView(APIView):
                         pass
                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                     send_notification(email_id, receiver, message)
-                    receiver_device_token = []
-                    for i in data:
-                        device_data = UserDeviceToken.objects.filter(user_type=i)
-                        for j in device_data:
-                            receiver_device_token.append(j.device_token)
+                    # receiver_device_token = []
+                    # for i in data:
+                    #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                    #     for j in device_data:
+                    #         receiver_device_token.append(j.device_token)
 
-                    print(receiver_device_token)
-                    send_push_notification(receiver_device_token,message)
+                    # print(receiver_device_token)
+                    # send_push_notification(receiver_device_token,message)
                     for i in receiver:
                         try:
                             record_map1 = {}
@@ -193,14 +193,14 @@ class AddCourseView(APIView):
                 receiver = [i.email_id for i in users]
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
-                receiver_device_token = []
-                for i in users:
-                    device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
-                    for j in device_data:
-                        receiver_device_token.append(j.device_token)
+                # receiver_device_token = []
+                # for i in users:
+                #     device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
+                #     for j in device_data:
+                #         receiver_device_token.append(j.device_token)
 
-                print(receiver_device_token)
-                send_push_notification(receiver_device_token,message)
+                # print(receiver_device_token)
+                # send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map2 = {}
@@ -258,14 +258,14 @@ class AddSubCategoryView(APIView):
                 pass
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             send_notification(email_id, receiver, message)
-            receiver_device_token = []
-            for i in data:
-                device_data = UserDeviceToken.objects.filter(user_type=i)
-                for j in device_data:
-                    receiver_device_token.append(j.device_token)
+            # receiver_device_token = []
+            # for i in data:
+            #     device_data = UserDeviceToken.objects.filter(user_type=i)
+            #     for j in device_data:
+            #         receiver_device_token.append(j.device_token)
 
-            print(receiver_device_token)
-            send_push_notification(receiver_device_token,message)
+            # print(receiver_device_token)
+            # send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -384,12 +384,12 @@ class GetSubCategoryDetails(APIView):
                             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                             receiver = [data.supplier.email_id]
                             send_notification(email_id, receiver, message)
-                            receiver_device_token = []
-                            device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                            receiver_device_token.append(device_data.device_token)
+                            # receiver_device_token = []
+                            # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                            # receiver_device_token.append(device_data.device_token)
 
-                            print(receiver_device_token)
-                            send_push_notification(receiver_device_token,message)
+                            # print(receiver_device_token)
+                            # send_push_notification(receiver_device_token,message)
                             
                             for i in receiver:
                                 try:
@@ -433,12 +433,12 @@ class GetSubCategoryDetails(APIView):
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 receiver = [data.supplier.email_id]
                                 send_notification(email_id, receiver, message)
-                                receiver_device_token = []
-                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                receiver_device_token.append(device_data.device_token)
+                                # receiver_device_token = []
+                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                # receiver_device_token.append(device_data.device_token)
 
-                                print(receiver_device_token)
-                                send_push_notification(receiver_device_token,message)
+                                # print(receiver_device_token)
+                                # send_push_notification(receiver_device_token,message)
 
                                 for i in receiver:
                                     try:
@@ -599,7 +599,7 @@ class GetCourseDetails(APIView):
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
-                elif getattr(models,USERSIGNUP_TABLE).objects.selected_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
+                elif getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except Exception as ex:
@@ -803,12 +803,12 @@ class GetCourseDetails(APIView):
                                 receiver = [data.supplier.email_id]
                                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                 send_notification(email_id, receiver, message)
-                                receiver_device_token = []
-                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                receiver_device_token.append(device_data.device_token)
+                                # receiver_device_token = []
+                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                # receiver_device_token.append(device_data.device_token)
 
-                                print(receiver_device_token)
-                                send_push_notification(receiver_device_token,message)
+                                # print(receiver_device_token)
+                                # send_push_notification(receiver_device_token,message)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -871,12 +871,12 @@ class GetCourseDetails(APIView):
                                     receiver = [data.supplier.email_id]
                                     # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                                     send_notification(email_id, receiver, message)
-                                    receiver_device_token = []
-                                    device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                    receiver_device_token.append(device_data.device_token)
+                                    # receiver_device_token = []
+                                    # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                    # receiver_device_token.append(device_data.device_token)
 
-                                    print(receiver_device_token)
-                                    send_push_notification(receiver_device_token,message)
+                                    # print(receiver_device_token)
+                                    # send_push_notification(receiver_device_token,message)
                                     for i in receiver:
                                         try:
                                             record_map2 = {}
@@ -1772,3 +1772,101 @@ class MyProgressView(APIView):
         except Exception as ex:
             print(ex,"exexe")
             return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetCourseListView(APIView):
+    def get(self, request):
+        email_id =  get_user_email_by_token(request)
+        if getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S or ADMIN_S:
+            try:
+                data_s = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False, IS_APPROVED_ID:1}).values_list("uuid","id","course_name").order_by("-created_date_time"))
+
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({STATUS: SUCCESS, DATA:data_s}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
+class AddBatchView(APIView):
+    def post(self, request):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
+            if request.POST.get(BATCH_NAME):
+                try:
+                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{"batch_name":request.POST.get(BATCH_NAME)})
+                except Exception as ex:
+                    batch_data = None
+                if batch_data != None:
+                    return Response({STATUS: ERROR, DATA: "Please choose unique batch name"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                record_map = {
+                    BATCH_NAME : request.POST.get('batch_name'),
+                    COURSE : getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}),
+                    CREATED_AT : make_aware(datetime.datetime.now()),
+                    CREATED_BY : user_data.user_type.user_type,
+                    STATUS_ID:1
+                }
+                data = getattr(models,COURSE_BATCH).objects.update_or_create(**record_map)
+                for i in request.POST.getlist('students'):
+                    try:
+                        data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
+                        data[0].students.add(data1.id)
+                    
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                return Response({STATUS: SUCCESS, DATA: "Course created successfully"}, status=status.HTTP_200_OK)
+            
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetBatchView(APIView):
+    def get(self, request, uuid = None):
+        if uuid:
+            email_id =  get_user_email_by_token(request)
+            try:
+                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').get(**{UUID:uuid, IS_DELETED:False})
+                if serializer := BatchDetailsSerializer(batch_data):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            email_id =  get_user_email_by_token(request)
+            try:
+                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').filter(**{IS_DELETED:False})
+                if serializer := BatchDetailsSerializer(batch_data,many=True):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, uuid = None):
+        pass
+    
+    
+    
+    def delete(self, request,uuid = None):
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map = {
+            STATUS_ID:2,
+            IS_DELETED:True
+        }
+        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+        record_map[MODIFIED_BY] = email_id
+        record_map[UUID] = uuid4()
+        for key,value in record_map.items():
+            setattr(data,key,value)
+        data.save()
+        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)

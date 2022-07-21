@@ -761,11 +761,11 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
-                    record_data1 = {
-                        DEVICE_TOKEN:user_device_token,
-                        USER_TYPE:data
-                    }
-                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    # record_data1 = {
+                    #     DEVICE_TOKEN:user_device_token,
+                    #     USER_TYPE:data
+                    # }
+                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
         except Exception as ex:
@@ -1317,14 +1317,14 @@ class UserProfileView(APIView):
                         #     pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(email_id, receiver, message)
-                        receiver_device_token = []
-                        for i in data:
-                            device_data = UserDeviceToken.objects.filter(user_type=i)
-                            for j in device_data:
-                                receiver_device_token.append(j.device_token)
+                        # receiver_device_token = []
+                        # for i in data:
+                        #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                        #     for j in device_data:
+                        #         receiver_device_token.append(j.device_token)
 
-                        print(receiver_device_token)
-                        send_push_notification(receiver_device_token,message)
+                        # print(receiver_device_token)
+                        # send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map = {}
@@ -1514,12 +1514,12 @@ class UserPaymentDetail_info(APIView):
                         # except:
                         #     pass
                         send_notification(email_id, receiver, message)
-                        receiver_device_token = []
-                        device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
-                        receiver_device_token.append(device_data.device_token)
+                        # receiver_device_token = []
+                        # device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
+                        # receiver_device_token.append(device_data.device_token)
 
-                        print(receiver_device_token)
-                        send_push_notification(receiver_device_token,message)
+                        # print(receiver_device_token)
+                        # send_push_notification(receiver_device_token,message)
                         try:
                             record_map1 = {}
                             record_map1 = {
@@ -1620,14 +1620,14 @@ class EventPaymentDetail_info(APIView):
                             pass
                         # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                         send_notification(user_email_id, receiver, message)
-                        receiver_device_token = []
-                        for i in data:
-                            device_data = UserDeviceToken.objects.filter(user_type=i)
-                            for j in device_data:
-                                receiver_device_token.append(j.device_token)
+                        # receiver_device_token = []
+                        # for i in data:
+                        #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                        #     for j in device_data:
+                        #         receiver_device_token.append(j.device_token)
 
-                        print(receiver_device_token)
-                        send_push_notification(receiver_device_token,message)
+                        # print(receiver_device_token)
+                        # send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map1 = {}
@@ -2076,13 +2076,13 @@ class RecruitmentAdView(APIView):
                     pass
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
                 send_notification(email_id, receiver, message)
-                receiver_device_token = []
-                for i in data:
-                    device_data = UserDeviceToken.objects.filter(user_type=i)
-                    for j in device_data:
-                        receiver_device_token.append(j.device_token)
-                print(receiver_device_token)
-                send_push_notification(receiver_device_token,message)
+                # receiver_device_token = []
+                # for i in data:
+                #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                #     for j in device_data:
+                #         receiver_device_token.append(j.device_token)
+                # print(receiver_device_token)
+                # send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map1 = {}
@@ -2777,3 +2777,4 @@ class Manage_Payment(APIView):
                 return Response({STATUS: SUCCESS, DATA: "Something went wrong"}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: SUCCESS, DATA: "You are not authorized person"}, status=status.HTTP_400_BAD_REQUEST)
+

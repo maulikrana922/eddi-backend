@@ -1,3 +1,4 @@
+from argparse import SUPPRESS
 from django.db import models
 import uuid
 from django.conf import settings
@@ -24,7 +25,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
-from .notification import send_notification, send_push_notification
+from .notification import send_notification
 from translate import Translator
 
 
@@ -1539,11 +1540,11 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
-            receiver_device_token = []
-            for i in data:
-                device_data = UserDeviceToken.objects.filter(user_type=i)
-                for j in device_data:
-                    receiver_device_token.append(j.device_token)
+            # receiver_device_token = []
+            # for i in data:
+            #     device_data = UserDeviceToken.objects.filter(user_type=i)
+            #     for j in device_data:
+            #         receiver_device_token.append(j.device_token)
 
             try:
                 translator= Translator(from_lang='english',to_lang="swedish")
@@ -1551,7 +1552,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             except:
                 pass
             send_notification(instance.email_id, receiver, message)
-            send_push_notification(receiver_device_token,message)
+            # send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -1622,3 +1623,37 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
 
+class CourseBatch(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    batch_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Batch Name'))
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
+    students = models.ManyToManyField(UserProfile,blank=True,null=True,verbose_name=_('Students'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
+
+    class Meta:
+        verbose_name_plural = _("Course Batch Table")
+
+# class BatchSession(models.Model):
+#     name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
+#     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
+#     start_date = models.DateField()
+#     end_date = models.DateField()
+#     start_time = models.DateTimeField(verbose_name=_('Session Start Time'))
+#     end_time = models.DateTimeField(verbose_name=_('Session End Time'))
+#     # total_duration = 
+#     url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
+#     # choose_days = 
+#     created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+#     modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+#     created_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+#     modified_datetime = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+#     is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+#     # status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
+
+#     class Meta:
+#         verbose_name_plural = _("Batch Session Table")
