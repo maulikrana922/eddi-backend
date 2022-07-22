@@ -67,8 +67,8 @@ DEBUG = env.bool('DEBUG', default=True)
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
 
-# CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
-# CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
+CSRF_TRUSTED_ORIGINS= env('CSRF_TRUSTED_ORIGINS').split(",")
 
 # Application definition
 INSTALLED_APPS = [
