@@ -33,6 +33,9 @@ from .notification import send_notification
 from translate import Translator
 from django.db import connection,reset_queries
 
+
+
+
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
     try:
@@ -1778,7 +1781,7 @@ class GetCourseListView(APIView):
         email_id =  get_user_email_by_token(request)
         if getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S or ADMIN_S:
             try:
-                data_s = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False, IS_APPROVED_ID:1}).values_list("uuid","id","course_name").order_by("-created_date_time"))
+                data_s = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False, IS_APPROVED_ID:1,STATUS:1}).values_list("uuid","id","course_name").order_by("-created_date_time"))
 
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1816,7 +1819,7 @@ class AddBatchView(APIView):
                     except Exception as ex:
                         return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
                 
-                return Response({STATUS: SUCCESS, DATA: "Course created successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
             
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1838,15 +1841,49 @@ class GetBatchView(APIView):
         else:
             email_id =  get_user_email_by_token(request)
             try:
-                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').filter(**{IS_DELETED:False})
+                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').filter(**{'course__supplier__email_id':email_id,IS_DELETED:False})
                 if serializer := BatchDetailsSerializer(batch_data,many=True):
                     return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
 
-            except:
+            except Exception as ex:
+                print(ex)
                 return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request, uuid = None):
-        pass
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
+            record_map = {
+                    BATCH_NAME : request.POST.get('batch_name',data.batch_name),
+                    STATUS_ID:1,
+                    MODIFIED_AT: make_aware(datetime.datetime.now()),
+                    MODIFIED_BY: email_id,
+                    STATUS: request.POST.get(STATUS,data.status)
+                }
+            
+            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST['course'] else data.course
+            students_data = request.POST.getlist('students',None)
+            if not students_data:
+                students_list = data.students.all()
+                students_list.delete()
+                for i in request.POST.getlist('students'):
+                    try:
+                        data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
+                        data[0].students.add(data1.id)     
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()
+            return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
+       
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
     
     
     
@@ -1870,3 +1907,16 @@ class GetBatchView(APIView):
             setattr(data,key,value)
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+
+class AddSessionView(APIView):
+    def post(self, request):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
+            if request.POST.get(SESSION_NAME):
+                try:
+                    session_data = getattr(models,).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
+                except Exception as ex:
+                    session_data = None
+                if session_data != None:
+                    return Response({STATUS: ERROR, DATA: "Please choose unique session name"}, status=status.HTTP_400_BAD_REQUEST)

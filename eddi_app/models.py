@@ -319,7 +319,8 @@ class CourseDetails(models.Model):
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
-    
+    author_name = models.CharField(max_length=150,verbose_name=_('Author Name'),blank=True,null=True)
+    author_bio = models.CharField(max_length=300,verbose_name=_('Author Bio'),blank=True,null=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -1638,22 +1639,21 @@ class CourseBatch(models.Model):
     class Meta:
         verbose_name_plural = _("Course Batch Table")
 
-# class BatchSession(models.Model):
-#     name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
-#     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
-#     start_date = models.DateField()
-#     end_date = models.DateField()
-#     start_time = models.DateTimeField(verbose_name=_('Session Start Time'))
-#     end_time = models.DateTimeField(verbose_name=_('Session End Time'))
-#     # total_duration = 
-#     url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
-#     # choose_days = 
-#     created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
-#     modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
-#     created_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-#     modified_datetime = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
-#     is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
-#     # status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
-
-#     class Meta:
-#         verbose_name_plural = _("Batch Session Table")
+class BatchSession(models.Model):
+    session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
+    batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
+    start_date = models.DateField()
+    end_date = models.DateField()
+    start_time = models.DateTimeField(verbose_name=_('Session Start Time'))
+    end_time = models.DateTimeField(verbose_name=_('Session End Time'))
+    total_duration = models.CharField(max_length=100,verbose_name=_('Total Duration'))
+    url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
+    choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_datetime = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Batch Session Table")

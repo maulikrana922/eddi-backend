@@ -126,4 +126,5 @@ urlpatterns = [
     path('add-batch/',AddBatchView.as_view()),
     path('get-batch/',GetBatchView.as_view()),
     path('get-batch/<str:uuid>/',GetBatchView.as_view()),
+    path('add-session/',AddSessionView.as_view()),
 ]

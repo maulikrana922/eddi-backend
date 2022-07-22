@@ -421,11 +421,11 @@ class UserSignupView(APIView):
         
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
-            record_data1 = {
-                    DEVICE_TOKEN:request.POST.get(DEVICE_TOKEN,None),
-                    USER_TYPE:data[0]
-                }
-            getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+            # record_data1 = {
+            #         DEVICE_TOKEN:request.POST.get(DEVICE_TOKEN,None),
+            #         USER_TYPE:data[0]
+            #     }
+            # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong or user already exists"}, status=status.HTTP_400_BAD_REQUEST)
@@ -678,7 +678,7 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
-        user_device_token = request.POST.get(DEVICE_TOKEN)
+        # user_device_token = request.POST.get(DEVICE_TOKEN)
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -782,11 +782,11 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
-                    record_data1 = {
-                        DEVICE_TOKEN:user_device_token,
-                        USER_TYPE:data
-                    }
-                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    # record_data1 = {
+                    #     DEVICE_TOKEN:user_device_token,
+                    #     USER_TYPE:data
+                    # }
+                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         except Exception as ex:
             pass
