@@ -513,4 +513,6 @@ admin.site.register(PaybyInvoice)
 admin.site.register(WhatsonEddiCMS_SV)
 admin.site.register(ContactFormLead_SV)
 admin.site.register(ContactFormLead)
+admin.site.register(CourseBatch)
+admin.site.register(BatchSession)
 

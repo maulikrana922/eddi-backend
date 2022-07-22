@@ -145,6 +145,8 @@ production_models = [
     'eddi_app.AboutUsPageCMS_SV',
     'eddi_app.HomePageCMSPartners_SV',
     'eddi_app.PrivacyPolicyCMS_SV',
+    'eddi_app.CourseBatch',
+    'eddi_app.BatchSession',
 
     ]
 local_models = []
