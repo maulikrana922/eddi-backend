@@ -1,4 +1,3 @@
-from argparse import SUPPRESS
 from django.db import models
 import uuid
 from django.conf import settings
@@ -1647,10 +1646,11 @@ class BatchSession(models.Model):
     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
     start_date = models.DateField()
     end_date = models.DateField()
-    start_time = models.DateTimeField(verbose_name=_('Session Start Time'))
-    end_time = models.DateTimeField(verbose_name=_('Session End Time'))
+    start_time = models.TimeField(verbose_name=_('Session Start Time'))
+    end_time = models.TimeField(verbose_name=_('Session End Time'))
     total_duration = models.CharField(max_length=100,verbose_name=_('Total Duration'))
     url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
+    event_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Id'))
     choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
     created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
     modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))

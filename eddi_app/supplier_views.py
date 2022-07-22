@@ -33,9 +33,10 @@ import cv2
 from .notification import send_notification
 from translate import Translator
 from django.db import connection,reset_queries
-
-
-
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -51,6 +52,16 @@ def get_user_email_by_token(request):
     except:
         data = None
         return data
+
+def get_calendar_service():
+    # credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    # service = build('calendar', 'v3', credentials=credentials)
+  
+    flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
+    print(flow)
+    creds = flow.run_local_server(port=5000)
+    service = build('calendar', 'v3', credentials=creds)
+    return service
 
 
 class AddCourseView(APIView):
@@ -1750,21 +1761,24 @@ class AddBatchView(APIView):
                     STATUS_ID:1
                 }
                 data = getattr(models,COURSE_BATCH).objects.update_or_create(**record_map)
-                for i in request.POST.getlist('students'):
+                for i in request.POST.get('students').split(','):      
                     try:
                         data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
+                        print(data1)
                         data[0].students.add(data1.id)
                     
                     except Exception as ex:
-                       return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                       print(ex)
+                       return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
                 
                 return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
             
             except Exception as ex:
-                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                print(ex)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
             
         else:
-            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen",'error':'not authorize'}, status=status.HTTP_400_BAD_REQUEST)
 class GetBatchView(APIView):
     def get(self, request, uuid = None):
         if uuid:
@@ -1802,11 +1816,11 @@ class GetBatchView(APIView):
                 }
             
             record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST['course'] else data.course
-            students_data = request.POST.getlist('students',None)
-            if not students_data:
+            students_data = request.POST.get('students',None)
+            if students_data:
                 students_list = data.students.all()
                 students_list.delete()
-                for i in request.POST.getlist('students'):
+                for i in request.POST.get('students').split(','):
                     try:
                         data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
                         data[0].students.add(data1.id)     
@@ -1817,7 +1831,7 @@ class GetBatchView(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()
-            return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Batch updated successfully"}, status=status.HTTP_200_OK)
        
         except Exception as ex:
             print(ex)
@@ -1853,7 +1867,7 @@ class AddSessionView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
             if request.POST.get(SESSION_NAME):
                 try:
-                    session_data = getattr(models,BATCH_SESION).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
+                    session_data = getattr(models,BATCH_SESSION).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
                 except Exception as ex:
                     session_data = None
                 if session_data != None:
@@ -1862,25 +1876,41 @@ class AddSessionView(APIView):
                     record_map = {
                         SESSION_NAME:request.POST.get(SESSION_NAME),
                         BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}),
-                        START_DATE:request.POST.get(START_DATE),
-                        END_DATE:request.POST.get(END_DATE),
+                        START_DATE: request.POST.get(START_DATE),
+                        END_DATE: request.POST.get(START_DATE),
                         START_TIME:request.POST.get(START_TIME),
                         END_TIME:request.POST.get(END_TIME),
                         CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS),
+                        MODIFIED_AT: make_aware(datetime.datetime.now()),
+                        MODIFIED_BY: email_id,
                     }
+                    attendees_list = []
+                    for student in record_map[BATCH].students.all():
+                        attendees_list.append({
+                            'email':student.usersignup.email_id
+                        })
+                    service = get_calendar_service() 
                     event = {
-                            'summary': SESSION_NAME,
+                            'summary': record_map[SESSION_NAME],
                             # 'location': 'Denver, CO USA',
                             # 'description': 'https://benhammond.tech',
                             'start': {
-                                'date': f"{datetime.datetime.combine(START_DATE, START_TIME)}",
+                                'date': f"{datetime.date.today()}",
                                 'timeZone': "Asia/Kolkata",
                             },
                             'end': {
-                                'date': f"{datetime.datetime.combine(END_DATE, END_TIME)}",
+                                'date': f"{datetime.date.today()}",
                                 'timeZone': "Asia/Kolkata"
                             },
-                            "attendees": [{ "email": "japdavev@gmail.com"},{"email":"jap.d@latitudetechnolabs.com"}],
+                            "conferenceData": {
+                                "createRequest": {
+                                "conferenceSolutionKey": {
+                                    "type": "hangoutsMeet"
+                                },
+                                "requestId": "RandomString"
+                                }
+                            },
+                            "attendees": attendees_list,
                             # "recurrence": [
                             #     # "EXDATE;VALUE=DATE:20220810",
                             #     # "RDATE;VALUE=DATE:20220809,20220817",
@@ -1894,9 +1924,125 @@ class AddSessionView(APIView):
                                 ]
                             }
                         }
-                    # service.events().insert(calendarId=CAL_ID, body=new_event).execute()
-                    # print('Event created')
+                    event_response = service.events().insert(calendarId="primary", conferenceDataVersion=1, body=event).execute()
+                    print(event_response)
+                    print('Event created')
+                    record_map['event_id'] = event_response['id']
+                    record_map['url'] = event_response['hangoutLink']
+                    getattr(models,BATCH_SESSION).objects.update_or_create(**record_map)
+                    return Response({STATUS: SUCCESS, DATA: "Session created successfully"}, status=status.HTTP_200_OK)
                 except Exception as ex:
                     print(ex)
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
+class GetSessionView(APIView):
+    def get(self, request, uuid = None):
+        if uuid:
+            email_id =  get_user_email_by_token(request)
+            try:
+                session_data = getattr(models,BATCH_SESSION).objects.select_related('batch').get(**{UUID:uuid, IS_DELETED:False})
+                if serializer := SessionDetailsSerializer(session_data):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            email_id =  get_user_email_by_token(request)
+            try:
+                session_data = getattr(models,BATCH_SESSION).objects.select_related('batch').filter(**{'batch__course__supplier__email_id':email_id,IS_DELETED:False})
+                if serializer := SessionDetailsSerializer(session_data,many=True):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except Exception as ex:
+                print(ex)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, uuid = None):
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,BATCH_SESSION).objects.get(**{UUID:uuid})
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map = {
+            SESSION_NAME:request.POST.get(SESSION_NAME,data.session_name),
+            BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}) if request.POST['batch'] else data.batch,
+            START_DATE: request.POST.get(START_DATE,data.start_date),
+            END_DATE: request.POST.get(START_DATE,data.end_date),
+            START_TIME:request.POST.get(START_TIME,data.start_time),
+            END_TIME:request.POST.get(END_TIME,data.end_time),
+            CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS,data.choose_days)
+        }
+        attendees_list = []
+        for student in record_map[BATCH].students.all():
+            attendees_list.append({
+                'email':student.usersignup.email_id
+            })
+        service = get_calendar_service() 
+        event = {
+                'summary': record_map[SESSION_NAME],
+                # 'location': 'Denver, CO USA',
+                # 'description': 'https://benhammond.tech',
+                'start': {
+                    'date': f"{datetime.date.today()}",
+                    'timeZone': "Asia/Kolkata",
+                },
+                'end': {
+                    'date': f"{datetime.date.today()}",
+                    'timeZone': "Asia/Kolkata"
+                },
+                "conferenceData": {
+                    "createRequest": {
+                    "conferenceSolutionKey": {
+                        "type": "hangoutsMeet"
+                    },
+                    "requestId": "RandomString"
+                    }
+                },
+                "attendees": attendees_list,
+                # "recurrence": [
+                #     # "EXDATE;VALUE=DATE:20220810",
+                #     # "RDATE;VALUE=DATE:20220809,20220817",
+                #     "RRULE:FREQ=DAILY;UNTIL=20220817T065959Z;INTERVAL=3",
+                # ],
+                "reminders": {
+                    "useDefault": False,
+                    "overrides": [
+                    { "method": "email", "minutes": 30 },
+                    { "method": "popup", "minutes": 10 }
+                    ]
+                }
+            }
+        event_response = service.events().update(calendarId='primary',eventId=data.eventId, body=event).execute()
+        print(event_response)
+        print('Event updated')
+        # record_map['event_id'] = event_response['id']
+        record_map['url'] = event_response['hangoutLink']
+        for key,value in record_map.items():
+            setattr(data,key,value)
+        data.save()
+        return Response({STATUS: SUCCESS, DATA: "Session updated successfully"}, status=status.HTTP_200_OK)
+
+    def delete(self, request,uuid = None):
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,BATCH_SESSION).objects.get(**{UUID:uuid})
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map = {
+            IS_DELETED:True
+        }
+        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+        record_map[MODIFIED_BY] = email_id
+        record_map[UUID] = uuid4()
+        for key,value in record_map.items():
+            setattr(data,key,value)
+        data.save()
+        service = get_calendar_service()
+        service.events().delete(calendarId="primary", eventId=data.event_id).execute()
+        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
