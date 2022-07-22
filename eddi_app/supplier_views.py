@@ -1915,7 +1915,7 @@ class AddSessionView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
             if request.POST.get(SESSION_NAME):
                 try:
-                    session_data = getattr(models,).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
+                    session_data = getattr(models,BATCH_SESION).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
                 except Exception as ex:
                     session_data = None
                 if session_data != None:

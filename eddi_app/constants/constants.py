@@ -192,6 +192,7 @@ SUPPLIER_IMAGE = 'supplier_image'
 ABOUT_ME = "about_me"
 USER_UUID = 'user_uuid'
 BATCH_NAME = 'batch_name'
+BATCH_SESION = 'BatchSession'
 SESSION_NAME = 'session_name'
 COURSE_BATCH = 'CourseBatch'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
