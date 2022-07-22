@@ -1,3 +1,4 @@
+from argparse import SUPPRESS
 from django.db import models
 import uuid
 from django.conf import settings
@@ -292,7 +293,7 @@ class SupplierOrganizationProfile(models.Model):
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'))
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('supplier'),related_name='supplier')
     supplier_organization = models.ForeignKey(SupplierOrganizationProfile,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Organization'))
     course_image = models.FileField(upload_to='course_image/',verbose_name=_('Course Image'),blank=True,null=True)
     course_name = models.CharField(max_length=150,verbose_name=_('Course Name'),blank=True,null=True)
@@ -318,7 +319,8 @@ class CourseDetails(models.Model):
     is_post = models.BooleanField(default=False,verbose_name=_('Is_post'))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
-    
+    author_name = models.CharField(max_length=150,verbose_name=_('Author Name'),blank=True,null=True)
+    author_bio = models.CharField(max_length=300,verbose_name=_('Author Bio'),blank=True,null=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -1453,6 +1455,14 @@ class Notification(models.Model):
     class Meta:
         verbose_name_plural = _("Notification Table")
 
+class UserDeviceToken(models.Model):
+    user_type = models.ForeignKey(USERSIGNUP_TABLE,on_delete=models.CASCADE,verbose_name=_('User Type'),related_name='device_token',blank=True,null=True,default=None)
+    device_token = models.CharField(max_length=1000,blank=True,null=True,verbose_name=_('Device Token'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+
+    class Meta:
+        verbose_name_plural = _("Notification Device Token")
+
 class UserProfileCMS(models.Model):
     user_welcome = models.CharField(max_length=255,blank=True,null=True,verbose_name=_('User Welcome'))
     content = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('content'))
@@ -1532,12 +1542,19 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
+            # receiver_device_token = []
+            # for i in data:
+            #     device_data = UserDeviceToken.objects.filter(user_type=i)
+            #     for j in device_data:
+            #         receiver_device_token.append(j.device_token)
+
             try:
                 translator= Translator(from_lang='english',to_lang="swedish")
                 message_sv = translator.translate(f"{instance.first_name}, as a Supplier has been added by the System.")
             except:
                 pass
             send_notification(instance.email_id, receiver, message)
+            # send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -1608,3 +1625,38 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
 
+class CourseBatch(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    batch_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Batch Name'))
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
+    students = models.ManyToManyField(UserProfile,blank=True,null=True,verbose_name=_('Students'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
+
+    class Meta:
+        verbose_name_plural = _("Course Batch Table")
+
+   
+
+class BatchSession(models.Model):
+    session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
+    batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
+    start_date = models.DateField()
+    end_date = models.DateField()
+    start_time = models.DateTimeField(verbose_name=_('Session Start Time'))
+    end_time = models.DateTimeField(verbose_name=_('Session End Time'))
+    total_duration = models.CharField(max_length=100,verbose_name=_('Total Duration'))
+    url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
+    choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_datetime = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Batch Session Table")

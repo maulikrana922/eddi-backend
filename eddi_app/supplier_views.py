@@ -4,6 +4,7 @@ from posixpath import split
 import json
 from typing import final
 from wsgiref.handlers import read_environ
+from xml.dom.pulldom import END_DOCUMENT
 from pytz import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -31,6 +32,9 @@ import cv2
 # import pafy
 from .notification import send_notification
 from translate import Translator
+from django.db import connection,reset_queries
+
+
 
 
 @permission_classes([AllowAny])
@@ -68,7 +72,7 @@ class AddCourseView(APIView):
         else:
             course_organization = False
         try:    
-            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            supplier_id = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         except Exception as ex:
             return Response({STATUS: ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -149,6 +153,14 @@ class AddCourseView(APIView):
                     except:
                         pass
                     send_notification(email_id, receiver, message)
+                    # receiver_device_token = []
+                    # for i in data:
+                    #     device_data = UserDeviceToken.objects.filter(user_type=i)
+                    #     for j in device_data:
+                    #         receiver_device_token.append(j.device_token)
+
+                    # print(receiver_device_token)
+                    # send_push_notification(receiver_device_token,message)
                     for i in receiver:
                         try:
                             record_map1 = {}
@@ -176,6 +188,14 @@ class AddCourseView(APIView):
                     message_sv = f"{supplier_id.first_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
                 receiver = [i.email_id for i in users]
                 send_notification(email_id, receiver, message)
+                # receiver_device_token = []
+                # for i in users:
+                #     device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
+                #     for j in device_data:
+                #         receiver_device_token.append(j.device_token)
+
+                # print(receiver_device_token)
+                # send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map2 = {}
@@ -230,6 +250,14 @@ class AddSubCategoryView(APIView):
             except:
                 pass
             send_notification(email_id, receiver, message)
+            # receiver_device_token = []
+            # for i in data:
+            #     device_data = UserDeviceToken.objects.filter(user_type=i)
+            #     for j in device_data:
+            #         receiver_device_token.append(j.device_token)
+
+            # print(receiver_device_token)
+            # send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -277,13 +305,13 @@ class GetSubCategoryDetails(APIView):
         else:
             email_id = get_user_email_by_token(request)
             try:
-                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+                user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
             except Exception:
-                user_type_data = None
-            if user_type_data:
-                if user_type_data == ADMIN_S:
+                user_data.user_type.user_type = None
+            if user_data.user_type.user_type:
+                if user_data.user_type.user_type == ADMIN_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{IS_DELETED:False}).order_by("-created_date_time")
-                elif user_type_data == SUPPLIER_S:
+                elif user_data.user_type.user_type == SUPPLIER_S:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
                 else:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).order_by("-created_date_time")
@@ -343,6 +371,13 @@ class GetSubCategoryDetails(APIView):
 
                             receiver = [data.supplier.email_id]
                             send_notification(email_id, receiver, message)
+                            # receiver_device_token = []
+                            # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                            # receiver_device_token.append(device_data.device_token)
+
+                            # print(receiver_device_token)
+                            # send_push_notification(receiver_device_token,message)
+                            
                             for i in receiver:
                                 try:
                                     record_map1 = {}
@@ -384,6 +419,13 @@ class GetSubCategoryDetails(APIView):
 
                                 receiver = [data.supplier.email_id]
                                 send_notification(email_id, receiver, message)
+                                # receiver_device_token = []
+                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                # receiver_device_token.append(device_data.device_token)
+
+                                # print(receiver_device_token)
+                                # send_push_notification(receiver_device_token,message)
+
                                 for i in receiver:
                                     try:
                                         record_map2 = {}
@@ -471,18 +513,21 @@ class GetCourseDetails(APIView):
             vat_val = None
         if uuid:
             email_id = get_user_email_by_token(request)
+            # try:
+            #     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
+            # except:
+            #     user = None
             try:
-                user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":email_id})
-            except:
-                user = None
-            try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{UUID:uuid, IS_DELETED:False})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.select_related('supplier').get(**{UUID:uuid, IS_DELETED:False})
+                
             except:
                 course_data = None
+            print(course_data)
             try:
                 supplier_profile = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":course_data.supplier.email_id})
             except:
                 supplier_profile = None
+            print(supplier_profile)
             try:
                 fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE:course_data}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
@@ -529,7 +574,7 @@ class GetCourseDetails(APIView):
         else:
             email_id =  get_user_email_by_token(request)
             if email_id:
-                if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
+                if getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:
                     try:
                         data_s = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
 
@@ -538,7 +583,7 @@ class GetCourseDetails(APIView):
                     if serializer := CourseDetailsSerializer(data_s,many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
-                elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
+                elif getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
                     try:
                         data_a = getattr(models,COURSEDETAILS_TABLE).objects.all().order_by("-created_date_time")
                     except:
@@ -728,6 +773,12 @@ class GetCourseDetails(APIView):
                                 message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin"
                                 receiver = [data.supplier.email_id]
                                 send_notification(email_id, receiver, message)
+                                # receiver_device_token = []
+                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                # receiver_device_token.append(device_data.device_token)
+
+                                # print(receiver_device_token)
+                                # send_push_notification(receiver_device_token,message)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -786,6 +837,12 @@ class GetCourseDetails(APIView):
                                     message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin"
                                     receiver = [data.supplier.email_id]
                                     send_notification(email_id, receiver, message)
+                                    # receiver_device_token = []
+                                    # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                    # receiver_device_token.append(device_data.device_token)
+
+                                    # print(receiver_device_token)
+                                    # send_push_notification(receiver_device_token,message)
                                     for i in receiver:
                                         try:
                                             record_map2 = {}
@@ -859,9 +916,9 @@ class GetCourseDetails(APIView):
         return Response({STATUS: SUCCESS, DATA: "Information successfully deleted", DATA_SV:"Data har nu raderats"}, status=status.HTTP_200_OK)
     
 class AdminDashboardView(APIView):
-    def get(self, request,uuid = None): 
+    def get(self, request,uuid = None):
         admin_email = get_user_email_by_token(request)
-        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:admin_email})
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
             try:
                 total_supplier = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE_ID:1}).count()
@@ -877,6 +934,7 @@ class AdminDashboardView(APIView):
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer :=  UserSignupSerializer(users, many = True):
                 if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
+                    print(len(connection.queries))
                     return Response({STATUS: SUCCESS,
                 "admin_name" : f"{data.first_name} {data.last_name}",
                 "supplier_count": total_supplier,
@@ -922,7 +980,7 @@ class SupplierDashboardView(APIView):
 
             counter = 0
             for v in individual_details[COURSENAME]:
-                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:v})
+                Individuals = getattr(models,COURSEDETAILS_TABLE).objects.select_related('course_type').get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
                     USER_EMAIL:individual_details[USER_EMAIL][counter],
@@ -1121,7 +1179,7 @@ class SupplierDashboard_earningGraphView(APIView):
                 year = datee.strftime("%Y")
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":year}).values_list("payment_detail__amount", flat=True)
                 total_earning = "{:.2f}".format(sum(list(data)))
-                final_data = {}
+                final_data = {} 
                 for i in range(0, 12):
                     data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__year":month_List[i].split()[1], "created_date_time__month":strptime(month_List[i].split()[0],'%B').tm_mon}).values_list("payment_detail__amount", flat=True)
                     final_data[month_List[i].split()[0]] = "{:.2f}".format(sum(list(data1)))
@@ -1342,9 +1400,9 @@ class SupplierOrganizationProfileview(APIView):
             try:
                 getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.update_or_create(**record_map)
                 try:
-                    data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     html_path = "supplier_organization_approval.html"
-                    fullname = f'{data.first_name} {data.last_name}'
+                    fullname = f'{usersignup_data.first_name} {usersignup_data.last_name}'
                     context_data = {'fullname':fullname}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
@@ -1364,11 +1422,11 @@ class SupplierOrganizationProfileview(APIView):
                 except:
                     pass
                 try:
-                    data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    data1.is_resetpassword = False
-                    data1.is_first_time_login = False
-                    data1.save()
-                except:
+                    # data1 = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    usersignup_data.is_resetpassword = False
+                    usersignup_data.is_first_time_login = False
+                    usersignup_data.save()
+                except Exception as ex:
                     pass
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1402,14 +1460,15 @@ class SupplierOrganizationProfileview(APIView):
         email_id = get_user_email_by_token(request)
         supplier_email = request.POST.get("supplier_email")
         print(supplier_email,"supplierererer")
-        if getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == ADMIN_S:
+        data =  getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if data.user_type.user_type == ADMIN_S:
             data1 = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:supplier_email})
             record_map1 = {}
             if request.POST.get(STATUS):
                 if request.POST.get(STATUS) == "Active":
                     record_map1[STATUS_ID] = 1
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_active.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1433,7 +1492,7 @@ class SupplierOrganizationProfileview(APIView):
                 else:
                     record_map1[STATUS_ID] = 2
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_inactive.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1465,7 +1524,7 @@ class SupplierOrganizationProfileview(APIView):
                     data1.approved_once = True
                     data1.save()
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
@@ -1496,7 +1555,7 @@ class SupplierOrganizationProfileview(APIView):
                     if request.POST.get("reject_reason"):
                         record_map1["reject_reason"] = request.POST.get("reject_reason")
                     try:
-                        data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                        # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_reject.html"
                         fullname = f'{data.first_name} {data.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id, "reason":request.POST.get("reject_reason")}
@@ -1561,6 +1620,7 @@ class SupplierOrganizationProfileview(APIView):
 class SupplierProfileView(APIView):
     def put(self, request):
         email_id = get_user_email_by_token(request)
+
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
         except:
@@ -1651,5 +1711,192 @@ class MyProgressView(APIView):
                 else:
                     is_completed_count += 1            
             return Response({STATUS: SUCCESS, "is_completed_count":is_completed_count, "is_ongoing_count":is_ongoing_count}, status=status.HTTP_200_OK)
-        except:
+        except Exception as ex:
+            print(ex,"exexe")
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetCourseListView(APIView):
+    def get(self, request):
+        email_id =  get_user_email_by_token(request)
+        if getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S or ADMIN_S:
+            try:
+                data_s = list(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False, IS_APPROVED_ID:1,STATUS:1}).values_list("uuid","id","course_name").order_by("-created_date_time"))
+
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({STATUS: SUCCESS, DATA:data_s}, status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+class AddBatchView(APIView):
+    def post(self, request):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
+            if request.POST.get(BATCH_NAME):
+                try:
+                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{"batch_name":request.POST.get(BATCH_NAME)})
+                except Exception as ex:
+                    batch_data = None
+                if batch_data != None:
+                    return Response({STATUS: ERROR, DATA: "Please choose unique batch name"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                record_map = {
+                    BATCH_NAME : request.POST.get('batch_name'),
+                    COURSE : getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}),
+                    CREATED_AT : make_aware(datetime.datetime.now()),
+                    CREATED_BY : user_data.user_type.user_type,
+                    STATUS_ID:1
+                }
+                data = getattr(models,COURSE_BATCH).objects.update_or_create(**record_map)
+                for i in request.POST.getlist('students'):
+                    try:
+                        data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
+                        data[0].students.add(data1.id)
+                    
+                    except Exception as ex:
+                       return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
+            
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+class GetBatchView(APIView):
+    def get(self, request, uuid = None):
+        if uuid:
+            email_id =  get_user_email_by_token(request)
+            try:
+                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').get(**{UUID:uuid, IS_DELETED:False})
+                if serializer := BatchDetailsSerializer(batch_data):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            email_id =  get_user_email_by_token(request)
+            try:
+                batch_data = getattr(models,COURSE_BATCH).objects.select_related('course').filter(**{'course__supplier__email_id':email_id,IS_DELETED:False})
+                if serializer := BatchDetailsSerializer(batch_data,many=True):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+            except Exception as ex:
+                print(ex)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, uuid = None):
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
+            record_map = {
+                    BATCH_NAME : request.POST.get('batch_name',data.batch_name),
+                    STATUS_ID:1,
+                    MODIFIED_AT: make_aware(datetime.datetime.now()),
+                    MODIFIED_BY: email_id,
+                    STATUS: request.POST.get(STATUS,data.status)
+                }
+            
+            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST['course'] else data.course
+            students_data = request.POST.getlist('students',None)
+            if not students_data:
+                students_list = data.students.all()
+                students_list.delete()
+                for i in request.POST.getlist('students'):
+                    try:
+                        data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
+                        data[0].students.add(data1.id)     
+                    except Exception as ex:
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+            for key,value in record_map.items():
+                setattr(data,key,value)
+            data.save()
+            return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
+       
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    
+    def delete(self, request,uuid = None):
+        email_id =  get_user_email_by_token(request)
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+        record_map = {
+            STATUS_ID:2,
+            IS_DELETED:True
+        }
+        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+        record_map[MODIFIED_BY] = email_id
+        record_map[UUID] = uuid4()
+        for key,value in record_map.items():
+            setattr(data,key,value)
+        data.save()
+        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+
+class AddSessionView(APIView):
+    def post(self, request):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
+            if request.POST.get(SESSION_NAME):
+                try:
+                    session_data = getattr(models,BATCH_SESION).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
+                except Exception as ex:
+                    session_data = None
+                if session_data != None:
+                    return Response({STATUS: ERROR, DATA: "Please choose unique session name"}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    record_map = {
+                        SESSION_NAME:request.POST.get(SESSION_NAME),
+                        BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}),
+                        START_DATE:request.POST.get(START_DATE),
+                        END_DATE:request.POST.get(END_DATE),
+                        START_TIME:request.POST.get(START_TIME),
+                        END_TIME:request.POST.get(END_TIME),
+                        CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS),
+                    }
+                    event = {
+                            'summary': SESSION_NAME,
+                            # 'location': 'Denver, CO USA',
+                            # 'description': 'https://benhammond.tech',
+                            'start': {
+                                'date': f"{datetime.datetime.combine(START_DATE, START_TIME)}",
+                                'timeZone': "Asia/Kolkata",
+                            },
+                            'end': {
+                                'date': f"{datetime.datetime.combine(END_DATE, END_TIME)}",
+                                'timeZone': "Asia/Kolkata"
+                            },
+                            "attendees": [{ "email": "japdavev@gmail.com"},{"email":"jap.d@latitudetechnolabs.com"}],
+                            # "recurrence": [
+                            #     # "EXDATE;VALUE=DATE:20220810",
+                            #     # "RDATE;VALUE=DATE:20220809,20220817",
+                            #     "RRULE:FREQ=DAILY;UNTIL=20220817T065959Z;INTERVAL=3",
+                            # ],
+                            "reminders": {
+                                "useDefault": False,
+                                "overrides": [
+                                { "method": "email", "minutes": 30 },
+                                { "method": "popup", "minutes": 10 }
+                                ]
+                            }
+                        }
+                    # service.events().insert(calendarId=CAL_ID, body=new_event).execute()
+                    # print('Event created')
+                except Exception as ex:
+                    print(ex)
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+

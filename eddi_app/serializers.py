@@ -311,3 +311,9 @@ class FavouriteCourseSerializer(serializers.ModelSerializer):
 #         model = SupplierOrganizationProfile
 #         depth = 1
 #         fields = ('organizational_name', 'supplier_name')
+
+class BatchDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseBatch
+        depth = 2
+        fields = '__all__'
