@@ -377,7 +377,6 @@ STRIPE_SECRET_KEY='sk_test_51KhDqeEjvkdtZsC4aOLUytltjWx0sYj5rZpkcphI6jbxtUHw7Lq5
 
 STRIPE_WEBHOOK_SECRET = ""
 
-
 CRONJOBS = [
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
