@@ -3,7 +3,6 @@ from .views import *
 
 urlpatterns = [
     # Stripe Link
-    path('test/',test.as_view(), name="test"),   
     path('save-stripe-info/',Save_stripe_info.as_view(), name="stripe"),   
     path('user-payment-detail/',UserPaymentDetail_info.as_view(), name="UserPaymentDetail"),   
     path('paybyinvoice/',PayByInvoice.as_view(), name="PayByInvoice"),   
@@ -23,7 +22,7 @@ urlpatterns = [
     path('forgot/',ForgetPasswordView.as_view()),
     path('changepassword/<str:uuid>/',ChangePasswordView.as_view(), name="changepassword"),
     path('verify-user/<str:uuid>/',VerifyUser.as_view(), name="VerifyUser"),
-    path('resetpassword/<str:uuid>',ResetPasswordView.as_view(), name="resetpassword"),
+    path('resetpassword/<str:uuid>/',ResetPasswordView.as_view(), name="resetpassword"),
 
     # User Details
     path('get-user-details/<str:uuid>/',GetUserDetails.as_view()),

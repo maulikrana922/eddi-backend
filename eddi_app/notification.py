@@ -26,10 +26,10 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
         try:
             response = requests.request("POST", url, headers=headers, data=payload)
             print(response, "responseeesees")
-        except Exception as ex:
-            print(ex,"exexe")
-    except Exception as ex:
-        print(ex,"ececece")
+        except:
+            pass
+    except:
+        pass
 
 # def send_push_notification(receivers,message):
 #     try:

@@ -48,7 +48,7 @@ def my_cron_job_course():
                 for j in users:
                     try:
                         user_detail = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID : j.email_id})
-                        fullname = f"{user_detail.first_name} {user_detail.first_name}"
+                        fullname = f"{user_detail.first_name} {user_detail.last_name}"
                     except Exception as ex:
                         fullname = None
                     context_data = {'course_name':i.course_name, "fullname":fullname}

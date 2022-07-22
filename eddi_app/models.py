@@ -194,7 +194,6 @@ class CourseSubCategoryDetails(models.Model):
 class CourseType(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     type_name = models.CharField(max_length=150,verbose_name=_('Course Type Name'),blank=True,null=True)
-
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -317,6 +316,7 @@ class CourseDetails(models.Model):
     course_checkout_link = models.CharField(max_length=255,verbose_name=_('Checkout Link'),blank=True,null=True)
     meeting_link = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Meeting Link"))
     meeting_passcode = models.CharField(max_length=200,blank=True,null=True,verbose_name=_("Passcode"))
+    is_post = models.BooleanField(default=False,verbose_name=_('Is_post'))
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
     author_name = models.CharField(max_length=150,verbose_name=_('Author Name'),blank=True,null=True)
@@ -347,7 +347,7 @@ def add_organization_domain(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=CourseDetails)
 def bulk_email(sender, instance, created, **kwargs):
-    if instance.course_for_organization == True:
+    if instance.course_for_organization == True and instance.is_post == True:
         connection = mail.get_connection()
         if instance.target_users != None:
             try:
@@ -387,6 +387,8 @@ def bulk_email(sender, instance, created, **kwargs):
                 msg.attach(img)
                 msg.send()
             connection.close()
+            instance.is_post = False
+            instance.save()
         except Exception as ex:
             pass
 
@@ -1132,7 +1134,6 @@ class UserProfile(models.Model):
     area_of_interest = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Area of Interest"))
     agree_ads_terms = models.BooleanField(default=True,verbose_name=_('agree ads terms'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('is_deleted'))
-
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
 
