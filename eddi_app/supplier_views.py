@@ -1761,10 +1761,10 @@ class AddBatchView(APIView):
                     STATUS_ID:1
                 }
                 data = getattr(models,COURSE_BATCH).objects.update_or_create(**record_map)
+               
                 for i in request.POST.get('students').split(','):      
                     try:
                         data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
-                        print(data1)
                         data[0].students.add(data1.id)
                     
                     except Exception as ex:
@@ -1779,6 +1779,7 @@ class AddBatchView(APIView):
             
         else:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen",'error':'not authorize'}, status=status.HTTP_400_BAD_REQUEST)
+
 class GetBatchView(APIView):
     def get(self, request, uuid = None):
         if uuid:
@@ -1814,17 +1815,20 @@ class GetBatchView(APIView):
                     MODIFIED_BY: email_id,
                     STATUS: request.POST.get(STATUS,data.status)
                 }
-            
-            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST['course'] else data.course
+            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST.get('course') else data.course
+          
             students_data = request.POST.get('students',None)
+
             if students_data:
                 students_list = data.students.all()
                 students_list.delete()
-                for i in request.POST.get('students').split(','):
+                for i in request.POST.get('students').split(','):    
                     try:
                         data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})
-                        data[0].students.add(data1.id)     
+                        print(data1)
+                        data.students.add(data1.id)    
                     except Exception as ex:
+                        print(ex)
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             
             
@@ -1834,9 +1838,8 @@ class GetBatchView(APIView):
             return Response({STATUS: SUCCESS, DATA: "Batch updated successfully"}, status=status.HTTP_200_OK)
        
         except Exception as ex:
-            print(ex)
+            print(ex,"dasdasdasdexxxx")
             return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
-    
     
     
     def delete(self, request,uuid = None):
