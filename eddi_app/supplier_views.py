@@ -4,6 +4,7 @@ from posixpath import split
 import json
 from typing import final
 from wsgiref.handlers import read_environ
+from xml.dom.pulldom import END_DOCUMENT
 from pytz import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1920,3 +1921,44 @@ class AddSessionView(APIView):
                     session_data = None
                 if session_data != None:
                     return Response({STATUS: ERROR, DATA: "Please choose unique session name"}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    record_map = {
+                        SESSION_NAME:request.POST.get(SESSION_NAME),
+                        BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}),
+                        START_DATE:request.POST.get(START_DATE),
+                        END_DATE:request.POST.get(END_DATE),
+                        START_TIME:request.POST.get(START_TIME),
+                        END_TIME:request.POST.get(END_TIME),
+                        CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS),
+                    }
+                    event = {
+                            'summary': SESSION_NAME,
+                            # 'location': 'Denver, CO USA',
+                            # 'description': 'https://benhammond.tech',
+                            'start': {
+                                'date': f"{datetime.datetime.combine(START_DATE, START_TIME)}",
+                                'timeZone': "Asia/Kolkata",
+                            },
+                            'end': {
+                                'date': f"{datetime.datetime.combine(END_DATE, END_TIME)}",
+                                'timeZone': "Asia/Kolkata"
+                            },
+                            "attendees": [{ "email": "japdavev@gmail.com"},{"email":"jap.d@latitudetechnolabs.com"}],
+                            # "recurrence": [
+                            #     # "EXDATE;VALUE=DATE:20220810",
+                            #     # "RDATE;VALUE=DATE:20220809,20220817",
+                            #     "RRULE:FREQ=DAILY;UNTIL=20220817T065959Z;INTERVAL=3",
+                            # ],
+                            "reminders": {
+                                "useDefault": False,
+                                "overrides": [
+                                { "method": "email", "minutes": 30 },
+                                { "method": "popup", "minutes": 10 }
+                                ]
+                            }
+                        }
+                    # service.events().insert(calendarId=CAL_ID, body=new_event).execute()
+                    # print('Event created')
+                except Exception as ex:
+                    print(ex)
+                    return Response({STATUS: ERROR, DATA: "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)

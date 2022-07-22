@@ -87,7 +87,9 @@ EVENT_CHOOSE_TYPE = "event_choose_type"
 EVENT_CATEGORY = "event_category"
 BANNER_VIDEO_LINK = "banner_video_link"
 START_DATE = "start_date"
+END_DATE = "end_date"
 START_TIME = "start_time"
+END_TIME = "end_time"
 FEES_TYPE = "fees_type"
 EVENT_TYPE = "event_type"
 EVENT_PRICE = "event_price"
@@ -195,5 +197,11 @@ BATCH_NAME = 'batch_name'
 BATCH_SESION = 'BatchSession'
 SESSION_NAME = 'session_name'
 COURSE_BATCH = 'CourseBatch'
+BATCH = 'batch'
+TOTAL_DURATION = 'total_duration'
+URL = 'url'
+CHOOSE_DAYS = 'choose_days'
+
+
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 SERVICE_ACCOUNT_FILE = './google-credentials.json'

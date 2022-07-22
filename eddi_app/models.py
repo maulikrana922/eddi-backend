@@ -1639,6 +1639,8 @@ class CourseBatch(models.Model):
     class Meta:
         verbose_name_plural = _("Course Batch Table")
 
+   
+
 class BatchSession(models.Model):
     session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
