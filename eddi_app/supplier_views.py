@@ -1820,8 +1820,7 @@ class GetBatchView(APIView):
             students_data = request.POST.get('students',None)
 
             if students_data:
-                students_list = data.students.all()
-                students_list.delete()
+                data.students.clear()
                 for i in request.POST.get('students').split(','):    
                     try:
                         data1 = getattr(models,USERPROFILE).objects.get(**{'usersignup__email_id':i})

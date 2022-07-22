@@ -829,8 +829,9 @@ class ResetPasswordView(APIView):
 
 @permission_classes([AllowAny])
 class VerifyUser(APIView):
-    def get(self,uuid):
+    def get(self,uuid=None):
         try:
+            print("hello")
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
         except:
             data = None
