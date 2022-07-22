@@ -364,21 +364,12 @@ MEDIA_URL = '/media/'
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.mailtrap.io'
-# EMAIL_HOST_USER = 'cdfc9d61864f08'
-# EMAIL_HOST_PASSWORD = '9eacd4588b999d'
-# EMAIL_PORT = '2525'
-# EMAIL_HOST = env('EMAIL_HOST')
-# EMAIL_USE_TLS = env('EMAIL_USE_TLS')
-# EMAIL_PORT = env('EMAIL_PORT')
-# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-# WKHTMLTOPDF_CMD = env('WKHTMLTOPDF_CMD')
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'testing.skillism@gmail.com'
-EMAIL_HOST_PASSWORD = 'vyzhcuaabfqutufz'
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+WKHTMLTOPDF_CMD = env('WKHTMLTOPDF_CMD')
 
 
 STRIPE_PUBLIC_KEY='pk_test_51KhDqeEjvkdtZsC4cUmvapGjtOYTru6hGp8EOK1KBdZkp7pQfBYMY4XAhkJ0WY2OAjIhpYXtXI2ia9slbSlnvPuy00XyRs254B'

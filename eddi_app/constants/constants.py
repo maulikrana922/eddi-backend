@@ -1,3 +1,5 @@
+from eddi_backend.settings import BASE_DIR
+
 FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'
 EMAIL_ID = 'email_id'
@@ -197,7 +199,7 @@ SUPPLIER_IMAGE = 'supplier_image'
 ABOUT_ME = "about_me"
 USER_UUID = 'user_uuid'
 BATCH_NAME = 'batch_name'
-BATCH_SESION = 'BatchSession'
+BATCH_SESSION = 'BatchSession'
 SESSION_NAME = 'session_name'
 COURSE_BATCH = 'CourseBatch'
 BATCH = 'batch'
@@ -207,4 +209,4 @@ CHOOSE_DAYS = 'choose_days'
 
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = './google-credentials.json'
+SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/creds.json'
