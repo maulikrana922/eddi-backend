@@ -56,6 +56,7 @@ APPROVE_COURSE_HTML = "approve_course.html"
 INACTIVE_COURSE = "inactive_course.html"
 EVENT_ENROLL_HTML = "event_enroll.html"
 COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
+SESSION_INVITATION = "session_invitation.html"
 INVOICE_HTML = "invoice.html"
 INVOICE_TO_USER = 'invoice-to-user.html'
 VARIFY_EMAIL = 'varify_email.html'
@@ -209,4 +210,4 @@ CHOOSE_DAYS = 'choose_days'
 
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/google-credientials.json'
+SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/creds.json'

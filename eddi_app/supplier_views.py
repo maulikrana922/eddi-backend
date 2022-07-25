@@ -9,7 +9,7 @@ from pytz import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from .serializers import *
 from datetime import timezone
 from eddi_app import models
@@ -54,13 +54,13 @@ def get_user_email_by_token(request):
         return data
 
 def get_calendar_service():
-    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    service = build('calendar', 'v3', credentials=credentials)
+    # credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    # service = build('calendar', 'v3', credentials=credentials)
   
-    # flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
-    # print(flow)
-    # creds = flow.run_local_server(port=5000)
-    # service = build('calendar', 'v3', credentials=creds)
+    flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
+    print(flow)
+    creds = flow.run_local_server(port=5000)
+    service = build('calendar', 'v3', credentials=creds)
     return service
 
 
@@ -1810,11 +1810,15 @@ class GetBatchView(APIView):
             data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
             record_map = {
                     BATCH_NAME : request.POST.get('batch_name',data.batch_name),
-                    STATUS_ID:1,
                     MODIFIED_AT: make_aware(datetime.datetime.now()),
                     MODIFIED_BY: email_id,
                     STATUS: request.POST.get(STATUS,data.status)
                 }
+            if record_map[STATUS] == "Active":
+                record_map[STATUS_ID] = 1
+            elif record_map[STATUS] == "InActive":
+                record_map[STATUS_ID] = 2
+          
             record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST.get('course') else data.course
           
             students_data = request.POST.get('students',None)
@@ -1881,29 +1885,54 @@ class AddSessionView(APIView):
                         START_DATE: request.POST.get(START_DATE),
                         END_DATE: request.POST.get(START_DATE),
                         START_TIME:request.POST.get(START_TIME),
+                        TOTAL_DURATION : request.POST.get(TOTAL_DURATION,None),
                         END_TIME:request.POST.get(END_TIME),
                         CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS),
                         MODIFIED_AT: make_aware(datetime.datetime.now()),
                         MODIFIED_BY: email_id,
                     }
+                    
+                    print(record_map,"mkap")
+                    week_day = []
+                    week_end = []
+                    all_day = []
+                    # # custom_list = []
+                    # # extra = [0,1,2]
+
+                    # if request.POST.get('choose_days') == 'custom':
+                    #     for single_date in range(delta + 1):
+                    #         day = record_map[START_DATE] + timedelta(days=single_date)
+                    #         for i in extra:
+                    #             print(day.weekday(), "dayyy")
+                    #             if int(float(i)) == day.weekday():
+                    #                 custom_list.append(day)
+                    # else:
+                    session_start_date_time = record_map[START_DATE]+"T"+record_map[START_TIME]
+                    session_end_date_time = record_map[END_DATE]+"T"+record_map[END_TIME]
+
+                    # delta = int((datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') - datetime.datetime.strptime(str(session_start_date_time.split("T")[0]),'%Y-%m-%d')).days)
+                    # print(delta)
+                    # for single_date in range(delta + 1):
+                    #     day = datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') + timedelta(days=single_date)
+                    #     all_day.append(day)
+                    #     if day.weekday() > 4:
+                    #         week_end.append(day)
+                    #     elif day.weekday() <= 4:
+                    #         week_day.append(day)
+                    # print(all_day)
+
                     attendees_list = []
                     for student in record_map[BATCH].students.all():
                         attendees_list.append({
                             'email':student.usersignup.email_id
                         })
                     service = get_calendar_service() 
+                    print(datetime.datetime.now())
                     event = {
-                            'summary': record_map[SESSION_NAME],
-                            # 'location': 'Denver, CO USA',
-                            # 'description': 'https://benhammond.tech',
-                            'start': {
-                                'date': f"{datetime.date.today()}",
-                                'timeZone': "Asia/Kolkata",
-                            },
-                            'end': {
-                                'date': f"{datetime.date.today()}",
-                                'timeZone': "Asia/Kolkata"
-                            },
+                            "summary": record_map[SESSION_NAME],
+                            # "location": "Virtual event (Slack)",
+                            # "description": "https://developers.google.com/calendar/api/guides/recurringevents",
+                            # ""
                             "conferenceData": {
                                 "createRequest": {
                                 "conferenceSolutionKey": {
@@ -1912,12 +1941,17 @@ class AddSessionView(APIView):
                                 "requestId": "RandomString"
                                 }
                             },
+                            
+                            "start": {
+                                "dateTime": f"{session_start_date_time}",
+                                "timeZone": "Asia/Kolkata"
+                            },
+                            "end": {
+                                "dateTime": f"{session_end_date_time}",
+                                "timeZone": "Asia/Kolkata"
+                            },
                             "attendees": attendees_list,
-                            # "recurrence": [
-                            #     # "EXDATE;VALUE=DATE:20220810",
-                            #     # "RDATE;VALUE=DATE:20220809,20220817",
-                            #     "RRULE:FREQ=DAILY;UNTIL=20220817T065959Z;INTERVAL=3",
-                            # ],
+                            "recurrence": ["RDATE;VALUE=DATE-TIME:20210730T190000,20210802T190000"],
                             "reminders": {
                                 "useDefault": False,
                                 "overrides": [
@@ -1925,7 +1959,7 @@ class AddSessionView(APIView):
                                 { "method": "popup", "minutes": 10 }
                                 ]
                             }
-                        }
+                    }
                     event_response = service.events().insert(calendarId="primary", conferenceDataVersion=1, body=event).execute()
                     print(event_response)
                     print('Event created')
@@ -1974,9 +2008,14 @@ class GetSessionView(APIView):
             START_DATE: request.POST.get(START_DATE,data.start_date),
             END_DATE: request.POST.get(START_DATE,data.end_date),
             START_TIME:request.POST.get(START_TIME,data.start_time),
+            TOTAL_DURATION : request.POST.get(TOTAL_DURATION,data.total_duration),
             END_TIME:request.POST.get(END_TIME,data.end_time),
             CHOOSE_DAYS:request.POST.get(CHOOSE_DAYS,data.choose_days)
         }
+        session_start_date_time = record_map[START_DATE]+"T"+record_map[START_TIME]
+        session_end_date_time = record_map[END_DATE]+"T"+record_map[END_TIME]
+
+
         attendees_list = []
         for student in record_map[BATCH].students.all():
             attendees_list.append({
@@ -1984,17 +2023,10 @@ class GetSessionView(APIView):
             })
         service = get_calendar_service() 
         event = {
-                'summary': record_map[SESSION_NAME],
-                # 'location': 'Denver, CO USA',
-                # 'description': 'https://benhammond.tech',
-                'start': {
-                    'date': f"{datetime.date.today()}",
-                    'timeZone': "Asia/Kolkata",
-                },
-                'end': {
-                    'date': f"{datetime.date.today()}",
-                    'timeZone': "Asia/Kolkata"
-                },
+                "summary": record_map[SESSION_NAME],
+                # "location": "Virtual event (Slack)",
+                # "description": "https://developers.google.com/calendar/api/guides/recurringevents",
+                # ""
                 "conferenceData": {
                     "createRequest": {
                     "conferenceSolutionKey": {
@@ -2002,6 +2034,15 @@ class GetSessionView(APIView):
                     },
                     "requestId": "RandomString"
                     }
+                },
+                
+                "start": {
+                    "dateTime": f"{session_start_date_time}",
+                    "timeZone": "Asia/Kolkata"
+                },
+                "end": {
+                    "dateTime": f"{session_end_date_time}",
+                    "timeZone": "Asia/Kolkata"
                 },
                 "attendees": attendees_list,
                 # "recurrence": [

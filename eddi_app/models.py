@@ -1642,6 +1642,7 @@ class CourseBatch(models.Model):
    
 
 class BatchSession(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
     batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
     start_date = models.DateField()
@@ -1652,11 +1653,36 @@ class BatchSession(models.Model):
     url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
     event_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Id'))
     choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
+    customDays = models.CharField(max_length=100,null=True,verbose_name=_('Custom Days'))
     created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
     modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
-    created_datetime = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-    modified_datetime = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
     is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
     
     class Meta:
         verbose_name_plural = _("Batch Session Table")
+
+
+@receiver(post_save, sender=BatchSession)
+def send_session_email(sender, instance, created, **kwargs):
+    print("OUTER")
+    for student in instance.batch.students.all():
+        html_path = SESSION_INVITATION
+        fullname = f'{student.first_name} {student.last_name}'
+        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (student.email_id,)
+        email_msg = EmailMessage('Invitation To Join Session',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.png'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)

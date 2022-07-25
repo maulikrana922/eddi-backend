@@ -154,3 +154,31 @@ def my_cron_job_login():
                 email_msg.send(fail_silently=False)
             except:
                 pass
+
+# def session_cron_job():
+#     session_data = getattr(models,BATCH_SESSION).objects.filter(**{'start_date':datetime.datetime.date()})
+#     for session in session_data:
+#         time_diff = datetime.datetime.now() - session_data.event_start_time.split
+#         if time_diff.seconds > 108000:
+#             for user_data in session.batch.students:
+#                 try:
+#                     html_path = 'user_reminder.html'
+#                     fullname = f'{i.first_name} {i.last_name}'
+#                     context_data = {'fullname':fullname}
+#                     email_html_template = get_template(html_path).render(context_data)
+#                     email_from = settings.EMAIL_HOST_USER
+#                     recipient_list = (i.email_id,)
+#                     email_msg = EmailMessage('You have been missed!',email_html_template,email_from,recipient_list)
+#                     email_msg.content_subtype = 'html'
+#                     path = 'eddi_app'
+#                     img_dir = 'static'
+#                     image = 'Logo.png'
+#                     file_path = os.path.join(path,img_dir,image)
+#                     with open(file_path,'rb') as f:
+#                         img = MIMEImage(f.read())
+#                         img.add_header('Content-ID', '<{name}>'.format(name=image))
+#                         img.add_header('Content-Disposition', 'inline', filename=image)
+#                     email_msg.attach(img)
+#                     email_msg.send(fail_silently=False)
+#                 except:
+#                     pass
