@@ -209,4 +209,4 @@ CHOOSE_DAYS = 'choose_days'
 
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/creds.json'
+SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/google-credientials.json'

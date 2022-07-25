@@ -829,7 +829,7 @@ class ResetPasswordView(APIView):
 
 @permission_classes([AllowAny])
 class VerifyUser(APIView):
-    def get(self,uuid=None):
+    def get(self,request,uuid=None):
         try:
             print("hello")
             data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})

@@ -54,13 +54,13 @@ def get_user_email_by_token(request):
         return data
 
 def get_calendar_service():
-    # credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    # service = build('calendar', 'v3', credentials=credentials)
+    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    service = build('calendar', 'v3', credentials=credentials)
   
-    flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
-    print(flow)
-    creds = flow.run_local_server(port=5000)
-    service = build('calendar', 'v3', credentials=creds)
+    # flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
+    # print(flow)
+    # creds = flow.run_local_server(port=5000)
+    # service = build('calendar', 'v3', credentials=creds)
     return service
 
 
@@ -1242,7 +1242,7 @@ class CourseMaterialUpload(APIView):
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)      
         return Response({STATUS: SUCCESS, DATA: "Course material uploaded successfully", DATA_SV:"Utbildningsunderlag är nu upplagda"}, status=status.HTTP_200_OK)
     
-    def get(self, uuid=None):
+    def get(self,request, uuid=None):
         if uuid:
             video = []
             try:
