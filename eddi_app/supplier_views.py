@@ -37,6 +37,8 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import httplib2
+
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -56,9 +58,12 @@ def get_user_email_by_token(request):
 def get_calendar_service():
     # credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     # service = build('calendar', 'v3', credentials=credentials)
-  
+ 
+
     flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
     print(flow)
+    # flow.fetch_token(code=code)
+    # creds = flow.credentials
     creds = flow.run_local_server(port=5000)
     service = build('calendar', 'v3', credentials=creds)
     return service
@@ -1926,6 +1931,7 @@ class AddSessionView(APIView):
                         attendees_list.append({
                             'email':student.usersignup.email_id
                         })
+
                     service = get_calendar_service() 
                     print(datetime.datetime.now())
                     event = {
@@ -2004,7 +2010,7 @@ class GetSessionView(APIView):
             return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SESSION_NAME:request.POST.get(SESSION_NAME,data.session_name),
-            BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}) if request.POST['batch'] else data.batch,
+            BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}) if request.POST.get('batch_name') else data.batch,
             START_DATE: request.POST.get(START_DATE,data.start_date),
             END_DATE: request.POST.get(START_DATE,data.end_date),
             START_TIME:request.POST.get(START_TIME,data.start_time),
@@ -2019,7 +2025,7 @@ class GetSessionView(APIView):
         attendees_list = []
         for student in record_map[BATCH].students.all():
             attendees_list.append({
-                'email':student.usersignup.email_id
+                'email':student.email_id
             })
         service = get_calendar_service() 
         event = {
@@ -2058,7 +2064,7 @@ class GetSessionView(APIView):
                     ]
                 }
             }
-        event_response = service.events().update(calendarId='primary',eventId=data.eventId, body=event).execute()
+        event_response = service.events().update(calendarId='primary',eventId=data.event_id, body=event).execute()
         print(event_response)
         print('Event updated')
         # record_map['event_id'] = event_response['id']
