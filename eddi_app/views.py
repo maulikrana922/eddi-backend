@@ -163,14 +163,30 @@ class Save_stripe_info(APIView):
                     
                 # creating paymentIntent
                 try:
+                    # intent = stripe.PaymentIntent.create(
+                    #     amount=int(float(amount)*100),
+                    #     currency='usd',
+                    #     description='helllo',
+                    #     customer=customer['id'],
+                    #     payment_method_types=["card"],
+                    #     payment_method=payment_method_id,
+                    #     confirm=True)
+                    course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+
                     intent = stripe.PaymentIntent.create(
-                    amount=int(float(amount)*100),
-                    currency='usd',
-                    description='helllo',
-                    customer=customer['id'],
-                    payment_method_types=["card"],
-                    payment_method=payment_method_id,
-                    confirm=True)
+                        transfer_data = {
+                            'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                        },
+                        amount=int(float(amount)*100),
+                        currency='usd',
+                        description='helllo',
+                        customer=customer_data['id'],
+                        payment_method_types=["card"],
+                        payment_method=payment_method_id,
+                        application_fee_amount=int(float(amount)*100)*0.02,
+                        confirm=True,
+                    )
+                    print(intent)
 
                 except:
                     return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST) 
@@ -1382,7 +1398,6 @@ class UserPaymentDetail_info(APIView):
                     CREATED_AT : make_aware(datetime.datetime.now())
                     }
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
-
                     try:
                         html_path = COURSE_ENROLL_HTML_TO_U
                         fullname = f"{user_data.first_name} {user_data.last_name}"
@@ -1403,6 +1418,13 @@ class UserPaymentDetail_info(APIView):
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
                     except:
+                        pass
+                    
+                    try:
+                        supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
+                        total_earnings = supplier_data.total_earnings + float(amount)
+                        setattr(supplier_data,'total_earnings',total_earnings)
+                    except Exception as ex:
                         pass
                     try:
                         sender_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})

@@ -15,6 +15,7 @@ urlpatterns = [
     path('manage-payment/',Manage_Payment.as_view(), name="ManagePayment"),   
     path('manage-payment/<str:uuid>/',Manage_Payment.as_view(), name="ManagePayment"),   
 
+    path('save-stripe-account/',SaveStripeAccount.as_view(),name="SaveStripeAccount"),
 
     # General Login/SignUp
     path('signup/',UserSignupView.as_view()),
@@ -128,4 +129,6 @@ urlpatterns = [
     path('add-session/',AddSessionView.as_view()),
     path('get-session/',GetSessionView.as_view()),
     path('get-session/<str:uuid>/',GetSessionView.as_view()),
+
+    
 ]

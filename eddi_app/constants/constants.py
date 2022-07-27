@@ -207,7 +207,9 @@ BATCH = 'batch'
 TOTAL_DURATION = 'total_duration'
 URL = 'url'
 CHOOSE_DAYS = 'choose_days'
+EVENT_ID = 'event_id'
+CUSTOM_DAYS = 'customDays'
 
-
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/creds.json'
+SCOPES = ['https://www.googleapis.com/auth/calendar.events',
+          'https://www.googleapis.com/auth/calendar']
+SERVICE_ACCOUNT_FILE = str(BASE_DIR) +'/creds2.json'

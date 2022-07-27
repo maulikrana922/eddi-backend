@@ -1686,3 +1686,17 @@ def send_session_email(sender, instance, created, **kwargs):
             img.add_header('Content-Disposition', 'inline', filename=image)
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
+
+class SupplierAccountDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier'))
+    account_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Account Id'))
+    total_earnings = models.FloatField(blank=True,null=True,verbose_name=_('Total Earnings'))
+    total_amount_due = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Due'))
+    total_amount_withdraw = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Withdraw'))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Supplier Account Details Table")

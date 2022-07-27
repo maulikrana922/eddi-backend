@@ -160,7 +160,7 @@ def my_cron_job_login():
 #     for session in session_data:
 #         time_diff = datetime.datetime.now() - session_data.event_start_time.split
 #         if time_diff.seconds > 108000:
-#             for user_data in session.batch.students:
+#             for user_data in session.batch.students.all():
 #                 try:
 #                     html_path = 'user_reminder.html'
 #                     fullname = f'{i.first_name} {i.last_name}'
