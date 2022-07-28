@@ -173,22 +173,24 @@ class Save_stripe_info(APIView):
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
 
+                    supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
+
                     intent = stripe.PaymentIntent.create(
                         transfer_data = {
                             'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
                         },
-                        amount=int(float(amount)*100),
+                        amount=supplier_amount,
                         currency='usd',
                         description='helllo',
-                        customer=customer_data['id'],
+                        customer=customer['id'],
                         payment_method_types=["card"],
                         payment_method=payment_method_id,
-                        application_fee_amount=int(float(amount)*100)*0.02,
+                        application_fee_amount=int(float(amount)*100*0.5),
                         confirm=True,
                     )
-                    print(intent)
-
-                except:
+                    
+                except Exception as ex:
+                    print(ex)
                     return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST) 
                 try:
                     instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
@@ -1352,8 +1354,11 @@ class UserPaymentDetail_info(APIView):
                 card_type = None
             if request.POST.get(PRICE):
                 amount = request.POST.get(PRICE)
+                supplier_amount = request.POST.get('supplier_amount')
             else:
                 amount = 0
+                supplier_amount = 0
+
             if request.POST.get(STATUS):
                 status_s = request.POST.get(STATUS)
             else:
@@ -1383,6 +1388,7 @@ class UserPaymentDetail_info(APIView):
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
             except:
                 var = None
+          
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
@@ -1424,6 +1430,7 @@ class UserPaymentDetail_info(APIView):
                         supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
                         total_earnings = supplier_data.total_earnings + float(amount)
                         setattr(supplier_data,'total_earnings',total_earnings)
+                        supplier_data.save()
                     except Exception as ex:
                         pass
                     try:
@@ -1457,12 +1464,14 @@ class UserPaymentDetail_info(APIView):
                         pass
                     return Response({STATUS: SUCCESS, DATA: SUCCESS, DATA_SV:"Framgång"}, status=status.HTTP_200_OK)
 
-                except:
+                except Exception as e:
+                    print(e)
                     return Response({MESSAGE: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: ERROR, DATA: "You already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
                 
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 
 
@@ -2160,7 +2169,7 @@ class CourseEnrollView(APIView):
         email_id =  get_user_email_by_token(request)
         var = request.POST.get("filter")
         try:
-            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id}).order_by("-created_date_time")
+            enroll_data = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{'email_id':email_id,IS_APPROVED_ID:1}).order_by("-created_date_time")
         except:
             enroll_data = None
 
@@ -2588,8 +2597,15 @@ class Manage_Payment(APIView):
             except:
                 all_payment = None
             try:
+                supplier_account_data = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__email_id":email_id})
+            except:
+                pass
+            try:
                 if serializer := UserPaymentSerializer(all_payment, many=True):
-                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    if serializer1 := SupplierAccountDetailSerializer(supplier_account_data):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data, 'supplier_account_data':serializer1.data}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({STATUS: SUCCESS, DATA: serializer1.error}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
             except:

@@ -2019,7 +2019,8 @@ class AddSessionView(APIView):
                 except Exception as ex:
                     print(ex)
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen",'error':'not authorize'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetSessionView(APIView):
@@ -2144,6 +2145,7 @@ class GetSessionView(APIView):
         # service.events().delete(calendarId="primary", eventId=data.event_id).execute()
         return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
 
+@permission_classes([AllowAny])
 class SaveStripeAccount(APIView):
     def post(self,request, uuid = None):
         try:
@@ -2172,3 +2174,40 @@ class SaveStripeAccount(APIView):
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetAdminPaymentList(APIView):
+    def get(self,request, uuid=None):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == ADMIN_S:
+            if uuid :
+                payment_detail = getattr(models,"SupplierAccountDetail").objects.get(**{UUID:uuid})
+                if serializer := SupplierAccountDetailSerializer(payment_detail):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+            else:
+                payment_list = getattr(models,"SupplierAccountDetail").objects.all()
+                if serializer := SupplierAccountDetailSerializer(payment_list,many=True):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
+
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen",'error':'not authorize'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@permission_classes([AllowAny])
+class GetAccountDetail(APIView):
+    def get(self,request):
+        try:
+            email = "kabariyanishant@gmail.com"
+            supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
+            print(supplier_account.account_id)
+            balance = stripe.Balance.retrieve(
+                stripe_account=supplier_account.account_id
+            )
+            print(balance)
+        
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+

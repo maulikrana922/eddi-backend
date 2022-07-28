@@ -323,3 +323,9 @@ class SessionDetailsSerializer(serializers.ModelSerializer):
         model = BatchSession
         depth = 2
         fields = '__all__'
+
+class SupplierAccountDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierAccountDetail
+        depth = 1
+        fields = '__all__'

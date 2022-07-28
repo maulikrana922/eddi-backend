@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .webhook import stripe_webhook
 
 urlpatterns = [
     # Stripe Link
@@ -14,8 +15,12 @@ urlpatterns = [
 
     path('manage-payment/',Manage_Payment.as_view(), name="ManagePayment"),   
     path('manage-payment/<str:uuid>/',Manage_Payment.as_view(), name="ManagePayment"),   
+    path('admin-payment-list/',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
+    path('admin-payment-list/<str:uuid>',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
 
     path('save-stripe-account/',SaveStripeAccount.as_view(),name="SaveStripeAccount"),
+    path('get-account-detail/',GetAccountDetail.as_view(),name="GetAccountDetail"),
+    path('stripe-webhook/',stripe_webhook,name="StripeWebhook"),
 
     # General Login/SignUp
     path('signup/',UserSignupView.as_view()),
@@ -130,5 +135,4 @@ urlpatterns = [
     path('get-session/',GetSessionView.as_view()),
     path('get-session/<str:uuid>/',GetSessionView.as_view()),
 
-    
 ]
