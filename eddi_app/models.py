@@ -1640,7 +1640,6 @@ class CourseBatch(models.Model):
         verbose_name_plural = _("Course Batch Table")
 
    
-
 class BatchSession(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))

@@ -1,15 +1,8 @@
-from calendar import TUESDAY
-from math import ceil
-from posixpath import split
 import json
-from typing import final
-from wsgiref.handlers import read_environ
-from xml.dom.pulldom import END_DOCUMENT
-from pytz import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from .serializers import *
 from datetime import timezone
 from eddi_app import models
@@ -32,11 +25,7 @@ import cv2
 # import pafy
 from .notification import send_notification
 from translate import Translator
-from django.db import connection,reset_queries
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from django.db import connection
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -54,21 +43,6 @@ def get_user_email_by_token(request):
     except:
         data = None
         return data
-
-def get_calendar_service(code):
-    # credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    # service = build('calendar', 'v3', credentials=credentials)
- 
-
-    flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES,redirect_uri='http://localhost:3001')
-    auth_url = flow.authorization_url(prompt='consent')
-    print(auth_url)
-    flow.fetch_token(code=code)
-    creds = flow.credentials
-    # creds = flow.run_local_server(port=0)
-    service = build('calendar', 'v3', credentials=creds)
-    return service
-
 
 class AddCourseView(APIView):
     def post(self, request):
@@ -127,6 +101,8 @@ class AddCourseView(APIView):
                 ORGANIZATION_LOCATION: request.POST.get(ORGANIZATION_LOCATION,None),
                 MEETING_LINK : request.POST.get(MEETING_LINK,None),
                 MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,None),
+                AUTHOR_NAME : request.POST.get(AUTHOR_NAME,None),
+                AUTHOR_BIO : request.POST.get(AUTHOR_BIO,None),
                 IS_POST : json.loads(request.POST.get(IS_POST)),
                 TARGET_USERS : request.POST.get(TARGET_USERS,None),
                 SUB_AREA:request.POST.get(SUB_AREA,None),
@@ -713,6 +689,8 @@ class GetCourseDetails(APIView):
             COURSE_CHECKOUT_LINK: request.POST.get(COURSE_CHECKOUT_LINK,data.course_checkout_link),
             MEETING_LINK : request.POST.get(MEETING_LINK,data.meeting_link),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,data.meeting_passcode),
+            AUTHOR_NAME : request.POST.get(AUTHOR_NAME,data.author_name),
+            AUTHOR_BIO : request.POST.get(MEETING_PASSCODE,data.author_bio),
             TARGET_USERS : request.POST.get(TARGET_USERS,data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
@@ -1900,119 +1878,6 @@ class AddSessionView(APIView):
                         MODIFIED_AT: make_aware(datetime.datetime.now()),
                         MODIFIED_BY: email_id,
                     }
-                    
-                    print(record_map,"mkap")
-                    # week_day = []
-                    # week_end = []
-                    # all_day = []
-                    # session_start_date_time = record_map[START_DATE]+"T"+record_map[START_TIME]
-                    # session_end_date_time = record_map[END_DATE]+"T"+record_map[END_TIME]
-                    # end_date_time = record_map[START_DATE]+"T"+record_map[END_TIME]
-                    # custom_list = []
-                    # extra = [0,1,2]
-
-                    # print((datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d')))
-                    # print((datetime.datetime.strptime(str(session_start_date_time.split("T")[0]),'%Y-%m-%d')))
-                    # delta = int((datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') - datetime.datetime.strptime(str(session_start_date_time.split("T")[0]),'%Y-%m-%d')).days)
-                    # print(delta,"Delta")
-
-                    # time = str(session_end_date_time.split("T")[1])
-                    # time_split = time.split(":")
-                    # custom_time = "".join(time_split)
-                    # print(custom_time,"custom_time")
-
-                    # if request.POST.get('choose_days') == 'Custom':
-                    #     for single_date in range(delta + 1):
-                    #         day = record_map[START_DATE] - timedelta(days=single_date)
-                    #         for i in extra:
-                    #             print(day.weekday(), "dayyy")
-                    #             if int(float(i)) == day.weekday():
-                    #                 custom_list.append(str(day))
-                    
-                    # elif request.POST.get('choose_days') == 'All Days':
-                       
-                    #     for single_date in range(delta + 1):
-                           
-                    #         date = datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') - timedelta(days=single_date)
-                    #         date_split = str(date).split(" ")
-                    #         custom_day = "".join(date_split[0].split("-"))
-                    #         day = custom_day+"T"+str(custom_time)
-                    #         custom_list.append(str(day))
-                           
-                    # elif request.POST.get('choose_days') == 'Week Days':
-                    #     for single_date in range(delta + 1):
-                    #         date = datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') - timedelta(days=single_date)
-                    #         if date.weekday() <= 4:
-                    #             date_split = str(date).split(" ")
-                    #             custom_day = "".join(date_split[0].split("-"))
-                    #             day = custom_day+"T"+str(custom_time)
-                    #             custom_list.append(str(day))
-                               
-                        
-                    # elif request.POST.get('choose_days') == 'Week End':
-                    #     for single_date in range(delta + 1):
-                    #         date = datetime.datetime.strptime(str(session_end_date_time.split("T")[0]),'%Y-%m-%d') - timedelta(days=single_date)
-                    #         if date.weekday() > 4:
-                    #             date_split = str(date).split(" ")
-                    #             custom_day = "".join(date_split[0].split("-"))
-                    #             day = custom_day+"T"+str(custom_time)
-                    #             custom_list.append(str(day))
-                    
-                    # custom_list.reverse()
-                    # print(custom_list)
-                    # custom_days = ",".join(custom_list)
-                    
-
-                    # print(custom_days,"custom_days")
-                    # attendees_list = []
-                    # for student in record_map[BATCH].students.all():
-                    #     attendees_list.append({
-                    #         'email':student.usersignup.email_id
-                    #     })
-
-                    # service = get_calendar_service(request.POST.get('access_token')) 
-                    # event = {
-                    #         "summary": record_map[SESSION_NAME],
-                    #         # "location": "Virtual event (Slack)",
-                    #         # "description": "https://developers.google.com/calendar/api/guides/recurringevents",
-                    #         # ""
-                    #         "conferenceData": {
-                    #             "createRequest": {
-                    #             "conferenceSolutionKey": {
-                    #                 "type": "hangoutsMeet"
-                    #             },
-                    #             "requestId": "RandomString"
-                    #             }
-                    #         },
-                            
-                    #         "start": {
-                    #             "dateTime": f"{session_start_date_time}",
-                    #             "timeZone": "Asia/Kolkata"
-                    #         },
-                    #         "end": {
-                    #             "dateTime": f"{session_end_date_time}",
-                    #             "timeZone": "Asia/Kolkata"
-                    #         },
-                    #         "attendees": attendees_list,
-                    #         "recurrence":["RRULE:FREQ=WEEKLY;COUNT=10;WKST=SU;BYDAY=TU,TH"],
-                    #         "reminders": {
-                    #             "useDefault": False,
-                    #             "overrides": [
-                    #             { "method": "email", "minutes": 30 },
-                    #             { "method": "popup", "minutes": 10 }
-                    #             ]
-                    #         }   
-                    # }
-                    # # ['RDATE;VALUE=DATE-TIME:20210725T181948,20210726T181948']
-                    # # ['RDATE;VALUE=DATE-TIME:20210730T190000,20210802T190000']
-                    
-                    # # event["recurrence"] = ["RDATE;VALUE=DATE-TIME:"+custom_days]
-                    # print(event["recurrence"],"recurrence")
-                    # event_response = service.events().insert(calendarId="primary", conferenceDataVersion=1, body=event).execute()
-                    # print(event_response)
-                    # print('Event created')
-                    # record_map['event_id'] = event_response['id']
-                    # record_map['url'] = event_response['hangoutLink']
                     getattr(models,BATCH_SESSION).objects.update_or_create(**record_map)
                     return Response({STATUS: SUCCESS, DATA: "Session created successfully"}, status=status.HTTP_200_OK)
                 
@@ -2067,57 +1932,7 @@ class GetSessionView(APIView):
             URL:request.POST.get(URL,data.url),
             CUSTOM_DAYS:request.POST.get('custom_days',data.customDays),
         }
-        # session_start_date_time = record_map[START_DATE]+"T"+record_map[START_TIME]
-        # session_end_date_time = record_map[END_DATE]+"T"+record_map[END_TIME]
 
-
-        # attendees_list = []
-        # for student in record_map[BATCH].students.all():
-        #     attendees_list.append({
-        #         'email':student.email_id
-        #     })
-        # service = get_calendar_service() 
-        # event = {
-        #         "summary": record_map[SESSION_NAME],
-        #         # "location": "Virtual event (Slack)",
-        #         # "description": "https://developers.google.com/calendar/api/guides/recurringevents",
-        #         # ""
-        #         "conferenceData": {
-        #             "createRequest": {
-        #             "conferenceSolutionKey": {
-        #                 "type": "hangoutsMeet"
-        #             },
-        #             "requestId": "RandomString"
-        #             }
-        #         },
-                
-        #         "start": {
-        #             "dateTime": f"{session_start_date_time}",
-        #             "timeZone": "Asia/Kolkata"
-        #         },
-        #         "end": {
-        #             "dateTime": f"{session_end_date_time}",
-        #             "timeZone": "Asia/Kolkata"
-        #         },
-        #         "attendees": attendees_list,
-        #         # "recurrence": [
-        #         #     # "EXDATE;VALUE=DATE:20220810",
-        #         #     # "RDATE;VALUE=DATE:20220809,20220817",
-        #         #     "RRULE:FREQ=DAILY;UNTIL=20220817T065959Z;INTERVAL=3",
-        #         # ],
-        #         "reminders": {
-        #             "useDefault": False,
-        #             "overrides": [
-        #             { "method": "email", "minutes": 30 },
-        #             { "method": "popup", "minutes": 10 }
-        #             ]
-        #         }
-        #     }
-        # event_response = service.events().update(calendarId='primary',eventId=data.event_id, body=event).execute()
-        # print(event_response)
-        # print('Event updated')
-        # # record_map['event_id'] = event_response['id']
-        # record_map['url'] = event_response['hangoutLink']
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
@@ -2141,8 +1956,6 @@ class GetSessionView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        # service = get_calendar_service()
-        # service.events().delete(calendarId="primary", eventId=data.event_id).execute()
         return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
@@ -2161,6 +1974,7 @@ class SaveStripeAccount(APIView):
                         'supplier' : getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:supplier_account['email']}),
                         'account_id' : stripe_response['stripe_user_id']
                     }
+                    print(record_map)
                     getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
                     return Response({STATUS: SUCCESS, DATA: "Account  Connected Succesfully"}, status=status.HTTP_200_OK)
                

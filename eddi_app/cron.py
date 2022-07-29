@@ -1,4 +1,6 @@
 import logging
+
+from django.forms import PasswordInput
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
@@ -15,6 +17,9 @@ from django.template.loader import render_to_string
 from email.mime.image import MIMEImage
 from django.core import mail
 from django.core.mail import get_connection, EmailMultiAlternatives
+import stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 logger = logging.getLogger(__name__)
 
 def my_cron_job():
@@ -183,29 +188,14 @@ def my_cron_job_login():
 #                 except:
 #                     pass
 
-def my_cron_job_login():
-    user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1})
-    for i in user_data:
-        time_diff = datetime.datetime.now() - datetime.datetime.strptime(str(user_data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
-        if time_diff.seconds > 172800:
-            try:
-                html_path = 'user_reminder.html'
-                fullname = f'{i.first_name} {i.last_name}'
-                context_data = {'fullname':fullname}
-                email_html_template = get_template(html_path).render(context_data)
-                email_from = settings.EMAIL_HOST_USER
-                recipient_list = (i.email_id,)
-                email_msg = EmailMessage('You have been missed!',email_html_template,email_from,recipient_list)
-                email_msg.content_subtype = 'html'
-                path = 'eddi_app'
-                img_dir = 'static'
-                image = 'Logo.png'
-                file_path = os.path.join(path,img_dir,image)
-                with open(file_path,'rb') as f:
-                    img = MIMEImage(f.read())
-                    img.add_header('Content-ID', '<{name}>'.format(name=image))
-                    img.add_header('Content-Disposition', 'inline', filename=image)
-                email_msg.attach(img)
-                email_msg.send(fail_silently=False)
-            except:
-                pass
+def my_cron_job_balance(): 
+    supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
+    for supplier in supplier_data:
+        account_balance = stripe.Balance.retrieve(
+                stripe_account=supplier.account_id
+        )
+        balance = 0 
+        for available_balance in account_balance.available:
+            balance += available_balance.amount
+        supplier.total_amount_due = balance
+        supplier.save()

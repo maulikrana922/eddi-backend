@@ -1819,7 +1819,6 @@ class EventView(APIView):
             else:
                 try:
                     cat = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                    print(cat)
                     a = cat.course_category.split(",")
                 except:
                     a = cat.course_category.split()
