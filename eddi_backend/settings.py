@@ -147,8 +147,9 @@ production_models = [
     'eddi_app.PrivacyPolicyCMS_SV',
     'eddi_app.CourseBatch',
     'eddi_app.BatchSession',
-
+    'eddi_app.SupplierAccountDetail',
     ]
+    
 local_models = []
 JAZZMIN_SETTINGS = {
     "language_chooser": True,

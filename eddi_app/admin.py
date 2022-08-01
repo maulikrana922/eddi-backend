@@ -515,4 +515,5 @@ admin.site.register(ContactFormLead_SV)
 admin.site.register(ContactFormLead)
 admin.site.register(CourseBatch)
 admin.site.register(BatchSession)
+admin.site.register(SupplierAccountDetail)
 

@@ -319,7 +319,7 @@ class CourseDetails(models.Model):
     target_users = models.CharField(max_length=10000,blank=True,null=True,verbose_name=_("Target Users"))
     course_expiry = models.DateField(verbose_name =_('Course Expiry Date'), blank=True,null=True)
     author_name = models.CharField(max_length=150,verbose_name=_('Author Name'),blank=True,null=True)
-    author_bio = models.CharField(max_length=300,verbose_name=_('Author Bio'),blank=True,null=True)
+    author_bio = models.TextField(blank=True,null=True,verbose_name=_('Author bio'))
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
     modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
@@ -1490,9 +1490,12 @@ class UserProfileCMS_SV(models.Model):
 
 class PaybyInvoice(models.Model):
     student_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Student Name'))
+    dob = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Student DOB'))
+    invoice_method = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Method'))
     personal_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Personal Number'))
     organization_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Name'))
     organization_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Number'))
+    organization_reference = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Reference'))
     street_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Street Number'))
     reference = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Reference'))
     zip_code = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Zip'))

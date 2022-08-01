@@ -50,6 +50,9 @@ class PayByInvoice(APIView):
             course = None
         try:
             record_map = {
+            "invoice_method" : request.POST.get("InvoiceMethod"),
+            "dob" : request.POST.get("Dob"),
+            "organization_reference" : request.POST.get("OrganizationReference"),
             "student_name" : request.POST.get("NameOfStudent"),
             "personal_number" : request.POST.get("PersonalNumber"),
             "organization_name" : request.POST.get("OrganizationName"),
