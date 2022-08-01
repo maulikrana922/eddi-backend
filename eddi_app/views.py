@@ -1210,10 +1210,12 @@ class ContactFormView(APIView):
             record_map[CREATED_BY] = request.POST.get(EMAIL_ID)
             try:
                 getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
-            except:
+            except Exception as e:
+                print(e)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({STATUS: SUCCESS, DATA: "Message sent successfully", DATA_SV:"Meddelandet är nu skickat"}, status=status.HTTP_200_OK)
 

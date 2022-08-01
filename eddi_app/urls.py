@@ -38,6 +38,8 @@ urlpatterns = [
     # Course
     path('add-course/',AddCourseView.as_view()), 
     path('course-rating/<str:uuid>/',CourseRating.as_view(), name="CourseRating"),   
+    path('course-rating-admin/',CourseRatingAdmin.as_view(), name="CourseRatingAdmin"),   
+    path('course-rating-admin/<str:uuid>/',CourseRatingAdmin.as_view(), name="CourseRatingAdmin"),   
     path('get-course-details/<str:uuid>/',GetCourseDetails.as_view()),
     path('get-course-details/',GetCourseDetails.as_view()),
     path('favourite-course-details/',FavCourseDetails.as_view()),

@@ -69,6 +69,7 @@ RESETPASSWORD_HTML = 'resetpassword-link.html'
 RESETPASSWORDSupplierAdmin_HTML = 'reset-password-supplierAdmin.html'
 SUPPLIER_WITHDRAW_REQUEST_HTML = 'supplier_withdraw_request.html'
 SUPPLIER_WITHDRAW_REQUEST_TO_ADMIN_HTML = 'supplier_withdraw_request_to_admin.html'
+CONTACTUS_USER = 'contactus_user.html'
 USER_TYPE_ID = 'user_type_id'
 ORGANIZATION_LOCATION = 'organization_location'
 SUB_AREA = 'sub_area'
@@ -213,6 +214,7 @@ URL = 'url'
 CHOOSE_DAYS = 'choose_days'
 EVENT_ID = 'event_id'
 CUSTOM_DAYS = 'customDays'
+
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.events',
           'https://www.googleapis.com/auth/calendar']

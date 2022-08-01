@@ -1725,6 +1725,30 @@ class GetCourseListView(APIView):
         else:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
+class CourseRatingAdmin(APIView):
+    def get(self, request, uuid = None):
+        email_id = get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == ADMIN_S:
+            if uuid:
+                try:
+                    rating_data = getattr(models,"CourseRating").objects.get(**{UUID:uuid})
+                    if serializer := CourseRatingSerializer(rating_data):
+                        return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                    else: 
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)   
+                except:
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)   
+            try:
+                rating_data = getattr(models,"CourseRating").objects.all()
+                if serializer := CourseRatingSerializer(rating_data,many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)   
+        else:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen",'error':'not authorize'}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class AddBatchView(APIView):
     def post(self, request):
         email_id =  get_user_email_by_token(request)

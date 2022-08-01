@@ -550,18 +550,27 @@ def send_contactlead_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
 
+@receiver(post_save, sender=ContactFormLead)
 @receiver(post_save, sender=ContactFormLead_SV)
 def send_contact_usl(sender, instance, created, **kwargs):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = (settings.EMAIL_HOST_USER,)
-    message = f'''Full Name: {instance.fullname}
-    Email ID: {instance.email_id}
-    Phone Number: {instance.phone_number}
-    Message: {instance.message}
-
-    '''
-    email_msg = EmailMessage('Contact Us Email',message,email_from,recipient_list)
-    email_msg.send(fail_silently=False)
+    if created:
+        html_path = CONTACTUS_USER
+        context_data = {'fullname':instance.fullname}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.email_id,)
+        email_msg = EmailMessage('Inquiry Submitted',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.png'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
 
 
 class BlogDetails(models.Model):
