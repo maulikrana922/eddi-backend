@@ -15,6 +15,12 @@ class StripeWebhookActions:
     def balance_updated(self, event):
         balance_obj = event.data.object
         print(balance_obj)
+
+    def account_updated(self, event):
+        obj = event.data.object
+        print(obj)
+
+
     # def charge_succeeded(self, event):
     #     charge = event.data.object
     #     ach_charge = payment_models.ACHCharge.objects.filter(
@@ -86,6 +92,7 @@ class StripeWebhookActions:
     WEBHOOK_HANDLER_MAP = {
         'payment_intent.succeeded': intent_succeeded,
         'balance.available': balance_updated,
+        'account.updated': account_updated,
         # 'charge.succeeded': charge_succeeded,
         # 'customer.subscription.updated': customer_subscription_updated,
         # 'customer.subscription.deleted': delete_subscription,

@@ -160,7 +160,7 @@ def my_cron_job_login():
             except:
                 pass
 
-# def session_cron_job():
+# def my_cron_session():
 #     session_data = getattr(models,BATCH_SESSION).objects.filter(**{'start_date':datetime.datetime.date()})
 #     for session in session_data:
 #         time_diff = datetime.datetime.now() - session_data.event_start_time.split
@@ -168,11 +168,11 @@ def my_cron_job_login():
 #             for user_data in session.batch.students.all():
 #                 try:
 #                     html_path = 'user_reminder.html'
-#                     fullname = f'{i.first_name} {i.last_name}'
+#                     fullname = f'{user_data.first_name} {user_data.last_name}'
 #                     context_data = {'fullname':fullname}
 #                     email_html_template = get_template(html_path).render(context_data)
 #                     email_from = settings.EMAIL_HOST_USER
-#                     recipient_list = (i.email_id,)
+#                     recipient_list = (user_data.email_id,)
 #                     email_msg = EmailMessage('You have been missed!',email_html_template,email_from,recipient_list)
 #                     email_msg.content_subtype = 'html'
 #                     path = 'eddi_app'
@@ -188,14 +188,14 @@ def my_cron_job_login():
 #                 except:
 #                     pass
 
-def my_cron_job_balance(): 
-    supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
-    for supplier in supplier_data:
-        account_balance = stripe.Balance.retrieve(
-                stripe_account=supplier.account_id
-        )
-        balance = 0 
-        for available_balance in account_balance.available:
-            balance += available_balance.amount
-        supplier.total_amount_due = balance
-        supplier.save()
+# def my_cron_job_balance(): 
+#     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
+#     for supplier in supplier_data:
+#         account_balance = stripe.Balance.retrieve(
+#                 stripe_account=supplier.account_id
+#         )
+#         balance = 0 
+#         for available_balance in account_balance.available:
+#             balance += available_balance.amount
+#         supplier.total_amount_due = balance
+#         supplier.save()

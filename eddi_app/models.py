@@ -1188,23 +1188,7 @@ class SupplierProfile(models.Model):
         verbose_name_plural = _("Supplier Profile")
 
 
-class UserPaymentDetail(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
-    course = models.ForeignKey(CourseDetails, on_delete=models.CASCADE, blank=True,null=True, default=None)
-    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
-    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User name"))
-    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
-    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
-    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
-    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
-    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
 
-    class Meta:
-        verbose_name_plural = _("User Payment Detail")
-
-    def __str__(self):
-        return str(self.course.course_name)
     
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Name"))
@@ -1217,45 +1201,10 @@ class FavouriteCourse(models.Model):
 
     class Meta:
         verbose_name_plural = _("Favourite Course")
-    
-class CourseEnroll(models.Model):
-    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
-    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('supplier email'))
-    payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
-    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Favourite Course Created Date Time'))
 
-
-    def __str__(self):
-        return str(self.payment_detail.course.course_name)
-
-    class Meta:
-        verbose_name_plural = _("Course Enroll")  
 
     
-@receiver(post_save, sender=CourseEnroll)
-def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    if created:
-        html_path = COURSE_ENROLL_HTML_TO_S
-        fullname = f'{instance.user_profile.first_name} {instance.user_profile.last_name}'
-        category = f'{instance.course_category}'
-        context_data = {'fullname':fullname, "course_category":category}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.supplier_email,)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-        print("TRUE")
+
 
 
 class EventAd(models.Model):    
@@ -1411,12 +1360,14 @@ class RecruitmentAd(models.Model):
         
 
 class InvoiceData(models.Model):
+    # uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
     user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
     vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Vat'))
     user_email = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Course Name'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
+    # invoice_pdf = models.FileField(blank=True,null=True,upload_to='invoice/',verbose_name=_('Invoice Pdf'))
 
     def __str__(self):
         return str(self.course_name)
@@ -1439,6 +1390,63 @@ class InvoiceDataEvent(models.Model):
     class Meta:
         verbose_name_plural = _("Invoice Data Event")
 
+class UserPaymentDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    course = models.ForeignKey(CourseDetails, on_delete=models.CASCADE, blank=True,null=True, default=None)
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User name"))
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
+    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
+    # invoice = models.ForeignKey(InvoiceData, on_delete=models.CASCADE, blank=True,null=True, default=None)
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
+
+    class Meta:
+        verbose_name_plural = _("User Payment Detail")
+
+    def __str__(self):
+        return str(self.course.course_name)
+
+    
+class CourseEnroll(models.Model):
+    course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
+    supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('supplier email'))
+    payment_detail = models.ForeignKey(UserPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Favourite Course Created Date Time'))
+
+
+    def __str__(self):
+        return str(self.payment_detail.course.course_name)
+
+    class Meta:
+        verbose_name_plural = _("Course Enroll")  
+
+@receiver(post_save, sender=CourseEnroll)
+def send_appointment_confirmation_email(sender, instance, created, **kwargs):
+    if created:
+        html_path = COURSE_ENROLL_HTML_TO_S
+        fullname = f'{instance.user_profile.first_name} {instance.user_profile.last_name}'
+        category = f'{instance.course_category}'
+        context_data = {'fullname':fullname, "course_category":category}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (instance.supplier_email,)
+        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'
+        image = 'Logo.png'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
+        print("TRUE")
 
 class Notification(models.Model):
     sender = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('sender'))

@@ -104,6 +104,15 @@ class PayByInvoice(APIView):
                         course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
                         fullname = f'{course.supplier.first_name} {course.supplier.last_name}'
                         recipient_list = (course.supplier.email_id,)
+                         
+                        try:
+                            supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
+                            total_earnings = supplier_data.total_earnings + float(record_map2["amount"])
+                            setattr(supplier_data,'total_earnings',total_earnings)
+                            supplier_data.save()
+                        except Exception as ex:
+                            pass
+                    
                     else:
                         event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                         fullname = f'{event.admin_name}'
@@ -154,6 +163,7 @@ class Save_stripe_info(APIView):
             
             try:
                 customer_data = stripe.Customer.list(email=email_id).data
+                print(customer_data)
                 if len(customer_data) == 0:
                     # creating customer
                     customer = stripe.Customer.create(email=email_id, payment_method=payment_method_id)
@@ -173,13 +183,14 @@ class Save_stripe_info(APIView):
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
 
-                    supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
+                    # supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
 
+                    print(customer['id'])
                     intent = stripe.PaymentIntent.create(
                         transfer_data = {
                             'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
                         },
-                        amount=supplier_amount,
+                        amount=int(float(amount)*100),
                         currency='usd',
                         description='helllo',
                         customer=customer['id'],
@@ -188,7 +199,7 @@ class Save_stripe_info(APIView):
                         application_fee_amount=int(float(amount)*100*0.5),
                         confirm=True,
                     )
-                    
+                    print(intent)
                 except Exception as ex:
                     print(ex)
                     return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST) 
@@ -215,11 +226,12 @@ class Save_stripe_info(APIView):
                     record = {}
                     try: 
                         record = {
-                        "invoice_number" : invoice_number,
-                        "user_address" : "Address",
-                        "user_email" : instance.email_id,
-                        "course_name" : course_name,
-                        "vat_charges" : vat_val
+                            "invoice_number" : invoice_number,
+                            "user_address" : "Address",
+                            "user_email" : instance.email_id,
+                            "course_name" : course_name,
+                            "vat_charges" : vat_val,
+                            # "invoice_pdf" : filename,
                         }
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
                     except:
@@ -1371,7 +1383,8 @@ class UserPaymentDetail_info(APIView):
                 CARD_TYPE : card_type,
                 AMOUNT: float(amount),
                 STATUS: status_s,
-                CREATED_AT : make_aware(datetime.datetime.now())
+                CREATED_AT : make_aware(datetime.datetime.now()),
+                # "invoice" : getattr(models,"InvoiceData").objects.get(**{"user_email":user_data.email_id,"course_name":course_data.course_name})
                 }
 
             if payment_mode == "eddi":

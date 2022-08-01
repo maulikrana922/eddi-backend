@@ -1465,11 +1465,11 @@ class SupplierOrganizationProfileview(APIView):
                     try:
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_active.html"
-                        fullname = f'{data.first_name} {data.last_name}'
+                        fullname = f'{data1.usersignup.first_name} {data1.usersignup.first_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
-                        recipient_list = (email_id,)
+                        recipient_list = (data1.supplier_email,)
                         email_msg = EmailMessage('Account has been Activated by the Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
@@ -1489,11 +1489,11 @@ class SupplierOrganizationProfileview(APIView):
                     try:
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_inactive.html"
-                        fullname = f'{data.first_name} {data.last_name}'
+                        fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
-                        recipient_list = (email_id,)
+                        recipient_list = (data1.supplier_email,)
                         email_msg = EmailMessage('Account has been Deactivated by the Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
@@ -1521,11 +1521,11 @@ class SupplierOrganizationProfileview(APIView):
                     try:
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
-                        fullname = f'{data.first_name} {data.last_name}'
+                        fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
                         context_data = {'fullname':fullname, "email_id":email_id}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
-                        recipient_list = (email_id,)
+                        recipient_list = (data1.supplier_email,)
                         email_msg = EmailMessage('Profile Approved by Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
@@ -1538,7 +1538,8 @@ class SupplierOrganizationProfileview(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                    except:
+                    except Exception as e:
+                        print(e)
                         pass
                 elif request.POST.get(APPROVAL_STATUS) == "Pending":
                     record_map1[IS_APPROVED_ID] = 2
@@ -2025,3 +2026,44 @@ class GetAccountDetail(APIView):
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SupplierWithDrawRequest(APIView):
+    def post(self,request):
+        try:
+            email_id =  get_user_email_by_token(request)
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+            if user_data.user_type.user_type == SUPPLIER_S:
+                try:
+                    supplier_data = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email_id})
+                except Exception:
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                withdraw_amount = float(request.POST.get('amount'))
+               
+                if withdraw_amount <= supplier_data.total_amount_due:
+                        html_path = RESETPASSWORD_HTML
+                        fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
+                        context_data = {"amount": withdraw_amount,"fullname":fullname}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = (email_id,)
+                        email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'  
+                        image = 'Logo.png'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully"}, status=status.HTTP_200_OK) 
+                else:
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
