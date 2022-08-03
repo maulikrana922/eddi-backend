@@ -194,8 +194,6 @@ def my_cron_job_balance():
         account_balance = stripe.Balance.retrieve(
                 stripe_account=supplier.account_id
         )
-        balance = 0 
         for available_balance in account_balance.available:
-            balance += available_balance.amount
-        supplier.total_amount_due = balance
-        supplier.save()
+            supplier.total_amount_due = available_balance["amount"]
+            supplier.save()

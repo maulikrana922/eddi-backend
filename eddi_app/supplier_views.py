@@ -2037,7 +2037,7 @@ class GetAdminPaymentList(APIView):
 class GetAccountDetail(APIView):
     def get(self,request):
         try:
-            email = "kabariyanishant@gmail.com"
+            email = "krupa.s@yopmail.com"
             supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
             print(supplier_account.account_id)
             balance = stripe.Balance.retrieve(
