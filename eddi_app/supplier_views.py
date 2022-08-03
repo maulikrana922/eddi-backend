@@ -2085,9 +2085,27 @@ class SupplierWithDrawRequest(APIView):
                 else:
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class SupplierPayout(APIView):
+    def post(self, request, uuid=None):
+        try:
+            email_id = get_user_email_by_token(request)
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+            if user_data.user_type.user_type == ADMIN_S:
+                amount = request.POST.get(AMOUNT)  
+                supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__uuid":uuid})
+                if amount <= supplier_account.total_amount_due:
+                    payout = stripe.Payout.create(
+                        amount=int(amount)*100,
+                        currency='sek',
+                        stripe_account=supplier_account.account_id,
+                    )
+                    print(payout)
+
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 

@@ -21,6 +21,7 @@ urlpatterns = [
     path('save-stripe-account/',SaveStripeAccount.as_view(),name="SaveStripeAccount"),
     path('get-account-detail/',GetAccountDetail.as_view(),name="GetAccountDetail"),
     path('supplier-withdraw-request/',SupplierWithDrawRequest.as_view(),name="SupplierWithDrawRequest"),
+    path('supplier-payout/<str:uuid>',SupplierPayout.as_view(),name="SupplierPayout"),
     path('stripe-webhook/',stripe_webhook,name="StripeWebhook"),
 
     # General Login/SignUp

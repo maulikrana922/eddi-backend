@@ -52,7 +52,6 @@ class PayByInvoice(APIView):
             record_map = {
             "invoice_method" : request.POST.get("InvoiceMethod"),
             "dob" : request.POST.get("Dob"),
-            "organization_reference" : request.POST.get("OrganizationReference"),
             "student_name" : request.POST.get("NameOfStudent"),
             "personal_number" : request.POST.get("PersonalNumber"),
             "organization_name" : request.POST.get("OrganizationName"),
@@ -166,7 +165,6 @@ class Save_stripe_info(APIView):
             
             try:
                 customer_data = stripe.Customer.list(email=email_id).data
-                print(customer_data)
                 if len(customer_data) == 0:
                     # creating customer
                     customer = stripe.Customer.create(email=email_id, payment_method=payment_method_id)
@@ -186,23 +184,29 @@ class Save_stripe_info(APIView):
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
 
-                    # supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
-
-                    print(customer['id'])
+                    supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
                     intent = stripe.PaymentIntent.create(
-                        transfer_data = {
-                            'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                        },
+                        # on_behalf_of = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                        # transfer_data = {
+                        #     'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                        # },
                         amount=int(float(amount)*100),
-                        currency='usd',
+                        currency='sek',
                         description='helllo',
                         customer=customer['id'],
                         payment_method_types=["card"],
                         payment_method=payment_method_id,
-                        application_fee_amount=int(float(amount)*100*0.5),
+                        # application_fee_amount=int(float(amount)*100*0.5),
                         confirm=True,
                     )
-                    print(intent)
+                    print(intent,"intent")
+                    transfer = stripe.Transfer.create(
+                        amount=supplier_amount,
+                        currency='sek',
+                        destination=getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                    )
+                   
+                    
                 except Exception as ex:
                     print(ex)
                     return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST) 

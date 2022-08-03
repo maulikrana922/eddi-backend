@@ -188,14 +188,14 @@ def my_cron_job_login():
 #                 except:
 #                     pass
 
-# def my_cron_job_balance(): 
-#     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
-#     for supplier in supplier_data:
-#         account_balance = stripe.Balance.retrieve(
-#                 stripe_account=supplier.account_id
-#         )
-#         balance = 0 
-#         for available_balance in account_balance.available:
-#             balance += available_balance.amount
-#         supplier.total_amount_due = balance
-#         supplier.save()
+def my_cron_job_balance(): 
+    supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
+    for supplier in supplier_data:
+        account_balance = stripe.Balance.retrieve(
+                stripe_account=supplier.account_id
+        )
+        balance = 0 
+        for available_balance in account_balance.available:
+            balance += available_balance.amount
+        supplier.total_amount_due = balance
+        supplier.save()
