@@ -377,7 +377,7 @@ class Save_stripe_info(APIView):
                             #     'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
                             # },
                             amount=int(float(amount)*100),
-                            currency='usd',
+                            currency='sek',
                             description=f'Course = {course_name},User = {email_id}',
                             customer=customer['id'],
                             payment_method_types=["card"],
@@ -388,7 +388,7 @@ class Save_stripe_info(APIView):
                         print(intent,"intent")
                         transfer = stripe.Transfer.create(
                             amount=supplier_amount,
-                            currency='usd',
+                            currency='sek',
                             destination=getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
                         )
                     else:
