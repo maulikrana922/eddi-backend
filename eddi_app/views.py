@@ -465,7 +465,7 @@ class Save_stripe_info(APIView):
         return Response({MESSAGE: 'Invalid Request', DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([AllowAny])
-class Save_stripe_infoEvent(APIView):
+class Save_stripe_infoEvent(APIView): 
     def post(self, request, *args, **kwargs):
             if request.method == POST_METHOD:
                 user_email_id = request.POST.get(EMAIL_ID)
