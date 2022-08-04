@@ -20,20 +20,20 @@ class Migration(migrations.Migration):
         #     model_name='invoicedataevent',
         #     name='uuid',
         # ),
-        # migrations.CreateModel(
-        #     name='SupplierPayoutDetail',
-        #     fields=[
-        #         ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-        #         ('uuid', models.UUIDField(blank=True, default=uuid.uuid4, null=True, unique=True, verbose_name='UUID')),
-        #         ('payout_id', models.CharField(blank=True, max_length=100, null=True, verbose_name='Payout Id')),
-        #         ('amount', models.FloatField(blank=True, null=True, verbose_name='Payout Amount')),
-        #         ('created_date_time', models.DateTimeField(auto_now_add=True, verbose_name='Created Date Time')),
-        #         ('modified_date_time', models.DateTimeField(auto_now=True, verbose_name='Modified Date Time')),
-        #         ('is_deleted', models.BooleanField(default=False, verbose_name='Is Deleted')),
-        #         ('supplier_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='eddi_app.supplieraccountdetail', verbose_name='Supplier Account')),
-        #     ],
-        #     options={
-        #         'verbose_name_plural': 'Supplier Account Details Table',
-        #     },
-        # ),
+        migrations.CreateModel(
+            name='SupplierPayoutDetail',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uuid', models.UUIDField(blank=True, default=uuid.uuid4, null=True, unique=True, verbose_name='UUID')),
+                ('payout_id', models.CharField(blank=True, max_length=100, null=True, verbose_name='Payout Id')),
+                ('amount', models.FloatField(blank=True, null=True, verbose_name='Payout Amount')),
+                ('created_date_time', models.DateTimeField(auto_now_add=True, verbose_name='Created Date Time')),
+                ('modified_date_time', models.DateTimeField(auto_now=True, verbose_name='Modified Date Time')),
+                ('is_deleted', models.BooleanField(default=False, verbose_name='Is Deleted')),
+                ('supplier_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='eddi_app.supplieraccountdetail', verbose_name='Supplier Account')),
+            ],
+            options={
+                'verbose_name_plural': 'Supplier Account Details Table',
+            },
+        ),
     ]

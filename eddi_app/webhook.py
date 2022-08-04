@@ -25,6 +25,24 @@ class StripeWebhookActions:
         payout_obj = getattr(models,"SupplierPayoutDetail").objects.get(**{"payout_id":obj["id"]})
         payout_obj.supplier_account.total_amount_withdraw = payout_obj.amount
         payout_obj.save()
+        html_path = SUPPLIER_PAYOUT_SUCCESSED_HTML
+        fullname = payout_obj.supplier_account.supplier.first_name + " " + payout_obj.supplier_account.supplier.last_name
+        context_data = {"amount": payout_obj.amount,"fullname":fullname}
+        email_html_template = get_template(html_path).render(context_data)
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = (payout_obj.supplier_account.supplier.email_id,)
+        email_msg = EmailMessage('Supplier Receives the Payment',email_html_template,email_from,recipient_list)
+        email_msg.content_subtype = 'html'
+        path = 'eddi_app'
+        img_dir = 'static'  
+        image = 'Logo.png'
+        file_path = os.path.join(path,img_dir,image)
+        with open(file_path,'rb') as f:
+            img = MIMEImage(f.read())
+            img.add_header('Content-ID', '<{name}>'.format(name=image))
+            img.add_header('Content-Disposition', 'inline', filename=image)
+        email_msg.attach(img)
+        email_msg.send(fail_silently=False)
         print(payout_obj)
 
     # def charge_succeeded(self, event):

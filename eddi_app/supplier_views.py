@@ -2073,7 +2073,8 @@ class SupplierWithDrawRequest(APIView):
                 withdraw_amount = float(request.POST.get('amount'))
                
                 if withdraw_amount <= supplier_data.total_amount_due:
-                        html_path = RESETPASSWORD_HTML
+                    try:
+                        html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
                         context_data = {"amount": withdraw_amount,"fullname":fullname}
                         email_html_template = get_template(html_path).render(context_data)
@@ -2091,10 +2092,39 @@ class SupplierWithDrawRequest(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully"}, status=status.HTTP_200_OK) 
+                   
+                    except Exception as ex:
+                        print(ex)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                    try:
+                        # admin_emails = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":ADMIN_S}).values_list("email_id", flat=True)
+                        html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
+                        fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
+                        context_data = {"amount": withdraw_amount,"fullname":fullname}
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = ("nishant.k@latitudetechnolabs.com",)
+                        email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        path = 'eddi_app'
+                        img_dir = 'static'  
+                        image = 'Logo.png'
+                        file_path = os.path.join(path,img_dir,image)
+                        with open(file_path,'rb') as f:
+                            img = MIMEImage(f.read())
+                            img.add_header('Content-ID', '<{name}>'.format(name=image))
+                            img.add_header('Content-Disposition', 'inline', filename=image)
+                        email_msg.attach(img)
+                        email_msg.send(fail_silently=False)
+                        return Response({STATUS: SUCCESS, DATA: "Withdrawal request sent successfully"}, status=status.HTTP_200_OK) 
+                    
+                    except Exception as ex:
+                        print(ex)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
+                  
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2113,7 +2143,7 @@ class SupplierPayout(APIView):
                         payout = stripe.Payout.create(
                             amount=int(amount)*100,
                             currency='sek',
-                            method='instant',
+                            # method='instant',
                             stripe_account=supplier_account.account_id,
                         )
                         print(payout)
