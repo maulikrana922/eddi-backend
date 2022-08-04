@@ -2001,6 +2001,10 @@ class SaveStripeAccount(APIView):
                     }
                     print(record_map)
                     getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
+                    stripe.Account.modify(
+                        stripe_response['stripe_user_id'],
+                        settings={"payouts": {"schedule": {"interval": "manual"}}},
+                    )
                     return Response({STATUS: SUCCESS, DATA: "Account  Connected Succesfully"}, status=status.HTTP_200_OK)
                
                 except Exception as ex:
@@ -2050,10 +2054,10 @@ class GetAccountDetail(APIView):
                 account_balance = stripe.Balance.retrieve(
                         stripe_account=supplier.account_id
                 )
-                # for available_balance in account_balance.available:
-                #     supplier.total_amount_due = available_balance["amount"]
-                #     print(supplier.total_amount_due)
-                #     supplier.save()
+                for available_balance in account_balance.available:
+                    supplier.total_amount_due = available_balance["amount"]
+                    print(supplier.total_amount_due)
+                    supplier.save()
         
         except Exception as ex:
             print(ex)

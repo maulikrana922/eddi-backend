@@ -12,14 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.RemoveField(
-        #     model_name='invoicedata',
-        #     name='uuid',
-        # ),
-        # migrations.RemoveField(
-        #     model_name='invoicedataevent',
-        #     name='uuid',
-        # ),
         migrations.CreateModel(
             name='SupplierPayoutDetail',
             fields=[

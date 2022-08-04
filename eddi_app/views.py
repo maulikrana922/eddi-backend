@@ -1589,7 +1589,7 @@ class UserPaymentDetail_info(APIView):
                 AMOUNT: float(amount),
                 STATUS: status_s,
                 CREATED_AT : make_aware(datetime.datetime.now()),
-                "invoice_pdf" : getattr(models,"InvoiceData").objects.get(**{"course_name":course_data.course_name,"email_id":email_id})
+                "invoice" : getattr(models,"InvoiceData").objects.get(**{"course_name":course_data.course_name,"user_email":email_id})
                 }
 
             if payment_mode == "eddi":
@@ -1606,7 +1606,7 @@ class UserPaymentDetail_info(APIView):
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
             except:
                 var = None
-          
+            var = None
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
@@ -1646,10 +1646,13 @@ class UserPaymentDetail_info(APIView):
                     
                     try:
                         supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
-                        total_earnings = supplier_data.total_earnings + float(amount)
-                        setattr(supplier_data,'total_earnings',total_earnings)
+                        if supplier_data.total_earnings == None:
+                            supplier_data.total_earnings = float(amount)
+                        else:
+                            supplier_data.total_earnings += float(amount)
                         supplier_data.save()
                     except Exception as ex:
+                        print(ex)
                         pass
                     try:
                         sender_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
