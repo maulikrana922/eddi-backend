@@ -249,7 +249,15 @@ class InvoiceVATCMS(models.Model):
     class Meta:
         verbose_name_plural = _("Invoice VAT Table")
 
+class PlatformFeeCMS(models.Model):
+    platform_fee = models.IntegerField(blank=True,null=True,verbose_name=_("Platform Fee Value Percentage"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
 
+    def __str__(self):
+        return str(self.platform_fee)
+
+    class Meta:
+        verbose_name_plural = _("Platform Fee Table")
 
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
@@ -1257,39 +1265,6 @@ class EventAd(models.Model):
         verbose_name_plural = _("EventAd Table")
 
 
-class EventAdPaymentDetail(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
-    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
-    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
-    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User Name"))
-    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
-    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
-    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
-    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
-    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
-
-
-    def __str__(self):
-        return str(self.event_name)
-
-    class Meta:
-        verbose_name_plural = _("Event Ad Payment Detail") 
-
-class EventAdEnroll(models.Model):
-    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event name"))
-    user_email = models.EmailField(blank=True,null=True,verbose_name=_('User Email'))
-    payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
-    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
-
-    def __str__(self):
-        return str(self.event_name)
-
-    class Meta:
-        verbose_name_plural = _("Event Ad Enroll")
-    
 
 class MaterialVideoMaterial(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
@@ -1369,14 +1344,15 @@ class RecruitmentAd(models.Model):
         
 
 class InvoiceData(models.Model):
-    # uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
     user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
     vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Vat'))
     user_email = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    invoice_pdf = models.FileField(blank=True,null=True,upload_to='invoice/',verbose_name=_('Invoice Pdf'))
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Course Name'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
-    # invoice_pdf = models.FileField(blank=True,null=True,upload_to='invoice/',verbose_name=_('Invoice Pdf'))
+    
 
     def __str__(self):
         return str(self.course_name)
@@ -1386,10 +1362,12 @@ class InvoiceData(models.Model):
 
 
 class InvoiceDataEvent(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     invoice_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Invoice Number'))
     user_address = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('User Address'))
     vat_charges = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Vat'))
     user_email = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    invoice_pdf = models.FileField(blank=True,null=True,upload_to='invoice/',verbose_name=_('Invoice Pdf'))
     event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Name'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('created_date_time'))
 
@@ -1398,6 +1376,42 @@ class InvoiceDataEvent(models.Model):
     
     class Meta:
         verbose_name_plural = _("Invoice Data Event")
+
+
+class EventAdPaymentDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
+    admin_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Admin Name"))
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event Name"))
+    email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
+    user_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("User Name"))
+    card_type = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Card Type"))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_("Amount"))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
+    payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
+    invoice = models.ForeignKey(InvoiceDataEvent, on_delete=models.CASCADE, blank=True,null=True, default=None)
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
+    is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
+
+
+    def __str__(self):
+        return str(self.event_name)
+
+    class Meta:
+        verbose_name_plural = _("Event Ad Payment Detail") 
+
+class EventAdEnroll(models.Model):
+    event_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Event name"))
+    user_email = models.EmailField(blank=True,null=True,verbose_name=_('User Email'))
+    payment_detail = models.ForeignKey(EventAdPaymentDetail,on_delete=models.CASCADE,verbose_name=_('Payment Detail'),blank=True,null=True)
+    user_profile = models.ForeignKey(UserProfile,on_delete=models.CASCADE,verbose_name=_('User Profile'),blank=True,null=True)
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+
+    def __str__(self):
+        return str(self.event_name)
+
+    class Meta:
+        verbose_name_plural = _("Event Ad Enroll")
+    
 
 class UserPaymentDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
@@ -1409,7 +1423,7 @@ class UserPaymentDetail(models.Model):
     payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_("Payment Mode"))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Payment Created Date Time'))
     status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Payment Status"))
-    # invoice = models.ForeignKey(InvoiceData, on_delete=models.CASCADE, blank=True,null=True, default=None)
+    invoice = models.ForeignKey(InvoiceData, on_delete=models.CASCADE, blank=True,null=True, default=None)
     is_approved = models.ForeignKey(approval_status, on_delete=models.CASCADE, verbose_name=_('Approval Status'), blank=True,null=True, default=None)
 
     class Meta:
@@ -1504,13 +1518,12 @@ class PaybyInvoice(models.Model):
     personal_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Personal Number'))
     organization_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Name'))
     organization_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Number'))
-    organization_reference = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Organization Reference'))
     street_number = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Street Number'))
     reference = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Reference'))
     zip_code = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Zip'))
     contry = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Contry'))
     city = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('City'))
-    invoice_address = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Invoice Address'))
+    # invoice_address = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Invoice Address'))
     email_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Email_id'))
     price = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Price'))
     course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,default=None,null=True,blank=True,verbose_name=_('Course'))
@@ -1709,10 +1722,23 @@ def send_session_email(sender, instance, created, **kwargs):
 class SupplierAccountDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier'))
+    commission = models.ForeignKey(PlatformFeeCMS,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Commission'))
     account_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Account Id'))
     total_earnings = models.FloatField(blank=True,null=True,verbose_name=_('Total Earnings'))
     total_amount_due = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Due'))
     total_amount_withdraw = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Withdraw'))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Supplier Account Details Table")
+
+class SupplierPayoutDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier_account = models.ForeignKey(SupplierAccountDetail,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Account'))
+    payout_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Payout Id'))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_('Payout Amount'))
     created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
     modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
     is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))

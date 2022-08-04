@@ -20,9 +20,12 @@ class StripeWebhookActions:
         obj = event.data.object
         print(obj)
 
-    def payout_user(self, event):
+    def payout_succeeded(self, event):
         obj = event.data.object
-        print(obj)
+        payout_obj = getattr(models,"SupplierPayoutDetail").objects.get(**{"payout_id":obj["id"]})
+        payout_obj.supplier_account.total_amount_withdraw = payout_obj.amount
+        payout_obj.save()
+        print(payout_obj)
 
     # def charge_succeeded(self, event):
     #     charge = event.data.object
@@ -96,7 +99,7 @@ class StripeWebhookActions:
         'payment_intent.succeeded': intent_succeeded,
         'balance.available': balance_updated,
         'account.updated': account_updated,
-        'payout.paid':payout_user
+        'payout.paid':payout_succeeded
         # 'charge.succeeded': charge_succeeded,
         # 'customer.subscription.updated': customer_subscription_updated,
         # 'customer.subscription.deleted': delete_subscription,

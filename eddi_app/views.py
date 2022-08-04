@@ -61,8 +61,8 @@ class PayByInvoice(APIView):
             "zip_code" : request.POST.get("Zip"),
             "contry" : request.POST.get("Country"),
             "city" : request.POST.get("City"),
-            "invoice_address" : request.POST.get("invoiceAddress"),
-            "email_id" : email_id,
+            # "invoice_address" : request.POST.get("invoiceAddress"),
+            "email_id" : request.POST.get("InvoiceEmail"),
             "price" : request.POST.get("price"),
             "payment_mode" : request.POST.get("payment_mode"),
             "product_type" : request.POST.get("product_type"),
@@ -74,38 +74,57 @@ class PayByInvoice(APIView):
             else:
                 record_map["product_name"] = request.POST.get("course_name")
 
+            # try:
+            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+            #     if var is not None:
+            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     pass
+
+
             getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
             try:
-                user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:request.POST.get("email_id")})
+                user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                amount = float(request.POST.get("price"))
                 if request.POST.get("product_type") == "course":
+                    print("Course")
                     record_map1 = {}
                     record_map1 = {
                         "course_id" : course.id,
-                        "email_id" : request.POST.get("email_id"),
+                        "email_id" : email_id,
                         "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                        "amount" : float(request.POST.get("price")),
+                        "amount" : amount,
                         "payment_mode" : "PayByInvoice",
                     }
                     record_map1[IS_APPROVED_ID] = 2
-                    getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
+                   
                 else:
+                    print("Event")
                     event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                     record_map2 = {}
                     record_map2 = {
                         "admin_name" : event.admin_name,
                         "event_name" : request.POST.get("event_name"),
-                        "email_id" : request.POST.get("email_id"),
+                        "email_id" : email_id,
                         "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                        "amount" : float(request.POST.get("price")),
+                        "amount" : amount,
                         "payment_mode" : "PayByInvoice",
                     }
                     record_map2[IS_APPROVED_ID] = 2
-                    getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.update_or_create(**record_map2)
+                   
                 try:
+                    vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                    vat_val = int(vat[0])
                     if request.POST.get("product_type") == "course":
                         course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})
-                        fullname = f'{course.supplier.first_name} {course.supplier.last_name}'
-                        recipient_list = (course.supplier.email_id,)
+                        total_price = int(amount) + (int(amount)*vat_val)/100
+                        instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})   
+                        if record_map["invoice_method"] == "PayByMe":
+                            fullname = f'{instance.first_name}'
+                            recipient_list = (email_id,)
+                        elif record_map["invoice_method"] == "PayByOrg":
+                            fullname = f'{record_map["organization_name"]}'
+                            recipient_list = (record_map["email_id"],instance.email_id)
                          
                         try:
                             supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
@@ -117,31 +136,114 @@ class PayByInvoice(APIView):
                     
                     else:
                         event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
-                        fullname = f'{event.admin_name}'
-                        recipient_list = (event.admin_email,)
+                        total_price = int(amount) + (int(amount)*vat_val)/100
+                        
+                        if record_map["invoice_method"] == "PayByMe":
+                            recipient_list = (email_id,)
+                            fullname = f'{event.admin_name}'
+                        elif record_map["invoice_method"] == "PayByOrg":
+                            recipient_list = (record_map["email_id"],instance.email_id)
+                            fullname = f'{event.admin_name}'
+                    print(recipient_list,"receiptent")
+                    try:            
+                       
+                        html_path = "pay_by_invoice.html" 
+                        context_data = {'fullname':fullname, "student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"), "organization_name":request.POST.get("OrganizationName"), "organization_number":request.POST.get("OrganizationNumber"), "street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"invoice_address" : request.POST.get("invoiceAddress"),"email_id" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"dob":request.POST.get("Dob"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price}
 
-                    html_path = "pay_by_invoice.html"
-                    context_data = {'fullname':fullname, "student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"), "organization_name":request.POST.get("OrganizationName"), "organization_number":request.POST.get("OrganizationNumber"), "street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"invoice_address" : request.POST.get("invoiceAddress"),"email_id" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type")}
-                    email_html_template = get_template(html_path).render(context_data)
-                    email_from = settings.EMAIL_HOST_USER
-                    email_msg = EmailMessage('Pay By Invoice!!',email_html_template,email_from,recipient_list)
-                    email_msg.content_subtype = 'html'
-                    path = 'eddi_app'
-                    img_dir = 'static'
-                    image = 'Logo.png'
-                    file_path = os.path.join(path,img_dir,image)
-                    with open(file_path,'rb') as f:
-                        img = MIMEImage(f.read())
-                        img.add_header('Content-ID', '<{name}>'.format(name=image))
-                        img.add_header('Content-Disposition', 'inline', filename=image)
-                    email_msg.attach(img)
-                    email_msg.send(fail_silently=False)
-                except:
+                        email_html_template = get_template(html_path).render(context_data)
+                        email_from = settings.EMAIL_HOST_USER
+                        recipient_list = recipient_list
+                        invoice_number = random.randrange(100000,999999)
+                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course.course_name,"course_fees": amount, "vat":vat_val, "total":total_price}
+                        template = get_template('invoice_temp_pbi.html').render(context_data1)
+                        try: 
+                            result = BytesIO()
+                            pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+                            pdf = result.getvalue()
+                            filename = f'Invoice-{invoice_number}.pdf'
+                        except Exception as e:
+                            print(e,"pdf exp")
+                            pass
+                        record = {}
+                        try: 
+                            if request.POST.get("product_type") == "course":
+                                record = {
+                                    "invoice_number" : invoice_number,
+                                    "user_address" : "Address",
+                                    "user_email" : instance.email_id,
+                                    "course_name" : course.course_name,
+                                    "vat_charges" : vat_val,
+                                    "invoice_pdf" : filename,
+                                    }
+                                invoice_data = getattr(models,"InvoiceData").objects.update_or_create(**record)
+                                record_map1["invoice"] = invoice_data[0]
+                                getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map1)
+                            else:
+                                record = {
+                                    "invoice_number" : invoice_number,
+                                    "user_address" : "Address",
+                                    "user_email" : instance.email_id,
+                                    "course_name" : course.course_name,
+                                    "vat_charges" : vat_val,
+                                    "invoice_pdf" : filename,
+                                    }
+                                invoice_data = getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
+                                record_map2["invoice"] = invoice_data[0]
+                                getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.update_or_create(**record_map2)
+                        
+                        except Exception as e:
+                            print(e,"invoice Data Model")
+                            pass
+                        try:
+                            path = 'eddi_app'
+                            img_dir = 'static'
+                            image = 'Logo.png'
+                            file_path = os.path.join(path,img_dir,image)
+                            with open(file_path,'rb') as f:
+                                img = MIMEImage(f.read())
+                                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                img.add_header('Content-Disposition', 'inline', filename=image)
+                        except Exception as e:
+                            print(e,"filee")
+                            pass
+                        email_msg = EmailMessage('Payment Invoice!!',email_html_template,email_from,recipient_list)
+                        email_msg.content_subtype = 'html'
+                        email_msg.attach(img)
+                        try:
+                            email_msg.attach(filename, pdf, "application/pdf")                         
+                        except Exception as e:
+                            print(e,"attachhh")
+                            pass
+                        email_msg.send(fail_silently=False)
+                    except Exception as e:
+                        print(e)
+                        pass
+
+                    # html_path = "pay_by_invoice.html"
+                    # context_data = {'fullname':fullname, "student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"), "organization_name":request.POST.get("OrganizationName"), "organization_number":request.POST.get("OrganizationNumber"), "street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"invoice_address" : request.POST.get("invoiceAddress"),"email_id" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type")}
+                    # email_html_template = get_template(html_path).render(context_data)
+                    # email_from = settings.EMAIL_HOST_USER
+                    # email_msg = EmailMessage('Pay By Invoice!!',email_html_template,email_from,recipient_list)
+                    # email_msg.content_subtype = 'html'
+                    # path = 'eddi_app'
+                    # img_dir = 'static'
+                    # image = 'Logo.png'
+                    # file_path = os.path.join(path,img_dir,image)
+                    # with open(file_path,'rb') as f:
+                    #     img = MIMEImage(f.read())
+                    #     img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    #     img.add_header('Content-Disposition', 'inline', filename=image)
+                    # email_msg.attach(img)
+                    # email_msg.send(fail_silently=False)
+                except Exception as e:
+                    print(e,"exx")
                     pass
                 return Response({STATUS: SUCCESS, DATA: "Information successfully added", DATA_SV:"Informationen har nu sparats"}, status=status.HTTP_200_OK)
-            except:
+            except Exception as e:
+                print(e)
                 return Response({MESSAGE: ERROR, DATA:"Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
-        except:
+        except Exception as e:
+            print(e)
             return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -183,28 +285,37 @@ class Save_stripe_info(APIView):
                     #     payment_method=payment_method_id,
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-
-                    supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
-                    intent = stripe.PaymentIntent.create(
-                        # on_behalf_of = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                        # transfer_data = {
-                        #     'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                        # },
-                        amount=int(float(amount)*100),
-                        currency='sek',
-                        description='helllo',
-                        customer=customer['id'],
-                        payment_method_types=["card"],
-                        payment_method=payment_method_id,
-                        # application_fee_amount=int(float(amount)*100*0.5),
-                        confirm=True,
-                    )
-                    print(intent,"intent")
-                    transfer = stripe.Transfer.create(
-                        amount=supplier_amount,
-                        currency='sek',
-                        destination=getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                    )
+                    if course.supplier.user_type.user_type == SUPPLIER_S:
+                        supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
+                        intent = stripe.PaymentIntent.create(
+                            # on_behalf_of = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                            # transfer_data = {
+                            #     'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                            # },
+                            amount=int(float(amount)*100),
+                            currency='usd',
+                            description=f'Course = {course_name},User = {email_id}',
+                            customer=customer['id'],
+                            payment_method_types=["card"],
+                            payment_method=payment_method_id,
+                            # application_fee_amount=int(float(amount)*100*0.5),
+                            confirm=True,
+                        )
+                        print(intent,"intent")
+                        transfer = stripe.Transfer.create(
+                            amount=supplier_amount,
+                            currency='usd',
+                            destination=getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                        )
+                    else:
+                        intent = stripe.PaymentIntent.create(
+                            amount=int(float(amount)*100),
+                            currency='usd',
+                            description=f'Course = {course_name},User = {email_id}',
+                            customer=customer['id'],
+                            payment_method_types=["card"],
+                            payment_method=payment_method_id,
+                            confirm=True)
                    
                     
                 except Exception as ex:
@@ -238,7 +349,7 @@ class Save_stripe_info(APIView):
                             "user_email" : instance.email_id,
                             "course_name" : course_name,
                             "vat_charges" : vat_val,
-                            # "invoice_pdf" : filename,
+                            "invoice_pdf" : filename,
                         }
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
                     except:
@@ -1393,7 +1504,6 @@ class UserPaymentDetail_info(APIView):
                 AMOUNT: float(amount),
                 STATUS: status_s,
                 CREATED_AT : make_aware(datetime.datetime.now()),
-                # "invoice" : getattr(models,"InvoiceData").objects.get(**{"user_email":user_data.email_id,"course_name":course_data.course_name})
                 }
 
             if payment_mode == "eddi":
@@ -2663,3 +2773,32 @@ class Manage_Payment(APIView):
                 return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: SUCCESS, DATA: "You are not authorized to do this", DATA_SV:"Du har inte behörighet att utföra detta"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetUserSessionView(APIView):
+    def get(self, request):
+        try:
+            email_id = get_user_email_by_token(request)
+            try:
+                user_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+            except Exception as e:
+                print(e)
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            batch_detail = getattr(models,COURSE_BATCH).objects.filter(**{"students__in":[user_data]})
+            all_session = []
+            
+            for batch in batch_detail:
+                sessions = getattr(models,BATCH_SESSION).objects.filter(**{BATCH:batch})
+                all_session.extend(sessions)
+
+            try:
+                if serializer := SessionDetailsSerializer(all_session, many=True):
+                    return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+            except:
+                pass
+            
+        except Exception as e:
+            print(e)
+            return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_200_OK)

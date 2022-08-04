@@ -196,4 +196,5 @@ def my_cron_job_balance():
         )
         for available_balance in account_balance.available:
             supplier.total_amount_due = available_balance["amount"]
+            print(supplier.total_amount_due)
             supplier.save()

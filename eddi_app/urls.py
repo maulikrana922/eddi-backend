@@ -16,12 +16,12 @@ urlpatterns = [
     path('manage-payment/',Manage_Payment.as_view(), name="ManagePayment"),   
     path('manage-payment/<str:uuid>/',Manage_Payment.as_view(), name="ManagePayment"),   
     path('admin-payment-list/',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
-    path('admin-payment-list/<str:uuid>',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
+    path('admin-payment-list/<str:uuid>/',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
 
     path('save-stripe-account/',SaveStripeAccount.as_view(),name="SaveStripeAccount"),
     path('get-account-detail/',GetAccountDetail.as_view(),name="GetAccountDetail"),
     path('supplier-withdraw-request/',SupplierWithDrawRequest.as_view(),name="SupplierWithDrawRequest"),
-    path('supplier-payout/<str:uuid>',SupplierPayout.as_view(),name="SupplierPayout"),
+    path('supplier-payout/<str:uuid>/',SupplierPayout.as_view(),name="SupplierPayout"),
     path('stripe-webhook/',stripe_webhook,name="StripeWebhook"),
 
     # General Login/SignUp
@@ -130,7 +130,7 @@ urlpatterns = [
     # Notification
     path('notifications/',Notification.as_view()),
     
-    # Batch 
+    # Batch And Session
     path('get-allcourse-list/',GetCourseListView.as_view()),
     path('add-batch/',AddBatchView.as_view()),
     path('get-batch/',GetBatchView.as_view()),
@@ -138,5 +138,6 @@ urlpatterns = [
     path('add-session/',AddSessionView.as_view()),
     path('get-session/',GetSessionView.as_view()),
     path('get-session/<str:uuid>/',GetSessionView.as_view()),
+    path('get-user-session/',GetUserSessionView.as_view()),
 
 ]

@@ -2037,13 +2037,23 @@ class GetAdminPaymentList(APIView):
 class GetAccountDetail(APIView):
     def get(self,request):
         try:
-            email = "krupa.s@yopmail.com"
-            supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
-            print(supplier_account.account_id)
-            balance = stripe.Balance.retrieve(
-                stripe_account=supplier_account.account_id
-            )
-            print(balance)
+            # invocies = PaybyInvoice.objects.all()
+            # invocies.delete()
+            # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'account_id':"acct_1LQlCPRI6ytOhdnS"})
+            # print(supplier_account)
+            # supplier_account.delete()           
+            # email = "krupa.s@yopmail.com"
+            # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
+            # print(supplier_account.account_id)
+            supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
+            for supplier in supplier_data:
+                account_balance = stripe.Balance.retrieve(
+                        stripe_account=supplier.account_id
+                )
+                # for available_balance in account_balance.available:
+                #     supplier.total_amount_due = available_balance["amount"]
+                #     print(supplier.total_amount_due)
+                #     supplier.save()
         
         except Exception as ex:
             print(ex)
@@ -2096,15 +2106,28 @@ class SupplierPayout(APIView):
             email_id = get_user_email_by_token(request)
             user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
             if user_data.user_type.user_type == ADMIN_S:
-                amount = request.POST.get(AMOUNT)  
-                supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__uuid":uuid})
-                if amount <= supplier_account.total_amount_due:
-                    payout = stripe.Payout.create(
-                        amount=int(amount)*100,
-                        currency='sek',
-                        stripe_account=supplier_account.account_id,
-                    )
-                    print(payout)
+                amount = float(request.POST.get(AMOUNT))
+                try:  
+                    supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{UUID:uuid})
+                    if amount <= supplier_account.total_amount_due:
+                        payout = stripe.Payout.create(
+                            amount=int(amount)*100,
+                            currency='sek',
+                            method='instant',
+                            stripe_account=supplier_account.account_id,
+                        )
+                        print(payout)
+                        record_map = {
+                            "supplier_account":supplier_account,
+                            "payout_id":payout["id"],
+                            "amount":payout["amount"],
+                        }
+                        getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
+                        return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
+                
+                except Exception as ex:
+                    print(ex)
+                    return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
 
         except Exception as ex:
             print(ex)
