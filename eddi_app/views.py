@@ -128,7 +128,7 @@ class PayByInvoice(APIView):
                             "user_email" : email_id,
                             "course_name" : course.course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : filename,
+                            "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
                             }
                     invoice_data = getattr(models,"InvoiceData").objects.update_or_create(**record)
                     record_map1["invoice"] = invoice_data[0]
@@ -162,7 +162,7 @@ class PayByInvoice(APIView):
                         "user_email" : email_id,
                         "course_name" : course.course_name,
                         "vat_charges" : vat_val,
-                        "invoice_pdf" : filename,
+                        "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
                         }
                     invoice_data = getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
                     record_map2["invoice"] = invoice_data[0]
@@ -433,7 +433,7 @@ class Save_stripe_info(APIView):
                             "user_email" : instance.email_id,
                             "course_name" : course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : filename,
+                            "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
                         }
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
                     except:
@@ -530,7 +530,8 @@ class Save_stripe_infoEvent(APIView):
                             "user_address" : "Address",
                             "user_email" : instance.email_id,
                             "event_name" : event_name,
-                            "vat_charges" : vat_val
+                            "vat_charges" : vat_val,
+                            "invoice" :  "/var/www/html/eddi-backend/media/"+filename,
                             }
                             getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
                         except:
@@ -1588,7 +1589,7 @@ class UserPaymentDetail_info(APIView):
                 AMOUNT: float(amount),
                 STATUS: status_s,
                 CREATED_AT : make_aware(datetime.datetime.now()),
-                "invoice" : getattr(models,"InvoiceData").objects.get(**{"course_name":course_data.course_name,"email_id":email_id})
+                "invoice_pdf" : getattr(models,"InvoiceData").objects.get(**{"course_name":course_data.course_name,"email_id":email_id})
                 }
 
             if payment_mode == "eddi":
