@@ -359,6 +359,8 @@ class Save_stripe_info(APIView):
                     #     payment_method=payment_method_id,
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
+                    supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
+                   
                     if course.supplier.user_type.user_type == SUPPLIER_S:
                         supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
                         intent = stripe.PaymentIntent.create(
@@ -375,8 +377,17 @@ class Save_stripe_info(APIView):
                         transfer = stripe.Transfer.create(
                             amount=supplier_amount,
                             currency='sek',
-                            destination=getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
+                            destination=supplier_acct.account_id,
                         )
+                        try:
+                            account_balance = stripe.Balance.retrieve(
+                                    stripe_account=supplier_acct.account_id
+                            )
+                            for available_balance in account_balance.available:
+                                supplier_acct.total_amount_due = available_balance["amount"]/100
+                                supplier_acct.save()
+                        except:
+                            pass
                     else:
                         intent = stripe.PaymentIntent.create(
                             amount=int(float(amount)*100),
@@ -419,7 +430,7 @@ class Save_stripe_info(APIView):
                             "user_email" : instance.email_id,
                             "course_name" : course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
+                            "invoice_pdf" : filename,
                         }
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
                     except:

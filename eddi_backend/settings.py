@@ -387,5 +387,5 @@ CRONJOBS = [
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
-    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance','>> ./file.log'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance'),
 ]
