@@ -361,6 +361,7 @@ class Save_stripe_info(APIView):
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
+                    print(comm[0])
                     if course.supplier.user_type.user_type == SUPPLIER_S:
                         supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                         intent = stripe.PaymentIntent.create(

@@ -1721,7 +1721,7 @@ def send_session_email(sender, instance, created, **kwargs):
 class SupplierAccountDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier'))
-    commission = models.ForeignKey(PlatformFeeCMS,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Commission'))
+    commission = models.FloatField(blank=True,null=True,verbose_name=_('Commission'))
     account_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Account Id'))
     total_earnings = models.FloatField(blank=True,null=True,verbose_name=_('Total Earnings'))
     total_amount_due = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Due'))

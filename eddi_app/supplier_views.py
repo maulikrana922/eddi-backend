@@ -1991,11 +1991,11 @@ class SaveStripeAccount(APIView):
             if stripe_response['stripe_user_id']:
                 try:
                     supplier_account = stripe.Account.retrieve(stripe_response['stripe_user_id'])
-                    # comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
+                    comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                     record_map = {
                         'supplier' : getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:supplier_account['email']}),
                         'account_id' : stripe_response['stripe_user_id'],
-                        # 'commission' : int(comm[0])
+                        'commission' : float((comm[0]))
                 
                     }
                     print(record_map)
