@@ -22,32 +22,20 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import os
+
 # LOGGING = {
 #     'version': 1,
-#     # 'disable_existing_loggers': False,
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             # 'handlers': ['file'],
-#             # 'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-#             'level': 'DEBUG',
-#             # 'propagate': False,
-#             # 'filename': './logs/debug.log',
-#         }
-#     },
+#     'disable_existing_loggers': False,
 #     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': './logs/debug.log',
-#         # 'console': {
-#         #     'class': 'logging.StreamHandler',
-#         }
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
 #     },
-#     # 'root': {
-#     #     'handlers': ['console'],
-#     #     'level': 'WARNING',
-#     # },
+#     'root': {
+#         'handlers': ['console'],
+#         'level': 'WARNING',
+#     },
 # }
 
 env = environ.Env()

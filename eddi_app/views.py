@@ -360,9 +360,9 @@ class Save_stripe_info(APIView):
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
-                   
+                    comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                     if course.supplier.user_type.user_type == SUPPLIER_S:
-                        supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
+                        supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                         intent = stripe.PaymentIntent.create(
                             amount=int(float(amount)*100),
                             currency='sek',
@@ -1568,7 +1568,8 @@ class UserPaymentDetail_info(APIView):
                 card_type = None
             if request.POST.get(PRICE):
                 amount = request.POST.get(PRICE)
-                supplier_amount = request.POST.get('supplier_amount')
+                comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
+                supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
             else:
                 amount = 0
                 supplier_amount = 0
@@ -1644,9 +1645,9 @@ class UserPaymentDetail_info(APIView):
                     try:
                         supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
                         if supplier_data.total_earnings == None:
-                            supplier_data.total_earnings = float(amount)
+                            supplier_data.total_earnings = float(supplier_amount)
                         else:
-                            supplier_data.total_earnings += float(amount)
+                            supplier_data.total_earnings += float(supplier_amount)
                         supplier_data.save()
                     except Exception as ex:
                         print(ex)

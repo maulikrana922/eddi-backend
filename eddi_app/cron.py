@@ -15,21 +15,18 @@ from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
-from models import *
+# from .models import *
 
 logger = logging.getLogger(__name__)
 
 def my_cron_job():
     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":"nishant.kabariya@gmail.com"})
-    user.location = "okk"
+    user.location = "nishantttttttttttttttttt"
     user.save()
-    logger.info("Running...logger")
+    logger.warning("Running...logger")
     print("Running...")
 
 def my_cron_job_course():
-    course = CourseDetails.objects.get(**{"course_name":"pawan python course"})
-    course.course_name = "pawan python course1"
-    course.save()
     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1})
     for i in course_data:
         end_date = i.course_starting_date + datetime.timedelta(days=i.course_length)
@@ -189,10 +186,6 @@ def my_cron_job_login():
 #                     pass
 
 def my_cron_job_balance():
-    course = CourseDetails.objects.get(**{"uuid":"5afbed70-ae87-49e8-9bc6-533cab0c0301"})
-    course.course_name = "pawan python course2"
-    course.save()
-
     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
     for supplier in supplier_data:
         account_balance = stripe.Balance.retrieve(
