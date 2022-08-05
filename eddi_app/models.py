@@ -2,12 +2,10 @@ from django.db import models
 import uuid
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.contrib.sessions.backends.db import SessionStore
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from email.mime.image import MIMEImage
 import os
-from django.contrib.sessions.models import Session
 import string
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
@@ -15,14 +13,14 @@ import random
 from django.template.loader import get_template
 from ckeditor.fields import RichTextField
 from eddi_app.constants.constants import *
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from rest_framework.authtoken.models import Token
 from django.core import mail
 from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
 from .notification import send_notification
 from translate import Translator

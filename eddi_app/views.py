@@ -4,13 +4,10 @@ from xhtml2pdf import pisa
 import random
 from random import shuffle
 from io import BytesIO
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import json
-from eddi_app.permissions import IsValid
 from .serializers import *
 from eddi_app import models
 from eddi_app.constants.constants import *
@@ -18,26 +15,19 @@ from eddi_app.constants.table_name import *
 from datetime import date
 from django.db.models import Q
 from collections import OrderedDict
-import pdfkit
 from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
 import stripe # 2.68.0
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
-from django.http import HttpResponse
-from moviepy.editor import VideoFileClip
-from django.core import mail
-from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMultiAlternatives
 from .notification import send_notification
 from translate import Translator
 import datetime
 from datetime import date
-import time
 stripe.api_key = settings.STRIPE_SECRET_KEY
-from django.db import connection,reset_queries
+from django.db import connection
 
 
 class PayByInvoice(APIView):

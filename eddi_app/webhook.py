@@ -1,6 +1,5 @@
 import json
 import stripe
-import datetime
 from .models import *
 from django.http import HttpResponse
 from rest_framework.views import csrf_exempt

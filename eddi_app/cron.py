@@ -1,13 +1,9 @@
 import logging
-
-from django.forms import PasswordInput
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 from datetime import datetime
 import datetime
-from datetime import date
-import time
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import get_template
@@ -16,7 +12,7 @@ from .notification import send_notification
 from django.template.loader import render_to_string
 from email.mime.image import MIMEImage
 from django.core import mail
-from django.core.mail import get_connection, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

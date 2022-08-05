@@ -4,14 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, timedelta
 from .serializers import *
-from datetime import timezone
 from eddi_app import models
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 import datetime
 from django.utils.timezone import make_aware
 from uuid import uuid4
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from django.db.models import Q 
 from datetime import timedelta
@@ -19,7 +18,6 @@ from time import strptime
 from dateutil.relativedelta import *
 from collections import deque
 # from moviepy.editor import *
-import moviepy.editor
 from itertools import chain
 import cv2
 # import pafy
