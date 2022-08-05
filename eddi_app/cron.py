@@ -27,6 +27,9 @@ def my_cron_job():
     print("Running...")
 
 def my_cron_job_course():
+    course = CourseDetails.objects.get(**{"course_name":"pawan python course"})
+    course.course_name = "pawan python course1"
+    course.save()
     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1})
     for i in course_data:
         end_date = i.course_starting_date + datetime.timedelta(days=i.course_length)

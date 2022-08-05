@@ -231,8 +231,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    "hide_models": production_models,
-    # "hide_models": local_models,
+    # "hide_models": production_models,
+    "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 
@@ -387,6 +387,5 @@ CRONJOBS = [
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_session'),
-    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance','>> ./file.log'),
 ]
