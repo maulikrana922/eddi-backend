@@ -362,10 +362,6 @@ class Save_stripe_info(APIView):
                     if course.supplier.user_type.user_type == SUPPLIER_S:
                         supplier_amount = int(float(amount)*100) - int(float(amount)*100*0.02)
                         intent = stripe.PaymentIntent.create(
-                            # on_behalf_of = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                            # transfer_data = {
-                            #     'destination': getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier}).account_id,
-                            # },
                             amount=int(float(amount)*100),
                             currency='sek',
                             description=f'Course = {course_name},User = {email_id}',

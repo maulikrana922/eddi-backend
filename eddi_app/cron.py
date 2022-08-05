@@ -15,6 +15,7 @@ from django.core import mail
 from django.core.mail import EmailMultiAlternatives
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
+from models import *
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +185,11 @@ def my_cron_job_login():
 #                 except:
 #                     pass
 
-def my_cron_job_balance(): 
+def my_cron_job_balance():
+    course = CourseDetails.objects.get(**{"course_name":"pawan python course"})
+    course.course_name = "pawan python course1"
+    course.save()
+
     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
     for supplier in supplier_data:
         account_balance = stripe.Balance.retrieve(
@@ -192,5 +197,4 @@ def my_cron_job_balance():
         )
         for available_balance in account_balance.available:
             supplier.total_amount_due = available_balance["amount"]
-            print(supplier.total_amount_due)
             supplier.save()
