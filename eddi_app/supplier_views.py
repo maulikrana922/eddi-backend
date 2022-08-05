@@ -1775,13 +1775,11 @@ class AddBatchView(APIView):
                         data[0].students.add(data1.id)
                     
                     except Exception as ex:
-                       print(ex)
                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
                 
                 return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
             
             except Exception as ex:
-                print(ex)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
             
         else:
