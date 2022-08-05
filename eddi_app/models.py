@@ -1743,4 +1743,4 @@ class SupplierPayoutDetail(models.Model):
     is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
     
     class Meta:
-        verbose_name_plural = _("Supplier Account Details Table")
+        verbose_name_plural = _("Supplier Payout Details Table")

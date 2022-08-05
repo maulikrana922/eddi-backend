@@ -189,8 +189,8 @@ def my_cron_job_login():
 #                     pass
 
 def my_cron_job_balance():
-    course = CourseDetails.objects.get(**{"course_name":"pawan python course"})
-    course.course_name = "pawan python course1"
+    course = CourseDetails.objects.get(**{"uuid":"5afbed70-ae87-49e8-9bc6-533cab0c0301"})
+    course.course_name = "pawan python course2"
     course.save()
 
     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
@@ -199,5 +199,5 @@ def my_cron_job_balance():
                 stripe_account=supplier.account_id
         )
         for available_balance in account_balance.available:
-            supplier.total_amount_due = available_balance["amount"]
+            supplier.total_amount_due = available_balance["amount"]/100
             supplier.save()

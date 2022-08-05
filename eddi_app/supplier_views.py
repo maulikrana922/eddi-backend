@@ -1991,9 +1991,12 @@ class SaveStripeAccount(APIView):
             if stripe_response['stripe_user_id']:
                 try:
                     supplier_account = stripe.Account.retrieve(stripe_response['stripe_user_id'])
+                    comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                     record_map = {
                         'supplier' : getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:supplier_account['email']}),
-                        'account_id' : stripe_response['stripe_user_id']
+                        'account_id' : stripe_response['stripe_user_id'],
+                        'commission' : int(comm[0])
+                
                     }
                     print(record_map)
                     getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
@@ -2153,6 +2156,8 @@ class SupplierPayout(APIView):
                             "amount":payout["amount"],
                         }
                         getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
+                        supplier_account.total_amount_due -= payout["amount"]/100
+                        supplier_account.save()
                         return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
                 
                 except Exception as ex:
