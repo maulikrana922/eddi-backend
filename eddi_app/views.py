@@ -332,12 +332,12 @@ class Save_stripe_info(APIView):
             payment_method_id = request.POST.get(PAYMENT_METHOD_ID)
             course_name = request.POST.get(COURSE_NAME)
             extra_msg = ''
-            try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
-                if var is not None:
-                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            except:
-                pass
+            # try:
+            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+            #     if var is not None:
+            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     pass
             
             try:
                 customer_data = stripe.Customer.list(email=email_id).data
@@ -420,6 +420,7 @@ class Save_stripe_info(APIView):
                         pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                         pdf = result.getvalue()
                         filename = f'Invoice-{invoice_number}.pdf'
+                         
                     except:
                         pass
                     record = {}
@@ -430,10 +431,12 @@ class Save_stripe_info(APIView):
                             "user_email" : instance.email_id,
                             "course_name" : course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : filename,
+                            "invoice_pdf" : os.path.join(str(BASE_DIR) + '/media/',filename) ,
                         }
+                        print(record)
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
-                    except:
+                    except Exception as e:
+                        print(e)
                         pass
                     try:
                         path = 'eddi_app'
