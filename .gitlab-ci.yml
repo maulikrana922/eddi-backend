@@ -3,7 +3,6 @@ deploy-job:
   tags:
     - "eddi-backend"
   variables:
-    #GIT_STRATEGY: clone
     BUILD_DIR: "/var/www/html/builds/Sh1xT3gR/0/e3673di/eddi-backend/"
     TARGET_DIR: "/var/www/html/eddi-backend"
   script:
