@@ -94,8 +94,8 @@ class PayByInvoice(APIView):
                         context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,} 
                         template = get_template('invoice_temp_pbi_student.html').render(context_data)
                     
-                    result = StringIO()
-                    pdf = pisa.pisaDocument(StringIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+                    result = BytesIO()
+                    pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                     pdf = result.getvalue()
                     print(pdf,"fsfsdfsdf")
                     filename = f'Invoice-{invoice_number}.pdf'
