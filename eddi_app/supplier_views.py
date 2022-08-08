@@ -1944,7 +1944,7 @@ class GetSessionView(APIView):
             SESSION_NAME:request.POST.get(SESSION_NAME,data.session_name),
             BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}) if request.POST.get('batch_name') else data.batch,
             START_DATE: request.POST.get(START_DATE,data.start_date),
-            END_DATE: request.POST.get(START_DATE,data.end_date),
+            END_DATE: request.POST.get(END_DATE,data.end_date),
             START_TIME:request.POST.get(START_TIME,data.start_time),
             TOTAL_DURATION : request.POST.get(TOTAL_DURATION,data.total_duration),
             END_TIME:request.POST.get(END_TIME,data.end_time),

@@ -3,7 +3,7 @@ import os
 from xhtml2pdf import pisa
 import random
 from random import shuffle
-from io import BytesIO
+from io import BytesIO,StringIO
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -28,6 +28,8 @@ import datetime
 from datetime import date
 stripe.api_key = settings.STRIPE_SECRET_KEY
 from django.db import connection
+from django.core.files import File
+
 
 
 class PayByInvoice(APIView):
@@ -66,7 +68,7 @@ class PayByInvoice(APIView):
                 record_map["product_name"] = request.POST.get("course_name")
 
             try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
                 if var is not None:
                     return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
             except:
@@ -92,10 +94,13 @@ class PayByInvoice(APIView):
                         context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,} 
                         template = get_template('invoice_temp_pbi_student.html').render(context_data)
                     
-                    result = BytesIO()
-                    pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
+                    result = StringIO()
+                    pdf = pisa.pisaDocument(StringIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                     pdf = result.getvalue()
+                    print(pdf,"fsfsdfsdf")
                     filename = f'Invoice-{invoice_number}.pdf'
+                    receipt_file = BytesIO(pdf)
+        
                 
                 except Exception as e:
                     print(e,"pdf exp")
@@ -118,7 +123,7 @@ class PayByInvoice(APIView):
                             "user_email" : email_id,
                             "course_name" : course.course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
+                            "invoice_pdf" :  File(receipt_file, filename),
                             }
                     invoice_data = getattr(models,"InvoiceData").objects.update_or_create(**record)
                     record_map1["invoice"] = invoice_data[0]
@@ -152,7 +157,7 @@ class PayByInvoice(APIView):
                         "user_email" : email_id,
                         "course_name" : course.course_name,
                         "vat_charges" : vat_val,
-                        "invoice_pdf" : "/var/www/html/eddi-backend/media/"+filename,
+                        "invoice_pdf" : File(receipt_file, filename),
                         }
                     invoice_data = getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
                     record_map2["invoice"] = invoice_data[0]
@@ -332,12 +337,12 @@ class Save_stripe_info(APIView):
             payment_method_id = request.POST.get(PAYMENT_METHOD_ID)
             course_name = request.POST.get(COURSE_NAME)
             extra_msg = ''
-            # try:
-            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
-            #     if var is not None:
-            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            # except:
-            #     pass
+            try:
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+                if var is not None:
+                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
             
             try:
                 customer_data = stripe.Customer.list(email=email_id).data
@@ -421,6 +426,7 @@ class Save_stripe_info(APIView):
                         pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                         pdf = result.getvalue()
                         filename = f'Invoice-{invoice_number}.pdf'
+                        receipt_file = BytesIO(pdf)
                          
                     except:
                         pass
@@ -432,7 +438,7 @@ class Save_stripe_info(APIView):
                             "user_email" : instance.email_id,
                             "course_name" : course_name,
                             "vat_charges" : vat_val,
-                            "invoice_pdf" : os.path.join(str(BASE_DIR) + '/media/',filename) ,
+                            "invoice_pdf" : File(receipt_file, filename) ,
                         }
                         print(record)
                         getattr(models,"InvoiceData").objects.update_or_create(**record)
@@ -454,7 +460,8 @@ class Save_stripe_info(APIView):
                     email_msg.content_subtype = 'html'
                     email_msg.attach(img)
                     try:
-                        email_msg.attach(filename, pdf, "application/pdf")                         
+                        file = email_msg.attach(filename, pdf, "application/pdf")
+                        print(file,"fileeee")                         
                     except:
                         pass
                     email_msg.send(fail_silently=False)
@@ -522,6 +529,7 @@ class Save_stripe_infoEvent(APIView):
                             pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                             pdf = result.getvalue()
                             filename = f'Invoice-{invoice_number}.pdf'
+                            receipt_file = BytesIO(pdf)
                         except:
                             pass
                         record = {}
@@ -532,7 +540,7 @@ class Save_stripe_infoEvent(APIView):
                             "user_email" : instance.email_id,
                             "event_name" : event_name,
                             "vat_charges" : vat_val,
-                            "invoice" :  "/var/www/html/eddi-backend/media/"+filename,
+                            "invoice" :  File(receipt_file, filename),
                             }
                             getattr(models,"InvoiceDataEvent").objects.update_or_create(**record)
                         except:
