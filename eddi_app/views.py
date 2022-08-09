@@ -87,11 +87,11 @@ class PayByInvoice(APIView):
                 try:
                      
                     if record_map["invoice_method"] == "PayByMe":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
                         template = get_template('invoice_temp_pbi_student.html').render(context_data)
                    
                     elif record_map["invoice_method"] == "PayByOrg":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
                         template = get_template('invoice_temp_pbi_student.html').render(context_data)
                     
                     result = BytesIO()
@@ -132,7 +132,7 @@ class PayByInvoice(APIView):
                     try:
                         if course.supplier.user_type.user_type == SUPPLIER_S:
                             supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
-                            total_earnings = supplier_data.total_earnings + float(record_map2["amount"])
+                            total_earnings = supplier_data.total_earnings + float(record_map1["amount"])
                             setattr(supplier_data,'total_earnings',total_earnings)
                             supplier_data.save()
                     except Exception as ex:
@@ -1657,9 +1657,9 @@ class UserPaymentDetail_info(APIView):
                     try:
                         supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
                         if supplier_data.total_earnings == None:
-                            supplier_data.total_earnings = float(supplier_amount)
+                            supplier_data.total_earnings = float(supplier_amount/100)
                         else:
-                            supplier_data.total_earnings += float(supplier_amount)
+                            supplier_data.total_earnings += float(supplier_amount/100)
                         supplier_data.save()
                     except Exception as ex:
                         print(ex)
@@ -2873,6 +2873,36 @@ class Manage_Payment(APIView):
         else:
             return Response({STATUS: SUCCESS, DATA: "You are not authorized to do this", DATA_SV:"Du har inte behörighet att utföra detta"}, status=status.HTTP_400_BAD_REQUEST)
 
+class Admin_Manage_Payment(APIView):
+    def get(self,request):
+        email_id =  get_user_email_by_token(request)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == ADMIN_S:
+            try:
+                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"course__supplier__email_id":email_id}).order_by("-created_date_time")
+            except:
+                all_payment = None
+            try:
+                all_event = getattr(models,"EventAdPaymentDetail").objects.filter(**{"email_id":email_id}).order_by("-created_date_time")
+            except:
+                all_event = None
+            try:
+                supplier_account_data = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__email_id":email_id})
+            except:
+                pass
+            try:
+                if serializer := UserPaymentSerializer(all_payment, many=True):
+                    if serializer1 := EventAdPaymentDetailSerializer(all_event, many=True):
+                        if serializer2 := SupplierAccountDetailSerializer(supplier_account_data):
+                            return Response({STATUS: SUCCESS, DATA: serializer.data, "event":serializer1.data,"admin_account_data":serializer2.data}, status=status.HTTP_200_OK)
+                        else:
+                            return Response({STATUS: SUCCESS, DATA: serializer2.error}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({STATUS: SUCCESS, DATA: serializer1.error}, status=status.HTTP_200_OK)
+                else:
+                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+            except:
+                pass
 
 class GetUserSessionView(APIView):
     def get(self, request):

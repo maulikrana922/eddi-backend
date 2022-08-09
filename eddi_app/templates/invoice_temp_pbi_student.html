@@ -9,43 +9,37 @@
       cellpadding="0"
       cellspacing="0"
       width="100%"
-      style="font-family: Arial, Helvetica, sans-serif; font-size: 14px"
+      style="font-family: Arial, Helvetica, sans-serif; font-size: 12px"
     >
       <tr>
-        <td width="100%" style="height: 10px"></td>
+        <td width="100%" style="height: 5px"></td>
       </tr>
       <tr>
         <td width="100%">
           <table width="100%">
             <tr>
-              <td width="80%" align="left">
-                <table style="font-size: 14px">
+              <td width="50%" align="left">
+                <table style="font-size: 12px">
                   <tr>
-                    <td style="font-weight: bold; font-size: 32px">Eddie AB</td>
+                    <td style="font-weight: bold; font-size: 22px">Eddie AB</td>
                   </tr>
                   <tr>
                     <td>1234 State St Sweden, 12345</td>
                   </tr>
                 </table>
               </td>
-              <td width="20%" align="right">
-                <table style="font-size: 14px">
+              <td width="50%" align="right">
+                <table width="100%" style="font-size: 12px">
                   <tr>
                     <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                        line-height: 20px;
-                      "
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
                     >
                       <strong>Invoice Number</strong>
                     </td>
                     <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                        line-height: 20px;
-                      "
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
                     >
                       #{{invoice_number}}
                     </td>
@@ -53,20 +47,14 @@
 
                   <tr>
                     <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                        line-height: 20px;
-                      "
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
                     >
                       <strong>Date</strong>
                     </td>
                     <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                        line-height: 20px;
-                      "
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
                     >
                       {{issue_date}}
                     </td>
@@ -78,6 +66,9 @@
         </td>
       </tr>
       <tr>
+        <td style="height: 5px"></td>
+      </tr>
+      <tr>
         <td width="100%">
           <table width="100%">
             <tr>
@@ -85,21 +76,15 @@
                 <table
                   width="100%"
                   align="left"
-                  style="font-size: 14px; border: 1px #eee solid; padding: 10px"
+                  style="font-size: 12px; border: 1px #eee solid; padding: 10px"
                 >
                   <tr>
-                    <td style="font-size: 18px">
+                    <td width="100%" style="font-size: 14px">
                       <strong>Student Name:</strong> {{student_name}}
                     </td>
                   </tr>
                   <tr>
-                    <td style="height: 10px"></td>
-                  </tr>
-                  <tr>
-                    <td style="height: 10px"></td>
-                  </tr>
-                  <tr>
-                    <td style="font-size: 18px">
+                    <td width="100%" style="font-size: 14px">
                       <strong>Date Birth:</strong> {{dob}}
                     </td>
                   </tr>
@@ -110,15 +95,15 @@
               </td>
               <td width="50%" align="right">
                 <table
-                  width="90%"
+                  width="100%"
                   align="right"
-                  style="font-size: 14px; border: 1px #eee solid; padding: 10px"
+                  style="font-size: 12px; border: 1px #eee solid; padding: 10px"
                 >
                   <!-- <tr>
               <td style="height: 10px"></td>
             </tr>
             <tr>
-              <td style="font-size: 18px">
+              <td style="font-size: 14px">
                 <strong>Company Name</strong>
               </td>
             </tr>
@@ -133,7 +118,7 @@
               <td style="height: 10px"></td>
             </tr>
             <tr>
-              <td style="font-size: 20px">
+              <td style="font-size: 18px">
                 <strong>Company Name</strong>
               </td>
             </tr> -->
@@ -144,10 +129,10 @@
         </td>
       </tr>
       <tr>
-        <td style="height: 20px"></td>
+        <td style="height: 10px"></td>
       </tr>
       <tr>
-        <td style="font-weight: bold; font-size: 24px; width: 100%">
+        <td style="font-weight: bold; font-size: 18px; width: 100%">
           Order Summery
         </td>
       </tr>
@@ -155,22 +140,22 @@
         <td style="height: 10px"></td>
       </tr>
       <tr>
-        <td style="width: 100%">
+        <td style="width: 100%" align="left">
           <table
             width="100%"
-            style="font-size: 14px; border: 1px #eee solid; padding: 10px"
+            style="font-size: 12px; border: 1px #eee solid; padding: 10px"
           >
             <tr>
-              <td style="height: 10px"></td>
+              <td width="100%" style="height: 10px"></td>
             </tr>
             <tr>
-              <td style="font-size: 18px">
+              <td width="100%" style="font-size: 14px">
                 <strong> Name of {{product_type}} </strong>
               </td>
             </tr>
 
             <tr>
-              <td>{{course_name}}</td>
+              <td width="100%">{{course_name}}</td>
             </tr>
             <tr>
               <td style="height: 10px"></td>
@@ -184,7 +169,7 @@
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td width="50%" align="left">
-                <table width="60%" align="left" style="font-size: 14px">
+                <table width="100%" align="left" style="font-size: 12px">
                   <tr>
                     <td style="border: 1px #eee solid; padding: 10px 8px">
                       <strong>Vat Specification</strong>
@@ -196,13 +181,24 @@
                 </table>
               </td>
               <td width="50%" align="right">
-                <table width="60%" align="right" style="font-size: 14px">
+                <table width="100%" align="left" style="font-size: 12px">
+                  <tr>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      <strong>Total Amount</strong>
+                    </td>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      {{total_fees}}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <!-- <td width="50%" align="right">
+                <table width="100%" align="right" style="font-size: 12px">
                   <tr>
                     <td
                       style="
                         border: 1px #eee solid;
                         padding: 10px 8px;
-                        line-height: 20px;
                       "
                     >
                       <strong>Total Amount</strong>
@@ -211,14 +207,13 @@
                       style="
                         border: 1px #eee solid;
                         padding: 10px 8px;
-                        line-height: 20px;
                       "
                     >
                       {{total_fees}}
                     </td>
                   </tr>
                 </table>
-              </td>
+              </td> -->
             </tr>
           </table>
         </td>
@@ -236,9 +231,9 @@
             style="border: 1px #eee solid; padding: 10px"
           >
             <td width="25%" align="left">
-              <table width="100%" style="font-size: 14px">
+              <table width="100%" style="font-size: 12px">
                 <tr>
-                  <td style="font-weight: bold; font-size: 20px">Eddie AB</td>
+                  <td style="font-weight: bold; font-size: 16px">Eddie AB</td>
                 </tr>
                 <tr>
                   <td>1234 State St Sweden, 12345</td>
@@ -246,9 +241,9 @@
               </table>
             </td>
             <td width="50%" align="center">
-              <table width="100%" style="font-size: 14px; text-align: center">
+              <table width="100%" style="font-size: 12px; text-align: center">
                 <tr>
-                  <td style="font-weight: bold; font-size: 20px">
+                  <td style="font-weight: bold; font-size: 16px">
                     Eddie Customer Service
                   </td>
                 </tr>
@@ -256,14 +251,14 @@
                   <td>test@gmail.com</td>
                 </tr>
                 <tr>
-                  <td>Phone:076-1112314</td>
+                  <td>Phone:076-1112312</td>
                 </tr>
               </table>
             </td>
             <td width="25%" align="left">
-              <table width="100%" style="font-size: 14px">
+              <table width="100%" style="font-size: 12px">
                 <tr>
-                  <td style="font-weight: bold; font-size: 20px">
+                  <td style="font-weight: bold; font-size: 16px">
                     Bank Account
                   </td>
                 </tr>
@@ -279,7 +274,7 @@
         <td style="height: 10px"></td>
       </tr>
       <tr>
-        <td width="100%" style="font-size: 14px; text-align: center">
+        <td width="100%" style="font-size: 12px; text-align: center">
           <table align="center">
             <tr>
               <td style="text-align: center">

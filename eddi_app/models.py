@@ -1536,6 +1536,13 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     print("OUTER")
     if created and instance.user_type.user_type == ADMIN_S:
         try:
+            record_map = {
+                'supplier' : instance,
+            }
+            getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
+        except:
+            pass
+        try:
             record_map = {}
             record_map = {
                 "supplier_name" : f"{instance.first_name} {instance.last_name}",

@@ -2101,7 +2101,7 @@ class SupplierWithDrawRequest(APIView):
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         # admin_emails = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":ADMIN_S}).values_list("email_id", flat=True)
-                        html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
+                        html_path = SUPPLIER_WITHDRAW_REQUEST_TO_ADMIN_HTML
                         # fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
                         context_data = {"amount": withdraw_amount,"fullname":"nishant"}
                         email_html_template = get_template(html_path).render(context_data)

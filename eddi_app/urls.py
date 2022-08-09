@@ -14,6 +14,7 @@ urlpatterns = [
 
 
     path('manage-payment/',Manage_Payment.as_view(), name="ManagePayment"),   
+    path('admin-manage-payment/',Admin_Manage_Payment.as_view(), name="AdminManagePayment"),   
     path('manage-payment/<str:uuid>/',Manage_Payment.as_view(), name="ManagePayment"),   
     path('admin-payment-list/',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
     path('admin-payment-list/<str:uuid>/',GetAdminPaymentList.as_view(), name="GetAdminPaymentList"),
