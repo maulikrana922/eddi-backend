@@ -66,104 +66,80 @@
         </td>
       </tr>
       <tr>
-        <td style="height: 5px"></td>
+        <td style="height: 20px"></td>
       </tr>
       <tr>
-        <td width="100%">
-          <table width="100%">
+        <td width="100%" style="width: 100%">
+          <table
+            width="100%"
+            style="
+              width: 100%;
+              border: 1px #eee solid;
+              font-size: 14px;
+              padding: 10px;
+            "
+          >
             <tr>
-              <td width="50%" align="left">
-                <table
-                  width="100%"
-                  align="left"
-                  style="font-size: 12px; border: 1px #eee solid; padding: 10px"
-                >
-                  <tr>
-                    <td width="100%" style="font-size: 14px">
-                      <strong>Student Name:</strong> {{student_name}}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td width="100%" style="font-size: 14px">
-                      <strong>Date Birth:</strong> {{dob}}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="height: 10px"></td>
-                  </tr>
-                </table>
+              <td width="50%" align="left" style="width: 50%">
+                <b>Student Name :</b> {{student_name}}
               </td>
-              <td width="50%" align="right">
-                <table
-                  width="100%"
-                  align="right"
-                  style="font-size: 12px; border: 1px #eee solid; padding: 10px"
-                >
-                  <!-- <tr>
-              <td style="height: 10px"></td>
-            </tr>
-            <tr>
-              <td style="font-size: 14px">
-                <strong>Company Name</strong>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                Address<br />
-                address
+              <td width="50%" align="left" style="width: 50%">
+                <b>Organization Name :</b> {{organization_name}}
               </td>
             </tr>
             <tr>
-              <td style="height: 10px"></td>
-            </tr>
-            <tr>
-              <td style="font-size: 18px">
-                <strong>Company Name</strong>
+              <td width="50%" align="left" style="font-size: 14px; width: 50%">
+                <b>Date Birth :</b> {{dob}}
               </td>
-            </tr> -->
-                </table>
+              <td width="50%" align="left" style="font-size: 14px; width: 50%">
+                <b>organization Email :</b> {{organization_email}}
               </td>
             </tr>
           </table>
         </td>
       </tr>
       <tr>
-        <td style="height: 10px"></td>
+        <td style="height: 25px"></td>
       </tr>
       <tr>
         <td style="font-weight: bold; font-size: 18px; width: 100%">
-          Order Summery
+          Order Summary
         </td>
       </tr>
       <tr>
         <td style="height: 10px"></td>
       </tr>
       <tr>
-        <td style="width: 100%" align="left">
+        <td width="100%" align="left">
           <table
             width="100%"
-            style="font-size: 12px; border: 1px #eee solid; padding: 10px"
+            style="
+              width: 100%;
+              border: 1px #eee solid;
+              font-size: 14px;
+              padding: 10px;
+            "
           >
             <tr>
-              <td width="100%" style="height: 10px"></td>
-            </tr>
-            <tr>
-              <td width="100%" style="font-size: 14px">
-                <strong> Name of {{product_type}} </strong>
+              <td width="100%" align="left" style="width: 100%">
+                <b>Name of {{product_type}} : </b>  {{course_name}}
               </td>
             </tr>
-
-            <tr>
-              <td width="100%">{{course_name}}</td>
-            </tr>
-            <tr>
-              <td style="height: 10px"></td>
-            </tr>
+            <!-- <tr>
+              <td
+                width="100%"
+                align="left"
+                style="font-size: 14px; width: 100%"
+              >
+               
+              </td>
+            </tr> -->
           </table>
         </td>
       </tr>
-
+      <tr>
+        <td style="height: 15px"></td>
+      </tr>
       <tr>
         <td>
           <table width="100%" cellpadding="0" cellspacing="0">
@@ -187,33 +163,11 @@
                       <strong>Total Amount</strong>
                     </td>
                     <td style="border: 1px #eee solid; padding: 10px 8px">
-                      {{total_fees}}
+                      {{total_fees}} Sek
                     </td>
                   </tr>
                 </table>
               </td>
-              <!-- <td width="50%" align="right">
-                <table width="100%" align="right" style="font-size: 12px">
-                  <tr>
-                    <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                      "
-                    >
-                      <strong>Total Amount</strong>
-                    </td>
-                    <td
-                      style="
-                        border: 1px #eee solid;
-                        padding: 10px 8px;
-                      "
-                    >
-                      {{total_fees}}
-                    </td>
-                  </tr>
-                </table>
-              </td> -->
             </tr>
           </table>
         </td>
@@ -274,6 +228,9 @@
         <td style="height: 10px"></td>
       </tr>
       <tr>
+        <td style="height: 15px"></td>
+      </tr>
+      <tr>
         <td width="100%" style="font-size: 12px; text-align: center">
           <table align="center">
             <tr>
@@ -283,7 +240,7 @@
             </tr>
             <tr>
               <td style="text-align: center">
-                Eddi Ab Orgenisation Number : XXXXXXXXXX
+                Eddi Ab Organization Number : XXXXXXXXXX
               </td>
             </tr>
           </table>

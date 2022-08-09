@@ -38,7 +38,7 @@ def get_user_email_by_token(request):
     try:
         data = getattr(models,TOKEN_TABLE).objects.get(key = token)
         return data.user.email_id
-    except:
+    except Exception as e:
         data = None
         return data
 
@@ -616,17 +616,20 @@ class GetCourseDetails(APIView):
                     print(course_enrolled, "enrolleddd")
 
                     user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_name__in = course_enrolled)
+
                     print(user_profile_interest, "intererer")
 
-                    target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
+                    # target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
+
+                    # print(target_course,"target_course")
 
                     target_course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False,"course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled).values_list("course_name")
 
                     print(target_course_data, "datata")
 
-                    data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time"))
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time")
 
-                if serializer := CourseDetailsSerializer(target_course,many=True):
+                if serializer := CourseDetailsSerializer(user_profile_interest,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data}, status=status.HTTP_200_OK)
                     else:
@@ -2028,7 +2031,8 @@ class GetAdminPaymentList(APIView):
                 if serializer := SupplierAccountDetailSerializer(payment_detail):
                     return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
             else:
-                payment_list = getattr(models,"SupplierAccountDetail").objects.all()
+                payment_list = getattr(models,"SupplierAccountDetail").objects.filter(**{"supplier__user_type__user_type":SUPPLIER_S})
+                print(payment_list)
                 if serializer := SupplierAccountDetailSerializer(payment_list,many=True):
                     return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
 
@@ -2071,7 +2075,8 @@ class SupplierWithDrawRequest(APIView):
             if user_data.user_type.user_type == SUPPLIER_S:
                 try:
                     supplier_data = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email_id})
-                except Exception:
+                except Exception as e:
+                    print(e,"reeeee")
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 withdraw_amount = float(request.POST.get('amount'))
                
@@ -2097,14 +2102,14 @@ class SupplierWithDrawRequest(APIView):
                         email_msg.send(fail_silently=False)
                    
                     except Exception as ex:
-                        print(ex)
+                        print(ex,"dsdasdasd")
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         # admin_emails = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":ADMIN_S}).values_list("email_id", flat=True)
-                        html_path = SUPPLIER_WITHDRAW_REQUEST_TO_ADMIN_HTML
+                        html_path = SUPPLIER_WITHDRAW_REQUEST_ADMIN
                         # fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
-                        context_data = {"amount": withdraw_amount,"fullname":"nishant"}
-                        email_html_template = get_template(html_path).render(context_data)
+                        context_data = {"amount": withdraw_amount,"fullname":"nishant","supplier_name":fullname}
+                        email_html_template = get_template(SUPPLIER_WITHDRAW_REQUEST_ADMIN).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = ("nishant.k@latitudetechnolabs.com",)
                         email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
@@ -2122,14 +2127,14 @@ class SupplierWithDrawRequest(APIView):
                         return Response({STATUS: SUCCESS, DATA: "Withdrawal request sent successfully"}, status=status.HTTP_200_OK) 
                     
                     except Exception as ex:
-                        print(ex)
+                        print(ex,)
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
                   
         except Exception as ex:
-            print(ex)
+            print(ex,"dasdasdasd")
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -2156,7 +2161,7 @@ class SupplierPayout(APIView):
                             "amount":payout["amount"],
                         }
                         getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
-                        supplier_account.total_amount_due -= payout["amount"]/100
+                        supplier_account.total_amount_due -= "{:.2f}".format(payout["amount"]/100)
                         supplier_account.save()
                         return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
                 

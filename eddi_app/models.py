@@ -541,7 +541,7 @@ def send_contactlead_email(sender, instance, created, **kwargs):
         context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = ('nishant.k@latitudetechnolabs.com',)
+        recipient_list = ('harshit.s@latitudetechnolabs.com',)
         email_msg = EmailMessage('General Inquiry from User',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
@@ -1530,18 +1530,76 @@ class PaybyInvoice(models.Model):
     product_name = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Product Name'))
     payment_mode = models.CharField(max_length=500,blank=True,null=True,verbose_name=_('Payment Mode'))
 
+class SupplierAccountDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier'))
+    commission = models.FloatField(blank=True,null=True,verbose_name=_('Commission'))
+    account_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Account Id'))
+    total_earnings = models.FloatField(blank=True,null=True,verbose_name=_('Total Earnings'))
+    total_amount_due = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Due'))
+    total_amount_withdraw = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Withdraw'))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Supplier Account Details Table")
+
+class SupplierPayoutDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier_account = models.ForeignKey(SupplierAccountDetail,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Account'))
+    payout_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Payout Id'))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_('Payout Amount'))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Supplier Payout Details Table")
+
+
+class CourseBatch(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    batch_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Batch Name'))
+    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
+    students = models.ManyToManyField(UserProfile,blank=True,null=True,verbose_name=_('Students'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
+
+    class Meta:
+        verbose_name_plural = _("Course Batch Table")
+
+   
+class BatchSession(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
+    batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
+    start_date = models.DateField()
+    end_date = models.DateField()
+    start_time = models.TimeField(verbose_name=_('Session Start Time'))
+    end_time = models.TimeField(verbose_name=_('Session End Time'))
+    total_duration = models.CharField(max_length=100,verbose_name=_('Total Duration'))
+    url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
+    event_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Id'))
+    choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
+    customDays = models.CharField(max_length=100,null=True,verbose_name=_('Custom Days'))
+    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
+    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Batch Session Table")
 
 @receiver(post_save, sender=UserSignup)
 def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     print("OUTER")
     if created and instance.user_type.user_type == ADMIN_S:
-        try:
-            record_map = {
-                'supplier' : instance,
-            }
-            getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
-        except:
-            pass
         try:
             record_map = {}
             record_map = {
@@ -1561,6 +1619,10 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         data = UserSignup.objects.get(email_id = instance.email_id)
         data.password = make_password(otp)
         data.save()
+        record_map = {
+            'supplier' : data,
+        }
+        SupplierAccountDetail.objects.update_or_create(**record_map)
         email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
@@ -1663,43 +1725,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
 
-class CourseBatch(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    batch_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Batch Name'))
-    course = models.ForeignKey(CourseDetails,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_("Course"))
-    students = models.ManyToManyField(UserProfile,blank=True,null=True,verbose_name=_('Students'))
-    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
-    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
-    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
-    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_("Status"),blank=True,null=True)
 
-    class Meta:
-        verbose_name_plural = _("Course Batch Table")
-
-   
-class BatchSession(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
-    batch = models.ForeignKey(CourseBatch, on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Batch'))
-    start_date = models.DateField()
-    end_date = models.DateField()
-    start_time = models.TimeField(verbose_name=_('Session Start Time'))
-    end_time = models.TimeField(verbose_name=_('Session End Time'))
-    total_duration = models.CharField(max_length=100,verbose_name=_('Total Duration'))
-    url = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Url'))
-    event_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Event Id'))
-    choose_days = models.CharField(max_length=100,null=True,verbose_name=_('Choose Day'))
-    customDays = models.CharField(max_length=100,null=True,verbose_name=_('Custom Days'))
-    created_by = models.CharField(max_length=100,blank=True, verbose_name=_("Created By"))
-    modified_by = models.CharField(max_length=100,blank=True, verbose_name=_("Modified By"))
-    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
-    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
-    
-    class Meta:
-        verbose_name_plural = _("Batch Session Table")
 
 
 @receiver(post_save, sender=BatchSession)
@@ -1725,29 +1751,3 @@ def send_session_email(sender, instance, created, **kwargs):
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
 
-class SupplierAccountDetail(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier'))
-    commission = models.FloatField(blank=True,null=True,verbose_name=_('Commission'))
-    account_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Account Id'))
-    total_earnings = models.FloatField(blank=True,null=True,verbose_name=_('Total Earnings'))
-    total_amount_due = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Due'))
-    total_amount_withdraw = models.FloatField(blank=True,null=True,verbose_name=_('Total Amount Withdraw'))
-    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
-    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
-    
-    class Meta:
-        verbose_name_plural = _("Supplier Account Details Table")
-
-class SupplierPayoutDetail(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    supplier_account = models.ForeignKey(SupplierAccountDetail,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Account'))
-    payout_id = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Payout Id'))
-    amount = models.FloatField(blank=True,null=True,verbose_name=_('Payout Amount'))
-    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
-    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
-    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
-    
-    class Meta:
-        verbose_name_plural = _("Supplier Payout Details Table")
