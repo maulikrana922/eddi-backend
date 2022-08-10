@@ -910,7 +910,25 @@ class GetCourseDetails(APIView):
             setattr(data,key,value)
         data.save()
         return Response({STATUS: SUCCESS, DATA: "Information successfully deleted", DATA_SV:"Data har nu raderats"}, status=status.HTTP_200_OK)
-    
+
+class GetSubCategoryList(APIView):
+    def get(self, request, uuid=None):
+        email_id = get_user_email_by_token(request)   
+        if not uuid:
+            return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
+        try:
+            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{"category_name__uuid":uuid,IS_DELETED:False}).order_by("-created_date_time")
+            if serializer := SubCategoryDetailsSerializer(data, many=True):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+       
+       
+       
+
 class AdminDashboardView(APIView):
     def get(self, request,uuid = None):
         admin_email = get_user_email_by_token(request)

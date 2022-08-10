@@ -1057,6 +1057,7 @@ class ResetPasswordView(APIView):
             data = None
         try:
             if data:
+                # setattr(data,UUID,uuid4())
                 setattr(data,PASSWORD,make_password(password))
                 setattr(data,"is_resetpassword",False)
                 setattr(data,MODIFIED_AT,make_aware(datetime.datetime.now()))

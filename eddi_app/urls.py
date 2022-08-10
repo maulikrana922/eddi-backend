@@ -55,6 +55,7 @@ urlpatterns = [
     path('add-sub-category/',AddSubCategoryView.as_view()),
     path('get-sub-category-details/<str:uuid>/',GetSubCategoryDetails.as_view()),
     path('get-sub-category-details/',GetSubCategoryDetails.as_view()),
+    path('get-sub-category-list/<str:uuid>/',GetSubCategoryList.as_view()),
 
     # Category Details
     path('get-category-details/',GetCategoryDetails.as_view()),
