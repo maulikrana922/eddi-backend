@@ -67,12 +67,12 @@ class PayByInvoice(APIView):
             else:
                 record_map["product_name"] = request.POST.get("course_name")
 
-            try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
-                if var is not None:
-                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            except:
-                pass
+            # try:
+            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
+            #     if var is not None:
+            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     pass
 
 
             getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
@@ -83,7 +83,7 @@ class PayByInvoice(APIView):
                     
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                 amount = float(request.POST.get("price"))
-                total_price = int(amount) + (int(amount)*vat_val)/100
+                total_price = "{:.2f}".format(int(float(amount)) + (int(float(amount))*vat_val)/100)
                 try:
                      
                     if record_map["invoice_method"] == "PayByMe":
@@ -132,7 +132,7 @@ class PayByInvoice(APIView):
                     try:
                         if course.supplier.user_type.user_type == SUPPLIER_S:
                             supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
-                            total_earnings = supplier_data.total_earnings + float(record_map1["amount"])
+                            total_earnings = "{:.2f}".format(supplier_data.total_earnings + float(record_map1["amount"]))
                             setattr(supplier_data,'total_earnings',total_earnings)
                             supplier_data.save()
                     except Exception as ex:
@@ -173,7 +173,7 @@ class PayByInvoice(APIView):
                             recipient_list = (email_id,)
                             recipient_list1 = (course.supplier.email_id,)
                             context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me"}
-                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me"} 
+                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
                            
                              
                         else:
@@ -182,7 +182,7 @@ class PayByInvoice(APIView):
                             recipient_list = (email_id,)
                             recipient_list1 = (event.admin_email,)
                             context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me"}
-                            context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me"} 
+                            context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
                             
                         try:                               
                             html_path = "pay_by_invoice.html" 
@@ -228,9 +228,9 @@ class PayByInvoice(APIView):
                             recipient_list1 = (course.supplier.email_id,)
                             recipient_list2 = (request.POST.get("InvoiceEmail"),)
                             context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization"}
-                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization"} 
-                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization"}
-                        
+                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
+                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")}
+                            print(context_data3["student_name"])
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                             fullname = f'{instance.first_name}'
@@ -238,8 +238,8 @@ class PayByInvoice(APIView):
                             recipient_list1 = (event.admin_email,)
                             recipient_list2 = (request.POST.get("InvoiceEmail"))
                             context_data1 = {"fullname":fullname,"product":event.event_name,"user_type":"student","payment_method":"Pay By Organization"}
-                            context_data2 = {"fullname":event.admin_email,"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization"} 
-                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization"}
+                            context_data2 = {"fullname":event.admin_email,"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
+                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")}
                         
 
                         try:                               
@@ -420,7 +420,7 @@ class Save_stripe_info(APIView):
                     recipient_list = (instance.email_id,)
                     invoice_number = random.randrange(100000,999999)
                     context_data1 = {"student_name":fullname,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(float(amount)) + (int(float(amount))*vat_val)/100}
-                    template = get_template('invoice.html').render(context_data1)
+                    template = get_template('stripe_invoice.html').render(context_data1)
                     try: 
                         result = BytesIO()
                         pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
