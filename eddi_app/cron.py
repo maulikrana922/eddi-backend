@@ -192,5 +192,5 @@ def my_cron_job_balance():
                 stripe_account=supplier.account_id
         )
         for available_balance in account_balance.available:
-            supplier.total_amount_due = float(available_balance["amount"]/100)
+            supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
             supplier.save()
