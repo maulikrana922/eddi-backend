@@ -419,7 +419,7 @@ class Save_stripe_info(APIView):
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (instance.email_id,)
                     invoice_number = random.randrange(100000,999999)
-                    context_data1 = {"student_name":fullname,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total":int(float(amount)) + (int(float(amount))*vat_val)/100}
+                    context_data1 = {"student_name":fullname,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total_fees":int(float(amount)) + (int(float(amount))*vat_val)/100}
                     template = get_template('stripe_invoice.html').render(context_data1)
                     try: 
                         result = BytesIO()

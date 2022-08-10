@@ -473,10 +473,10 @@ class UserSignupAdmin(admin.ModelAdmin):
 
     list_filter = ('user_type','status')
 
-    # def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-    #      if db_field.name == "user_type":
-    #              kwargs["queryset"] = UserType.objects.all().exclude(user_type='User')
-    #      return super(UserSignupAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+         if db_field.name == "user_type":
+                 kwargs["queryset"] = UserType.objects.all().exclude(user_type='User')
+         return super(UserSignupAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 # class  authorAdmin(admin.ModelAdmin):
 #     list_display=['image_tag','category_name']
