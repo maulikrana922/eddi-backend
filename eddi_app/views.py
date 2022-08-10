@@ -2905,7 +2905,7 @@ class Admin_Manage_Payment(APIView):
                     return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
             except Exception as e:
                 print(e)
-                return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetUserSessionView(APIView):
     def get(self, request):
@@ -2933,4 +2933,4 @@ class GetUserSessionView(APIView):
             
         except Exception as e:
             print(e)
-            return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
