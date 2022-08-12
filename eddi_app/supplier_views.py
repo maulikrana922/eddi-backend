@@ -2065,7 +2065,7 @@ class GetAccountDetail(APIView):
         try:
             # invocies = PaybyInvoice.objects.all()
             # invocies.delete()
-            # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'account_id':"acct_1LQlCPRI6ytOhdnS"})
+            # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'account_id':"acct_1LT1DXRGmSDdsqh4"})
             # print(supplier_account)
             # supplier_account.delete()           
             # email = "krupa.s@yopmail.com"
@@ -2073,13 +2073,13 @@ class GetAccountDetail(APIView):
             # print(supplier_account.account_id)
             supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
             for supplier in supplier_data:
-                account_balance = stripe.Balance.retrieve(
-                        stripe_account=supplier.account_id
-                )
-                for available_balance in account_balance.available:
-                    supplier.total_amount_due = available_balance["amount"]
-                    print(supplier.total_amount_due)
-                    supplier.save()
+                if supplier.account_id:
+                    account_balance = stripe.Balance.retrieve(
+                            stripe_account=supplier.account_id
+                    )
+                    for available_balance in account_balance.available:
+                        supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
+                        supplier.save()
         
         except Exception as ex:
             print(ex)
@@ -2166,6 +2166,7 @@ class SupplierPayout(APIView):
                 amount = float(request.POST.get(AMOUNT))
                 try:  
                     supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{UUID:uuid})
+                    print(supplier_account.supplier.email_id)
                     if amount <= supplier_account.total_amount_due:
                         payout = stripe.Payout.create(
                             amount=int(amount)*100,
@@ -2180,7 +2181,7 @@ class SupplierPayout(APIView):
                             "amount":payout["amount"],
                         }
                         getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
-                        supplier_account.total_amount_due -= "{:.2f}".format(payout["amount"]/100)
+                        supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
                         supplier_account.save()
                         return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
                 

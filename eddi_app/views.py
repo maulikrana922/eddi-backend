@@ -397,7 +397,7 @@ class Save_stripe_info(APIView):
                     else:
                         intent = stripe.PaymentIntent.create(
                             amount=int(float(amount)*100),
-                            currency='usd',
+                            currency='sek',
                             description=f'Course = {course_name},User = {email_id}',
                             customer=customer['id'],
                             payment_method_types=["card"],

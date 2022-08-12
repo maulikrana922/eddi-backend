@@ -188,9 +188,10 @@ logger = logging.getLogger(__name__)
 def my_cron_job_balance():
     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
     for supplier in supplier_data:
-        account_balance = stripe.Balance.retrieve(
-                stripe_account=supplier.account_id
-        )
-        for available_balance in account_balance.available:
-            supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
-            supplier.save()
+        if supplier.account_id:
+            account_balance = stripe.Balance.retrieve(
+                    stripe_account=supplier.account_id
+            )
+            for available_balance in account_balance.available:
+                supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
+                supplier.save()
