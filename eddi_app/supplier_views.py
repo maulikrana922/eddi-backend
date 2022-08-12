@@ -618,6 +618,7 @@ class GetCourseDetails(APIView):
                     user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
 
                     print(user_profile_interest, "intererer")
+                    user_interest_course = user_profile_interest.values_list("course_name")
 
                     # target_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : True, "target_users__icontains" : email_id}).exclude(course_name__in = course_enrolled)
 
@@ -627,7 +628,7 @@ class GetCourseDetails(APIView):
 
                     print(target_course_data, "datata")
 
-                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time")
+                    data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_interest_course).order_by("-created_date_time")
 
                 if serializer := CourseDetailsSerializer(user_profile_interest,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
