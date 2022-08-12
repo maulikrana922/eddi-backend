@@ -1,6 +1,5 @@
 import json
 import stripe
-
 from .models import *
 from django.http import HttpResponse
 from rest_framework.views import csrf_exempt
@@ -22,7 +21,8 @@ class StripeWebhookActions:
 
     def payout_succeeded(self, event):
         obj = event.data.object
-        payout_obj = getattr(models,"SupplierPayoutDetail").objects.get(**{"payout_id":obj["id"]})
+        print(obj.id)
+        payout_obj = SupplierPayoutDetail.objects.get(**{"payout_id":obj.id})
         payout_obj.supplier_account.total_amount_withdraw = payout_obj.amount
         payout_obj.save()
         html_path = SUPPLIER_PAYOUT_SUCCESSED_HTML
@@ -50,7 +50,7 @@ class StripeWebhookActions:
         'payment_intent.succeeded': intent_succeeded,
         'balance.available': balance_updated,
         'account.updated': account_updated,
-        'payout.paid':payout_succeeded
+        'payout.paid': payout_succeeded
         # 'charge.succeeded': charge_succeeded,
         # 'customer.subscription.updated': customer_subscription_updated,
         # 'customer.subscription.deleted': delete_subscription,

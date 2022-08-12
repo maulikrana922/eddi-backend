@@ -2130,7 +2130,7 @@ class SupplierWithDrawRequest(APIView):
                         context_data = {"amount": withdraw_amount,"fullname":"nishant","supplier_name":fullname}
                         email_html_template = get_template(SUPPLIER_WITHDRAW_REQUEST_ADMIN).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
-                        recipient_list = ("nishant.k@latitudetechnolabs.com",)
+                        recipient_list = ("jap.admin@yopmail.com",)
                         email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'

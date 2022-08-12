@@ -67,12 +67,12 @@ class PayByInvoice(APIView):
             else:
                 record_map["product_name"] = request.POST.get("course_name")
 
-            try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
-                if var is not None:
-                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            except:
-                pass
+            # try:
+            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
+            #     if var is not None:
+            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     pass
 
 
             getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
@@ -113,7 +113,7 @@ class PayByInvoice(APIView):
                         "course_id" : course.id,
                         "email_id" : email_id,
                         "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                        "amount" : amount,
+                        "amount" : total_price,
                         "payment_mode" : "PayByInvoice",
                     }
                     record_map1[IS_APPROVED_ID] = 2
@@ -147,7 +147,7 @@ class PayByInvoice(APIView):
                         "event_name" : request.POST.get("event_name"),
                         "email_id" : email_id,
                         "user_name" : f"{user_data.first_name} {user_data.last_name}",
-                        "amount" : amount,
+                        "amount" : total_price,
                         "payment_mode" : "PayByInvoice",
                     }
                     record_map2[IS_APPROVED_ID] = 2
@@ -366,7 +366,7 @@ class Save_stripe_info(APIView):
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
-                    print(comm[0])
+            
                     if course.supplier.user_type.user_type == SUPPLIER_S:
                         supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                         intent = stripe.PaymentIntent.create(
@@ -419,7 +419,7 @@ class Save_stripe_info(APIView):
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (instance.email_id,)
                     invoice_number = random.randrange(100000,999999)
-                    context_data1 = {"student_name":fullname,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": amount, "vat":vat_val, "total_fees":int(float(amount)) + (int(float(amount))*vat_val)/100}
+                    context_data1 = {"student_name":fullname,"student_email":email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": int(float(amount)) - (int(float(amount))*vat_val)/100, "vat":vat_val, "total_fees":amount , "product_type":"Course"}
                     template = get_template('stripe_invoice.html').render(context_data1)
                     try: 
                         result = BytesIO()
@@ -522,8 +522,8 @@ class Save_stripe_infoEvent(APIView):
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (instance.email_id,)
                         invoice_number = random.randrange(100000,999999)
-                        context_data1 = {"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total":int(amount) + (int(amount)*vat_val)/100}
-                        template = get_template('invoice.html').render(context_data1)
+                        context_data1 = {"student_name":fullname,"student_email":instance.email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total_fees":int(amount) + (int(amount)*vat_val)/100,"product_type":"Event"}
+                        template = get_template('stripe_invoice.html').render(context_data1)
                         try: 
                             result = BytesIO()
                             pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
