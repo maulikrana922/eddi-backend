@@ -2181,8 +2181,8 @@ class SupplierPayout(APIView):
                             "amount":payout["amount"],
                         }
                         getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
-                        supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
-                        supplier_account.save()
+                        # supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
+                        # supplier_account.save()
                         return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
                 
                 except Exception as ex:
