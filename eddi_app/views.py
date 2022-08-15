@@ -83,15 +83,15 @@ class PayByInvoice(APIView):
                     
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                 amount = float(request.POST.get("price"))
-                total_price = "{:.2f}".format(int(float(amount)) + (int(float(amount))*vat_val)/100)
+                total_price = float("{:.2f}".format(int((amount))) + (int(float(amount))*vat_val)/100)
                 try:
                      
                     if record_map["invoice_method"] == "PayByMe":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : amount, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
                         template = get_template('invoice_temp_pbi_me.html').render(context_data)
                    
                     elif record_map["invoice_method"] == "PayByOrg":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : request.POST.get("price"), "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : amount, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")} 
                         template = get_template('invoice_temp_pbi_org.html').render(context_data)
                     
                     result = BytesIO()
@@ -346,6 +346,9 @@ class Save_stripe_info(APIView):
                 pass
             
             try:
+                vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                vat_val = int(vat[0])
+                amount = int(float(amount)) + (int(float(amount))*vat_val)/100
                 customer_data = stripe.Customer.list(email=email_id).data
                 if len(customer_data) == 0:
                     # creating customer
@@ -367,7 +370,8 @@ class Save_stripe_info(APIView):
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
-            
+        
+
                     if course.supplier.user_type.user_type == SUPPLIER_S:
                         supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                         intent = stripe.PaymentIntent.create(
@@ -412,16 +416,15 @@ class Save_stripe_info(APIView):
                 return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)     
             try:
                 instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-                vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-                vat_val = int(vat[0])
+                
                 html_path = INVOICE_TO_USER
                 fullname = f'{instance.first_name} {instance.last_name}'
-                context_data = {'fullname':fullname, "course_name":course_name,"total":int(float(amount)) + (int(float(amount))*vat_val)/100}
+                context_data = {'fullname':fullname, "course_name":course_name,"total": amount}
                 email_html_template = get_template(html_path).render(context_data)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = (instance.email_id,)
                 invoice_number = random.randrange(100000,999999)
-                context_data1 = {"student_name":fullname,"student_email":email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": int(float(amount)) - (int(float(amount))*vat_val)/100, "vat":vat_val, "total_fees":amount , "product_type":"Course"}
+                context_data1 = {"student_name":fullname,"student_email":email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": int(float(amount)) - (int(float(amount))*vat_val)/100, "vat":vat_val, "total_fees": amount, "product_type":"Course"}
                 template = get_template('stripe_invoice.html').render(context_data1)
                 try: 
                     result = BytesIO()
@@ -1717,12 +1720,13 @@ class UserPaymentDetail_info(APIView):
                         pass
                     
                     try:
-                        supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
-                        if supplier_data.total_earnings == None:
-                            supplier_data.total_earnings = float("{:.2f}".format(float(supplier_amount/100)))
-                        else:
-                            supplier_data.total_earnings += float("{:.2f}".format(float(supplier_amount/100)))
-                        supplier_data.save()
+                        if not request.POST.get(PRICE):
+                            supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
+                            if supplier_data.total_earnings == None:
+                                supplier_data.total_earnings = float("{:.2f}".format(float(supplier_amount/100)))
+                            else:
+                                supplier_data.total_earnings += float("{:.2f}".format(float(supplier_amount/100)))
+                            supplier_data.save()
                     except Exception as ex:
                         print(ex)
                         pass
@@ -2933,7 +2937,7 @@ class Manage_Payment(APIView):
             except:
                 return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_200_OK)
         else:
-            return Response({STATUS: SUCCESS, DATA: "You are not authorized to do this", DATA_SV:"Du har inte behörighet att utföra detta"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "You are not authorized to do this", DATA_SV:"Du har inte behörighet att utföra detta"}, status=status.HTTP_400_BAD_REQUEST)
 
 class Admin_Manage_Payment(APIView):
     def get(self,request):
@@ -2959,11 +2963,11 @@ class Admin_Manage_Payment(APIView):
                         if serializer2 := SupplierAccountDetailSerializer(supplier_account_data):
                             return Response({STATUS: SUCCESS, DATA: serializer.data, "event":serializer1.data,"admin_account_data":serializer2.data}, status=status.HTTP_200_OK)
                         else:
-                            return Response({STATUS: SUCCESS, DATA: serializer2.error}, status=status.HTTP_200_OK)
+                            return Response({STATUS: ERROR, DATA: serializer2.error}, status=status.HTTP_200_OK)
                     else:
-                        return Response({STATUS: SUCCESS, DATA: serializer1.error}, status=status.HTTP_200_OK)
+                        return Response({STATUS: ERROR, DATA: serializer1.error}, status=status.HTTP_200_OK)
                 else:
-                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+                    return Response({STATUS: ERROR, DATA: serializer.error}, status=status.HTTP_200_OK)
             except Exception as e:
                 print(e)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2988,10 +2992,10 @@ class GetUserSessionView(APIView):
                 if serializer := SessionDetailsSerializer(all_session, many=True):
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
                 else:
-                    return Response({STATUS: SUCCESS, DATA: serializer.error}, status=status.HTTP_200_OK)
+                    return Response({STATUS: ERROR, DATA: serializer.error}, status=status.HTTP_200_OK)
             except:
                 pass
             
         except Exception as e:
             print(e)
-            return Response({STATUS: SUCCESS, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
