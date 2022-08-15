@@ -143,7 +143,7 @@ class AddCourseView(APIView):
                         message_sv = translator.translate(f"{supplier_id.first_name}, has added a new course {course}, under {category_id.category_name} to the system.")
                     except:
                         pass
-                    send_notification(email_id, receiver, message)
+                    # send_notification(email_id, receiver, message)
                     # receiver_device_token = []
                     # for i in data:
                     #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -178,7 +178,7 @@ class AddCourseView(APIView):
                     message = f"{supplier_id.first_name}, has added a new Course under “{category_id.category_name}”"
                     message_sv = f"{supplier_id.first_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
                 receiver = [i.email_id for i in users]
-                send_notification(email_id, receiver, message)
+                # send_notification(email_id, receiver, message)
                 # receiver_device_token = []
                 # for i in users:
                 #     device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
@@ -769,7 +769,7 @@ class GetCourseDetails(APIView):
                                 message = f"{record_map[COURSE_NAME]}, has been Approved by the Admin"
                                 message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin"
                                 receiver = [data.supplier.email_id]
-                                send_notification(email_id, receiver, message)
+                                # send_notification(email_id, receiver, message)
                                 # receiver_device_token = []
                                 # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                                 # receiver_device_token.append(device_data.device_token)
@@ -833,7 +833,7 @@ class GetCourseDetails(APIView):
                                     message = f"{record_map[COURSE_NAME]}, has been Rejected by the Admin"
                                     message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin"
                                     receiver = [data.supplier.email_id]
-                                    send_notification(email_id, receiver, message)
+                                    # send_notification(email_id, receiver, message)
                                     # receiver_device_token = []
                                     # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                                     # receiver_device_token.append(device_data.device_token)
