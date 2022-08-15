@@ -1584,7 +1584,10 @@ class UserPaymentDetail_info(APIView):
             else:
                 card_type = None
             if request.POST.get(PRICE):
-                amount = request.POST.get(PRICE)
+                price = request.POST.get(PRICE)
+                vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                vat_val = int(vat[0])
+                amount = int(float(price)) + (int(float(price))*vat_val)/100
                 comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                 supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                
