@@ -1744,7 +1744,7 @@ class UserPaymentDetail_info(APIView):
                         message = f"{sender_data.first_name}, has Enrolled for the {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         message_sv = f"{sender_data.first_name}, har registrerat sig på  {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         receiver = [courseobj.supplier.email_id]
-                        send_notification(email_id, receiver, message)
+                        # send_notification(email_id, receiver, message)
                         # receiver_device_token = []
                         # device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
                         # receiver_device_token.append(device_data.device_token)
