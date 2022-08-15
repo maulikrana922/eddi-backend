@@ -67,12 +67,12 @@ class PayByInvoice(APIView):
             else:
                 record_map["product_name"] = request.POST.get("course_name")
 
-            # try:
-            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
-            #     if var is not None:
-            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            # except:
-            #     pass
+            try:
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":record_map["product_name"],STATUS:'Success'})
+                if var is not None:
+                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
 
 
             getattr(models,"PaybyInvoice").objects.update_or_create(**record_map)
@@ -83,16 +83,16 @@ class PayByInvoice(APIView):
                     
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                 amount = float(request.POST.get("price"))
-                total_price = int(float(amount)) + (int(float(amount))*vat_val)/100
+                total_price = int(float(course.course_price)) + (int(float(course.course_price))*vat_val)/100
                 
                 try:
                      
                     if record_map["invoice_method"] == "PayByMe":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":"{:.2f}".format(total_price),"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
                         template = get_template('invoice_temp_pbi_me.html').render(context_data)
                    
                     elif record_map["invoice_method"] == "PayByOrg":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":"{:.2f}".format(total_price),"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")} 
                         template = get_template('invoice_temp_pbi_org.html').render(context_data)
                     
                     result = BytesIO()
@@ -133,7 +133,7 @@ class PayByInvoice(APIView):
                     try:
                         if course.supplier.user_type.user_type == SUPPLIER_S:
                             supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
-                            total_earnings = float("{:.2f}".format(supplier_data.total_earnings) + float(record_map1["amount"]))
+                            total_earnings = supplier_data.total_earnings + float(record_map1["amount"])
                             setattr(supplier_data,'total_earnings',total_earnings)
                             supplier_data.save()
                     except Exception as ex:
@@ -1586,9 +1586,9 @@ class UserPaymentDetail_info(APIView):
                 card_type = None
             if request.POST.get(PRICE):
                 amount = request.POST.get(PRICE)
-                # vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
-                # vat_val = int(vat[0])
-                # amount = int(float(price)) + (int(float(price))*vat_val)/100
+                vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
+                vat_val = int(vat[0])
+                amount = int(float(amount)) + (int(float(amount))*vat_val)/100
                 comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                 supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
                
@@ -1728,13 +1728,13 @@ class UserPaymentDetail_info(APIView):
                             supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
                             print(supplier_data.total_earnings,"before")
                             if supplier_data.total_earnings == None:
-                                supplier_data.total_earnings = float(supplier_amount/100)
+                                supplier_data.total_earnings = amount
                             else:
-                                supplier_data.total_earnings += float(supplier_amount/100)
+                                supplier_data.total_earnings += amount
                             supplier_data.save()
                         print(supplier_data.total_earnings,"after")
                     except Exception as ex:
-                        print(ex)
+                        print(ex,"supplier account")
                         pass
                     try:
                         sender_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{"email_id":email_id})
