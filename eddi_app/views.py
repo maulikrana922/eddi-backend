@@ -88,7 +88,7 @@ class PayByInvoice(APIView):
                 try:
                      
                     if record_map["invoice_method"] == "PayByMe":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
+                        context_data = {"student_name": request.POST.get("NameOfStudent"),"personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
                         template = get_template('invoice_temp_pbi_me.html').render(context_data)
                    
                     elif record_map["invoice_method"] == "PayByOrg":
@@ -339,12 +339,12 @@ class Save_stripe_info(APIView):
             course_name = request.POST.get(COURSE_NAME)
             extra_msg = ''
            
-            try:
-                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
-                if var is not None:
-                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            except:
-                pass
+            # try:
+            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+            #     if var is not None:
+            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            # except:
+            #     pass
             
             try:
                 vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
@@ -409,7 +409,8 @@ class Save_stripe_info(APIView):
                             payment_method_types=["card"],
                             payment_method=payment_method_id,
                             confirm=True)
-                except:
+                except Exception as e:
+                    print(e)
                     return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST) 
                 
             except Exception as ex:
@@ -915,6 +916,7 @@ class UserLoginView(APIView):
                 # Supplier Exception Cases
                 try:
                     organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+                    print(str(organization_data.is_approved.value))
                     if organization_data.rejection_count == 3:
                         return Response({STATUS: ERROR, DATA: "Your profile has been blocked. please contact to eddi support"}, status=status.HTTP_400_BAD_REQUEST)
                     if str(organization_data.is_approved.value) == "Pending" and organization_data.approved_once == False:
@@ -1474,7 +1476,7 @@ class UserProfileView(APIView):
 
                         data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                         receiver = [i.email_id for i in data]
-                        send_notification(email_id, receiver, message)
+                        # send_notification(email_id, receiver, message)
                         # receiver_device_token = []
                         # for i in data:
                         #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -1850,7 +1852,7 @@ class EventPaymentDetail_info(APIView):
                             message_sv = translator.translate(f"{data_user.first_name}, has Registered for the “{event_name}” ")
                         except:
                             pass
-                        send_notification(user_email_id, receiver, message)
+                        # send_notification(user_email_id, receiver, message)
                         # receiver_device_token = []
                         # for i in data:
                         #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -2273,7 +2275,7 @@ class RecruitmentAdView(APIView):
                     message_sv = translator.translate(f"{data_supplier.first_name}, has added a new Recruitment Ad“{title}” to the system")
                 except:
                     pass
-                send_notification(email_id, receiver, message)
+                # send_notification(email_id, receiver, message)
                 # receiver_device_token = []
                 # for i in data:
                 #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -2375,7 +2377,7 @@ class RecruitmentAdView(APIView):
                                 message_sv = f"Rekryteringsannonsen {record_map[RECRUITMENTAD_TITLE]} har godkänts av Eddi Admin"
                                 receiver = [data.supplier_profile.supplier_email]
                                 title = record_map[RECRUITMENTAD_TITLE]
-                                send_notification(email_id, receiver, message)
+                                # send_notification(email_id, receiver, message)
                                 # receiver_device_token = []
                                 # for i in data:
                                 #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -2406,7 +2408,7 @@ class RecruitmentAdView(APIView):
                                 message_sv = f"Rekryteringsannonsen {record_map[RECRUITMENTAD_TITLE]}, har inte godkänts av Eddi Admin"
                                 receiver = [data.supplier_profile.supplier_email]
                                 title = record_map[RECRUITMENTAD_TITLE]
-                                send_notification(email_id, receiver, message)
+                                # send_notification(email_id, receiver, message)
                                 for i in receiver:
                                     try:
                                         record_map2 = {}

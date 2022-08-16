@@ -240,7 +240,7 @@ class AddSubCategoryView(APIView):
                 message_sv = translator.translate(f"{supplier_id.first_name}, has added a new “{subcategory}”, under “{category_id.category_name}”  to the system. Click below to view the details.")
             except:
                 pass
-            send_notification(email_id, receiver, message)
+            # send_notification(email_id, receiver, message)
             # receiver_device_token = []
             # for i in data:
             #     device_data = UserDeviceToken.objects.filter(user_type=i)
@@ -361,7 +361,7 @@ class GetSubCategoryDetails(APIView):
                             message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
                             receiver = [data.supplier.email_id]
-                            send_notification(email_id, receiver, message)
+                            # send_notification(email_id, receiver, message)
                             # receiver_device_token = []
                             # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                             # receiver_device_token.append(device_data.device_token)
@@ -409,7 +409,7 @@ class GetSubCategoryDetails(APIView):
                                 message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
 
                                 receiver = [data.supplier.email_id]
-                                send_notification(email_id, receiver, message)
+                                # send_notification(email_id, receiver, message)
                                 # receiver_device_token = []
                                 # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                                 # receiver_device_token.append(device_data.device_token)
@@ -1681,7 +1681,8 @@ class SupplierProfileView(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
         if serializer := SupplierProfileSerializer(data):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)

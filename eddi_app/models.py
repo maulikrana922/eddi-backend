@@ -1653,7 +1653,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
                 message_sv = translator.translate(f"{instance.first_name}, as a Supplier has been added by the System.")
             except:
                 pass
-            send_notification(instance.email_id, receiver, message)
+            # send_notification(instance.email_id, receiver, message)
             # send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
