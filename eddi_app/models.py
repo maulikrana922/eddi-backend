@@ -344,11 +344,13 @@ class CourseDetails(models.Model):
 @receiver(post_save, sender=CourseDetails)
 def add_organization_domain(sender, instance, created, **kwargs):
     if created and instance.course_for_organization == True:
-        
-        test_str = instance.supplier.email_id
-        res = test_str.split('@')[1]
-        print(res)
-        CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
+        try:
+            test_str = instance.supplier.email_id
+            res = test_str.split('@')[1]
+            # print(res)
+            CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
+        except Exception as e:
+            print(e,"essssss")
 
 @receiver(post_save, sender=CourseDetails)
 def bulk_email(sender, instance, created, **kwargs):
@@ -381,7 +383,8 @@ def bulk_email(sender, instance, created, **kwargs):
                     username = None
                 try:
                     organization_data = instance.supplier_organization.organizational_name
-                except:
+                except Exception as ex:
+                    print(ex,"exxx")
                     organization_data = None
                 context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "uuid":instance.uuid}
                 html_content = render_to_string(html_path, context_data)               
@@ -395,6 +398,7 @@ def bulk_email(sender, instance, created, **kwargs):
             instance.is_post = False
             instance.save()
         except Exception as ex:
+            print(ex,"exx")
             pass
 
 

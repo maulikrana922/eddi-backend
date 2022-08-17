@@ -83,6 +83,7 @@ class AddCourseView(APIView):
             organization_data = None
         try:
             try:
+                print(request.POST.get(TARGET_USERS))
                 record_map = {
                 SUPPLIER_ID: supplier_id.id,
                 COURSE_IMAGE: request.FILES.get(COURSE_IMAGE,None),
@@ -125,13 +126,13 @@ class AddCourseView(APIView):
                 else:
                     record_map[COURSE_STARTING_DATE] = request.POST.get(COURSE_STARTING_DATE)
                 record_map[CREATED_AT] = make_aware(datetime.datetime.now())
-                record_map[CREATED_BY] = supplier_id.user_type
+                record_map[CREATED_BY] = supplier_id.user_type.user_type
                 print(record_map, "recordddd")
             except Exception as ex:
                 return Response({STATUS:ERROR, "var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 course = getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
-                print(course)
+                print(course,"courseeeeeee")
             except Exception as ex:
                 print(ex,"ererorrr")
 
