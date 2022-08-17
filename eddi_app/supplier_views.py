@@ -513,14 +513,12 @@ class GetCourseDetails(APIView):
                 
             except:
                 course_data = None
-            print(course_data)
             try:
                 supplier_profile = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":course_data.supplier.email_id})
             except:
                 supplier_profile = None
-            print(supplier_profile)
             try:
-                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE:course_data}).get(**{EMAIL_ID:email_id})
+                fav_data = getattr(models,FAVOURITE_COURSE_TABLE).objects.filter(**{COURSE_NAME:course_data.course_name}).get(**{EMAIL_ID:email_id})
                 fav_dataa = fav_data.is_favourite
             except:
                 fav_data = None
@@ -615,6 +613,9 @@ class GetCourseDetails(APIView):
                     course_enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{EMAIL_ID:email_id}).values_list("course__course_name", flat=True)
                     print(course_enrolled, "enrolleddd")
 
+                    # if user_subcategory:
+                    #     user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_name__in=user_areaofinterest)).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
+                    # else:
                     user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
 
                     print(user_profile_interest, "intererer")
@@ -647,7 +648,7 @@ class GetCourseDetails(APIView):
             user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
         except Exception:
             user_type_data = None
-            
+        print(request.POST.get(SUBCATEGORY_NAME_ID))
         res = None
         if not uuid:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -665,18 +666,19 @@ class GetCourseDetails(APIView):
             pass
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
-
             try:
-                sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,data.course_subcategory.subcategory_name)})
-            except:
+                sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{"subcategory_name":request.POST.get(SUBCATEGORY_NAME_ID)}).id
+               
+            except Exception as e:
                 sub_category_id = None
-
+    
             course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
 
             fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
 
             course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
-        except:
+        except Exception as e:
+            print(e,"subcat")
             return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -692,7 +694,7 @@ class GetCourseDetails(APIView):
             MEETING_LINK : request.POST.get(MEETING_LINK,data.meeting_link),
             MEETING_PASSCODE : request.POST.get(MEETING_PASSCODE,data.meeting_passcode),
             AUTHOR_NAME : request.POST.get(AUTHOR_NAME,data.author_name),
-            AUTHOR_BIO : request.POST.get(MEETING_PASSCODE,data.author_bio),
+            AUTHOR_BIO : request.POST.get(AUTHOR_BIO,data.author_bio),
             TARGET_USERS : request.POST.get(TARGET_USERS,data.target_users),
             FEE_TYPE_ID: fee_type_id.id,
             SUB_AREA:request.POST.get(SUB_AREA,data.sub_area),
@@ -707,7 +709,7 @@ class GetCourseDetails(APIView):
             else:
                 record_map["offer_price"] = data.offer_price
             if sub_category_id != None:
-                record_map[COURSE_SUBCATEGORY_ID] = sub_category_id.id
+                record_map[COURSE_SUBCATEGORY_ID] = sub_category_id
             if request.POST.get(COURSE_STARTING_DATE) == "":
                 record_map[COURSE_STARTING_DATE] = None
             else:
@@ -880,7 +882,8 @@ class GetCourseDetails(APIView):
                     setattr(data,key,value)
                 data.save()
                 return Response({STATUS: SUCCESS, DATA: "Information successfully edited", DATA_SV:"Din information har nu ändrats"}, status=status.HTTP_200_OK)
-        except:
+        except Exception as e:
+            print(e,"lastt")
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
 
