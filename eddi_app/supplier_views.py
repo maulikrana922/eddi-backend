@@ -78,7 +78,8 @@ class AddCourseView(APIView):
             return Response({STATUS:ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{"supplier_email":email_id})
-        except:
+        except Exception as e:
+            print(e,"organi")
             organization_data = None
         try:
             try:
@@ -128,8 +129,11 @@ class AddCourseView(APIView):
                 print(record_map, "recordddd")
             except Exception as ex:
                 return Response({STATUS:ERROR, "var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-                
-            getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
+            try:
+                course = getattr(models,COURSEDETAILS_TABLE).objects.update_or_create(**record_map)
+                print(course)
+            except Exception as ex:
+                print(ex,"ererorrr")
 
             # noti to Admin
             if supplier_id.user_type.user_type != ADMIN_S:

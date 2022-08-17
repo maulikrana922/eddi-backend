@@ -1024,7 +1024,7 @@ class ForgetPasswordView(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully"}, status=status.HTTP_200_OK) 
+                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully",DATA_SV: "E-postmeddelandet har skickats"}, status=status.HTTP_200_OK) 
                     
 
                     if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
@@ -1046,7 +1046,7 @@ class ForgetPasswordView(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
-                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully"}, status=status.HTTP_200_OK) 
+                        return Response({STATUS: SUCCESS, DATA: "Email sent successfully", DATA_SV:"E-postmeddelandet har skickats"}, status=status.HTTP_200_OK) 
         except:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
                 
