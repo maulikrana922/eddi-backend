@@ -17,7 +17,7 @@
         background-color: #3e8181;
       "
     >
-      <img src="cid:Logo.png" style="width: 120px;height: 120px" />
+      <img src="cid:Logo.png" style="width: 120px" />
     </td>
   </tr>
   <tr>
@@ -31,68 +31,34 @@
         font-size: 18px;
       "
     >
-      Hello, {{ fullname }}
-      <span style="font-family: Arial, Helvetica, sans-serif; font-weight: bold"
-        ></span
-      >
-    </td>
-  </tr>
-  <!-- <tr>
-    <td style="color: #3e3e3e">
-      Please find below Pay By Invoice Details,
-      <br>
-      <br>
-      Student_name : {{student_name}}
-      <br>
-      Personal_number : {{personal_number}}
-      <br>
-      Organization_name : {{organization_name}}
-      <br>
-      Organization_number : {{organization_number}}
-      <br>
-      Street_number : {{street_number}}
-      <br>
-      Reference : {{reference}}
-      <br>
-      Zip_code : {{zip_code}}
-      <br>
-      Contry : {{contry}}
-      <br>
-      City : {{city}}
-      <br>
-      Invoice_address : {{invoice_address}}
-      <br>
-      Price : {{price}}
-      <br>
-      Payment_mode : {{payment_mode}}
-      <br>
-      Product_type : {{product_type}}
-      <br>
-      <br>
-    </td>
-  </tr> -->
-  <tr>
-    <td style="height: 20px"></td>
-  </tr>
-  <tr>
-    <td style="
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;
-    color: #3e3e3e;
-    text-decoration: none;
-  ">
-      {% if user_type == "student" %}
-        you have enrolled for the Course {{product}} and has requested for {{payment_method}}. Please find the below invoice pdf for the same. 
-
-      {% else %}
-          {{student_name}} has enrolled for the Course {{product}} and has requested for {{payment_method}}. Please find the below invoice pdf for the same. 
+      Hello {{fullname}},
       
-      {% endif %}
-    
     </td>
   </tr>
   <tr>
-    <td style="height: 25px"></td>
+    <td height="25"></td>
+  </tr>
+      <td style="color: #3e3e3e;font-size: 17px;">
+      {% if user_type == "student" %}
+        you have enrolled for the Course <b>{{product}}</b> and has requested for <b>{{payment_method}}</b>.Please find the below invoice pdf for the same. 
+      {% else %}
+        <b>{{student_name}}</b> has enrolled for the Course <b>{{product}}</b> and has requested for <b>{{payment_method}}</b>. Please find the below invoice pdf for the same. 
+      {% endif %}
+      </td>
+  <tr>
+  <tr>
+    <td height="45"></td>
+  </tr>
+  <tr>
+    <td style="color: #3e3e3e">
+        Thank You,
+        <br>
+        The Eddi Team.    </td>
+  </tr>
+
+ 
+  <tr>
+    <td height="30"></td>
   </tr>
   <tr>
     <td
@@ -104,9 +70,7 @@
         display: grid;
       "
     >
-    Thank You,
-    <br>
-    The Eddi Team.
+      If you are in need of assistance please contact
       <a
         style="
           font-family: Arial, Helvetica, sans-serif;
@@ -116,13 +80,13 @@
         "
         href="mailto:support@eddi.nu"
       >
-      If you are in need of assistance please contact
-        </a
+        support@eddi.nu</a
       >
     </td>
   </tr>
+  
   <tr>
-    <td height="45"><a href="support@eddi.nu">support@eddi.nu</a></td>
+    <td height="45"></td>
   </tr>
   <tr>
     <td
