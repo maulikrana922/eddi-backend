@@ -1056,7 +1056,10 @@ class ResetPasswordView(APIView):
     def post(self,request, uuid=None):
         email_id = request.POST.get(EMAIL_ID)
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS_ID:1,IS_DELETED:False})
+            if uuid:
+                data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid,STATUS_ID:1,IS_DELETED:False})
+            else:
+                data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id,STATUS_ID:1,IS_DELETED:False})
             password = request.POST.get(PASSWORD)
             if check_password(password, data.password):
                 return Response({STATUS: ERROR, DATA: "You have already used this password, please choose an other one", DATA_SV:"Du har redan använt detta lösenord, vänligen välj ett nytt"}, status=status.HTTP_400_BAD_REQUEST)
