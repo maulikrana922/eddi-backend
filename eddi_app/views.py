@@ -849,6 +849,7 @@ class UserLoginView(APIView):
     def post(self, request):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
+        user_type = request.POST.get(USER_TYPE)
         # user_device_token = request.POST.get(DEVICE_TOKEN)
         record_map = {}
         record_map = {
@@ -911,7 +912,7 @@ class UserLoginView(APIView):
        
         # Supplier General Login
         try:
-            if data.user_type.user_type == SUPPLIER_S:
+            if data.user_type.user_type == SUPPLIER_S and user_type == 'Supplier':
                
                 # Supplier Exception Cases
                 try:
@@ -942,7 +943,7 @@ class UserLoginView(APIView):
             pass
         # General Admin Login
         try:
-            if data.user_type.user_type == ADMIN_S:
+            if data.user_type.user_type == ADMIN_S and user_type == 'Supplier':
                 if not check_password(password, data.password):
                     return Response({STATUS: ERROR, DATA: "Invalid Credentials please try again!", DATA_SV:"Användarnamn eller lösenord stämmer inte, försök igen!"}, status=status.HTTP_400_BAD_REQUEST)
                 if data.status.id == 2:
@@ -956,12 +957,13 @@ class UserLoginView(APIView):
                     # }
                     # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
+        
         except:
             pass
 
         # User Login Cases
         try:
-            if data.user_type.user_type == "User":
+            if data.user_type.user_type == "User" and user_type == 'User':
                 if data.status.id == 2:
                     return Response({STATUS: ERROR, DATA: "Your account is temporarily inactivated, please contact eddi support", DATA_SV:"Ditt konto är tillfälligt inaktiverat, vänligen kontakta kundservice"}, status=status.HTTP_400_BAD_REQUEST)
                 if not check_password(password, data.password):
@@ -987,6 +989,8 @@ class UserLoginView(APIView):
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({STATUS: ERROR, DATA: "Please verify your account via your email", DATA_SV:"Vänligen verifiera ditt konto via din email"}, status=status.HTTP_400_BAD_REQUEST)
 
