@@ -54,6 +54,7 @@ class AddCourseView(APIView):
                 course_data = None
             if course_data != None:
                 return Response({STATUS: ERROR, DATA: "Please choose unique course name", DATA_SV:"Vänligen, välj ett unikt namn på utbildningen"}, status=status.HTTP_400_BAD_REQUEST)
+       
         if request.POST.get(COURSE_FOR_ORGANIZATION) == 'true':
             course_organization = True
             test_str = email_id
@@ -62,6 +63,12 @@ class AddCourseView(APIView):
             course_organization = False
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+            if supplier_id.user_type.user_type == SUPPLIER_S and request.POST.get(FEE_TYPE_NAME) == 'Paid':
+                try:
+                    supplier_acc = getattr(models,"SupplierAccountDetail").objects.get(supplier=supplier_id)
+                except Exception as ex:
+                    return Response({STATUS: ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as ex:
             return Response({STATUS: ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
