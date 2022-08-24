@@ -132,7 +132,7 @@ class PayByInvoice(APIView):
                     
                     try:
                         if course.supplier.user_type.user_type == SUPPLIER_S:
-                            supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
+                            supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier':course.supplier})
                             total_earnings = supplier_data.total_earnings + float(record_map1["amount"])
                             setattr(supplier_data,'total_earnings',total_earnings)
                             supplier_data.save()
@@ -369,7 +369,7 @@ class Save_stripe_info(APIView):
                     #     payment_method=payment_method_id,
                     #     confirm=True)
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
-                    supplier_acct = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course.supplier})
+                    supplier_acct = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier':course.supplier})
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
         
 
@@ -582,7 +582,7 @@ class UserSignupView(APIView):
             user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
         except:
             return Response({STATUS:ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        user_device_token = request.POST.get(DEVICE_TOKEN)
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
             LAST_NAME: request.POST.get(LAST_NAME,None),
@@ -602,11 +602,12 @@ class UserSignupView(APIView):
         
         try:
             data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
-            # record_data1 = {
-            #         DEVICE_TOKEN:request.POST.get(DEVICE_TOKEN,None),
-            #         USER_TYPE:data[0]
-            #     }
-            # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+            if request.POST.get(DEVICE_TOKEN):
+                record_data1 = {
+                        DEVICE_TOKEN:user_device_token,
+                        USER_TYPE:data[0]
+                    }
+                getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
@@ -850,7 +851,8 @@ class UserLoginView(APIView):
         email_id = request.POST.get(EMAIL_ID)
         password = request.POST.get(PASSWORD)
         user_type = request.POST.get(USER_TYPE)
-        # user_device_token = request.POST.get(DEVICE_TOKEN)
+        user_device_token = request.POST.get(DEVICE_TOKEN)
+        print(user_device_token)
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -932,11 +934,12 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
-                    # record_data1 = {
-                    #     DEVICE_TOKEN:user_device_token,
-                    #     USER_TYPE:data
-                    # }
-                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    if request.POST.get(DEVICE_TOKEN):
+                        record_data1 = {
+                            DEVICE_TOKEN:user_device_token,
+                            USER_TYPE:data
+                        }
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
         except:
@@ -951,11 +954,12 @@ class UserLoginView(APIView):
                 if check_password(password, data.password):
                     data.modified_date_time = make_aware(datetime.datetime.now())
                     data.save()
-                    # record_data1 = {
-                    #     DEVICE_TOKEN:user_device_token,
-                    #     USER_TYPE:data
-                    # }
-                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    if request.POST.get(DEVICE_TOKEN):
+                        record_data1 = {
+                            DEVICE_TOKEN:user_device_token,
+                            USER_TYPE:data
+                        }
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         
         except:
@@ -980,11 +984,12 @@ class UserLoginView(APIView):
                     # print(type(time_diff.seconds), "timeeeeeeeeeeeee")
                     # print(divmod(time_diff.seconds, 3600)[0] , "timeeeeeeeeeeeee")
                     print(user_profile)
-                    # record_data1 = {
-                    #     DEVICE_TOKEN:user_device_token,
-                    #     USER_TYPE:data
-                    # }
-                    # getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                    if request.POST.get(DEVICE_TOKEN):
+                        record_data1 = {
+                            DEVICE_TOKEN:user_device_token,
+                            USER_TYPE:data
+                        }
+                    getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
                     # getattr(models,DEVICE_TOKEN_TABLE).objects.create(device_token=user_device_token)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
@@ -1484,14 +1489,14 @@ class UserProfileView(APIView):
                         data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
                         receiver = [i.email_id for i in data]
                         # send_notification(email_id, receiver, message)
-                        # receiver_device_token = []
-                        # for i in data:
-                        #     device_data = UserDeviceToken.objects.filter(user_type=i)
-                        #     for j in device_data:
-                        #         receiver_device_token.append(j.device_token)
+                        receiver_device_token = []
+                        for i in data:
+                            device_data = UserDeviceToken.objects.filter(user_type=i)
+                            for j in device_data:
+                                receiver_device_token.append(j.device_token)
 
                         # print(receiver_device_token)
-                        # send_push_notification(receiver_device_token,message)
+                        send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map = {}
@@ -1734,7 +1739,7 @@ class UserPaymentDetail_info(APIView):
                     
                     try:
                         if amount > 0:
-                            supplier_data = getattr(models,'SupplierAccountDetail').objects.get(**{'supplier':course_data.supplier})
+                            supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier':course_data.supplier})
                             print(supplier_data.total_earnings,"before")
                             if supplier_data.total_earnings == None:
                                 supplier_data.total_earnings = amount
@@ -1754,12 +1759,12 @@ class UserPaymentDetail_info(APIView):
                         message_sv = f"{sender_data.first_name}, har registrerat sig på  {courseobj.course_name} added by {courseobj.supplier.first_name}"
                         receiver = [courseobj.supplier.email_id]
                         # send_notification(email_id, receiver, message)
-                        # receiver_device_token = []
-                        # device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
-                        # receiver_device_token.append(device_data.device_token)
+                        receiver_device_token = []
+                        device_data = UserDeviceToken.objects.filter(user_type=courseobj.supplier)
+                        receiver_device_token.append(device_data.device_token)
 
                         # print(receiver_device_token)
-                        # send_push_notification(receiver_device_token,message)
+                        send_push_notification(receiver_device_token,message)
                         try:
                             record_map1 = {}
                             record_map1 = {
@@ -1860,14 +1865,14 @@ class EventPaymentDetail_info(APIView):
                         except:
                             pass
                         # send_notification(user_email_id, receiver, message)
-                        # receiver_device_token = []
-                        # for i in data:
-                        #     device_data = UserDeviceToken.objects.filter(user_type=i)
-                        #     for j in device_data:
-                        #         receiver_device_token.append(j.device_token)
+                        receiver_device_token = []
+                        for i in data:
+                            device_data = UserDeviceToken.objects.filter(user_type=i)
+                            for j in device_data:
+                                receiver_device_token.append(j.device_token)
 
                         # print(receiver_device_token)
-                        # send_push_notification(receiver_device_token,message)
+                        send_push_notification(receiver_device_token,message)
                         for i in receiver:
                             try:
                                 record_map1 = {}
@@ -2283,13 +2288,13 @@ class RecruitmentAdView(APIView):
                 except:
                     pass
                 # send_notification(email_id, receiver, message)
-                # receiver_device_token = []
-                # for i in data:
-                #     device_data = UserDeviceToken.objects.filter(user_type=i)
-                #     for j in device_data:
-                #         receiver_device_token.append(j.device_token)
-                # print(receiver_device_token)
-                # send_push_notification(receiver_device_token,message)
+                receiver_device_token = []
+                for i in data:
+                    device_data = UserDeviceToken.objects.filter(user_type=i)
+                    for j in device_data:
+                        receiver_device_token.append(j.device_token)
+                print(receiver_device_token)
+                send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map1 = {}
@@ -2385,13 +2390,13 @@ class RecruitmentAdView(APIView):
                                 receiver = [data.supplier_profile.supplier_email]
                                 title = record_map[RECRUITMENTAD_TITLE]
                                 # send_notification(email_id, receiver, message)
-                                # receiver_device_token = []
-                                # for i in data:
-                                #     device_data = UserDeviceToken.objects.filter(user_type=i)
-                                #     for j in device_data:
-                                #         receiver_device_token.append(j.device_token)
+                                receiver_device_token = []
+                                for i in data:
+                                    device_data = UserDeviceToken.objects.filter(user_type=i)
+                                    for j in device_data:
+                                        receiver_device_token.append(j.device_token)
                                 # print(receiver_device_token)
-                                # send_push_notification(receiver_device_token)
+                                send_push_notification(receiver_device_token)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -2885,11 +2890,11 @@ class Manage_Payment(APIView):
         data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if data.user_type.user_type == ADMIN_S:
             try:
-                all_payment = getattr(models,"UserPaymentDetail").objects.all().order_by("-created_date_time")
+                all_payment = getattr(models,USER_PAYMENT_DETAIL).objects.all().order_by("-created_date_time")
             except:
                 all_payment = None
             try:
-                all_event = getattr(models,"EventAdPaymentDetail").objects.all().order_by("-created_date_time")
+                all_event = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.all().order_by("-created_date_time")
             except:
                 all_event = None
             try:
@@ -2904,11 +2909,11 @@ class Manage_Payment(APIView):
                 pass
         elif data.user_type.user_type == SUPPLIER_S:
             try:
-                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"course__supplier__email_id":email_id})
+                all_payment = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__supplier__email_id":email_id})
             except:
                 all_payment = None
             try:
-                supplier_account_data = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__email_id":email_id})
+                supplier_account_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{"supplier__email_id":email_id})
             except:
                 pass
             try:
@@ -2932,7 +2937,7 @@ class Manage_Payment(APIView):
             print("admininin")
             try:
                 try:
-                    payment_data = getattr(models,"UserPaymentDetail").objects.get(**{UUID:uuid})
+                    payment_data = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{UUID:uuid})
                 except:
                     payment_data = None
 
@@ -2960,15 +2965,15 @@ class Admin_Manage_Payment(APIView):
         user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if user_data.user_type.user_type == ADMIN_S:
             try:
-                all_payment = getattr(models,"UserPaymentDetail").objects.filter(**{"course__supplier__email_id":email_id}).order_by("-created_date_time")
+                all_payment = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__supplier__email_id":email_id}).order_by("-created_date_time")
             except:
                 all_payment = None
             try:
-                all_event = getattr(models,"EventAdPaymentDetail").objects.filter(**{"email_id":email_id}).order_by("-created_date_time")
+                all_event = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{"email_id":email_id}).order_by("-created_date_time")
             except:
                 all_event = None
             try:
-                supplier_account_data = getattr(models,"SupplierAccountDetail").objects.get(**{"supplier__email_id":email_id})
+                supplier_account_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{"supplier__email_id":email_id})
             except Exception as e:
                 print(e,"dsdadas")
                 pass

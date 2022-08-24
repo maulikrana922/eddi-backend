@@ -21,7 +21,7 @@ from collections import deque
 from itertools import chain
 import cv2
 # import pafy
-from .notification import send_notification
+from .notification import send_notification, send_push_notification
 from translate import Translator
 from django.db import connection
 import stripe
@@ -156,14 +156,14 @@ class AddCourseView(APIView):
                     except:
                         pass
                     # send_notification(email_id, receiver, message)
-                    # receiver_device_token = []
-                    # for i in data:
-                    #     device_data = UserDeviceToken.objects.filter(user_type=i)
-                    #     for j in device_data:
-                    #         receiver_device_token.append(j.device_token)
+                    receiver_device_token = []
+                    for i in data:
+                        device_data = UserDeviceToken.objects.filter(user_type=i)
+                        for j in device_data:
+                            receiver_device_token.append(j.device_token)
 
-                    # print(receiver_device_token)
-                    # send_push_notification(receiver_device_token,message)
+                    print(receiver_device_token)
+                    send_push_notification(receiver_device_token,message)
                     for i in receiver:
                         try:
                             record_map1 = {}
@@ -191,14 +191,14 @@ class AddCourseView(APIView):
                     message_sv = f"{supplier_id.first_name}, har lagt till en utbildning inom kategorin/området “{category_id.category_name}”"
                 receiver = [i.email_id for i in users]
                 # send_notification(email_id, receiver, message)
-                # receiver_device_token = []
-                # for i in users:
-                #     device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
-                #     for j in device_data:
-                #         receiver_device_token.append(j.device_token)
+                receiver_device_token = []
+                for i in users:
+                    device_data = UserDeviceToken.objects.filter(user_type=i.usersignup)
+                    for j in device_data:
+                        receiver_device_token.append(j.device_token)
 
-                # print(receiver_device_token)
-                # send_push_notification(receiver_device_token,message)
+                print(receiver_device_token)
+                send_push_notification(receiver_device_token,message)
                 for i in receiver:
                     try:
                         record_map2 = {}
@@ -253,14 +253,14 @@ class AddSubCategoryView(APIView):
             except:
                 pass
             # send_notification(email_id, receiver, message)
-            # receiver_device_token = []
-            # for i in data:
-            #     device_data = UserDeviceToken.objects.filter(user_type=i)
-            #     for j in device_data:
-            #         receiver_device_token.append(j.device_token)
+            receiver_device_token = []
+            for i in data:
+                device_data = UserDeviceToken.objects.filter(user_type=i)
+                for j in device_data:
+                    receiver_device_token.append(j.device_token)
 
-            # print(receiver_device_token)
-            # send_push_notification(receiver_device_token,message)
+            print(receiver_device_token)
+            send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
@@ -373,13 +373,13 @@ class GetSubCategoryDetails(APIView):
                             message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
                             receiver = [data.supplier.email_id]
-                            # send_notification(email_id, receiver, message)
-                            # receiver_device_token = []
-                            # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                            # receiver_device_token.append(device_data.device_token)
+                            send_notification(email_id, receiver, message)
+                            receiver_device_token = []
+                            device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                            receiver_device_token.append(device_data.device_token)
 
-                            # print(receiver_device_token)
-                            # send_push_notification(receiver_device_token,message)
+                            print(receiver_device_token)
+                            send_push_notification(receiver_device_token,message)
                             
                             for i in receiver:
                                 try:
@@ -421,13 +421,13 @@ class GetSubCategoryDetails(APIView):
                                 message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
 
                                 receiver = [data.supplier.email_id]
-                                # send_notification(email_id, receiver, message)
-                                # receiver_device_token = []
-                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                # receiver_device_token.append(device_data.device_token)
+                                send_notification(email_id, receiver, message)
+                                receiver_device_token = []
+                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                receiver_device_token.append(device_data.device_token)
 
                                 # print(receiver_device_token)
-                                # send_push_notification(receiver_device_token,message)
+                                send_push_notification(receiver_device_token,message)
 
                                 for i in receiver:
                                     try:
@@ -793,12 +793,12 @@ class GetCourseDetails(APIView):
                                 message_sv = f"{record_map[COURSE_NAME]}, har godkänts av Eddi Admin"
                                 receiver = [data.supplier.email_id]
                                 # send_notification(email_id, receiver, message)
-                                # receiver_device_token = []
-                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                # receiver_device_token.append(device_data.device_token)
+                                receiver_device_token = []
+                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                receiver_device_token.append(device_data.device_token)
 
                                 # print(receiver_device_token)
-                                # send_push_notification(receiver_device_token,message)
+                                send_push_notification(receiver_device_token,message)
                                 for i in receiver:
                                     try:
                                         record_map1 = {}
@@ -857,12 +857,12 @@ class GetCourseDetails(APIView):
                                     message_sv = f"{record_map[COURSE_NAME]},har inte godkänts av Eddi Admin"
                                     receiver = [data.supplier.email_id]
                                     # send_notification(email_id, receiver, message)
-                                    # receiver_device_token = []
-                                    # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                    # receiver_device_token.append(device_data.device_token)
+                                    receiver_device_token = []
+                                    device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                    receiver_device_token.append(device_data.device_token)
 
                                     # print(receiver_device_token)
-                                    # send_push_notification(receiver_device_token,message)
+                                    send_push_notification(receiver_device_token,message)
                                     for i in receiver:
                                         try:
                                             record_map2 = {}
@@ -1801,7 +1801,7 @@ class AddBatchView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
             if request.POST.get(BATCH_NAME):
                 try:
-                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{"batch_name":request.POST.get(BATCH_NAME)})
+                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)})
                 except Exception as ex:
                     batch_data = None
                 if batch_data != None:
@@ -1809,7 +1809,7 @@ class AddBatchView(APIView):
             try:
                 record_map = {
                     BATCH_NAME : request.POST.get('batch_name'),
-                    COURSE : getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}),
+                    COURSE : getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get('course')}),
                     CREATED_AT : make_aware(datetime.datetime.now()),
                     CREATED_BY : user_data.user_type.user_type,
                     STATUS_ID:1
@@ -1861,7 +1861,7 @@ class GetBatchView(APIView):
         try:
             data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
             record_map = {
-                    BATCH_NAME : request.POST.get('batch_name',data.batch_name),
+                    BATCH_NAME : request.POST.get(BATCH_NAME,data.batch_name),
                     MODIFIED_AT: make_aware(datetime.datetime.now()),
                     MODIFIED_BY: email_id,
                     STATUS: request.POST.get(STATUS,data.status)
@@ -1871,7 +1871,7 @@ class GetBatchView(APIView):
             elif record_map[STATUS] == "InActive":
                 record_map[STATUS_ID] = 2
           
-            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{'course_name':request.POST.get('course')}) if request.POST.get('course') else data.course
+            record_map[COURSE] =  getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get('course')}) if request.POST.get('course') else data.course
           
             students_data = request.POST.get('students',None)
 
@@ -2045,8 +2045,7 @@ class SaveStripeAccount(APIView):
                         'commission' : float((comm[0]))
                 
                     }
-                    print(record_map)
-                    getattr(models,"SupplierAccountDetail").objects.update_or_create(**record_map)
+                    getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.update_or_create(**record_map)
                     stripe.Account.modify(
                         stripe_response['stripe_user_id'],
                         settings={"payouts": {"schedule": {"interval": "manual"}}},
@@ -2071,11 +2070,11 @@ class GetAdminPaymentList(APIView):
         user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
         if user_data.user_type.user_type == ADMIN_S:
             if uuid :
-                payment_detail = getattr(models,"SupplierAccountDetail").objects.get(**{UUID:uuid})
+                payment_detail = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{UUID:uuid})
                 if serializer := SupplierAccountDetailSerializer(payment_detail):
                     return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
             else:
-                payment_list = getattr(models,"SupplierAccountDetail").objects.filter(**{"supplier__user_type__user_type":SUPPLIER_S})
+                payment_list = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.filter(**{"supplier__user_type__user_type":SUPPLIER_S})
                 print(payment_list)
                 if serializer := SupplierAccountDetailSerializer(payment_list,many=True):
                     return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK)
@@ -2096,7 +2095,7 @@ class GetAccountDetail(APIView):
             # email = "krupa.s@yopmail.com"
             # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
             # print(supplier_account.account_id)
-            supplier_data = getattr(models,"SupplierAccountDetail").objects.all()
+            supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.all()
             for supplier in supplier_data:
                 if supplier.account_id:
                     account_balance = stripe.Balance.retrieve(
@@ -2118,7 +2117,7 @@ class SupplierWithDrawRequest(APIView):
             user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
             if user_data.user_type.user_type == SUPPLIER_S:
                 try:
-                    supplier_data = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email_id})
+                    supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier__email_id':email_id})
                 except Exception as e:
                     print(e,"reeeee")
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2190,8 +2189,7 @@ class SupplierPayout(APIView):
             if user_data.user_type.user_type == ADMIN_S:
                 amount = float(request.POST.get(AMOUNT))
                 try:  
-                    supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{UUID:uuid})
-                    print(supplier_account.supplier.email_id)
+                    supplier_account = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{UUID:uuid})
                     if amount <= supplier_account.total_amount_due:
                         payout = stripe.Payout.create(
                             amount=int(amount)*100,
@@ -2199,13 +2197,12 @@ class SupplierPayout(APIView):
                             # method='instant',
                             stripe_account=supplier_account.account_id,
                         )
-                        print(payout)
                         record_map = {
                             "supplier_account":supplier_account,
                             "payout_id":payout["id"],
                             "amount":payout["amount"],
                         }
-                        getattr(models,"SupplierPayoutDetail").objects.update_or_create(**record_map)
+                        getattr(models,SUPPLIER_PAYOUT_DETAIL).objects.update_or_create(**record_map)
                         # supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
                         # supplier_account.save()
                         return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)

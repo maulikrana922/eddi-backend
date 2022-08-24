@@ -22,7 +22,7 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
-from .notification import send_notification
+from .notification import send_notification, send_push_notification
 from translate import Translator
 
 
@@ -1646,11 +1646,11 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
             data = UserSignup.objects.filter(user_type__user_type = "Admin")
             receiver = [i.email_id for i in data]
-            # receiver_device_token = []
-            # for i in data:
-            #     device_data = UserDeviceToken.objects.filter(user_type=i)
-            #     for j in device_data:
-            #         receiver_device_token.append(j.device_token)
+            receiver_device_token = []
+            for i in data:
+                device_data = UserDeviceToken.objects.filter(user_type=i)
+                for j in device_data:
+                    receiver_device_token.append(j.device_token)
 
             try:
                 translator= Translator(from_lang='english',to_lang="swedish")
@@ -1658,7 +1658,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
             except:
                 pass
             # send_notification(instance.email_id, receiver, message)
-            # send_push_notification(receiver_device_token,message)
+            send_push_notification(receiver_device_token,message)
             for i in receiver:
                 try:
                     record_map1 = {}
