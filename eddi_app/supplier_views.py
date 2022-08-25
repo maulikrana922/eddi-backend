@@ -63,7 +63,7 @@ class AddCourseView(APIView):
             course_organization = False
         try:    
             supplier_id = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
-            if supplier_id.user_type.user_type == SUPPLIER_S and request.POST.get(FEE_TYPE_NAME) == 'Paid':
+            if supplier_id.user_type.user_type == SUPPLIER_S and request.POST.get(FEE_TYPE_ID) == 'Paid':
                 try:
                     supplier_acc = getattr(models,"SupplierAccountDetail").objects.get(supplier=supplier_id)
                 except Exception as ex:
@@ -1566,7 +1566,7 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
                         fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
-                        context_data = {'fullname':fullname, "email_id":supplier_email}
+                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.uuid}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
@@ -2031,6 +2031,7 @@ class SaveStripeAccount(APIView):
     def post(self,request, uuid = None):
         try:
             auth_code = request.POST.get('auth_code')
+            uuid = request.POST.get('supplier_id')
             stripe_response = stripe.OAuth.token(
                 grant_type = 'authorization_code',
                 code = auth_code
@@ -2040,7 +2041,7 @@ class SaveStripeAccount(APIView):
                     supplier_account = stripe.Account.retrieve(stripe_response['stripe_user_id'])
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                     record_map = {
-                        'supplier' : getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:supplier_account['email']}),
+                        'supplier' : getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid}),
                         'account_id' : stripe_response['stripe_user_id'],
                         'commission' : float((comm[0]))
                 
