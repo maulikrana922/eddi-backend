@@ -373,7 +373,7 @@ class GetSubCategoryDetails(APIView):
                             message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
                             receiver = [data.supplier.email_id]
-                            send_notification(email_id, receiver, message)
+                            # send_notification(email_id, receiver, message)
                             receiver_device_token = []
                             device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                             receiver_device_token.append(device_data.device_token)
@@ -421,7 +421,7 @@ class GetSubCategoryDetails(APIView):
                                 message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
 
                                 receiver = [data.supplier.email_id]
-                                send_notification(email_id, receiver, message)
+                                # send_notification(email_id, receiver, message)
                                 receiver_device_token = []
                                 device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
                                 receiver_device_token.append(device_data.device_token)

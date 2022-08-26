@@ -339,12 +339,12 @@ class Save_stripe_info(APIView):
             course_name = request.POST.get(COURSE_NAME)
             extra_msg = ''
            
-            # try:
-            #     var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
-            #     if var is not None:
-            #         return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
-            # except:
-            #     pass
+            try:
+                var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
+                if var is not None:
+                    return Response({MESSAGE: ERROR, DATA: "You’ve already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
             
             try:
                 vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
@@ -368,6 +368,7 @@ class Save_stripe_info(APIView):
                     #     payment_method_types=["card"],
                     #     payment_method=payment_method_id,
                     #     confirm=True)
+                    # course amount verification
                     course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:course_name})
                     supplier_acct = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier':course.supplier})
                     comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
