@@ -608,7 +608,7 @@ class UserSignupView(APIView):
                         DEVICE_TOKEN:user_device_token,
                         USER_TYPE:data[0]
                     }
-                getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
+                getattr(models,DEVICE_TOKEN_TABLE).objects.update_or_create(**record_data1)
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
@@ -925,7 +925,8 @@ class UserLoginView(APIView):
                         return Response({STATUS: ERROR, DATA: "Your profile has been blocked. please contact to eddi support"}, status=status.HTTP_400_BAD_REQUEST)
                     if str(organization_data.is_approved.value) == "Pending" and organization_data.approved_once == False:
                         return Response({STATUS: ERROR, DATA: "Your profile is under review. You can't login until it's approved"}, status=status.HTTP_400_BAD_REQUEST)
-                except:
+                except Exception as e:
+                    print(e)
                     pass
               
                 if not check_password(password, data.password):
@@ -940,10 +941,11 @@ class UserLoginView(APIView):
                             DEVICE_TOKEN:user_device_token,
                             USER_TYPE:data
                         }
-                        getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.update_or_create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
-        except:
+        except Exception as e:
+            print(e,"esadsad")
             pass
         # General Admin Login
         try:
@@ -960,7 +962,7 @@ class UserLoginView(APIView):
                             DEVICE_TOKEN:user_device_token,
                             USER_TYPE:data
                         }
-                        getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.update_or_create(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
         
         except Exception as e:
@@ -990,7 +992,7 @@ class UserLoginView(APIView):
                             DEVICE_TOKEN:user_device_token,
                             USER_TYPE:data
                         }
-                        getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.update_or_create(**record_data1)
                     # getattr(models,DEVICE_TOKEN_TABLE).objects.create(device_token=user_device_token)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
                 else:
