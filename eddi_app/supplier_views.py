@@ -324,157 +324,170 @@ class GetSubCategoryDetails(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self,request,uuid = None):
-        email_id =  get_user_email_by_token(request)
         try:
-            user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
-        except:
-            user_type_data = None
-        if not uuid:
-            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
-        except Exception as e:
-            print(e)
-            return Response({STATUS: ERROR, DATA: "Requested data not found", DATA_SV:"Efterfrågad information kan inte hittas"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
-        except:
-            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            record_map = {
-            CATEGORY_NAME_ID: dataa.id,
-            SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
-            SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
-         }
-        except:
-            pass
-        if user_type_data:
-            if user_type_data == ADMIN_S:
-                if request.POST.get(STATUS):
-                    if request.POST.get(STATUS) == "Active":
-                        record_map[STATUS_ID] = 1
-                    else:
-                        try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except:
-                            data1 = None
-                        if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
+            email_id =  get_user_email_by_token(request)
+            try:
+                user_type_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type
+            except:
+                user_type_data = None
+            if not uuid:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
+            except Exception as e:
+                print(e)
+                return Response({STATUS: ERROR, DATA: "Requested data not found", DATA_SV:"Efterfrågad information kan inte hittas"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
+            except:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                record_map = {
+                CATEGORY_NAME_ID: dataa.id,
+                SUBCATEGORY_NAME: request.POST.get(SUBCATEGORY_NAME,data.subcategory_name),
+                SUBCATEGORY_IMAGE : request.FILES.get(SUBCATEGORY_IMAGE,data.subcategory_image),
+            }
+            except:
+                pass
+            if user_type_data:
+                if user_type_data == ADMIN_S:
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
+                            record_map[STATUS_ID] = 1
                         else:
-                            record_map[STATUS_ID] = 2
-                else:
-                    record_map[STATUS] = data.status
-                    
-                if request.POST.get(APPROVAL_STATUS):
-                    if request.POST.get(APPROVAL_STATUS) == "Approved":
-                        record_map[IS_APPROVED_ID] = 1
-                        try:
-                            message = f"{record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
-
-                            message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
-
-                            receiver = [data.supplier.email_id]
-                            # send_notification(email_id, receiver, message)
-                            receiver_device_token = []
-                            device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                            for data in device_data:
-                                receiver_device_token.append(data.device_token)
-
-                            send_push_notification(receiver_device_token,message)
-                            
-                            for i in receiver:
-                                try:
-                                    record_map1 = {}
-                                    record_map1 = {
-                                        "sender" : email_id,
-                                        "receiver" : i,
-                                        "message" : message,
-                                        "message_sv" : message_sv
-                                    }
-
-                                    getattr(models,"Notification").objects.update_or_create(**record_map1)
-                                except Exception as e:
-                                    print(e)
-                                    pass
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    if request.POST.get(APPROVAL_STATUS) == "Pending":
-                        try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except:
-                            data1 = None
-                        if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            record_map[IS_APPROVED_ID] = 2
-                    if request.POST.get(APPROVAL_STATUS) == "Rejected":
-                        try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except:
-                            data1 = None
-                        if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            record_map[IS_APPROVED_ID] = 3
                             try:
-                                message = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
+                            except:
+                                data1 = None
+                            if data1.exists():
+                                return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map[STATUS_ID] = 2
+                    else:
+                        record_map[STATUS] = data.status
+                        
+                    if request.POST.get(APPROVAL_STATUS):
+                        if request.POST.get(APPROVAL_STATUS) == "Approved":
+                            record_map[IS_APPROVED_ID] = 1
+                            try:
+                                message = f"{record_map[SUBCATEGORY_NAME]}, has been Approved by the Admin"
 
-                                message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
+                                message_sv = f"{record_map[SUBCATEGORY_NAME]}, har godkänts av eddi Admin. Klicka på länken"
 
                                 receiver = [data.supplier.email_id]
                                 # send_notification(email_id, receiver, message)
-                                receiver_device_token = []
-                                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                                receiver_device_token.append(device_data.device_token)
+                                # receiver_device_token = []
+                                # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                # for data in device_data:
+                                #     receiver_device_token.append(data.device_token)
 
-                                # print(receiver_device_token)
-                                send_push_notification(receiver_device_token,message)
-
+                                # send_push_notification(receiver_device_token,message)
+                                
                                 for i in receiver:
                                     try:
-                                        record_map2 = {}
-                                        record_map2 = {
+                                        record_map1 = {}
+                                        record_map1 = {
                                             "sender" : email_id,
                                             "receiver" : i,
                                             "message" : message,
                                             "message_sv" : message_sv
                                         }
 
-                                        getattr(models,"Notification").objects.update_or_create(**record_map2)
-                                    except:
+                                        getattr(models,"Notification").objects.update_or_create(**record_map1)
+                                    except Exception as e:
+                                        print(e)
                                         pass
-                            except:
+                            except Exception as e:
+                                print(e)
                                 pass
 
-                else:
-                    record_map[IS_APPROVED] = data.is_approved
+                        if request.POST.get(APPROVAL_STATUS) == "Pending":
+                            try:
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
+                            except:
+                                data1 = None
+                            if data1.exists():
+                                return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map[IS_APPROVED_ID] = 2
+                        if request.POST.get(APPROVAL_STATUS) == "Rejected":
+                            try:
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
+                            except:
+                                data1 = None
+                            if data1.exists():
+                                return Response({STATUS: ERROR, DATA: "Someone has already enrolled in this category", DATA_SV:"Någon har redan registrerat sig inom denna kategori, kategori kan inte raderas"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map[IS_APPROVED_ID] = 3
+                                try:
+                                    message = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
 
-            elif user_type_data == SUPPLIER_S:
-                if request.POST.get(STATUS):
-                    if request.POST.get(STATUS) == "Active":
-                        record_map[STATUS_ID] = 1
+                                    message_sv = f"Course SubCategory {record_map[SUBCATEGORY_NAME]}, has been Rejected by the Admin"
+
+                                    receiver = [data.supplier.email_id]
+                                    # send_notification(email_id, receiver, message)
+                                    # receiver_device_token = []
+                                    # device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                                    # receiver_device_token.append(device_data.device_token)
+
+                                    # # print(receiver_device_token)
+                                    # send_push_notification(receiver_device_token,message)
+
+                                    for i in receiver:
+                                        try:
+                                            record_map2 = {}
+                                            record_map2 = {
+                                                "sender" : email_id,
+                                                "receiver" : i,
+                                                "message" : message,
+                                                "message_sv" : message_sv
+                                            }
+
+                                            getattr(models,"Notification").objects.update_or_create(**record_map2)
+                                        except:
+                                            pass
+                                except:
+                                    pass
+
                     else:
-                        try:
-                            data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
-                        except:
-                            data1 = None
-                        if data1.exists():
-                            return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
-                        else:
-                            record_map[STATUS_ID] = 2
-                else:
-                    record_map[STATUS] = data.status
-                    record_map[IS_APPROVED_ID] = 2
+                        record_map[IS_APPROVED] = data.is_approved
 
-        record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
-        record_map[MODIFIED_BY] = 'admin'
-        record_map[UUID] = uuid4()
-        for key,value in record_map.items():
-            setattr(data,key,value)
-        data.save()
-        return Response({STATUS: SUCCESS, DATA: "Information succesfully edited", DATA_SV:"Informationen är nu uppdaterad"}, status=status.HTTP_200_OK)
+                elif user_type_data == SUPPLIER_S:
+                    if request.POST.get(STATUS):
+                        if request.POST.get(STATUS) == "Active":
+                            record_map[STATUS_ID] = 1
+                        else:
+                            try:
+                                data1 = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{COURSE_CATEGORY:data.category_name})
+                            except:
+                                data1 = None
+                            if data1.exists():
+                                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                record_map[STATUS_ID] = 2
+                    else:
+                        record_map[STATUS] = data.status
+                        record_map[IS_APPROVED_ID] = 2
+            try:
+                record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
+                record_map[MODIFIED_BY] = 'admin'
+                record_map[UUID] = uuid4()
+                for key,value in record_map.items():
+                    setattr(data,key,value)
+                data.save()
+                receiver = [data.supplier.email_id]
+                # send_notification(email_id, receiver, message)
+                receiver_device_token = []
+                device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
+                for data in device_data:
+                    receiver_device_token.append(data.device_token)
+
+                send_push_notification(receiver_device_token,message)
+            except Exception as e:
+                print(e)
+            return Response({STATUS: SUCCESS, DATA: "Information succesfully edited", DATA_SV:"Informationen är nu uppdaterad"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
 
     def delete(self,request,uuid = None):
         email_id =  get_user_email_by_token(request)
