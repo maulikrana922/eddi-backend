@@ -137,6 +137,7 @@ production_models = [
     'eddi_app.BatchSession',
     'eddi_app.SupplierAccountDetail',
     'eddi_app.SupplierPayoutDetail',
+    'eddi_app.UserDeviceToken',
     ]
     
 local_models = []

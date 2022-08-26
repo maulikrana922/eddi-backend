@@ -22,6 +22,7 @@ admin.site.register(CourseDetails)
 admin.site.register(CourseSubCategoryDetails)
 admin.site.register(approval_status)
 admin.site.register(UserType)
+admin.site.register(UserDeviceToken)
 
 
 admin.site.unregister(Group)

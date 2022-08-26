@@ -34,6 +34,7 @@ def send_notification(sender, receiver, message, sender_type=None, receiver_type
 def send_push_notification(receivers,message):
     try:
         for receiver in receivers:
+            print(receiver)
             payload = {
                 "to":receiver,
                 "notification": {

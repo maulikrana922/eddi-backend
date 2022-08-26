@@ -608,7 +608,7 @@ class UserSignupView(APIView):
                         DEVICE_TOKEN:user_device_token,
                         USER_TYPE:data[0]
                     }
-                getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
         except Exception as ex:
             print(ex)
             return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
@@ -940,7 +940,7 @@ class UserLoginView(APIView):
                             DEVICE_TOKEN:user_device_token,
                             USER_TYPE:data
                         }
-                        getattr(models,DEVICE_TOKEN_TABLE).objects.create(**record_data1)
+                        getattr(models,DEVICE_TOKEN_TABLE).objects.create_or_update(**record_data1)
                     return Response({STATUS: SUCCESS, DATA: True, DATA: {FIRST_NAME:data.first_name, LAST_NAME:data.last_name} ,USER_TYPE:str(data.user_type),IS_FIRST_TIME_LOGIN: data.is_first_time_login,USER_PROFILE:user_profile,"is_resetpassword" : data.is_resetpassword,"Authorization":"Token "+ str(token.key),}, status=status.HTTP_200_OK)
 
         except:
