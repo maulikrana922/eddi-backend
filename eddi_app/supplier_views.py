@@ -333,7 +333,8 @@ class GetSubCategoryDetails(APIView):
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.get(**{UUID:uuid})
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA: "Requested data not found", DATA_SV:"Efterfrågad information kan inte hittas"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             dataa = getattr(models,COURSE_CATEGORY_TABLE).objects.get(**{CATEGORY_NAME:request.POST.get(CATEGORY_NAME_ID,data.category_name.category_name)})
@@ -376,9 +377,9 @@ class GetSubCategoryDetails(APIView):
                             # send_notification(email_id, receiver, message)
                             receiver_device_token = []
                             device_data = UserDeviceToken.objects.filter(user_type=data.supplier)
-                            receiver_device_token.append(device_data.device_token)
+                            for data in device_data:
+                                receiver_device_token.append(data.device_token)
 
-                            print(receiver_device_token)
                             send_push_notification(receiver_device_token,message)
                             
                             for i in receiver:
@@ -392,9 +393,11 @@ class GetSubCategoryDetails(APIView):
                                     }
 
                                     getattr(models,"Notification").objects.update_or_create(**record_map1)
-                                except:
+                                except Exception as e:
+                                    print(e)
                                     pass
-                        except:
+                        except Exception as e:
+                            print(e)
                             pass
 
                     if request.POST.get(APPROVAL_STATUS) == "Pending":

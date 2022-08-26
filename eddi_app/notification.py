@@ -43,11 +43,11 @@ def send_push_notification(receivers,message):
             }
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": "key=AAAAhLIgOxM:APA91bGsAx3RYNFswx3AXcfTz3uDc0LInLp7BQpgcR2vITp53DNspmrX3b5fafFQtxsRktpe7cz9f6x_Nz26Ekwx46s5n7BEy8wLbeazbdPZzKnj8ltEqg3lAduU3mQ0hlLXalc4MdBD"
+                "Authorization": "key=AAAAM5_RpBI:APA91bHFuextvmhZyyu0dAirqqpPFqnmN14HbRhoiTNqhcadSboOMrjUPzLedK_yX45Q7lydrgVHn1q5LvnwoZUZZRNJ8PPgfpcrlT5DvXUi7i02GJj4G3jncZQLgXuGL_1sds1t16NP"
             }
             try:
                 response = requests.post('https://fcm.googleapis.com/fcm/send',json=payload,headers=headers,)
-                print(response, "responseeesees")
+                print(response.json(), "responseeesees")
             except Exception as ex:
                 print(ex,"exexe")
     except Exception as ex:
