@@ -23,7 +23,11 @@ class StripeWebhookActions:
         obj = event.data.object
         print(obj.id)
         payout_obj = SupplierPayoutDetail.objects.get(**{"payout_id":obj.id})
-        payout_obj.supplier_account.total_amount_withdraw = payout_obj.amount
+        if payout_obj.supplier_account.total_amount_withdraw:
+            payout_obj.supplier_account.total_amount_withdraw += float(payout_obj.amount/100)
+        else:
+            payout_obj.supplier_account.total_amount_withdraw = float(payout_obj.amount/100)
+        payout_obj.supplier_account.save()
         payout_obj.save()
         html_path = SUPPLIER_PAYOUT_SUCCESSED_HTML
         fullname = payout_obj.supplier_account.supplier.first_name + " " + payout_obj.supplier_account.supplier.last_name
