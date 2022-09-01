@@ -137,6 +137,7 @@ production_models = [
     'eddi_app.BatchSession',
     'eddi_app.SupplierAccountDetail',
     'eddi_app.SupplierPayoutDetail',
+    'eddi_app.SupplierWithdrawalDetail',
     'eddi_app.UserDeviceToken',
     ]
     
@@ -220,8 +221,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    "hide_models": production_models,
-    # "hide_models": local_models,
+    # "hide_models": production_models,
+    "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 

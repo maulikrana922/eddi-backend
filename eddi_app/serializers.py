@@ -1,20 +1,85 @@
 from rest_framework import serializers
 from .models import *
 
-class UserSignupSerializer(serializers.ModelSerializer):
+class DynamicFieldsModelSerializer(serializers.ModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+
+        super().__init__(*args, **kwargs)
+
+        if fields is not None:
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class UserTypeSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = UserType
+        depth = 1
+        fields = '__all__'
+
+class StatusSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = utl_status
+        depth = 1
+        fields = '__all__'
+
+class ApprovalStatusSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = approval_status
+        depth = 1
+        fields = '__all__'
+
+class UserSignupSerializer(DynamicFieldsModelSerializer):
+    user_type = UserTypeSerializer(fields=('user_type',))
+    status = StatusSerializer(fields=('value',))
+
     class Meta:
         model = UserSignup
         depth = 1
         fields = '__all__'
 
-class CourseDetailsSerializer(serializers.ModelSerializer):
+class CategoryDetailsSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = CourseCategoryDetails
+        depth = 1
+        fields = '__all__'
+
+class SubCategoryDetailsSerializer(DynamicFieldsModelSerializer):
+    supplier = UserSignupSerializer(fields=('first_name','email_id'))
+    category_name = CategoryDetailsSerializer(fields=('category_name',))
+    status = StatusSerializer(fields=('value',))
+    is_approved = ApprovalStatusSerializer(fields=('value',))
+    class Meta:
+        model = CourseSubCategoryDetails
+        depth = 1
+        fields = '__all__'
+
+class CourseDetailsSerializer(DynamicFieldsModelSerializer):
+    supplier = UserSignupSerializer(fields=('first_name','last_name','email_id'))
+    status = StatusSerializer(fields=('value',))
+    is_approved = ApprovalStatusSerializer(fields=('value',))
+    course_category = CategoryDetailsSerializer(fields=('category_name',))
+    course_subcategory = SubCategoryDetailsSerializer(fields=('subcategory_name',))
     class Meta:
         model = CourseDetails
         depth = 2
         fields = '__all__'
 
-class UserPaymentSerializer(serializers.ModelSerializer):
-     class Meta:
+class InvoiceDataSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = InvoiceData
+        depth = 1
+        fields = '__all__'
+
+class UserPaymentSerializer(DynamicFieldsModelSerializer):
+    course = CourseDetailsSerializer(fields=('course_name','supplier'))
+    invoice = InvoiceDataSerializer(fields=('invoice_pdf',))
+    is_approved = ApprovalStatusSerializer(fields=('value',))
+    class Meta:
         model = UserPaymentDetail
         depth = 2
         fields = '__all__'
@@ -26,20 +91,7 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SubCategoryDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CourseSubCategoryDetails
-        depth = 1
 
-        fields = '__all__'
-
-class CategoryDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CourseCategoryDetails
-        depth = 1
-
-        fields = '__all__'
-        
 
 class WhatsOnEddiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -243,7 +295,11 @@ class RecruitmentAdSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SupplierOrganizationProfileSerializer(serializers.ModelSerializer):
+class SupplierOrganizationProfileSerializer(DynamicFieldsModelSerializer):
+    usersignup = UserSignupSerializer(fields=('email_id',))
+    status = StatusSerializer(fields=('value',))
+    is_approved = ApprovalStatusSerializer(fields=('value',))
+
     class Meta:
         model = SupplierOrganizationProfile
         depth = 1
@@ -323,8 +379,16 @@ class SessionDetailsSerializer(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
-class SupplierAccountDetailSerializer(serializers.ModelSerializer):
+class SupplierAccountDetailSerializer(DynamicFieldsModelSerializer):
+    supplier = UserSignupSerializer(fields=('first_name','last_name','email_id'))
     class Meta:
         model = SupplierAccountDetail
+        depth = 1
+        fields = '__all__'
+
+class SupplierWithdrawalSerializer(DynamicFieldsModelSerializer):
+    supplier = SupplierAccountDetailSerializer(fields=('supplier','total_amount_due'))
+    class Meta:
+        model = SupplierWithdrawalDetail
         depth = 1
         fields = '__all__'

@@ -637,7 +637,8 @@ class GetUserDetails(APIView):
                         if data.user_type.user_type =='User':
                             try:
                                 profile_data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:data.email_id})
-                            except:
+                            except Exception as e:
+                                print(e)
                                 return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
 
                             try:
@@ -688,7 +689,8 @@ class GetUserDetails(APIView):
                                         return Response({STATUS: ERROR, DATA:serializer1.errors}, status=status.HTTP_400_BAD_REQUEST)
                                 else:
                                     return Response({STATUS: ERROR, DATA:serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-                            except:
+                            except Exception as e:
+                                print(e)
                                 return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             
                         # elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
@@ -735,7 +737,7 @@ class GetUserDetails(APIView):
                 all_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{IS_DELETED:False}).exclude(user_type__user_type="Admin")
             except:
                 all_data = None
-            if serializer := UserSignupSerializer(all_data, many=True):
+            if serializer := UserSignupSerializer(all_data, many=True,fields=('uuid','first_name','last_name','email_id','created_date_time','status','user_type')):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: SUCCESS, DATA:serializer.errors}, status=status.HTTP_200_OK)
@@ -853,7 +855,6 @@ class UserLoginView(APIView):
         password = request.POST.get(PASSWORD)
         user_type = request.POST.get(USER_TYPE)
         user_device_token = request.POST.get(DEVICE_TOKEN)
-        print(user_device_token)
         record_map = {}
         record_map = {
             FIRST_NAME: request.POST.get(FIRST_NAME,None),
@@ -920,7 +921,6 @@ class UserLoginView(APIView):
                 # Supplier Exception Cases
                 try:
                     organization_data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-                    print(str(organization_data.is_approved.value))
                     if organization_data.rejection_count == 3:
                         return Response({STATUS: ERROR, DATA: "Your profile has been blocked. please contact to eddi support"}, status=status.HTTP_400_BAD_REQUEST)
                     if str(organization_data.is_approved.value) == "Pending" and organization_data.approved_once == False:
@@ -2902,7 +2902,7 @@ class Manage_Payment(APIView):
             except:
                 all_event = None
             try:
-                if serializer := UserPaymentSerializer(all_payment, many=True):
+                if serializer := UserPaymentSerializer(all_payment, many=True,fields=('uuid','course','user_name','amount','invoice','status','is_approved','payment_mode')):
                     if serializer1 := EventAdPaymentDetailSerializer(all_event, many=True):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, "event":serializer1.data}, status=status.HTTP_200_OK)
                     else:
@@ -2921,7 +2921,7 @@ class Manage_Payment(APIView):
             except:
                 pass
             try:
-                if serializer := UserPaymentSerializer(all_payment, many=True):
+                if serializer := UserPaymentSerializer(all_payment, many=True,fields=('uuid','course','user_name','amount','invoice','status','is_approved','payment_mode')):
                     if serializer1 := SupplierAccountDetailSerializer(supplier_account_data):
                         return Response({STATUS: SUCCESS, DATA: serializer.data, 'supplier_account_data':serializer1.data}, status=status.HTTP_200_OK)
                     else:

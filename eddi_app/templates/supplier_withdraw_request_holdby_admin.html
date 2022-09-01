@@ -31,28 +31,29 @@
         font-size: 18px;
       "
     >
-      Hello {{fullname}},
+      Hello, {{fullname|capfirst}}
       
     </td>
+    <br>
   </tr>
   <tr>
     <td height="25"></td>
   </tr>
       <td style="color: #3e3e3e;font-size: 17px;">
-        Your Account has been temporarily In-Activated by the Admin for some security reasons. You will receive an email once your is activated by the Admin. 
-      </td>
-  <tr>
+        <span style="font-family: Arial, Helvetica, sans-serif;">
+        Your request to withdraw the amount of <b>{{amount}} SEK</b> is kept on hold by admin because {{reason}}.</span> 
+      <br>
   <tr>
     <td height="45"></td>
   </tr>
   <tr>
     <td style="color: #3e3e3e;font-size: 17px;">
-        Thank You,
-        <br>
-        The Eddi Team.    </td>
+      Thank You,
+      <br>
+      The Eddi Team.    </td>
   </tr>
 
- 
+
   <tr>
     <td height="30"></td>
   </tr>
@@ -84,7 +85,7 @@
   </tr>
   
   <tr>
-    <td height="45"></td>
+    <td height="30"></td>
   </tr>
   <tr>
     <td

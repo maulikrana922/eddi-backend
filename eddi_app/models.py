@@ -1561,6 +1561,18 @@ class SupplierPayoutDetail(models.Model):
     class Meta:
         verbose_name_plural = _("Supplier Payout Details Table")
 
+class SupplierWithdrawalDetail(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
+    supplier = models.ForeignKey(SupplierAccountDetail,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('Supplier Account'))
+    reason = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Reason'))
+    status = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Status'))
+    amount = models.FloatField(blank=True,null=True,verbose_name=_('Payout Amount'))
+    created_date_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Created Date Time"))
+    modified_date_time = models.DateTimeField(auto_now=True, verbose_name=_("Modified Date Time"))
+    is_deleted = models.BooleanField(default=False, verbose_name=_("Is Deleted"))
+    
+    class Meta:
+        verbose_name_plural = _("Supplier Withdrawal Details Table")
 
 class CourseBatch(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -1715,7 +1727,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Please Verify your Email Id',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage('Please verify your Eddi account',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'

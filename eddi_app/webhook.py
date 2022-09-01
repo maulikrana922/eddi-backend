@@ -48,6 +48,35 @@ class StripeWebhookActions:
         email_msg.attach(img)
         email_msg.send(fail_silently=False)
         print(payout_obj)
+        try:
+            # user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            message = f"The payout has been credited to the bank account"
+            message_sv = f"The payout has been credited to the bank account"
+
+            # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+            # receiver = [i.email_id for i in data]
+            # send_notification(email_id, receiver, message)
+            receiver_device_token = []
+            device_data = UserDeviceToken.objects.filter(user_type=payout_obj.supplier_account.supplier)
+            for j in device_data:
+                receiver_device_token.append(j.device_token)
+
+            # print(receiver_device_token)
+            send_push_notification(receiver_device_token,message)
+            for i in receiver:
+                try:
+                    record_map = {}
+                    record_map = {
+                        "sender" : payout_obj.supplier_account.supplier.email_id,
+                        "receiver" : i,
+                        "message" : message,
+                        "message_sv" : message_sv
+                    }
+                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                except:
+                    pass
+        except:
+            pass
 
 
     WEBHOOK_HANDLER_MAP = {

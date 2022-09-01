@@ -318,7 +318,7 @@ class GetSubCategoryDetails(APIView):
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{'supplier__email_id':email_id, IS_DELETED:False}).order_by("-created_date_time")
                 else:
                     data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).order_by("-created_date_time")
-            if serializer := SubCategoryDetailsSerializer(data, many=True):
+            if serializer := SubCategoryDetailsSerializer(data, many=True,fields=('uuid','supplier','category_name','subcategory_name','status','is_approved','created_date_time')):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -597,7 +597,7 @@ class GetCourseDetails(APIView):
 
                     except:
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-                    if serializer := CourseDetailsSerializer(data_s,many=True):
+                    if serializer := CourseDetailsSerializer(data_s,many=True,fields=('uuid','course_name','course_image','course_category','course_subcategory','supplier','status','is_approved')):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
                 elif getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
@@ -606,7 +606,7 @@ class GetCourseDetails(APIView):
                     except:
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
-                    if serializer := CourseDetailsSerializer(data_a,many=True):
+                    if serializer := CourseDetailsSerializer(data_a,many=True,fields=('uuid','course_name','course_image','course_category','course_subcategory','supplier','status','is_approved')):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
                 else:
@@ -968,8 +968,6 @@ class GetSubCategoryList(APIView):
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
        
        
-       
-
 class AdminDashboardView(APIView):
     def get(self, request,uuid = None):
         admin_email = get_user_email_by_token(request)
@@ -987,8 +985,8 @@ class AdminDashboardView(APIView):
                 course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-            if serializer :=  UserSignupSerializer(users, many = True):
-                if serializer1 := CourseDetailsSerializer ( course_supplier, many = True):
+            if serializer :=  UserSignupSerializer(users, many = True,fields=('id','uuid','first_name','last_name','status','user_type')):
+                if serializer1 := CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
                     print(len(connection.queries))
                     return Response({STATUS: SUCCESS,
                 "admin_name" : f"{data.first_name} {data.last_name}",
@@ -1057,7 +1055,7 @@ class SupplierDashboardView(APIView):
                 newvar = all_subcategory_serializer.data
         except:
             newvar = None
-        if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True):
+        if course_offer_serializer := CourseDetailsSerializer(Courses_Offered, many=True,fields=('id','uuid','course_name','status','created_date_time')):
             return Response({STATUS: SUCCESS,
             "supplier_name" :supplier_data.first_name + " " + supplier_data.last_name,
             TOTAL_COURSE_COUNT: total_course,
@@ -1408,7 +1406,7 @@ class SupplierOrganizationProfileAdminview(APIView):
             except:
                 user_data= None
             if serializer := SupplierOrganizationProfileSerializer(data):
-                if serializer1 := UserSignupSerializer(user_data):
+                if serializer1 := UserSignupSerializer(user_data,fields=("first_name","last_name","email_id","created_date_time","status","user_type")):
                     return Response({STATUS: SUCCESS, DATA: serializer.data, "supplier_info":serializer1.data}, status=status.HTTP_200_OK)
                 else:
                     return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
@@ -1420,7 +1418,7 @@ class SupplierOrganizationProfileAdminview(APIView):
             data = getattr(models,SUPPLIER_ORGANIZATION_PROFILE_TABLE).objects.all()
         except:
             data= None
-        if serializer := SupplierOrganizationProfileSerializer(data, many=True):
+        if serializer := SupplierOrganizationProfileSerializer(data, many=True,fields=('organizational_name','organization_email','organization_logo','created_date_time','supplier_email','is_approved','status',)):
             return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -2112,15 +2110,26 @@ class GetAccountDetail(APIView):
             # email = "krupa.s@yopmail.com"
             # supplier_account = getattr(models,"SupplierAccountDetail").objects.get(**{'supplier__email_id':email})
             # print(supplier_account.account_id)
-            supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.all()
-            for supplier in supplier_data:
-                if supplier.account_id:
-                    account_balance = stripe.Balance.retrieve(
-                            stripe_account=supplier.account_id
-                    )
-                    for available_balance in account_balance.available:
-                        supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
-                        supplier.save()
+            # supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.all()
+            # for supplier in supplier_data:
+            #     if supplier.account_id:
+            #         account_balance = stripe.Balance.retrieve(
+            #                 stripe_account=supplier.account_id
+            #         )
+            #         for available_balance in account_balance.available:
+            #             supplier.total_amount_due = "{:.2f}".format(float(available_balance["amount"]/100))
+            #             supplier.save()
+            email_id =  get_user_email_by_token(request)
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+            if user_data.user_type.user_type == SUPPLIER_S:
+                try:
+                    supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier__email_id':email_id})
+                    return Response({STATUS: ERROR, DATA: False}, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    print(e,"reeeee")
+                    return Response({STATUS: ERROR, DATA: False}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as ex:
             print(ex)
@@ -2141,6 +2150,18 @@ class SupplierWithDrawRequest(APIView):
                 withdraw_amount = float(request.POST.get('amount'))
                
                 if withdraw_amount <= supplier_data.total_amount_due:
+                    try:
+                        if getattr(models,"SupplierWithdrawalDetail").objects.filter(Q(status='pending') | Q(status='hold'),**{'supplier':supplier_data}):
+                            return Response({STATUS: ERROR, DATA: "You Cannot Request For Withdraw When One Is Pending Or OnHold", DATA_SV:"You Cannot Request For Withdraw When One Is Pending Or OnHold"}, status=status.HTTP_400_BAD_REQUEST)
+                        record_map = {
+                            "supplier": supplier_data,
+                            "status": "pending",
+                            "amount": withdraw_amount,
+                        }
+                        getattr(models,"SupplierWithdrawalDetail").objects.create(**record_map)
+                    except Exception as ex:
+                        print(ex)
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
@@ -2168,7 +2189,7 @@ class SupplierWithDrawRequest(APIView):
                         # admin_emails = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":ADMIN_S}).values_list("email_id", flat=True)
                         html_path = SUPPLIER_WITHDRAW_REQUEST_ADMIN
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
-                        context_data = {"amount": withdraw_amount,"fullname":"nishant","supplier_name":fullname}
+                        context_data = {"amount": withdraw_amount,"fullname":"jap","supplier_name":fullname}
                         email_html_template = get_template(SUPPLIER_WITHDRAW_REQUEST_ADMIN).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = ("jap.admin@yopmail.com",)
@@ -2184,19 +2205,145 @@ class SupplierWithDrawRequest(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
                         email_msg.send(fail_silently=False)
+
+                        try:
+                            # user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                            message = f"{supplier_data.supplier.first_name}, has requested for withdrawal"
+                            message_sv = f"{supplier_data.supplier.first_name}, has requested for withdrawal"
+
+                            data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+                            receiver = [i.email_id for i in data]
+                            # send_notification(email_id, receiver, message)
+                            receiver_device_token = []
+                            for i in data:
+                                device_data = UserDeviceToken.objects.filter(user_type=i)
+                                for j in device_data:
+                                    receiver_device_token.append(j.device_token)
+
+                            # print(receiver_device_token)
+                            send_push_notification(receiver_device_token,message)
+                            for i in receiver:
+                                try:
+                                    record_map = {}
+                                    record_map = {
+                                        "sender" : email_id,
+                                        "receiver" : i,
+                                        "message" : message,
+                                        "message_sv" : message_sv
+                                    }
+                                    getattr(models,"Notification").objects.update_or_create(**record_map)
+                                except:
+                                    pass
+                        except:
+                            pass
+
                         return Response({STATUS: SUCCESS, DATA: "Withdrawal request sent successfully"}, status=status.HTTP_200_OK) 
-                    
+                          
                     except Exception as ex:
                         print(ex,)
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-
-                  
+            
+            else:
+                return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+               
         except Exception as ex:
             print(ex,"dasdasdasd")
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+class SupplierWithDrawDetails(APIView):
+    def get(self, request):
+        try:
+            email_id = get_user_email_by_token(request)
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+            if user_data.user_type.user_type == ADMIN_S:
+                withdrawal_list = getattr(models,"SupplierWithdrawalDetail").objects.all()
+                if serializer := SupplierWithdrawalSerializer(withdrawal_list,many=True):
+                    return Response({STATUS: SUCCESS, DATA:serializer.data}, status=status.HTTP_200_OK) 
+            else:
+                return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+       
+        except Exception as ex:
+            print(ex)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+
+class SupplierWithDrawStatus(APIView):
+    def post(self,request, uuid = None):
+        try:
+            if uuid:
+                email_id = get_user_email_by_token(request)
+                user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+                if user_data.user_type.user_type == ADMIN_S:
+                    withdrawal_request = getattr(models,"SupplierWithdrawalDetail").objects.get(**{UUID:uuid})
+                    withdrawal_status = request.POST.get('status')
+                    reason = request.POST.get('reason',None)
+                    if withdrawal_status == "transfer":
+                        try:  
+                            # supplier_account = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{UUID:uuid})
+                            if withdrawal_request.amount <= withdrawal_request.supplier.total_amount_due:
+                                payout = stripe.Payout.create(
+                                    amount=int(withdrawal_request.amount)*100,
+                                    currency='sek',
+                                    # method='instant',
+                                    stripe_account=withdrawal_request.supplier.account_id,
+                                )
+                                record_map = {
+                                    "supplier_account":withdrawal_request.supplier,
+                                    "payout_id":payout["id"],
+                                    "amount":payout["amount"],
+                                }
+                                getattr(models,SUPPLIER_PAYOUT_DETAIL).objects.update_or_create(**record_map)
+                                withdrawal_request.status = withdrawal_status
+                                withdrawal_request.reason = None
+                                withdrawal_request.save()
+                                # supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
+                                # supplier_account.save()
+                                return Response({STATUS: SUCCESS, DATA: "Request Successfully Completed"}, status=status.HTTP_200_OK)
+                            else:
+                                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"},status=status.HTTP_400_BAD_REQUEST)
+                        
+                        except Exception as ex:
+                            print(ex)
+                            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
+                    
+                    elif withdrawal_status == "hold" and withdrawal_request.status == "pending":
+                        try:
+                            html_path = SUPPLIER_WITHDRAW_REQUEST_HOLDBY_ADMIN
+                            fullname = withdrawal_request.supplier.supplier.first_name + " " + withdrawal_request.supplier.supplier.last_name
+                            context_data = {"amount": withdrawal_request.amount,"fullname":fullname,"reason":reason}
+                            email_html_template = get_template(html_path).render(context_data)
+                            email_from = settings.EMAIL_HOST_USER
+                            recipient_list = (withdrawal_request.supplier.supplier.email_id,)
+                            email_msg = EmailMessage('Supplier Request to Withdraw the Amount OnHold By Admin',email_html_template,email_from,recipient_list)
+                            email_msg.content_subtype = 'html'
+                            path = 'eddi_app'
+                            img_dir = 'static'  
+                            image = 'Logo.png'
+                            file_path = os.path.join(path,img_dir,image)
+                            with open(file_path,'rb') as f:
+                                img = MIMEImage(f.read())
+                                img.add_header('Content-ID', '<{name}>'.format(name=image))
+                                img.add_header('Content-Disposition', 'inline', filename=image)
+                            email_msg.attach(img)
+                            email_msg.send(fail_silently=False)
+                            withdrawal_request.status = withdrawal_status
+                            withdrawal_request.reason = reason
+                            withdrawal_request.save()
+                            return Response({STATUS: SUCCESS, DATA: "Request Successfully Completed"}, status=status.HTTP_200_OK)
+                        except Exception as e:
+                            print(e)
+                            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
+                    else:
+                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
+                else:
+                    return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
+      
+        except Exception as ex:
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
+
 
 class SupplierPayout(APIView):
     def post(self, request, uuid=None):
