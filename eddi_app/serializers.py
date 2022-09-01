@@ -76,7 +76,7 @@ class InvoiceDataSerializer(DynamicFieldsModelSerializer):
         fields = '__all__'
 
 class UserPaymentSerializer(DynamicFieldsModelSerializer):
-    course = CourseDetailsSerializer(fields=('course_name','supplier'))
+    course = CourseDetailsSerializer(fields=('course_name','supplier','course_image','course_category','course_subcategory','course_starting_date'))
     invoice = InvoiceDataSerializer(fields=('invoice_pdf',))
     is_approved = ApprovalStatusSerializer(fields=('value',))
     class Meta:
