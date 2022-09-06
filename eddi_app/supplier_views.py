@@ -26,6 +26,7 @@ from translate import Translator
 from django.db import connection
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
+from itertools import chain
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -651,12 +652,21 @@ class GetCourseDetails(APIView):
                     # print(target_course_data, "datata")
                   
                     if user_subcategory:
-                        user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time") 
-                    else:
-                        user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
+                        
+                        user_profile_subcat_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
 
-                    print(user_profile_interest, "data")
-                    user_interest_course = user_profile_interest.values_list("course_name")
+                        category_list = []
+                        for course in user_profile_subcat_interest:
+                            category_list.append(course.course_category)
+                        print(category_list,"cat listing")
+
+                        user_profile_cat_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).exclude(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory)).exclude(course_category__in=category_list).order_by("-created_date_time")
+                        result_list = list(chain(user_profile_subcat_interest, user_profile_cat_interest))
+                    else:
+                        result_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
+
+                    print(result_list, "data")
+                    user_interest_course = user_profile_subcat_interest.values_list("course_name")
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization":False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=user_interest_course).order_by("-created_date_time")
 
@@ -665,7 +675,7 @@ class GetCourseDetails(APIView):
                     # data_all = user_profile_interest.union(getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization" : False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=target_course_data).exclude(course_name__in=user_profile_interest).order_by("-created_date_time"))
                     print(data_all,"all_data")
 
-                if serializer := CourseDetailsSerializer(user_profile_interest,many=True):
+                if serializer := CourseDetailsSerializer(result_list,many=True):
                     if serializer_all := CourseDetailsSerializer(data_all, many=True):
                         if serializer_org_all := CourseDetailsSerializer(org_data, many=True):
                             return Response({STATUS: SUCCESS, DATA: serializer.data, "all_data": serializer_all.data,"org_data":serializer_org_all.data}, status=status.HTTP_200_OK)
@@ -958,7 +968,7 @@ class GetSubCategoryList(APIView):
         if not uuid:
             return Response({STATUS: ERROR, DATA: "UUID is required"}, status=status.HTTP_400_HTTP_400_BAD_REQUEST)
         try:
-            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{"category_name__uuid":uuid,IS_DELETED:False}).order_by("-created_date_time")
+            data = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.filter(**{"category_name__uuid":uuid,STATUS_ID:1, IS_APPROVED_ID:1,IS_DELETED:False}).order_by("-created_date_time")
             if serializer := SubCategoryDetailsSerializer(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
@@ -1033,6 +1043,7 @@ class SupplierDashboardView(APIView):
 
             counter = 0
             for v in individual_details[COURSENAME]:
+                print(v)
                 Individuals = getattr(models,COURSEDETAILS_TABLE).objects.select_related('course_type').get(**{COURSE_NAME:v})
                 final_dict[counter] = {
                     USERNAME:individual_details[USERNAME][counter],
@@ -1043,7 +1054,8 @@ class SupplierDashboardView(APIView):
                     COURSETYPE:Individuals.course_type.type_name,
                 }
                 counter +=1
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
