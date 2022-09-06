@@ -560,7 +560,7 @@ class Save_stripe_infoEvent(APIView):
                             img = MIMEImage(f.read())
                             img.add_header('Content-ID', '<{name}>'.format(name=image))
                             img.add_header('Content-Disposition', 'inline', filename=image)
-                        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Congratulations!!',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
@@ -602,7 +602,10 @@ class UserSignupView(APIView):
         record_map[CREATED_BY] = 'admin'
         
         try:
-            data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            try:
+                data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
+            except Exception as ex:
+                return Response({STATUS: ERROR, DATA: "This email is already registered", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             if request.POST.get(DEVICE_TOKEN):
                 record_data1 = {
                         DEVICE_TOKEN:user_device_token,
@@ -2595,12 +2598,14 @@ class CourseEnrollView(APIView):
                 a = cat.course_category.split(",")
             except:
                 a = cat.course_category.split()
+            
         except:
             pass
         organization_domain = email_id.split('@')[1]
         try:
-            data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest) | Q(course_name__in = area_of_interest)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
-        except:
+            data_category = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, COURSE_FOR_ORGANIZATION:False}).filter(Q(course_category__category_name__in = area_of_interest+a) | Q(course_name__in = area_of_interest+a)).exclude(course_name__in=enroll_data).order_by("-organization_domain")
+        except Exception as e:
+            print(e)
             data_category = None
         if serializer := UserPaymentSerializer(enroll_data, many=True):
             if serializer1 := CourseDetailsSerializer(data_category, many=True):

@@ -784,7 +784,7 @@ class GetCourseDetails(APIView):
                                     email_html_template = get_template(html_path).render(context_data)
                                     email_from = settings.EMAIL_HOST_USER
                                     recipient_list = (data.supplier.email_id,)
-                                    email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+                                    email_msg = EmailMessage('Course Inactived By Eddi',email_html_template,email_from,recipient_list)
                                     email_msg.content_subtype = 'html'
                                     path = 'eddi_app'
                                     img_dir = 'static'
@@ -1552,7 +1552,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
-                        email_msg = EmailMessage('Account has been Deactivated by the Admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Account Has Been Deactivated By The Eddi',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1616,7 +1616,7 @@ class SupplierOrganizationProfileview(APIView):
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Profile Rejected by Admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('Profile Rejected By Admin',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1819,7 +1819,7 @@ class AddBatchView(APIView):
                 except Exception as ex:
                     batch_data = None
                 if batch_data != None:
-                    return Response({STATUS: ERROR, DATA: "Please choose unique batch name"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({STATUS: ERROR, DATA: "Please choose unique batch name", DATA_SV:"Vänligen välj ett unikt batchnamn"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 record_map = {
                     BATCH_NAME : request.POST.get('batch_name'),
@@ -1838,7 +1838,7 @@ class AddBatchView(APIView):
                     except Exception as ex:
                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
                 
-                return Response({STATUS: SUCCESS, DATA: "Batch created successfully"}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: "Batch created successfully",DATA_SV:"Batch skapad framgångsrikt"}, status=status.HTTP_200_OK)
             
             except Exception as ex:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen", 'error':str(ex)}, status=status.HTTP_400_BAD_REQUEST)
@@ -1904,11 +1904,11 @@ class GetBatchView(APIView):
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()
-            return Response({STATUS: SUCCESS, DATA: "Batch updated successfully"}, status=status.HTTP_200_OK)
+            return Response({STATUS: SUCCESS, DATA: "Batch updated successfully", DATA_SV:"Batchen har uppdaterats"}, status=status.HTTP_200_OK)
        
         except Exception as ex:
             print(ex,"dasdasdasdexxxx")
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
     
     
     def delete(self, request,uuid = None):
@@ -1919,7 +1919,7 @@ class GetBatchView(APIView):
             data = getattr(models,COURSE_BATCH).objects.get(**{UUID:uuid,STATUS:1})
         except Exception as ex:
             print(ex)
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Batch not found", DATA_SV:"Batch hittades inte"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             STATUS_ID:2,
             IS_DELETED:True
@@ -1930,7 +1930,7 @@ class GetBatchView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Batch deleted succesfully",DATA_SV:"Batch raderades framgångsrikt"}, status=status.HTTP_200_OK)
 
 class AddSessionView(APIView):
     def post(self, request):
@@ -1943,7 +1943,7 @@ class AddSessionView(APIView):
                 except Exception as ex:
                     session_data = None
                 if session_data != None:
-                    return Response({STATUS: ERROR, DATA: "Please choose unique session name"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({STATUS: ERROR, DATA: "Please choose unique session name", DATA_SV:"Välj ett unikt sessionsnamn"}, status=status.HTTP_400_BAD_REQUEST)
                 try:
                     record_map = {
                         SESSION_NAME:request.POST.get(SESSION_NAME),
@@ -1961,7 +1961,7 @@ class AddSessionView(APIView):
                         MODIFIED_BY: email_id,
                     }
                     getattr(models,BATCH_SESSION).objects.update_or_create(**record_map)
-                    return Response({STATUS: SUCCESS, DATA: "Session created successfully"}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: "Session created successfully", DATA_SV:"Session skapad framgångsrikt"}, status=status.HTTP_200_OK)
                 
                 except Exception as ex:
                     print(ex)
@@ -2000,7 +2000,7 @@ class GetSessionView(APIView):
             data = getattr(models,BATCH_SESSION).objects.get(**{UUID:uuid})
         except Exception as ex:
             print(ex)
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Batch not found", DATA_SV:"Batch hittades inte"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             SESSION_NAME:request.POST.get(SESSION_NAME,data.session_name),
             BATCH: getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)}) if request.POST.get('batch_name') else data.batch,
@@ -2018,7 +2018,7 @@ class GetSessionView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Session updated successfully"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Session updated successfully", DATA_SV:"Sessionen har uppdaterats"}, status=status.HTTP_200_OK)
 
     def delete(self, request,uuid = None):
         email_id =  get_user_email_by_token(request)
@@ -2028,7 +2028,7 @@ class GetSessionView(APIView):
             data = getattr(models,BATCH_SESSION).objects.get(**{UUID:uuid})
         except Exception as ex:
             print(ex)
-            return Response({STATUS: ERROR, DATA: "Data not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS: ERROR, DATA: "Batch not found",DATA_SV:"Batch hittades inte"}, status=status.HTTP_400_BAD_REQUEST)
         record_map = {
             IS_DELETED:True
         }
@@ -2038,7 +2038,7 @@ class GetSessionView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
-        return Response({STATUS: SUCCESS, DATA: "Data succesfully deleted"}, status=status.HTTP_200_OK)
+        return Response({STATUS: SUCCESS, DATA: "Session deleted successfully", DATA_SV:"Sessionen har raderats"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])
 class SaveStripeAccount(APIView):
@@ -2065,7 +2065,7 @@ class SaveStripeAccount(APIView):
                         stripe_response['stripe_user_id'],
                         settings={"payouts": {"schedule": {"interval": "manual"}}},
                     )
-                    return Response({STATUS: SUCCESS, DATA: "Account  Connected Succesfully"}, status=status.HTTP_200_OK)
+                    return Response({STATUS: SUCCESS, DATA: "Account connected succesfully", DATA_SV:"Kontot har anslutits"}, status=status.HTTP_200_OK)
                
                 except Exception as ex:
                     print(ex)
@@ -2152,7 +2152,7 @@ class SupplierWithDrawRequest(APIView):
                 if withdraw_amount <= supplier_data.total_amount_due:
                     try:
                         if getattr(models,"SupplierWithdrawalDetail").objects.filter(Q(status='pending') | Q(status='hold'),**{'supplier':supplier_data}):
-                            return Response({STATUS: ERROR, DATA: "You Cannot Request For Withdraw When One Is Pending Or OnHold", DATA_SV:"You Cannot Request For Withdraw When One Is Pending Or OnHold"}, status=status.HTTP_400_BAD_REQUEST)
+                            return Response({STATUS: ERROR, DATA: "You cannot request for withdraw when one is pending or on-hold", DATA_SV:"Du kan inte begära uttag när en väntar eller väntar"}, status=status.HTTP_400_BAD_REQUEST)
                         record_map = {
                             "supplier": supplier_data,
                             "status": "pending",
@@ -2237,7 +2237,7 @@ class SupplierWithDrawRequest(APIView):
                         except:
                             pass
 
-                        return Response({STATUS: SUCCESS, DATA: "Withdrawal request sent successfully"}, status=status.HTTP_200_OK) 
+                        return Response({STATUS: SUCCESS, DATA: "Withdrawal request sent successfully", DATA_SV:"Begäran om uttag har skickats"}, status=status.HTTP_200_OK) 
                           
                     except Exception as ex:
                         print(ex,)
@@ -2299,7 +2299,7 @@ class SupplierWithDrawStatus(APIView):
                                 withdrawal_request.save()
                                 # supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
                                 # supplier_account.save()
-                                return Response({STATUS: SUCCESS, DATA: "Request Successfully Completed"}, status=status.HTTP_200_OK)
+                                return Response({STATUS: SUCCESS, DATA: "Request completed successfully", DATA_SV:"Begäran har slutförts"}, status=status.HTTP_200_OK)
                             else:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"},status=status.HTTP_400_BAD_REQUEST)
                         
@@ -2330,7 +2330,7 @@ class SupplierWithDrawStatus(APIView):
                             withdrawal_request.status = withdrawal_status
                             withdrawal_request.reason = reason
                             withdrawal_request.save()
-                            return Response({STATUS: SUCCESS, DATA: "Request Successfully Completed"}, status=status.HTTP_200_OK)
+                            return Response({STATUS: SUCCESS, DATA: "Request completed successfully", DATA_SV:"Begäran har slutförts"}, status=status.HTTP_200_OK)
                         except Exception as e:
                             print(e)
                             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST) 
@@ -2369,7 +2369,7 @@ class SupplierPayout(APIView):
                         getattr(models,SUPPLIER_PAYOUT_DETAIL).objects.update_or_create(**record_map)
                         # supplier_account.total_amount_due -= "{:.2f}".format(float(payout["amount"]/100))
                         # supplier_account.save()
-                        return Response({STATUS: SUCCESS, DATA: "Payout Created Succesfully"}, status=status.HTTP_200_OK)
+                        return Response({STATUS: SUCCESS, DATA: "Payout created succesfully", DATA_SV:"Utbetalning skapad framgångsrikt"}, status=status.HTTP_200_OK)
                 
                 except Exception as ex:
                     print(ex)

@@ -35,7 +35,7 @@ class StripeWebhookActions:
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (payout_obj.supplier_account.supplier.email_id,)
-        email_msg = EmailMessage('Supplier Receives the Payment',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage('Supplier Receives The Payment',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'  
