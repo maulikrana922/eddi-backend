@@ -651,8 +651,7 @@ class GetCourseDetails(APIView):
                     # print(target_course_data, "datata")
                   
                     if user_subcategory:
-                        user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time") + getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
-                   
+                        user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time") 
                     else:
                         user_profile_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
 
