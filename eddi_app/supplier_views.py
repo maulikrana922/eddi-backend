@@ -662,11 +662,12 @@ class GetCourseDetails(APIView):
 
                         user_profile_cat_interest = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).exclude(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory)).exclude(course_category__in=category_list).order_by("-created_date_time")
                         result_list = list(chain(user_profile_subcat_interest, user_profile_cat_interest))
+                        user_interest_course = user_profile_subcat_interest.values_list("course_name")
                     else:
                         result_list = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False}).filter(Q(course_subcategory__subcategory_name__in=user_areaofinterest + user_subcategory) | Q(course_category__category_name__in=user_areaofinterest + user_category + user_only_category)  | Q(course_name__in=user_areaofinterest)).exclude(course_for_organization=True).exclude(course_name__in = course_enrolled).order_by("-created_date_time")
-
+                        user_interest_course = result_list.values_list("course_name")
                     print(result_list, "data")
-                    user_interest_course = user_profile_subcat_interest.values_list("course_name")
+                    
 
                     data_all = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1, IS_DELETED:False, "course_for_organization":False}).exclude(course_name__in = course_enrolled).exclude(course_name__in=user_interest_course).order_by("-created_date_time")
 
