@@ -1592,7 +1592,7 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
                         fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
-                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL+f'resetpassword?email={email_id}&uuid={data1.usersignup.uuid}'}
+                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)

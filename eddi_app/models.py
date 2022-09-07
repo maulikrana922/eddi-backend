@@ -808,11 +808,11 @@ class HomePageCMS_SV(models.Model):
     class Meta:
         verbose_name_plural = _("Home Page SV")
 
-def regions_changed(sender, **kwargs):
-    if kwargs['instance'].section_5_blog.count() > 4:
-        raise ValidationError("You can't assign more than four regions")
+# def regions_changed(sender, **kwargs):
+#     if kwargs['instance'].section_5_blog.count() > 4:
+#         raise ValidationError("You can't assign more than four regions")
 
-m2m_changed.connect(regions_changed, sender=HomePageCMS_SV.section_5_blog.through)
+# m2m_changed.connect(regions_changed, sender=HomePageCMS_SV.section_5_blog.through)
 
 
 class AboutUsPageCMS(models.Model):
@@ -1628,7 +1628,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL}
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"user_type":"admin"}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
@@ -1700,7 +1700,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id, "url":SUPPLIER_URL}
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id, "url":SUPPLIER_URL,"user_type":"supplier"}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
