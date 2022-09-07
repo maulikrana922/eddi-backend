@@ -605,6 +605,7 @@ class UserSignupView(APIView):
             try:
                 data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
             except Exception as ex:
+                print(ex)
                 return Response({STATUS: ERROR, DATA: "This email is already registered", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             if request.POST.get(DEVICE_TOKEN):
                 record_data1 = {
@@ -1024,7 +1025,7 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == "User":
                         html_path = RESETPASSWORD_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"final_email": email_id,"fullname":fullname,"uuid": data.uuid}
+                        context_data = {"final_email": email_id,"fullname":fullname,"uuid": data.uuid,"url":FRONT_URL+f'resetpassword?email={email_id}&uuid={data.uuid}'}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -1046,7 +1047,7 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
                         html_path = RESETPASSWORDSupplierAdmin_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname}
+                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname,"url":SUPPLIER_URL+f''}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)

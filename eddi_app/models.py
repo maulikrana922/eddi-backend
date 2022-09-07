@@ -386,7 +386,7 @@ def bulk_email(sender, instance, created, **kwargs):
                 except Exception as ex:
                     print(ex,"exxx")
                     organization_data = None
-                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "uuid":instance.uuid}
+                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "url":FRONT_URL+f"view-course-details/{instance.uuid}/"  }
                 html_content = render_to_string(html_path, context_data)               
                 text_content = "..."                      
                 receiver = i,
@@ -545,7 +545,7 @@ def send_contactlead_email(sender, instance, created, **kwargs):
         context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = ('harshit.s@latitudetechnolabs.com',)
+        recipient_list = ('jap.d@latitudetechnolabs.com',)
         email_msg = EmailMessage('General Inquiry from User',email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
@@ -1628,7 +1628,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id}
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
@@ -1700,7 +1700,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id}
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id, "url":SUPPLIER_URL}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
@@ -1721,9 +1721,9 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         email_msg.send(fail_silently=False)
 
     if created and instance.user_type.user_type == 'User':
-        html_path = VARIFY_EMAIL
+        html_path = VERIFY_EMAIL
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':fullname, "uuid": instance.uuid}
+        context_data = {'fullname':fullname,"url":FRONT_URL+f"verify-user/{instance.uuid}"}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)

@@ -1,4 +1,14 @@
 from eddi_backend.settings import BASE_DIR
+import environ
+env = environ.Env()
+environ.Env.read_env()
+ENV = env('DJANGO_ENV')
+if ENV == 'development':
+    FRONT_URL = 'https://eddi-frontend.testyourapp.online/'
+    SUPPLIER_URL = 'https://eddi-supplier.testyourapp.online/#/'
+else:
+    FRONT_URL = 'https://eddistaging-frontend.testyourapp.online/'
+    SUPPLIER_URL = 'https://eddistaging-supplier.testyourapp.online/#/'
 
 FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'
@@ -61,7 +71,7 @@ COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 SESSION_INVITATION = "session_invitation.html"
 INVOICE_HTML = "invoice.html"
 INVOICE_TO_USER = 'invoice-to-user.html'
-VARIFY_EMAIL = 'varify_email.html'
+VERIFY_EMAIL = 'verify_email.html'
 USER_ACTIVATED = 'user-activated.html'
 USER_DEACTIVATED = 'user-deactivated.html'
 USER_WELCOME ='user-welcome.html'
