@@ -757,11 +757,11 @@ class HomePageCMS(models.Model):
     class Meta:
         verbose_name_plural = _("Home Page")
 
-def regions_changed(sender, **kwargs):
-    if kwargs['instance'].section_5_blog.count() > 4:
-        raise ValidationError("You can't assign more than four regions")
+# def regions_changed(sender, **kwargs):
+#     if kwargs['instance'].section_5_blog.count() > 4:
+#         raise ValidationError("You can't assign more than four regions")
 
-m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
+# m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 
 
 class HomePageCMS_SV(models.Model):

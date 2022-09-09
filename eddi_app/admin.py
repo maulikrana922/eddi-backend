@@ -144,7 +144,7 @@ admin.site.register(TestinomialsDetails,TestinomialsDetailsAdmin)
 class TestinomialsDetails_SVAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            'fields': ('user_id','review',)
+            'fields': ('user_id','review','profile_image','user_name')
         }),
         ('Advanced', {
             'classes': ('collapse',),

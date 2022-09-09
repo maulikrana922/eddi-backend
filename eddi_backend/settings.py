@@ -374,8 +374,8 @@ STRIPE_WEBHOOK_SECRET = ""
 
 CRONJOBS = [
     # ('*/1 * * * *', 'eddi_app.cron.my_cron_job'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance'),
 ]

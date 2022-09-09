@@ -75,7 +75,7 @@ def my_cron_job_course():
                 except:
                     pass
                 # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
-                send_notification(i.supplier.email_id, receiver, message)
+                # send_notification(i.supplier.email_id, receiver, message)
                 record_map1 = {}
                 record_map1 = {
                     "sender" : i.supplier.email_id,
