@@ -1222,6 +1222,34 @@ class Testimonial_sv(APIView):
         except:
             return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([AllowAny])
+class EddiLabsDetailCms(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,"EddiLabsCMS").objects.latest(CREATED_AT)
+            if serializer := EddiLabsCMSSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+@permission_classes([AllowAny])
+class EddiLabsDetailCms_sv(APIView):
+    def get(self, request):
+        try:
+            data = getattr(models,"EddiLabsCMS_SV").objects.latest(CREATED_AT)
+            if serializer := EddiLabsCMSSerializer_sv(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        except:
+            return Response({STATUS: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 @permission_classes([AllowAny])
 class GetHomePageDetails(APIView):

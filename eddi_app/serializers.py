@@ -216,6 +216,20 @@ class AboutUsCMSSerializer_sv(serializers.ModelSerializer):
         depth = 2
         fields = '__all__'
 
+class EddiLabsCMSSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EddiLabsCMS
+        depth = 2
+        fields = '__all__'
+
+class EddiLabsCMSSerializer_sv(serializers.ModelSerializer):
+
+    class Meta:
+        model = EddiLabsCMS_SV
+        depth = 2
+        fields = '__all__'
+
 class ContactUsCMSSerializer(serializers.ModelSerializer):
 
     class Meta:

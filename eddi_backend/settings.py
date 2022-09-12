@@ -211,6 +211,16 @@ JAZZMIN_SETTINGS = {
             "url": "/admin/eddi_app/termsconditioncms_sv/1/change/", 
             "icon": "fas fa-file-signature",
         },
+        {
+            "name": _("Eddi Labs Page"), 
+            "url": "/admin/eddi_app/eddilabscms/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
+        {
+            "name": _("Eddi Labs Page SV"), 
+            "url": "/admin/eddi_app/eddilabscms_sv/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
         ],
    
        

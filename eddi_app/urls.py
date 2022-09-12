@@ -102,7 +102,9 @@ urlpatterns = [
     path('sw/get-termsSupplier-page-data/',GetTermsConditionSupplierDetails_sv.as_view()),    
     path('contactus-form/',ContactFormView.as_view()),
     path('sw/contactus-form/',ContactFormView_sv.as_view()),
-
+    path('get-eddilabs-page-data/',EddiLabsDetailCms.as_view()),
+    path('sw/get-eddilabs-page-data/',EddiLabsDetailCms_sv.as_view()),
+    
 # Supplier Dashboard
     path('supplier-dashboard/',SupplierDashboardView.as_view()),
     path('supplier-dashboard-Active_InActive/',SupplierDashboard_Active_InActiveView.as_view()),

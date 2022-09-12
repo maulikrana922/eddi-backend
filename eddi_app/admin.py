@@ -517,4 +517,6 @@ admin.site.register(SupplierAccountDetail)
 admin.site.register(SupplierPayoutDetail)
 admin.site.register(PlatformFeeCMS)
 admin.site.register(SupplierWithdrawalDetail)
+admin.site.register(EddiLabsCMS)
+admin.site.register(EddiLabsCMS_SV)
 

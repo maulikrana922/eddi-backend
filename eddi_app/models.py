@@ -257,6 +257,40 @@ class PlatformFeeCMS(models.Model):
     class Meta:
         verbose_name_plural = _("Platform Fee Table")
 
+class EddiLabsCMS(models.Model):
+    title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Title'))
+    banner = models.ImageField(upload_to = 'eddilabs_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Link'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name_plural = _("Eddi Labs Table")
+
+    def __str__(self):
+        return self.title
+
+class EddiLabsCMS_SV(models.Model):
+    title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Title'))
+    banner = models.ImageField(upload_to = 'eddilabs_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Link'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name_plural = _("Eddi Labs Table SV")
+
+    def __str__(self):
+        return self.title
+
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
     usersignup = models.ForeignKey(UserSignup,on_delete=models.CASCADE,blank=True,null=True,verbose_name=_('User Signup'))
