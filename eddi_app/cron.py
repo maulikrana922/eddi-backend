@@ -1,3 +1,4 @@
+from cgitb import html
 import logging
 from eddi_app import models
 from eddi_app.constants.constants import *
@@ -19,12 +20,12 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
-# def my_cron_job():
-#     user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":"nishant.kabariya@gmail.com"})
-#     user.location = "nishantttttttttttttttttt"
-#     user.save()
-#     logger.warning("Running...logger")
-#     print("Running...")
+def my_cron_job():
+    # user = getattr(models,USER_PROFILE_TABLE).objects.get(**{"email_id":"nishant.kabariya@gmail.com"})
+    # user.location = "nishantttttttttttttttttt"
+    # user.save()
+    # logger.warning("Running...logger")
+    print("Running...")
 
 def my_cron_job_course():
     course_data = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{STATUS_ID:1})
@@ -53,11 +54,15 @@ def my_cron_job_course():
                         fullname = f"{user_detail.first_name} {user_detail.last_name}"
                     except Exception as ex:
                         fullname = None
-                    context_data = {'course_name':i.course_name, "fullname":fullname}
+                    if user_detail.is_swedishdefault:
+                        subject = 'Utbildning avslutas/utgår'
+                    else:
+                        subject = 'Course has expired!'
+                    context_data = {'course_name':i.course_name, "fullname":fullname,"swedish_default":user_detail.is_swedishdefault}
                     html_content = render_to_string(html_path, context_data)               
                     text_content = "..."                      
                     receiver = j.email_id,
-                    msg = EmailMultiAlternatives("Course Expiring!!", text_content, email_from, receiver, connection=connection)                                      
+                    msg = EmailMultiAlternatives(subject, text_content, email_from, receiver, connection=connection)                                      
                     msg.attach_alternative(html_content, "text/html")
                     msg.attach(img)
                     msg.send()
@@ -130,32 +135,36 @@ def my_cron_job_event():
             pass
 
 
-# def my_cron_job_login():
-#     user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1})
-#     for i in user_data:
-#         time_diff = datetime.datetime.now() - datetime.datetime.strptime(str(user_data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
-#         if time_diff.seconds > 172800:
-#             try:
-#                 html_path = 'user_reminder.html'
-#                 fullname = f'{i.first_name} {i.last_name}'
-#                 context_data = {'fullname':fullname}
-#                 email_html_template = get_template(html_path).render(context_data)
-#                 email_from = settings.EMAIL_HOST_USER
-#                 recipient_list = (i.email_id,)
-#                 email_msg = EmailMessage('You have been missed!',email_html_template,email_from,recipient_list)
-#                 email_msg.content_subtype = 'html'
-#                 path = 'eddi_app'
-#                 img_dir = 'static'
-#                 image = 'Logo.png'
-#                 file_path = os.path.join(path,img_dir,image)
-#                 with open(file_path,'rb') as f:
-#                     img = MIMEImage(f.read())
-#                     img.add_header('Content-ID', '<{name}>'.format(name=image))
-#                     img.add_header('Content-Disposition', 'inline', filename=image)
-#                 email_msg.attach(img)
-#                 email_msg.send(fail_silently=False)
-#             except:
-#                 pass
+def my_cron_job_login():
+    user_data = getattr(models,USERSIGNUP_TABLE).objects.filter(**{STATUS_ID:1, IS_APPROVED_ID:1})
+    for i in user_data:
+        time_diff = datetime.datetime.now() - datetime.datetime.strptime(str(user_data.modified_date_time).split("+")[0], '%Y-%m-%d %H:%M:%S.%f')
+        if time_diff.seconds > 172800:
+            try:
+                html_path = 'user_reminder.html'
+                fullname = f'{i.first_name} {i.last_name}'
+                if i.is_swedishdefault:
+                    subject = 'Eddi saknar dig! '
+                else:
+                    subject = 'You have been missed!'
+                context_data = {'fullname':fullname,'swedish_default':i.is_swedishdefault}
+                email_html_template = get_template(html_path).render(context_data)
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = (i.email_id,)
+                email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
+                email_msg.content_subtype = 'html'
+                path = 'eddi_app'
+                img_dir = 'static'
+                image = 'Logo.png'
+                file_path = os.path.join(path,img_dir,image)
+                with open(file_path,'rb') as f:
+                    img = MIMEImage(f.read())
+                    img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    img.add_header('Content-Disposition', 'inline', filename=image)
+                email_msg.attach(img)
+                email_msg.send(fail_silently=False)
+            except:
+                pass
 
 def my_cron_job_balance():
     supplier_data = getattr(models,"SupplierAccountDetail").objects.all()

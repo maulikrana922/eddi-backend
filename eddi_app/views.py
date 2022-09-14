@@ -589,7 +589,8 @@ class UserSignupView(APIView):
             LAST_NAME: request.POST.get(LAST_NAME,None),
             EMAIL_ID: request.POST.get(EMAIL_ID,None),            
             USER_TYPE_ID: user_type_id.id,
-            STATUS_ID:1
+            STATUS_ID:1,
+            IS_SWEDISHDEFAULT: request.POST.get(IS_SWEDISHDEFAULT,False)
         }
 
         try:
@@ -1047,11 +1048,15 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == SUPPLIER_S or data.user_type.user_type == ADMIN_S:
                         html_path = RESETPASSWORDSupplierAdmin_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname,"url":SUPPLIER_URL+f''}
+                        if data.is_swedishdefault:
+                            subject = 'Återställ ditt lösenord - Eddi '
+                        else:
+                            subject = 'Forgot password.'
+                        context_data = {"uuid": data.uuid,"final_email": email_id,"fullname":fullname,"url":SUPPLIER_URL+f'','swedish_default':data.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -2802,11 +2807,15 @@ class CourseRating(APIView):
                     try:
                         html_path = "user_rate_to_supplier.html"
                         fullname = f'{user.first_name} {user.last_name}'
-                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment")}
+                        if course.supplier.is_swedishdefault:
+                            subject = 'Någon har betygsatt din utbildning'
+                        else:
+                            subject = 'Someone has Rated your Course'
+                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment"),"swedish_default":course.supplier.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (admin_email.email_id,)
-                        email_msg = EmailMessage('Someone has Rated your Course',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         print("TRUE")
                         path = 'eddi_app'

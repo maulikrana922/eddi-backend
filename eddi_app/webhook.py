@@ -31,11 +31,15 @@ class StripeWebhookActions:
         payout_obj.save()
         html_path = SUPPLIER_PAYOUT_SUCCESSED_HTML
         fullname = payout_obj.supplier_account.supplier.first_name + " " + payout_obj.supplier_account.supplier.last_name
-        context_data = {"amount": float(payout_obj.amount/100),"fullname":fullname}
+        if payout_obj.supplier_account.supplier.is_swedish_default:
+            subject = 'Betalning genomförd'
+        else:
+            subject = 'Supplier receives the payment'
+        context_data = {"amount": float(payout_obj.amount/100),"fullname":fullname,"swedish_default":payout_obj.supplier_account.supplier.is_swedish_default}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (payout_obj.supplier_account.supplier.email_id,)
-        email_msg = EmailMessage('Supplier Receives The Payment',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'  

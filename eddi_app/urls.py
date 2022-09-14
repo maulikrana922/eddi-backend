@@ -113,6 +113,8 @@ urlpatterns = [
 
 # Admin Dashboard
     path('admin-dashboard/',AdminDashboardView.as_view()),
+    path('admin-dashboard-users/',AdminDashboardUserView.as_view()),
+    path('admin-dashboard-suppliers/',AdminDashboardSupplierView.as_view()),
 
 # Events
     path('event/',EventView.as_view()),

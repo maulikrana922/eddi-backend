@@ -103,6 +103,7 @@ class UserSignup(models.Model):
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
     is_active = models.BooleanField(default=False, verbose_name=_('Is_active'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('Is_deleted'))
+    is_swedishdefault= models.BooleanField(default=False, verbose_name=_('Is_swedishdefault'))
     is_resetpassword = models.BooleanField(default=True, verbose_name=_('Is_resetpassword'))
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
@@ -849,7 +850,7 @@ class HomePageCMS_SV(models.Model):
 # m2m_changed.connect(regions_changed, sender=HomePageCMS_SV.section_5_blog.through)
 
 
-class AboutUsPageCMS(models.Model):
+class AboutUsPageCMS(models.Model): 
 
     #section 1
     section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
@@ -1662,7 +1663,7 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"user_type":"admin"}
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"swedish_default":instance.is_swedishdefault,"user_type":"admin"}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
@@ -1734,14 +1735,20 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id, "url":SUPPLIER_URL,"user_type":"supplier"}
+        if instance.is_swedishdefault:
+            subject = 'Välkommen till Eddi!'
+            user_type = 'leverantör'
+        else:
+            subject = 'Welcome to the Eddi Platform!'
+            user_type = 'Supplier'
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"swedish_default":instance.is_swedishdefault,"url":SUPPLIER_URL,"user_type":user_type}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
         data = UserSignup.objects.get(email_id = instance.email_id)
         data.password = make_password(otp)
-        data.save()
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
+        data.save() 
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'

@@ -50,7 +50,7 @@ class AddCourseView(APIView):
         course_organization = None
         if request.POST.get(COURSE_NAME):
             try:
-                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":request.POST.get(COURSE_NAME)})
+                course_data = getattr(models,COURSEDETAILS_TABLE).objects.get(**{"course_name":request.POST.get(COURSE_NAME),'is_deleted':False})
             except:
                 course_data = None
             if course_data != None:
@@ -791,11 +791,15 @@ class GetCourseDetails(APIView):
                                 record_map[STATUS_ID] = 2
                                 try:
                                     html_path = INACTIVE_COURSE
-                                    context_data = {"fullname":str(data.supplier.first_name)+str(data.supplier.last_name),"course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                    if data.supplier.is_swedishdefault:
+                                        subject = 'Er utbildning har avaktiverats av Eddi Admin'
+                                    else:
+                                        subject = 'Course deactived by Eddi'
+                                    context_data = {"fullname":str(data.supplier.first_name)+str(data.supplier.last_name),"course_name":request.POST.get(COURSE_NAME,data.course_name),"swedish_default":data.supplier.is_swedishdefault}
                                     email_html_template = get_template(html_path).render(context_data)
                                     email_from = settings.EMAIL_HOST_USER
                                     recipient_list = (data.supplier.email_id,)
-                                    email_msg = EmailMessage('Course Inactived By Eddi',email_html_template,email_from,recipient_list)
+                                    email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                                     email_msg.content_subtype = 'html'
                                     path = 'eddi_app'
                                     img_dir = 'static'
@@ -842,11 +846,15 @@ class GetCourseDetails(APIView):
                                 pass
                             try:
                                 html_path = APPROVE_COURSE_HTML
-                                context_data = {"supplier_name":f"{data.supplier.first_name} {data.supplier.last_name}","course_name":request.POST.get(COURSE_NAME,data.course_name)}
+                                if data.supplier.is_swedish_default:
+                                    subject = 'Er Utbildning har godkänts av Eddi Admin'
+                                else:
+                                    subject = 'Course Approved by Admin'
+                                context_data = {"supplier_name":f"{data.supplier.first_name} {data.supplier.last_name}","course_name":request.POST.get(COURSE_NAME,data.course_name),"swedish_default":data.supplier.swedish_default}
                                 email_html_template = get_template(html_path).render(context_data)
                                 email_from = settings.EMAIL_HOST_USER
                                 recipient_list = (data.supplier.email_id,)
-                                email_msg = EmailMessage('Course Approved by Admin',email_html_template,email_from,recipient_list)
+                                email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                                 email_msg.content_subtype = 'html'
                                 path = 'eddi_app'
                                 img_dir = 'static'
@@ -1010,6 +1018,28 @@ class AdminDashboardView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminDashboardUserView(APIView):
+    def get(self, request):
+        admin_email = get_user_email_by_token(request)
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
+        if data.user_type.user_type == "Admin":
+            users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
+            if serializer :=  UserSignupSerializer(users, many = True,fields=('id','uuid','first_name','last_name','status','user_type')):
+                return Response({STATUS: SUCCESS,"users": serializer.data,},status=status.HTTP_200_OK)
+        else:
+            return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminDashboardSupplierView(APIView):
+    def get(self, request):
+        admin_email = get_user_email_by_token(request)
+        data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
+        if data.user_type.user_type == "Admin":
+            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
+            if serializer :=  CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
+                return Response({STATUS: SUCCESS,"suppliers": serializer.data,},status=status.HTTP_200_OK)
         else:
             return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1469,11 +1499,15 @@ class SupplierOrganizationProfileview(APIView):
                     # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                     html_path = "supplier_organization_approval.html"
                     fullname = f'{usersignup_data.first_name} {usersignup_data.last_name}'
-                    context_data = {'fullname':fullname}
+                    if usersignup_data.is_swedishdefault:
+                        subject = 'Grattis till ditt konto hos Eddi!'
+                    else:
+                        subject = 'Profile created successfully'
+                    context_data = {'fullname':fullname,'swedish_default':usersignup_data.is_swedishdefault}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (email_id,)
-                    email_msg = EmailMessage('Profile Created Successfully',email_html_template,email_from,recipient_list)
+                    email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                     email_msg.content_subtype = 'html'
                     path = 'eddi_app'
                     img_dir = 'static'
@@ -1537,11 +1571,15 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_active.html"
                         fullname = f'{data1.usersignup.first_name} {data1.usersignup.first_name}'
-                        context_data = {'fullname':fullname, "email_id":email_id}
+                        if data1.usersignup.is_swedishdefault:
+                            subject = 'Ditt konto har aktiverats av Eddi Admin '
+                        else:
+                            subject = 'Account has been Activated by the Admin'
+                        context_data = {'fullname':fullname, "email_id":email_id,"swedish_default":data1.usersignup.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
-                        email_msg = EmailMessage('Account has been Activated by the Admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1561,11 +1599,15 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_inactive.html"
                         fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
-                        context_data = {'fullname':fullname, "email_id":email_id}
+                        if data1.usersignup.is_swedishdefault:
+                            subject = 'Account Has Been Deactivated By The Eddi'
+                        else:
+                            subject = 'Ditt konto på Eddi har tillfälligt stängts av'
+                        context_data = {'fullname':fullname, "email_id":email_id,"swedish_default":data1.usersignup.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
-                        email_msg = EmailMessage('Account Has Been Deactivated By The Eddi',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage('',email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1593,11 +1635,15 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_approved.html"
                         fullname = f'{data1.usersignup.first_name} {data1.usersignup.last_name}'
-                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL}
+                        if data1.usersignup.is_swedishdefault:
+                            subject = 'Godkänd registrering av konto på Eddi'
+                        else:
+                            subject = 'Profile approved by the Admin'
+                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL,"swedish_default":data.usersignup.swedish_default.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
-                        email_msg = EmailMessage('Profile Approved by Admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1625,11 +1671,16 @@ class SupplierOrganizationProfileview(APIView):
                         # data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
                         html_path = "supplier_organization_reject.html"
                         fullname = f'{data.first_name} {data.last_name}'
-                        context_data = {'fullname':fullname, "email_id":email_id, "reason":request.POST.get("reject_reason")}
+                        if data.is_swedishdefault:
+                            subject = 'Ditt konto kan inte godkännas'
+                        else:
+                            subject = 'Profile rejected by the Admin.'
+
+                        context_data = {'fullname':fullname, "email_id":email_id, "reason":request.POST.get("reject_reason"), "swedish_default":data.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Profile Rejected By Admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -1828,7 +1879,7 @@ class AddBatchView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
             if request.POST.get(BATCH_NAME):
                 try:
-                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME)})
+                    batch_data = getattr(models,COURSE_BATCH).objects.get(**{BATCH_NAME:request.POST.get(BATCH_NAME),'is_deleted':False})
                 except Exception as ex:
                     batch_data = None
                 if batch_data != None:
@@ -1952,7 +2003,7 @@ class AddSessionView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S or ADMIN_S:
             if request.POST.get(SESSION_NAME):
                 try:
-                    session_data = getattr(models,BATCH_SESSION).objects.get(**{"session_name":request.POST.get(SESSION_NAME)})
+                    session_data = getattr(models,BATCH_SESSION).objects.get(**{"session_name":request.POST.get(SESSION_NAME),'is_deleted':False})
                 except Exception as ex:
                     session_data = None
                 if session_data != None:
@@ -2178,11 +2229,16 @@ class SupplierWithDrawRequest(APIView):
                     try:
                         html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
-                        context_data = {"amount": withdraw_amount,"fullname":fullname}
+                        if supplier_data.supplier.is_swedish_default:
+                            subject = 'Förfrågan om transferering från Eddi till Stripe-konto'
+                        else:
+                            subject = 'Request to withdraw anamount from Stripe.'
+
+                        context_data = {"amount": withdraw_amount,"fullname":fullname,"swedish_default":supplier_data.supplier.is_swedish_default}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'  
@@ -2324,11 +2380,15 @@ class SupplierWithDrawStatus(APIView):
                         try:
                             html_path = SUPPLIER_WITHDRAW_REQUEST_HOLDBY_ADMIN
                             fullname = withdrawal_request.supplier.supplier.first_name + " " + withdrawal_request.supplier.supplier.last_name
-                            context_data = {"amount": withdrawal_request.amount,"fullname":fullname,"reason":reason}
+                            if withdrawal_request.supplier.supplier.is_swedishdefault:
+                                subject = 'Uttag kunde inte genomföras'
+                            else:
+                                subject = 'Supplier request of withdrawal is on hold by the Admin'
+                            context_data = {"amount": withdrawal_request.amount,"fullname":fullname,"reason":reason,"swedish_default":withdrawal_request.supplier.supplier.is_swedishdefault}
                             email_html_template = get_template(html_path).render(context_data)
                             email_from = settings.EMAIL_HOST_USER
                             recipient_list = (withdrawal_request.supplier.supplier.email_id,)
-                            email_msg = EmailMessage('Supplier Request to Withdraw the Amount OnHold By Admin',email_html_template,email_from,recipient_list)
+                            email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                             email_msg.content_subtype = 'html'
                             path = 'eddi_app'
                             img_dir = 'static'  
