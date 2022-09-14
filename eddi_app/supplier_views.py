@@ -999,25 +999,25 @@ class AdminDashboardView(APIView):
                 purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.all().count()
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-            try:
-                users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
-                course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
-            except:
-                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-            if serializer :=  UserSignupSerializer(users, many = True,fields=('id','uuid','first_name','last_name','status','user_type')):
-                if serializer1 := CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
-                    print(len(connection.queries))
-                    return Response({STATUS: SUCCESS,
+            # try:
+            #     users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
+            #     course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
+            # except:
+            #     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            # if serializer :=  UserSignupSerializer(users, many = True,fields=('id','uuid','first_name','last_name','status','user_type')):
+            #     if serializer1 := CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
+            print(len(connection.queries))
+            return Response({STATUS: SUCCESS,
                 "admin_name" : f"{data.first_name} {data.last_name}",
                 "supplier_count": total_supplier,
                 "user_count": total_user,
                 "total_course": total_course,
                 PURCHASED_COURSE_COUNT: purchased_course,
-                "users": serializer.data,
-                "suppliers": serializer1.data,
+                # "users": serializer.data,
+                # "suppliers": serializer1.data,
                 }, status=status.HTTP_200_OK)
-            else:
-                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            # else:
+            #     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1029,6 +1029,8 @@ class AdminDashboardUserView(APIView):
             users = getattr(models,USERSIGNUP_TABLE).objects.all().exclude(user_type_id = 3)
             if serializer :=  UserSignupSerializer(users, many = True,fields=('id','uuid','first_name','last_name','status','user_type')):
                 return Response({STATUS: SUCCESS,"users": serializer.data,},status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({STATUS: ERROR, DATA: "User is not authorized", DATA_SV:"Du kan inte utföra denna handling"}, status=status.HTTP_400_BAD_REQUEST)
 
