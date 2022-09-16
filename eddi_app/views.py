@@ -422,7 +422,11 @@ class Save_stripe_info(APIView):
                 
                 html_path = INVOICE_TO_USER
                 fullname = f'{instance.first_name} {instance.last_name}'
-                context_data = {'fullname':fullname, "course_name":course_name,"total": amount}
+                if instance.is_swedishdefault:
+                    subject = 'Tack för din betalning!'
+                else:
+                    subject = 'Payment received successfully'
+                context_data = {'fullname':fullname, "course_name":course_name,"total": amount,"swedish_default":instance.is_swedishdefault}
                 email_html_template = get_template(html_path).render(context_data)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = (instance.email_id,)
@@ -464,7 +468,7 @@ class Save_stripe_info(APIView):
                         img.add_header('Content-Disposition', 'inline', filename=image)
                 except:
                     pass
-                email_msg = EmailMessage('Payment received successfully!!',email_html_template,email_from,recipient_list)
+                email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                 email_msg.content_subtype = 'html'
                 email_msg.attach(img)
                 try:
@@ -523,8 +527,14 @@ class Save_stripe_infoEvent(APIView):
                         vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
                         vat_val = int(vat[0])
                         html_path = COURSE_ENROLL_HTML_TO_U
+                        if instance.usersignup.is_swedishdefault:
+                            subject = 'Grattis till registering'
+                            product = 'eventet'
+                        else:
+                            subject = 'Congratulations to event enrollment'
+                            product = 'course'
                         fullname = f'{instance.first_name} {instance.last_name}'
-                        context_data = {'fullname':fullname, "course_name":event_name}
+                        context_data = {'fullname':fullname, "course_name":event_name,"product":product}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (instance.email_id,)
@@ -560,7 +570,7 @@ class Save_stripe_infoEvent(APIView):
                             img = MIMEImage(f.read())
                             img.add_header('Content-ID', '<{name}>'.format(name=image))
                             img.add_header('Content-Disposition', 'inline', filename=image)
-                        email_msg = EmailMessage('Congratulations!!',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         email_msg.attach(img)
                         try:
@@ -590,9 +600,9 @@ class UserSignupView(APIView):
             EMAIL_ID: request.POST.get(EMAIL_ID,None),            
             USER_TYPE_ID: user_type_id.id,
             STATUS_ID:1,
-            IS_SWEDISHDEFAULT: request.POST.get(IS_SWEDISHDEFAULT,False)
+            IS_SWEDISHDEFAULT: True if request.POST.get(IS_SWEDISHDEFAULT)=='true' else False
         }
-
+        
         try:
             if request.POST.get(PASSWORD):
                 record_map[PASSWORD] = make_password(request.POST.get(PASSWORD))
@@ -764,11 +774,15 @@ class GetUserDetails(APIView):
                     try:
                         html_path = USER_ACTIVATED
                         fullname = f'{user_data.first_name} {user_data.last_name}'
-                        context_data = {'fullname':fullname}
+                        if user_data.is_swedishdefault:
+                            subject = 'Ditt användarkonto hos Eddi har aktiverats.'
+                        else:
+                            subject = 'Your Eddi account has been activated by the Admin.'
+                        context_data = {'fullname':fullname,"swedish_default":user_data.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (user_data.email_id,)
-                        email_msg = EmailMessage('Account has been activated by the admin',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         print("TRUE")
                         path = 'eddi_app'
@@ -788,7 +802,11 @@ class GetUserDetails(APIView):
                     try:
                         html_path = USER_DEACTIVATED
                         fullname = f'{user_data.first_name} {user_data.last_name}'
-                        context_data = {'fullname':fullname}
+                        if user_data.is_swedishdefault:
+                            subject = 'Ditt konto har blivit inaktiverat av Eddi Admin'
+                        else:
+                            subject = 'Your Eddi account has been deactivated by the Admin'
+                        context_data = {'fullname':fullname,"swedish_default":user_data.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (user_data.email_id,)
@@ -1026,11 +1044,16 @@ class ForgetPasswordView(APIView):
                     if data.user_type.user_type == "User":
                         html_path = RESETPASSWORD_HTML
                         fullname = data.first_name + " " + data.last_name
-                        context_data = {"final_email": email_id,"fullname":fullname,"uuid": data.uuid,"url":FRONT_URL+f'resetpassword?email={email_id}&uuid={data.uuid}'}
+                        if data.is_swedishdefault:
+                            subject = 'Skapa ett nytt lösenord'
+                        else:
+                            subject = 'Forgot Password'
+
+                        context_data = {"final_email": email_id,"fullname":fullname,"uuid": data.uuid,"url":FRONT_URL+f'resetpassword?email={email_id}&uuid={data.uuid}',"swedish_default":data.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Forgot Password',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'  
@@ -1119,11 +1142,15 @@ class VerifyUser(APIView):
                 data.save()
                 html_path = USER_WELCOME
                 fullname = f'{data.first_name} {data.last_name}'
-                context_data = {'fullname':fullname,}
+                if data.is_swedishdefault:
+                    subject = 'Välkommen till Eddi!'
+                else:
+                    subject = 'Welcome To Eddi'
+                context_data = {'fullname':fullname,"swedish_default":data.is_swedishdefault}
                 email_html_template = get_template(html_path).render(context_data)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = (data.email_id,)
-                email_msg = EmailMessage('Welcome To Eddi',email_html_template,email_from,recipient_list)
+                email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                 email_msg.content_subtype = 'html'
                 print("TRUE")
                 path = 'eddi_app'
@@ -1517,6 +1544,7 @@ class UserProfileView(APIView):
     def post(self, request):
         email_id = get_user_email_by_token(request)
         user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+       
         serializer = UserProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.validated_data['usersignup_id'] = user_data.id
@@ -1574,7 +1602,8 @@ class UserProfileView(APIView):
         email_id = get_user_email_by_token(request)
         try:
             data = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             record_map = {
@@ -1607,22 +1636,31 @@ class UserProfileView(APIView):
                 record_map[AGREE_ADS_TERMS] = json.loads(request.POST.get(AGREE_ADS_TERMS))
             else:
                 record_map[AGREE_ADS_TERMS] = data.agree_ads_terms
+            user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if request.POST.get(IS_SWEDISHDEFAULT):
+                lan = True if request.POST.get(IS_SWEDISHDEFAULT)=='true' else False
+            else:
+                lan = user_data.is_swedishdefault
+            print(lan,"languageeee")
+            user_data.is_swedishdefault = lan
+            user_data.save()
             if request.POST.get(PASSWORD):
-                var = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                
                 recordd = {}
                 recordd = {
                     PASSWORD: make_password(request.POST.get(PASSWORD))
                 }
                 for key,value in recordd.items():
-                    setattr(var,key,value)
-                var.save()    
+                    setattr(user_data,key,value)
+                user_data.save()    
 
             record_map[MODIFIED_AT] = make_aware(datetime.datetime.now())
             for key,value in record_map.items():
                 setattr(data,key,value)
             data.save()            
             return Response({STATUS: SUCCESS, DATA: "Profile updated successfully", DATA_SV:"Din profil är nu uppdaterad"}, status=status.HTTP_200_OK)
-        except:
+        except Exception as e:
+            print(e)
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             
             
@@ -1656,7 +1694,11 @@ class UserPaymentDetail_info(APIView):
                     vat_val = int(vat[0])
                     html_path = INVOICE_TO_USER
                     fullname = f'{user_data.first_name} {user_data.last_name}'
-                    context_data = {'fullname':fullname, "course_name":course_name,"total":0.00}
+                    if user_data.is_swedishdefault:
+                        subject = 'Tack för din betalning!'
+                    else:
+                        subject = 'Payment received successfully'
+                    context_data = {'fullname':fullname, "course_name":course_name,"total":0.00,"swedish_default":user_data.is_swedishdefault}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (user_data.email_id,)
@@ -1698,7 +1740,7 @@ class UserPaymentDetail_info(APIView):
                             img.add_header('Content-Disposition', 'inline', filename=image)
                     except:
                         pass
-                    email_msg = EmailMessage('Payment received successfully!!',email_html_template,email_from,recipient_list)
+                    email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                     email_msg.content_subtype = 'html'
                     email_msg.attach(img)
                     try:
@@ -1759,11 +1801,17 @@ class UserPaymentDetail_info(APIView):
                     try:
                         html_path = COURSE_ENROLL_HTML_TO_U
                         fullname = f"{user_data.first_name} {user_data.last_name}"
-                        context_data = {'fullname':fullname, "email":user_data.email_id, "course_name":course_name}
+                        if user_data.is_swedishdefault:
+                            subject = 'Grattis till registering'
+                            product = 'utbildningen'
+                        else:
+                            subject = 'Congratulations to course enrollment'
+                            product = 'course'
+                        context_data = {'fullname':fullname, "email":user_data.email_id, "course_name":course_name,"swedish_default":user_data.is_swedishdefault,"product":product}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
-                        email_msg = EmailMessage('Congratulations!!',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'
@@ -2783,11 +2831,16 @@ class CourseRating(APIView):
                     try:
                         html_path = "user_rate_to_admin.html"
                         fullname = f'{user.first_name} {user.last_name}'
-                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment")}
+                        if admin_email.is_swedishdefault:
+                            subject =  'En användare har utvärderat din utbildning'
+                        else:
+                            subject = 'Someone has rated your course.'
+
+                        context_data = {'supplier_name':course.supplier.first_name,'fullname':fullname,"course_name":course.course_name,'star':"{:.1f}".format(int(request.POST.get("star"))),"review":request.POST.get("comment"),"swedish_default":admin_email.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (admin_email.email_id,)
-                        email_msg = EmailMessage('Someone has Rated your Course',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         print("TRUE")
                         path = 'eddi_app'

@@ -31,11 +31,11 @@ class StripeWebhookActions:
         payout_obj.save()
         html_path = SUPPLIER_PAYOUT_SUCCESSED_HTML
         fullname = payout_obj.supplier_account.supplier.first_name + " " + payout_obj.supplier_account.supplier.last_name
-        if payout_obj.supplier_account.supplier.is_swedish_default:
+        if payout_obj.supplier_account.supplier.is_swedishdefault:
             subject = 'Betalning genomförd'
         else:
             subject = 'Supplier receives the payment'
-        context_data = {"amount": float(payout_obj.amount/100),"fullname":fullname,"swedish_default":payout_obj.supplier_account.supplier.is_swedish_default}
+        context_data = {"amount": float(payout_obj.amount/100),"fullname":fullname,"swedish_default":payout_obj.supplier_account.supplier.is_swedishdefault}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (payout_obj.supplier_account.supplier.email_id,)

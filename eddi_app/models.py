@@ -413,6 +413,10 @@ def bulk_email(sender, instance, created, **kwargs):
             for i in reciever_list:
                 try:
                     user_detail = UserSignup.objects.get(email_id = i)
+                    if user_detail.is_swedishdefault:
+                        subject = 'Inbjudan från Eddi - En utbildning för dig'
+                    else:
+                        subject = 'Invite to a new course'
                     username = user_detail.first_name
                 except Exception as ex:
                     username = None
@@ -421,11 +425,11 @@ def bulk_email(sender, instance, created, **kwargs):
                 except Exception as ex:
                     print(ex,"exxx")
                     organization_data = None
-                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "url":FRONT_URL+f"view-course-details/{instance.uuid}/"  }
+                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "url":FRONT_URL+f"view-course-details/{instance.uuid}/","swedish_default":user_detail.is_swedishdefault}
                 html_content = render_to_string(html_path, context_data)               
                 text_content = "..."                      
                 receiver = i,
-                msg = EmailMultiAlternatives("Congratulations!!", text_content, email_from, receiver, connection=connection)                                      
+                msg = EmailMultiAlternatives(subject, text_content, email_from, receiver, connection=connection)                                      
                 msg.attach_alternative(html_content, "text/html")
                 msg.attach(img)
                 msg.send()
@@ -577,11 +581,15 @@ class ContactFormLead_SV(models.Model):
 def send_contactlead_email(sender, instance, created, **kwargs):
     if created:
         html_path = CONTACT_LEAD
-        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message}
+        if instance.is_swedishdefault:
+            subject = 'Förfrågan från användare'
+        else:
+            subject = 'General inquiry from ser'
+        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message,"swedish_default":instance.swedish_default}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
-        recipient_list = ('jap.d@latitudetechnolabs.com',)
-        email_msg = EmailMessage('General Inquiry from User',email_html_template,email_from,recipient_list)
+        recipient_list = ('jap.admin@yopmail.com',)
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
@@ -600,11 +608,15 @@ def send_contactlead_email(sender, instance, created, **kwargs):
 def send_contact_usl(sender, instance, created, **kwargs):
     if created:
         html_path = CONTACTUS_USER
-        context_data = {'fullname':instance.fullname}
+        if instance.is_swedishdefault:
+            subject = 'Förfrågan har skickats till Eddi'
+        else:
+            subject = 'Inquiry submitted'
+        context_data = {'fullname':instance.fullname,"swedish_default":instance.swedish_default}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Inquiry Submitted',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
@@ -1663,7 +1675,12 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
         html_path = OTP_EMAIL_HTML
         otp = PasswordView()
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"swedish_default":instance.is_swedishdefault,"user_type":"admin"}
+        if instance.is_swedishdefault:
+            subject = 'Välkommen till Eddi!'
+        else:
+            subject = 'Welcome to the Eddi Platform!'
+            
+        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"swedish_default":instance.is_swedishdefault,"user_type":'Admin',}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
@@ -1764,11 +1781,15 @@ def send_appointment_confirmation_email(sender, instance, created, **kwargs):
     if created and instance.user_type.user_type == 'User':
         html_path = VERIFY_EMAIL
         fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':fullname,"url":FRONT_URL+f"verify-user/{instance.uuid}"}
+        if instance.is_swedishdefault:
+            subject = 'Vänligen verifiera ditt konto hos Eddi'
+        else:
+            subject = 'Please verify your Eddi account'
+        context_data = {'fullname':fullname,"url":FRONT_URL+f"verify-user/{instance.uuid}","swedish_default":instance.is_swedishdefault}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Please verify your Eddi account',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'
@@ -1791,11 +1812,15 @@ def send_session_email(sender, instance, created, **kwargs):
     for student in instance.batch.students.all():
         html_path = SESSION_INVITATION
         fullname = f'{student.first_name} {student.last_name}'
-        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name}
+        if student.is_swedishdefault:
+            subject = 'Inbjudan till utbildnings tillfälle(n)'
+        else:
+            subject = 'Invitation to join a course session'
+        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name,"swedish_default":student.is_swedishdefault}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (student.email_id,)
-        email_msg = EmailMessage('Invitation To Join Session',email_html_template,email_from,recipient_list)
+        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
         email_msg.content_subtype = 'html'
         path = 'eddi_app'
         img_dir = 'static'

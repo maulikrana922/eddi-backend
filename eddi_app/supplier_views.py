@@ -846,7 +846,7 @@ class GetCourseDetails(APIView):
                                 pass
                             try:
                                 html_path = APPROVE_COURSE_HTML
-                                if data.supplier.is_swedish_default:
+                                if data.supplier.is_swedishdefault:
                                     subject = 'Er Utbildning har godkänts av Eddi Admin'
                                 else:
                                     subject = 'Course Approved by Admin'
@@ -2210,6 +2210,7 @@ class SupplierWithDrawRequest(APIView):
             if user_data.user_type.user_type == SUPPLIER_S:
                 try:
                     supplier_data = getattr(models,SUPPLIER_ACCOUNT_DETAIL).objects.get(**{'supplier__email_id':email_id})
+                    print(supplier_data,"supplier")
                 except Exception as e:
                     print(e,"reeeee")
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -2217,6 +2218,7 @@ class SupplierWithDrawRequest(APIView):
                
                 if withdraw_amount <= supplier_data.total_amount_due:
                     try:
+                        print("insideee")
                         if getattr(models,"SupplierWithdrawalDetail").objects.filter(Q(status='pending') | Q(status='hold'),**{'supplier':supplier_data}):
                             return Response({STATUS: ERROR, DATA: "You cannot request for withdraw when one is pending or on-hold", DATA_SV:"Du kan inte begära uttag när en väntar eller väntar"}, status=status.HTTP_400_BAD_REQUEST)
                         record_map = {
@@ -2227,16 +2229,16 @@ class SupplierWithDrawRequest(APIView):
                         getattr(models,"SupplierWithdrawalDetail").objects.create(**record_map)
                     except Exception as ex:
                         print(ex)
-                        return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({STATUS: ERROR, DATA: "Somethingg went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     try:
                         html_path = SUPPLIER_WITHDRAW_REQUEST_HTML
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
-                        if supplier_data.supplier.is_swedish_default:
+                        if supplier_data.supplier.is_swedishdefault:
                             subject = 'Förfrågan om transferering från Eddi till Stripe-konto'
                         else:
                             subject = 'Request to withdraw anamount from Stripe.'
 
-                        context_data = {"amount": withdraw_amount,"fullname":fullname,"swedish_default":supplier_data.supplier.is_swedish_default}
+                        context_data = {"amount": withdraw_amount,"fullname":fullname,"swedish_default":supplier_data.supplier.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -2257,14 +2259,20 @@ class SupplierWithDrawRequest(APIView):
                         print(ex,"dsdasdasd")
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                     try:
-                        # admin_emails = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":ADMIN_S}).values_list("email_id", flat=True)
+                      
+                        admin = getattr(models,USERSIGNUP_TABLE).objects.filter(**{"user_type__user_type":"Admin"})
                         html_path = SUPPLIER_WITHDRAW_REQUEST_ADMIN
+                        print(admin[0].is_swedishdefault)
                         fullname = supplier_data.supplier.first_name + " " + supplier_data.supplier.last_name
-                        context_data = {"amount": withdraw_amount,"fullname":"jap","supplier_name":fullname}
+                        if admin[0].is_swedishdefault:
+                            subject = 'Förfrågan om transferering från Eddi till Stripe-konto '
+                        else:
+                            subject = 'Supplier request to withdraw the amount'
+                        context_data = {"amount": withdraw_amount,"fullname":"jap","supplier_name":fullname,"swedish_default":admin[0].is_swedishdefault}
                         email_html_template = get_template(SUPPLIER_WITHDRAW_REQUEST_ADMIN).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = ("jap.admin@yopmail.com",)
-                        email_msg = EmailMessage('Supplier Request to Withdraw the Amount',email_html_template,email_from,recipient_list)
+                        email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
                         email_msg.content_subtype = 'html'
                         path = 'eddi_app'
                         img_dir = 'static'  
@@ -2314,6 +2322,7 @@ class SupplierWithDrawRequest(APIView):
                         print(ex,)
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
+                    print("elseee")
                     return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             
             else:
