@@ -706,12 +706,12 @@ class GetCourseDetails(APIView):
         except:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
-            if enrolled.exists():
-                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            pass
+        # try:
+        #     enrolled = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{COURSE:data})
+        #     if enrolled.exists():
+        #         return Response({STATUS: ERROR, DATA: "Someone already enrolled in this course", DATA_SV:"Någon har redan registrerat sig på denna utbildning"}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     pass
         try:
             category_id = getattr(models,COURSE_CATEGORY_TABLE).objects.only(ID).get(**{CATEGORY_NAME:request.POST.get(COURSE_CATEGORY_ID,data.course_category.category_name)})
             try:

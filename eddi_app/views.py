@@ -2248,12 +2248,12 @@ class EventView(APIView):
                      
         except:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            enrolled = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
-            if enrolled.exists():
-                return Response({STATUS: ERROR, DATA: "Someone already enrolled in this event you can't edit", DATA_SV:"Någon är redan anmäld till eventet, innehållet kan inte redigeras"}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            pass
+        # try:
+        #     enrolled = getattr(models,EVENTAD_PAYMENT_DETAIL_TABLE).objects.filter(**{EVENT_NAME:data.event_name})
+        #     if enrolled.exists():
+        #         return Response({STATUS: ERROR, DATA: "Someone already enrolled in this event you can't edit", DATA_SV:"Någon är redan anmäld till eventet, innehållet kan inte redigeras"}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     pass
         
         try:
             record_map = {
