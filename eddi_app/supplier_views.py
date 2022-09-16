@@ -2253,7 +2253,7 @@ class SupplierWithDrawRequest(APIView):
                             img.add_header('Content-ID', '<{name}>'.format(name=image))
                             img.add_header('Content-Disposition', 'inline', filename=image)
                         email_msg.attach(img)
-                        email_msg.send(fail_silently=False)
+                        email_msg.send(fail_silently=False) 
                    
                     except Exception as ex:
                         print(ex,"dsdasdasd")
