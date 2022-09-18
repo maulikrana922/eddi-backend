@@ -1782,7 +1782,7 @@ class UserPaymentDetail_info(APIView):
                 var = getattr(models,USER_PAYMENT_DETAIL).objects.get(**{EMAIL_ID:email_id, "course__course_name":course_name,STATUS:'Success'})
             except:
                 var = None
-            var = None
+            # var = None
             if not var:
                 try:
                     getattr(models,USER_PAYMENT_DETAIL).objects.update_or_create(**record_map)
@@ -1872,13 +1872,13 @@ class UserPaymentDetail_info(APIView):
 
                 except Exception as e:
                     print(e)
-                    return Response({MESSAGE: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({MESSAGE: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen","error":str(e)}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({MESSAGE: ERROR, DATA: "You already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as e:
             print(e)
-            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen","error":str(e)}, status=status.HTTP_400_BAD_REQUEST)
                 
 
 @permission_classes([AllowAny])
