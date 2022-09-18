@@ -412,11 +412,11 @@ class Save_stripe_info(APIView):
                             confirm=True)
                 except Exception as e:
                     print(e)
-                    return Response({MESSAGE: ERROR, DATA: ERROR}, status=status.HTTP_400_BAD_REQUEST) 
+                    return Response({MESSAGE: ERROR, DATA: ERROR,"error":str(e)}, status=status.HTTP_400_BAD_REQUEST) 
                 
             except Exception as ex:
                 print(ex)
-                return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)     
+                return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel","error":str(e)}, status=status.HTTP_400_BAD_REQUEST)     
             try:
                 instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                 
