@@ -421,12 +421,12 @@ class Save_stripe_info(APIView):
                 instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
                 
                 html_path = INVOICE_TO_USER
-                fullname = f'{instance.first_name} {instance.last_name}'
-                if instance.is_swedishdefault:
+                fullname = f'{instance.usersignup.first_name} {instance.usersignup.last_name}'
+                if instance.usersignup.is_swedishdefault:
                     subject = 'Tack för din betalning!'
                 else:
                     subject = 'Payment received successfully'
-                context_data = {'fullname':fullname, "course_name":course_name,"total": amount,"swedish_default":instance.is_swedishdefault}
+                context_data = {'fullname':fullname, "course_name":course_name,"total": amount,"swedish_default":instance.usersignup.is_swedishdefault}
                 email_html_template = get_template(html_path).render(context_data)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = (instance.email_id,)
