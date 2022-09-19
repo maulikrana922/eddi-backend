@@ -68,7 +68,7 @@ class AddCourseView(APIView):
                 try:
                     supplier_acc = getattr(models,"SupplierAccountDetail").objects.get(supplier=supplier_id)
                 except Exception as ex:
-                    return Response({STATUS: ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({STATUS: ERROR,"var":str(ex), DATA: "Please create your stripe account before adding course", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as ex:
             return Response({STATUS: ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -1641,7 +1641,7 @@ class SupplierOrganizationProfileview(APIView):
                             subject = 'Godkänd registrering av konto på Eddi'
                         else:
                             subject = 'Profile approved by the Admin'
-                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL,"swedish_default":data.usersignup.swedish_default.is_swedishdefault}
+                        context_data = {'fullname':fullname, "email_id":supplier_email,"uuid":data1.usersignup.uuid,"url":SUPPLIER_URL,"swedish_default":data1.usersignup.is_swedishdefault}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (data1.supplier_email,)
