@@ -581,11 +581,11 @@ class ContactFormLead_SV(models.Model):
 def send_contactlead_email(sender, instance, created, **kwargs):
     if created:
         html_path = CONTACT_LEAD
-        if instance.is_swedishdefault:
-            subject = 'Förfrågan från användare'
-        else:
-            subject = 'General inquiry from ser'
-        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message,"swedish_default":instance.swedish_default}
+        # if instance.is_swedishdefault:
+        subject = 'Förfrågan från användare'
+        # else:
+        #     subject = 'General inquiry from ser'
+        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message,"swedish_default":True}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = ('jap.admin@yopmail.com',)
@@ -608,11 +608,11 @@ def send_contactlead_email(sender, instance, created, **kwargs):
 def send_contact_usl(sender, instance, created, **kwargs):
     if created:
         html_path = CONTACTUS_USER
-        if instance.is_swedishdefault:
-            subject = 'Förfrågan har skickats till Eddi'
-        else:
-            subject = 'Inquiry submitted'
-        context_data = {'fullname':instance.fullname,"swedish_default":instance.swedish_default}
+        # if instance.is_swedishdefault:
+        subject = 'Förfrågan har skickats till Eddi'
+        # else:
+        #     subject = 'Inquiry submitted'
+        context_data = {'fullname':instance.fullname,"swedish_default":True}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (instance.email_id,)

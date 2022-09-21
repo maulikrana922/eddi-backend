@@ -1043,7 +1043,7 @@ class AdminDashboardSupplierView(APIView):
         admin_email = get_user_email_by_token(request)
         data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
-            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1})
+            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1,IS_DELETED:False})
             if serializer :=  CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
                 return Response({STATUS: SUCCESS,"suppliers": serializer.data,},status=status.HTTP_200_OK)
         else:
@@ -1059,7 +1059,7 @@ class SupplierDashboardView(APIView):
             total_user = getattr(models,USERSIGNUP_TABLE).objects.filter(**{USER_TYPE:1}).count()
             supplier_course_count = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).count()
             purchased_course = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email}).count()
-            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email}).order_by("-created_date_time")
+            Courses_Offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,IS_DELETED:False}).order_by("-created_date_time")
 
         except:
             return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
