@@ -3,7 +3,7 @@ import os
 from xhtml2pdf import pisa
 import random
 from random import shuffle
-from io import BytesIO,StringIO
+from io import BytesIO
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -98,7 +98,6 @@ class PayByInvoice(APIView):
                     result = BytesIO()
                     pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
                     pdf = result.getvalue()
-                    print(pdf,"fsfsdfsdf")
                     filename = f'Invoice-{invoice_number}.pdf'
                     receipt_file = BytesIO(pdf)
         
@@ -108,7 +107,6 @@ class PayByInvoice(APIView):
                     pass
 
                 if request.POST.get("product_type") == "course":
-                    print("Course")
                     record_map1 = {}
                     record_map1 = {
                         "course_id" : course.id,
@@ -140,7 +138,6 @@ class PayByInvoice(APIView):
                         pass
                    
                 else:
-                    print("Event")
                     event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                     record_map2 = {}
                     record_map2 = {
@@ -202,7 +199,6 @@ class PayByInvoice(APIView):
                                     img.add_header('Content-ID', '<{name}>'.format(name=image))
                                     img.add_header('Content-Disposition', 'inline', filename=image)
                             except Exception as e:
-                                print(e,"filee")
                                 pass
                             email_msg = EmailMessage('Payment Invoice!!',email_html_template1,email_from,recipient_list)
                             email_msg1 = EmailMessage('Payment Invoice!!',email_html_template2,email_from,recipient_list1)
@@ -214,7 +210,6 @@ class PayByInvoice(APIView):
                                 email_msg.attach(filename, pdf, "application/pdf")                         
                                 email_msg1.attach(filename, pdf, "application/pdf")                         
                             except Exception as e:
-                                print(e,"attachhh")
                                 pass
                             email_msg.send(fail_silently=False)
                             email_msg1.send(fail_silently=False)
@@ -231,7 +226,7 @@ class PayByInvoice(APIView):
                             context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization"}
                             context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
                             context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")}
-                            print(context_data3["student_name"])
+                          
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                             fullname = f'{instance.first_name}'
@@ -260,7 +255,6 @@ class PayByInvoice(APIView):
                                     img.add_header('Content-ID', '<{name}>'.format(name=image))
                                     img.add_header('Content-Disposition', 'inline', filename=image)
                             except Exception as e:
-                                print(e,"filee")
                                 pass
                             email_msg = EmailMessage('Payment Invoice!!',email_html_template1,email_from,recipient_list)
                             email_msg1 = EmailMessage('Payment Invoice!!',email_html_template2,email_from,recipient_list1)
@@ -316,14 +310,11 @@ class PayByInvoice(APIView):
                     # email_msg.attach(img)
                     # email_msg.send(fail_silently=False)
                 except Exception as e:
-                    print(e,"exx")
                     pass
                 return Response({STATUS: SUCCESS, DATA: "Information successfully added", DATA_SV:"Informationen har nu sparats"}, status=status.HTTP_200_OK)
             except Exception as e:
-                print(e)
                 return Response({MESSAGE: ERROR, DATA:"Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
             return Response({MESSAGE: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -452,7 +443,6 @@ class Save_stripe_info(APIView):
                         "vat_charges" : vat_val,
                         "invoice_pdf" : File(receipt_file, filename) ,
                     }
-                    print(record)
                     getattr(models,"InvoiceData").objects.update_or_create(**record)
                 except Exception as e:
                     print(e)
@@ -616,7 +606,6 @@ class UserSignupView(APIView):
             try:
                 data = getattr(models,USERSIGNUP_TABLE).objects.update_or_create(**record_map)
             except Exception as ex:
-                print(ex)
                 return Response({STATUS: ERROR, DATA: "This email is already registered", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             if request.POST.get(DEVICE_TOKEN):
                 record_data1 = {
@@ -678,8 +667,6 @@ class GetUserDetails(APIView):
                                 # enrolled_count = getattr(models,USER_PAYMENT_DETAIL).objects.filter(**{"course__course_name__in":supplier_all_course, "status":"Success"}).count()
                                 supplier_course_count = supplier_all_course.count()
                                 enrolled_count = individuals_useremail.count()
-                                # print(individuals_useremail.count())
-                                # print(supplier_all_course.count())
                                 individuals_user = getattr(models,USER_PROFILE_TABLE).objects.filter(**{"email_id__in":individuals_useremail})
                             except:
                                 return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
@@ -708,12 +695,6 @@ class GetUserDetails(APIView):
                                 print(e)
                                 return Response({STATUS: ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
             
-                        # elif getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id}).user_type.user_type == SUPPLIER_S:  
-                        #     data = getattr(models,USERSIGNUP_TABLE).objects.get(**{UUID:uuid})
-                        #     if serializer := UserSignupSerializer(data):
-                        #         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
-                        #     else:
-                        #         return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({STATUS: ERROR, DATA: serializer.errors, DATA: "Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
 

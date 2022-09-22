@@ -1812,11 +1812,11 @@ def send_session_email(sender, instance, created, **kwargs):
     for student in instance.batch.students.all():
         html_path = SESSION_INVITATION
         fullname = f'{student.first_name} {student.last_name}'
-        if student.is_swedishdefault:
+        if student.usersignup.is_swedishdefault:
             subject = 'Inbjudan till utbildnings tillfälle(n)'
         else:
             subject = 'Invitation to join a course session'
-        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name,"swedish_default":student.is_swedishdefault}
+        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name,"swedish_default":student.usersignup.is_swedishdefault}
         email_html_template = get_template(html_path).render(context_data)
         email_from = settings.EMAIL_HOST_USER
         recipient_list = (student.email_id,)
