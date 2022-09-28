@@ -10,6 +10,7 @@ from rest_framework import status
 import json
 from .serializers import *
 from eddi_app import models
+from eddi_app import master_models 
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 from datetime import date
@@ -19,7 +20,7 @@ from django.utils.timezone import make_aware
 from django.contrib.auth.hashers import make_password, check_password
 from .supplier_views import *
 from uuid import uuid4
-import stripe # 2.68.0
+import stripe 
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from .notification import send_notification
@@ -580,7 +581,7 @@ class UserSignupView(APIView):
     def post(self, request):
         record_map = {}
         try:
-            user_type_id = getattr(models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
+            user_type_id = getattr(master_models,USER_TYPE_TABLE).objects.only(ID).get(**{USER_TYPE:request.POST.get(USER_TYPE,None)})
         except:
             return Response({STATUS:ERROR, DATA: "Something went wrong", DATA_SV:"Något gick fel"}, status=status.HTTP_400_BAD_REQUEST)
         user_device_token = request.POST.get(DEVICE_TOKEN)

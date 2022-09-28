@@ -1,10 +1,13 @@
 import json
+import os
+from django.core.mail import EmailMessage
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime, timedelta
 from .serializers import *
-from eddi_app import models
+from eddi_app import models 
+from eddi_app import master_models 
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
 import datetime
@@ -19,14 +22,16 @@ from dateutil.relativedelta import *
 from collections import deque
 from itertools import chain
 import cv2
-from .notification import send_notification, send_push_notification
+from .notification import send_push_notification
 from translate import Translator
 from django.db import connection
 import stripe
+from django.conf import settings
 stripe.api_key = settings.STRIPE_SECRET_KEY
 from itertools import chain
 from django.contrib.auth.models import User
-
+from django.template.loader import get_template
+from email.mime.image import MIMEImage
 
 @permission_classes([AllowAny])
 def get_user_email_by_token(request):
@@ -78,9 +83,9 @@ class AddCourseView(APIView):
                 sub_category_id = getattr(models,COURSE_SUBCATEGORY_TABLE).objects.only(ID).get(**{SUBCATEGORY_NAME:request.POST.get(SUBCATEGORY_NAME_ID,None)})
             except:
                 sub_category_id = None
-            course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,None)})
-            fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
-            course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
+            course_type_id = getattr(master_models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,None)})
+            fee_type_id = getattr(master_models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,None)})
+            course_level_id = getattr(master_models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,None)})
             
         except Exception as ex:
             return Response({STATUS:ERROR,"var":str(ex), DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
@@ -713,11 +718,11 @@ class GetCourseDetails(APIView):
             except Exception as e:
                 sub_category_id = None
     
-            course_type_id = getattr(models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
+            course_type_id = getattr(master_models,COURSE_TYPE_TABLE).objects.only(ID).get(**{TYPE_NAME:request.POST.get(COURSE_TYPE_ID,data.course_type.type_name)})
 
-            fee_type_id = getattr(models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
+            fee_type_id = getattr(master_models,FEE_TYPE_TABLE).objects.only(ID).get(**{FEE_TYPE_NAME :request.POST.get(FEE_TYPE_ID,data.fee_type.fee_type_name)})
 
-            course_level_id = getattr(models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
+            course_level_id = getattr(master_models,COURSE_LEVEL_TABLE).objects.only(ID).get(**{LEVEL_NAME : request.POST.get(COURSE_LEVEL_ID,data.course_level.level_name)})
         except Exception as e:
             return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -1133,18 +1138,21 @@ class SupplierDashboard_courseGraphView(APIView):
             week = date.strftime("%V")
             try:
                 course_offered = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).count()
-            except:
+            except Exception as e:
+                print(e)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 purchased = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,'payment_detail__status':'Success',"created_date_time__week":week,}).values_list("payment_detail__course__course_name", flat=True)
-            except:
+            except Exception as e:
+                print(e)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
             set1 = set(purchased)
             purchased_course = len(set1)
             try:
                 all_supplier_course = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__email_id":supplier_email,"created_date_time__week":week}).values_list(COURSE_NAME, flat=True)
-            except:
+            except Exception as e:
+                print(e)
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
             set_all = set(all_supplier_course)
@@ -1211,14 +1219,17 @@ class SupplierDashboard_earningGraphView(APIView):
                     past = today - timedelta(days = i)
                     data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__date":past}).values_list("payment_detail__amount", flat=True)
                     var = list(data)
-                    final = "{:.2f}".format(sum(var))
+                    final = float("{:.2f}".format(sum(var)))
+                    total_earning = 0.0
                     if var == "":
                         final = 0.0
                     week_list[past.strftime("%A")] = final
+                    total_earning += final
                 data = getattr(models,COURSE_ENROLL_TABLE).objects.filter(**{SUPPLIER_EMAIL:supplier_email,"created_date_time__week":week}).values_list("payment_detail__amount", flat=True)
-                total_earning = "{:.2f}".format(sum(list(data)))
+                # total_earning = "{:.2f}".format(sum(list(data)))
                 return Response({STATUS: SUCCESS,"total_earning": total_earning, DATA:week_list}, status=status.HTTP_200_OK)
-            except: 
+            except Exception as e:
+                print(e) 
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif time_period == MONTHLY:

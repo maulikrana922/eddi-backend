@@ -3,6 +3,13 @@ import stripe
 from .models import *
 from django.http import HttpResponse
 from rest_framework.views import csrf_exempt
+from django.conf import settings
+from django.template.loader import get_template
+from email.mime.image import MIMEImage
+import os
+from django.core.mail import EmailMessage
+from .notification import  send_push_notification
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class StripeWebhookActions:
@@ -57,8 +64,8 @@ class StripeWebhookActions:
             message = f"The payout has been credited to the bank account"
             message_sv = f"The payout has been credited to the bank account"
 
-            # data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
-            # receiver = [i.email_id for i in data]
+            data = getattr(models,USERSIGNUP_TABLE).objects.filter(user_type__user_type = "Admin")
+            receiver = [i.email_id for i in data]
             # send_notification(email_id, receiver, message)
             receiver_device_token = []
             device_data = UserDeviceToken.objects.filter(user_type=payout_obj.supplier_account.supplier)

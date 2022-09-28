@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import *
+from .master_models import *
 from  django.contrib.auth.models  import  Group 
 from .forms import CategoryForm
 
@@ -58,7 +59,6 @@ class HomePageCMSBanner_SVAdmin(admin.ModelAdmin):
 
 
 admin.site.register(HomePageCMSBanner_SV,HomePageCMSBanner_SVAdmin)
-
 admin.site.register(InvoiceVATCMS)
 
 class BlogDetailsAdmin(admin.ModelAdmin):
@@ -108,7 +108,6 @@ class HomePageCMSPartnersAdmin(admin.ModelAdmin):
 
     )
 
-
 admin.site.register(HomePageCMSPartners,HomePageCMSPartnersAdmin)
 
 class HomePageCMSPartners_SVAdmin(admin.ModelAdmin):
@@ -122,7 +121,6 @@ class HomePageCMSPartners_SVAdmin(admin.ModelAdmin):
         }),
 
     )
-
 
 admin.site.register(HomePageCMSPartners_SV,HomePageCMSPartners_SVAdmin)
 
@@ -367,7 +365,6 @@ class PrivacyPolicyCMS_SVAdmin(admin.ModelAdmin):
         })
     )
    
-
 admin.site.register(PrivacyPolicyCMS_SV, PrivacyPolicyCMS_SVAdmin)
 
 class PrivacyPolicyCMSSupplierAdmin(admin.ModelAdmin):
@@ -469,8 +466,9 @@ class TermsConditionCMSSupplier_SVAdmin(admin.ModelAdmin):
 admin.site.register(TermsConditionCMSSupplier_SV, TermsConditionCMSSupplier_SVAdmin)
 
 class UserSignupAdmin(admin.ModelAdmin):
-    exclude = ('is_first_time_login','created_by','modified_by','is_authenticated','is_active','is_deleted','is_resetpassword','status','is_approved','is_login_from')
+    exclude = ('is_first_time_login','created_by','modified_by','is_authenticated','is_deleted','is_resetpassword','status','is_approved','is_login_from')
     list_display = ('email_id','user_type','status')
+    search_fields = ['first_name','last_name','email_id']
 
     list_filter = ('user_type','status')
 

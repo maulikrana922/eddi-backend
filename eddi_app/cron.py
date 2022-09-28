@@ -1,4 +1,3 @@
-from cgitb import html
 import logging
 from eddi_app import models
 from eddi_app.constants.constants import *
@@ -9,7 +8,6 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import get_template
 import os
-from .notification import send_notification
 from django.template.loader import render_to_string
 from email.mime.image import MIMEImage
 from django.core import mail
