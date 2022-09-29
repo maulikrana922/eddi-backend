@@ -170,7 +170,15 @@ class PayByInvoice(APIView):
                             # course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})   
                             fullname = f'{instance.first_name}'
                             recipient_list = (email_id,)
+                            if instance.usersignup.is_swedishdefault:
+                                student_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                student_subject = 'Payment Invoice!!'
                             recipient_list1 = (course.supplier.email_id,)
+                            if course.supplier.is_swedishdefault:
+                                supplier_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                supplier_subject = 'Payment Invoice!!'
                             context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me"}
                             context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
                            
@@ -178,8 +186,17 @@ class PayByInvoice(APIView):
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
                             fullname = f'{instance.first_name}'
+                            if instance.usersignup.is_swedishdefault:
+                                student_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                student_subject = 'Payment Invoice!!'
                             recipient_list = (email_id,)
                             recipient_list1 = (event.admin_email,)
+                            admin_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:event.admin_email})
+                            if admin_data.is_swedishdefault:
+                                supplier_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                supplier_subject = 'Payment Invoice!!'
                             context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me"}
                             context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
                             
@@ -222,7 +239,17 @@ class PayByInvoice(APIView):
                         if request.POST.get("product_type") == "course":   
                             fullname = f'{instance.first_name}'
                             recipient_list = (email_id,)
+                            if instance.usersignup.is_swedishdefault:
+                                student_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                student_subject = 'Payment Invoice!!'
+
                             recipient_list1 = (course.supplier.email_id,)
+                            if course.supplier.is_swedishdefault:
+                                supplier_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                supplier_subject = 'Payment Invoice!!'
+                               
                             recipient_list2 = (request.POST.get("InvoiceEmail"),)
                             context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization"}
                             context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
@@ -233,10 +260,20 @@ class PayByInvoice(APIView):
                             fullname = f'{instance.first_name}'
                             recipient_list = (email_id,)
                             recipient_list1 = (event.admin_email,)
+                            if instance.usersignup.is_swedishdefault:
+                                student_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                student_subject = 'Payment Invoice!!'
+
+                            admin_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:event.admin_email})
+                            if admin_data.is_swedishdefault:
+                                supplier_subject = 'Faktura för din utbildning med Edd'
+                            else:
+                                supplier_subject = 'Payment Invoice!!'
                             recipient_list2 = (request.POST.get("InvoiceEmail"))
-                            context_data1 = {"fullname":fullname,"product":event.event_name,"user_type":"student","payment_method":"Pay By Organization"}
-                            context_data2 = {"fullname":event.admin_email,"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
-                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")}
+                            context_data1 = {"fullname":fullname,"product":event.event_name,"user_type":"student","payment_method":"Pay By Organization","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data2 = {"fullname":event.admin_email,"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":admin_data.is_swedishdefault} 
+                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":False}
                         
 
                         try:                               
@@ -257,8 +294,8 @@ class PayByInvoice(APIView):
                                     img.add_header('Content-Disposition', 'inline', filename=image)
                             except Exception as e:
                                 pass
-                            email_msg = EmailMessage('Payment Invoice!!',email_html_template1,email_from,recipient_list)
-                            email_msg1 = EmailMessage('Payment Invoice!!',email_html_template2,email_from,recipient_list1)
+                            email_msg = EmailMessage(student_subject,email_html_template1,email_from,recipient_list)
+                            email_msg1 = EmailMessage(supplier_subject,email_html_template2,email_from,recipient_list1)
                             email_msg2 = EmailMessage('Payment Invoice!!',email_html_template3,email_from,recipient_list2)
                             email_msg.content_subtype = 'html'
                             email_msg.attach(img)
