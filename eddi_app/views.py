@@ -179,8 +179,8 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 supplier_subject = 'Payment Invoice!!'
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me"}
-                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent"),"swedish_default":course.supplier.is_swedishdefault} 
                            
                              
                         else:
@@ -197,8 +197,8 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 supplier_subject = 'Payment Invoice!!'
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me"}
-                            context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent")} 
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent"),"swedish_default":admin_data.is_swedishdefault} 
                             
                         try:                               
                             html_path = "pay_by_invoice.html" 
@@ -251,9 +251,9 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Payment Invoice!!'
                                
                             recipient_list2 = (request.POST.get("InvoiceEmail"),)
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization"}
-                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")} 
-                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent")}
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":course.supplier.is_swedishdefault} 
+                            context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":False}
                           
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
