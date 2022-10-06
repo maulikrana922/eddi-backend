@@ -1788,7 +1788,8 @@ class SupplierProfileView(APIView):
                 profile_link = None
             except Exception as ex:
                 uuid = user_data.uuid
-                profile_link = STRIPE_PROFILE_LINK
+                profile_link = STRIPE_PROFILE_LINK+f'state={uuid}#/'
+                print(profile_link)
             try:
                 data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
             except Exception as e:
