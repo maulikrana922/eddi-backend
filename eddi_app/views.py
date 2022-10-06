@@ -460,6 +460,7 @@ class Save_stripe_info(APIView):
                 html_path = INVOICE_TO_USER
                 fullname = f'{instance.usersignup.first_name} {instance.usersignup.last_name}'
                 if instance.usersignup.is_swedishdefault:
+                    print(instance.usersignup.is_swedishdefault)
                     subject = 'Tack för din betalning!'
                     invoice_temp = get_template('stripe_invoice_sw.html')
                 else:
@@ -479,7 +480,8 @@ class Save_stripe_info(APIView):
                     filename = f'Invoice-{invoice_number}.pdf'
                     receipt_file = BytesIO(pdf)
                         
-                except:
+                except Exception as e:
+                    print(e,"edsadadada")
                     pass
                 record = {}
                 try: 
@@ -491,6 +493,7 @@ class Save_stripe_info(APIView):
                         "vat_charges" : vat_val,
                         "invoice_pdf" : File(receipt_file, filename) ,
                     }
+                    print(record)
                     getattr(models,"InvoiceData").objects.update_or_create(**record)
                 except Exception as e:
                     print(e)
@@ -1705,6 +1708,8 @@ class UserPaymentDetail_info(APIView):
             email_id = request.POST.get(EMAIL_ID)
             payment_mode = request.POST.get("payment_mode")
             user_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            
+            print(user_data)
             if request.POST.get(CARD_BRAND):
                 card_type = request.POST.get(CARD_BRAND)
             else:
@@ -1716,23 +1721,28 @@ class UserPaymentDetail_info(APIView):
                 amount = int(float(amount)) + (int(float(amount))*vat_val)/100
                 comm = getattr(models,"PlatformFeeCMS").objects.all().values_list("platform_fee", flat=True)
                 supplier_amount = int(float(amount)*100) - int(float(amount)*100*(int(comm[0])/100))
+                print("insideee")
                
             else:
                 amount = 0
                 supplier_amount = 0
+                print("elsesseee")
                 try:
-                    # instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})
+                    print(instance,"userr")
                     vat = getattr(models,"InvoiceVATCMS").objects.all().values_list("vat_value", flat=True)
                     vat_val = int(vat[0])
                     html_path = INVOICE_TO_USER
                     fullname = f'{user_data.first_name} {user_data.last_name}'
-                    if user_data.is_swedishdefault:
+                    print(instance.usersignup.is_swedishdefault)
+                    if instance.usersignup.is_swedishdefault:
+                        print("swedishhh")
                         subject = 'Tack för din betalning!'
                         invoice_temp = get_template('stripe_invoice_sw.html')
                     else:
                         subject = 'Payment received successfully'
                         invoice_temp = get_template('stripe_invoice.html')
-                    context_data = {'fullname':fullname, "course_name":course_name,"total":0.00,"swedish_default":user_data.is_swedishdefault}
+                    context_data = {'fullname':fullname, "course_name":course_name,"total":0.00,"swedish_default":instance.usersignup.is_swedishdefault}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (user_data.email_id,)
@@ -1746,7 +1756,8 @@ class UserPaymentDetail_info(APIView):
                         filename = f'Invoice-{invoice_number}.pdf'
                         receipt_file = BytesIO(pdf)
                             
-                    except:
+                    except Exception as ex:
+                        print(ex,"exxceptionn")
                         pass
                     record = {}
                     try: 
@@ -1834,14 +1845,14 @@ class UserPaymentDetail_info(APIView):
                     getattr(models,COURSE_ENROLL_TABLE).objects.update_or_create(**record_map)
                     try:
                         html_path = COURSE_ENROLL_HTML_TO_U
-                        fullname = f"{user_data.first_name} {user_data.last_name}"
-                        if user_data.is_swedishdefault:
+                        fullname = f"{instance.first_name}"
+                        if instance.usersignup.is_swedishdefault:
                             subject = 'Grattis till registering'
                             product = 'utbildningen'
                         else:
                             subject = 'Congratulations to course enrollment'
                             product = 'course'
-                        context_data = {'fullname':fullname, "email":user_data.email_id, "course_name":course_name,"swedish_default":user_data.is_swedishdefault,"product":product}
+                        context_data = {'fullname':fullname, "email":user_data.email_id, "course_name":course_name,"swedish_default":instance.usersignup.is_swedishdefault,"product":product}
                         email_html_template = get_template(html_path).render(context_data)
                         email_from = settings.EMAIL_HOST_USER
                         recipient_list = (email_id,)
@@ -1911,7 +1922,7 @@ class UserPaymentDetail_info(APIView):
                 return Response({MESSAGE: ERROR, DATA: "You already enrolled", DATA_SV:"Du är redan registrerad"}, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as e:
-            print(e)
+            print(e,"ex")
             return Response({STATUS:ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen","error":str(e)}, status=status.HTTP_400_BAD_REQUEST)
                 
 
