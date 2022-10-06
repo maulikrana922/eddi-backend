@@ -83,18 +83,26 @@ class PayByInvoice(APIView):
                 invoice_number = random.randrange(100000,999999)
                     
                 user_data = getattr(models, USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
-                amount = float(request.POST.get("price"))
+                # amount = float(request.POST.get("price"))
                 total_price = int(float(course.course_price)) + (int(float(course.course_price))*vat_val)/100
                 
                 try:
-                     
+                    # instance = getattr(models,USER_PROFILE_TABLE).objects.select_related().get(**{EMAIL_ID:email_id})   
                     if record_map["invoice_method"] == "PayByMe":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"),"personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")} 
-                        template = get_template('invoice_temp_pbi_me.html').render(context_data)
+                        context_data = {"student_name": request.POST.get("NameOfStudent"),"personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob")}
+                        if user_data.is_swedishdefault:
+                             template = get_template('invoice_temp_pbi_me_sw.html').render(context_data)
+                        else:
+                            template = get_template('invoice_temp_pbi_me.html').render(context_data)
+                       
                    
                     elif record_map["invoice_method"] == "PayByOrg":
-                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")} 
-                        template = get_template('invoice_temp_pbi_org.html').render(context_data)
+                        context_data = {"student_name": request.POST.get("NameOfStudent"), "personal_number":request.POST.get("PersonalNumber"),"street_number":request.POST.get("StreetNumber"), "reference":request.POST.get("Reference"), "zip_code":request.POST.get("Zip"), "contry":request.POST.get("City"), "city" : request.POST.get("City"),"student_email" : email_id,"price" : course.course_price, "payment_mode" : request.POST.get("payment_mode"), "product_type" : request.POST.get("product_type"),"course_name":course.course_name,"vat":vat_val,"total_fees":total_price,"invoice_number":invoice_number,"issue_date":date.today(),"course_name":course.course_name,"dob":request.POST.get("Dob"),"organization_name": request.POST.get("OrganizationName"),"organization_email":request.POST.get("InvoiceEmail")}
+                        if user_data.is_swedishdefault:
+                            template = get_template('invoice_temp_pbi_org_sw.html').render(context_data)
+                        else:
+                            template = get_template('invoice_temp_pbi_org.html').render(context_data)
+                       
                     
                     result = BytesIO()
                     pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
@@ -164,13 +172,13 @@ class PayByInvoice(APIView):
                    
                 try:
                    
-                    instance = getattr(models,USER_PROFILE_TABLE).objects.get(**{EMAIL_ID:email_id})    
+                   
                     if record_map["invoice_method"] == "PayByMe":
                         if request.POST.get("product_type") == "course":
                             # course = getattr(models,COURSEDETAILS_TABLE).objects.get(**{COURSE_NAME:request.POST.get(COURSE_NAME)})   
-                            fullname = f'{instance.first_name}'
+                            fullname = f'{user_data.first_name}'+f'{user_data.last_name}'
                             recipient_list = (email_id,)
-                            if instance.usersignup.is_swedishdefault:
+                            if user_data.is_swedishdefault:
                                 student_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 student_subject = 'Payment Invoice!!'
@@ -179,14 +187,14 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 supplier_subject = 'Payment Invoice!!'
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Me","swedish_default":user_data.is_swedishdefault}
                             context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent"),"swedish_default":course.supplier.is_swedishdefault} 
                            
                              
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
-                            fullname = f'{instance.first_name}'
-                            if instance.usersignup.is_swedishdefault:
+                            fullname = f'{user_data.first_name}'+f'{user_data.last_name}'
+                            if user_data.is_swedishdefault:
                                 student_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 student_subject = 'Payment Invoice!!'
@@ -197,7 +205,7 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 supplier_subject = 'Payment Invoice!!'
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":event.event_name,"payment_method":"Pay By Me","swedish_default":user_data.is_swedishdefault}
                             context_data2 = {"fullname":event.admin_name,"user_type":"supplier","product":event.event_name,"payment_method":"Pay By Me","student_name":request.POST.get("NameOfStudent"),"swedish_default":admin_data.is_swedishdefault} 
                             
                         try:                               
@@ -218,8 +226,8 @@ class PayByInvoice(APIView):
                                     img.add_header('Content-Disposition', 'inline', filename=image)
                             except Exception as e:
                                 pass
-                            email_msg = EmailMessage('Payment Invoice!!',email_html_template1,email_from,recipient_list)
-                            email_msg1 = EmailMessage('Payment Invoice!!',email_html_template2,email_from,recipient_list1)
+                            email_msg = EmailMessage(supplier_subject,email_html_template1,email_from,recipient_list)
+                            email_msg1 = EmailMessage(supplier_subject,email_html_template2,email_from,recipient_list1)
                             email_msg.content_subtype = 'html'
                             email_msg.attach(img)
                             email_msg1.content_subtype = 'html'
@@ -237,9 +245,9 @@ class PayByInvoice(APIView):
 
                     elif record_map["invoice_method"] == "PayByOrg":
                         if request.POST.get("product_type") == "course":   
-                            fullname = f'{instance.first_name}'
+                            fullname = f'{user_data.first_name}'+f'{user_data.last_name}'
                             recipient_list = (email_id,)
-                            if instance.usersignup.is_swedishdefault:
+                            if user_data.is_swedishdefault:
                                 student_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 student_subject = 'Payment Invoice!!'
@@ -251,16 +259,16 @@ class PayByInvoice(APIView):
                                 supplier_subject = 'Payment Invoice!!'
                                
                             recipient_list2 = (request.POST.get("InvoiceEmail"),)
-                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data1 = {"fullname":fullname,"user_type":"student","product":course.course_name,"payment_method":"Pay By Organization","swedish_default":user_data.is_swedishdefault}
                             context_data2 = {"fullname":course.supplier.first_name +" "+ course.supplier.last_name,"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":course.supplier.is_swedishdefault} 
                             context_data3 = {"fullname":request.POST.get("OrganizationName"),"user_type":"supplier","product":course.course_name,"payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":False}
                           
                         else:
                             event = getattr(models,EVENT_AD_TABLE).objects.get(**{EVENT_NAME:request.POST.get("event_name")})
-                            fullname = f'{instance.first_name}'
+                            fullname = f'{user_data.first_name}'+f'{user_data.last_name}'
                             recipient_list = (email_id,)
                             recipient_list1 = (event.admin_email,)
-                            if instance.usersignup.is_swedishdefault:
+                            if user_data.is_swedishdefault:
                                 student_subject = 'Faktura för din utbildning med Edd'
                             else:
                                 student_subject = 'Payment Invoice!!'
@@ -271,7 +279,7 @@ class PayByInvoice(APIView):
                             else:
                                 supplier_subject = 'Payment Invoice!!'
                             recipient_list2 = (request.POST.get("InvoiceEmail"))
-                            context_data1 = {"fullname":fullname,"product":event.event_name,"user_type":"student","payment_method":"Pay By Organization","swedish_default":instance.usersignup.is_swedishdefault}
+                            context_data1 = {"fullname":fullname,"product":event.event_name,"user_type":"student","payment_method":"Pay By Organization","swedish_default":user_data.is_swedishdefault}
                             context_data2 = {"fullname":event.admin_email,"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":admin_data.is_swedishdefault} 
                             context_data3 = {"fullname":request.POST.get("OrganizationName"),"product":event.event_name,"user_type":"supplier","payment_method":"Pay By Organization","student_name":request.POST.get("NameOfStudent"),"swedish_default":False}
                         
@@ -453,15 +461,17 @@ class Save_stripe_info(APIView):
                 fullname = f'{instance.usersignup.first_name} {instance.usersignup.last_name}'
                 if instance.usersignup.is_swedishdefault:
                     subject = 'Tack för din betalning!'
+                    invoice_temp = get_template('stripe_invoice_sw.html')
                 else:
                     subject = 'Payment received successfully'
+                    invoice_temp = get_template('stripe_invoice.html')
                 context_data = {'fullname':fullname, "course_name":course_name,"total": amount,"swedish_default":instance.usersignup.is_swedishdefault}
                 email_html_template = get_template(html_path).render(context_data)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = (instance.email_id,)
                 invoice_number = random.randrange(100000,999999)
                 context_data1 = {"student_name":fullname,"student_email":email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees": course.course_price, "vat":vat_val, "total_fees": amount, "product_type":"Course"}
-                template = get_template('stripe_invoice.html').render(context_data1)
+                template = invoice_temp.render(context_data1)
                 try: 
                     result = BytesIO()
                     pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
@@ -558,9 +568,12 @@ class Save_stripe_infoEvent(APIView):
                         if instance.usersignup.is_swedishdefault:
                             subject = 'Grattis till registering'
                             product = 'eventet'
+                            invoice_temp = get_template('stripe_invoice_sw.html')
                         else:
                             subject = 'Congratulations to event enrollment'
-                            product = 'course'
+                            product = 'event'
+                            invoice_temp = get_template('stripe_invoice.html')
+
                         fullname = f'{instance.first_name} {instance.last_name}'
                         context_data = {'fullname':fullname, "course_name":event_name,"product":product}
                         email_html_template = get_template(html_path).render(context_data)
@@ -568,7 +581,7 @@ class Save_stripe_infoEvent(APIView):
                         recipient_list = (instance.email_id,)
                         invoice_number = random.randrange(100000,999999)
                         context_data1 = {"student_name":fullname,"student_email":instance.email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":event_name,"course_fees": amount, "vat":vat_val, "total_fees":int(amount) + (int(amount)*vat_val)/100,"product_type":"Event"}
-                        template = get_template('stripe_invoice.html').render(context_data1)
+                        template = invoice_temp.render(context_data1)
                         try: 
                             result = BytesIO()
                             pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)
@@ -1550,7 +1563,7 @@ class ContactFormView_sv(APIView):
             record_map[CREATED_AT] = make_aware(datetime.datetime.now())
             record_map[CREATED_BY] = request.POST.get(EMAIL_ID)
             try:
-                getattr(models,CONTACT_FORM_TABLE).objects.update_or_create(**record_map)
+                getattr(models,CONTACT_FORM_TABLE_SV).objects.update_or_create(**record_map)
             except:
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1715,15 +1728,17 @@ class UserPaymentDetail_info(APIView):
                     fullname = f'{user_data.first_name} {user_data.last_name}'
                     if user_data.is_swedishdefault:
                         subject = 'Tack för din betalning!'
+                        invoice_temp = get_template('stripe_invoice_sw.html')
                     else:
                         subject = 'Payment received successfully'
+                        invoice_temp = get_template('stripe_invoice.html')
                     context_data = {'fullname':fullname, "course_name":course_name,"total":0.00,"swedish_default":user_data.is_swedishdefault}
                     email_html_template = get_template(html_path).render(context_data)
                     email_from = settings.EMAIL_HOST_USER
                     recipient_list = (user_data.email_id,)
                     invoice_number = random.randrange(100000,999999)
                     context_data1 = {"student_name":fullname,"student_email":email_id,"invoice_number":invoice_number,"user_address":"User Address","issue_date":date.today(),"course_name":course_name,"course_fees":0.00, "vat":vat_val, "total_fees":0.00 , "product_type":"Course"}
-                    template = get_template('stripe_invoice.html').render(context_data1)
+                    template = invoice_temp.render(context_data1)
                     try: 
                         result = BytesIO()
                         pdf = pisa.pisaDocument(BytesIO(template.encode("UTF-8")), result)#, link_callback=fetch_resources)

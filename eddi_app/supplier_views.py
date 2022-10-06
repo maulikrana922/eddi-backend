@@ -593,7 +593,7 @@ class GetCourseDetails(APIView):
 
                     except:
                         return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
-                    if serializer := CourseDetailsSerializer(data_s,many=True,fields=('uuid','course_name','course_image','course_category','course_subcategory','supplier','status','is_approved')):
+                    if serializer := CourseDetailsSerializer(data_s,many=True,fields=('uuid','course_name','course_image','course_category','course_subcategory','supplier','status','is_approved','fee_type','created_date_time')):
                         return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
 
                 elif getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id, IS_DELETED:False}).user_type.user_type == ADMIN_S:
@@ -1035,7 +1035,7 @@ class AdminDashboardSupplierView(APIView):
         admin_email = get_user_email_by_token(request)
         data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:admin_email})
         if data.user_type.user_type == "Admin":
-            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1,IS_DELETED:False})
+            course_supplier = getattr(models,COURSEDETAILS_TABLE).objects.filter(**{"supplier__user_type_id":1,IS_DELETED:False}).order_by("-created_date_time")
             if serializer :=  CourseDetailsSerializer ( course_supplier, many = True,fields=('id','uuid','course_name','status','created_date_time')):
                 return Response({STATUS: SUCCESS,"suppliers": serializer.data,},status=status.HTTP_200_OK)
         else:
@@ -1781,14 +1781,30 @@ class SupplierProfileView(APIView):
     
     def get(self, request):
         email_id = get_user_email_by_token(request)
-        try:
-            data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
-        except Exception as e:
-            return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
-        if serializer := SupplierProfileSerializer(data):
-            return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+        user_data = getattr(models,USERSIGNUP_TABLE).objects.select_related('user_type').get(**{EMAIL_ID:email_id})
+        if user_data.user_type.user_type == SUPPLIER_S:
+            try:
+                supplier_acc = getattr(models,"SupplierAccountDetail").objects.get(supplier=user_data)
+            except Exception as ex:
+                uuid = user_data.uuid
+                profile_link = STRIPE_PROFILE_LINK
+            try:
+                data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+            except Exception as e:
+                return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer := SupplierProfileSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data,'profile_link':profile_link}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                data = getattr(models,SUPPLIER_PROFILE_TABLE).objects.get(**{SUPPLIER_EMAIL:email_id})
+            except Exception as e:
+                return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
+            if serializer := SupplierProfileSerializer(data):
+                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 

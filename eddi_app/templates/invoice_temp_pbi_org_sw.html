@@ -84,7 +84,7 @@
       </tr>
       <tr>
         <td style="font-weight: bold; font-size: 18px; width: 100%">
-          Invoice Recipient
+          Fakturamottagare
         </td>
       </tr>
       <tr>
@@ -102,17 +102,19 @@
             "
           >
             <tr>
-              <td width="100%" align="left" style="width: 100%">
+              <td width="50%" align="left" style="width: 50%">
                 <b>Student Name :</b> {{student_name}}
+              </td>
+              <td width="50%" align="left" style="width: 50%">
+                <b>Organization Name :</b> {{organization_name}}
               </td>
             </tr>
             <tr>
-              <td
-                width="100%"
-                align="left"
-                style="font-size: 14px; width: 100%"
-              >
+              <td width="50%" align="left" style="font-size: 14px; width: 50%">
                 <b>Student Email :</b> {{student_email}}
+              </td>
+              <td width="50%" align="left" style="font-size: 14px; width: 50%">
+                <b>organization Email :</b> {{organization_email}}
               </td>
             </tr>
           </table>
@@ -164,42 +166,6 @@
       </tr>
       <tr>
         <td style="height: 15px"></td>
-      </tr>
-      <tr>
-        <td>
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td width="50%" align="left">
-                <table width="100%" align="left" style="font-size: 12px">
-                  <tr>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      <strong>Vat Specification</strong>
-                    </td>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      {{vat}}%
-                    </td>
-                  </tr>
-                </table>
-              </td>
-              <td width="50%" align="right">
-                <table width="100%" align="left" style="font-size: 12px">
-                  <tr>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      <strong>Total Amount</strong>
-                    </td>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      {{total_fees}} SEK
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-
-      <tr>
-        <td style="height: 20px"></td>
       </tr>
       <tr>
         <td>
