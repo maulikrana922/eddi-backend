@@ -1502,9 +1502,9 @@ class GetBlogDetails(APIView):
 class GetBlogDetails_sv(APIView):
     def get(self, request,uuid = None):
         if uuid:
-            data = getattr(models,"BlogDetails_SV").objects.get(**{UUID:uuid})
+            data = getattr(models,BLOGDETAILS_TABLE_SV).objects.get(**{UUID:uuid})
             try:
-                related_blog = list(getattr(models,"BlogDetails_SV").objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
+                related_blog = list(getattr(models,BLOGDETAILS_TABLE_SV).objects.filter(**{BLOG_CATEGORY_ID:data.blog_category.id}).order_by('-created_date_time').exclude(id = data.id).values())
                 for i in related_blog:
                     for key,value in i.items():
                         if key == 'blog_image':
@@ -1518,7 +1518,7 @@ class GetBlogDetails_sv(APIView):
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
             
-            data = getattr(models,BLOGDETAILS_TABLE).objects.all().order_by("-created_date_time")
+            data = getattr(models,BLOGDETAILS_TABLE_SV).objects.all().order_by("-created_date_time")
             if serializer := BlogDetailsSerializer_sv(data, many=True):
                 return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
             else:
