@@ -1744,6 +1744,13 @@ class SupplierProfileView(APIView):
         except:
             data= None
         if data is not None:
+            supplier_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+            if request.POST.get(IS_SWEDISHDEFAULT):
+                lan = True if request.POST.get(IS_SWEDISHDEFAULT)=='true' else False
+            else:
+                lan = supplier_data.is_swedishdefault
+            supplier_data.is_swedishdefault = lan
+            supplier_data.save()
             try:
                 record_map = {
                     SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,data.supplier_name),
@@ -1763,6 +1770,13 @@ class SupplierProfileView(APIView):
                 return Response({STATUS: ERROR, DATA: "Something went wrong please try again", DATA_SV:"Något gick fel försök igen"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
+                supplier_data = getattr(models,USERSIGNUP_TABLE).objects.get(**{EMAIL_ID:email_id})
+                if request.POST.get(IS_SWEDISHDEFAULT):
+                    lan = True if request.POST.get(IS_SWEDISHDEFAULT)=='true' else False
+                else:
+                    lan = supplier_data.is_swedishdefault
+                supplier_data.is_swedishdefault = lan
+                supplier_data.save()
                 record_map = {
                     SUPPLIER_NAME : request.POST.get(SUPPLIER_NAME,None),
                     SUPPLIER_EMAIL : email_id,
@@ -1795,7 +1809,7 @@ class SupplierProfileView(APIView):
             except Exception as e:
                 return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer := SupplierProfileSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data,'profile_link':profile_link}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data,'profile_link':profile_link,'is_swedishdefault':user_data.is_swedishdefault}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -1804,7 +1818,7 @@ class SupplierProfileView(APIView):
             except Exception as e:
                 return Response({STATUS: ERROR, DATA:"Data not found", DATA_SV:"Ingen information tillgänglig"}, status=status.HTTP_400_BAD_REQUEST)
             if serializer := SupplierProfileSerializer(data):
-                return Response({STATUS: SUCCESS, DATA: serializer.data}, status=status.HTTP_200_OK)
+                return Response({STATUS: SUCCESS, DATA: serializer.data,'is_swedishdefault':user_data.is_swedishdefault}, status=status.HTTP_200_OK)
             else:
                 return Response({STATUS: ERROR, DATA: serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -2109,6 +2123,32 @@ class GetSessionView(APIView):
         for key,value in record_map.items():
             setattr(data,key,value)
         data.save()
+        try:
+            for student in data.batch.students.all():
+                html_path = SESSION_DELETION
+                fullname = f'{student.first_name} {student.last_name}'
+                if student.usersignup.is_swedishdefault:
+                    subject = 'Session Inställd'
+                else:
+                    subject = 'Session Cancelled'
+                context_data = {'fullname':fullname, "email":student.email_id,"session_name":data.session_name,"swedish_default":student.usersignup.is_swedishdefault}
+                email_html_template = get_template(html_path).render(context_data)
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = (student.email_id,)
+                email_msg = EmailMessage(subject,email_html_template,email_from,recipient_list)
+                email_msg.content_subtype = 'html'
+                path = 'eddi_app'
+                img_dir = 'static'
+                image = 'Logo.png'
+                file_path = os.path.join(path,img_dir,image)
+                with open(file_path,'rb') as f:
+                    img = MIMEImage(f.read())
+                    img.add_header('Content-ID', '<{name}>'.format(name=image))
+                    img.add_header('Content-Disposition', 'inline', filename=image)
+                email_msg.attach(img)
+                email_msg.send(fail_silently=False)
+        except:
+            pass
         return Response({STATUS: SUCCESS, DATA: "Session deleted successfully", DATA_SV:"Sessionen har raderats"}, status=status.HTTP_200_OK)
 
 @permission_classes([AllowAny])

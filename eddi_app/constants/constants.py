@@ -71,6 +71,7 @@ INACTIVE_COURSE = "inactive_course.html"
 EVENT_ENROLL_HTML = "event_enroll.html"
 COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 SESSION_INVITATION = "session_invitation.html"
+SESSION_DELETION = "session_deletion.html"
 INVOICE_HTML = "invoice.html"
 INVOICE_TO_USER = 'invoice-to-user.html'
 VERIFY_EMAIL = 'verify_email.html'
