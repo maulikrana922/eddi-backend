@@ -6,7 +6,7 @@ ENV = env('DJANGO_ENV')
 if ENV == 'development':
     FRONT_URL = 'https://eddi-frontend.testyourapp.online/'
     SUPPLIER_URL = 'https://eddi-supplier.testyourapp.online/#/'
-    STRIPE_PROFILE_LINK = f'https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&state={{uuid}}#/'
+    STRIPE_PROFILE_LINK = 'https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&state={uuid}#/'
 else:
     FRONT_URL = 'https://eddistaging-frontend.testyourapp.online/'
     SUPPLIER_URL = 'https://eddistaging-supplier.testyourapp.online/#/'

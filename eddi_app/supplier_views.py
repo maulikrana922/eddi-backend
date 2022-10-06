@@ -1785,6 +1785,7 @@ class SupplierProfileView(APIView):
         if user_data.user_type.user_type == SUPPLIER_S:
             try:
                 supplier_acc = getattr(models,"SupplierAccountDetail").objects.get(supplier=user_data)
+                profile_link = None
             except Exception as ex:
                 uuid = user_data.uuid
                 profile_link = STRIPE_PROFILE_LINK
