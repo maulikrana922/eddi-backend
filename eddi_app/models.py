@@ -101,7 +101,7 @@ class UserSignup(models.Model):
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
     is_active = models.BooleanField(default=False, verbose_name=_('Is_active'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('Is_deleted'))
-    is_swedishdefault= models.BooleanField(default=False, verbose_name=_('Is_swedishdefault'))
+    is_swedishdefault= models.BooleanField(default=True, verbose_name=_('Is_swedishdefault'))
     is_resetpassword = models.BooleanField(default=True, verbose_name=_('Is_resetpassword'))
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
@@ -129,6 +129,8 @@ class NonBuiltInUserToken(Token):
 class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.CharField(max_length=150,verbose_name=_('Category Name'),blank=True,null=True)
+    # category_name_en = models.CharField(max_length=150,verbose_name=_('Category Name English'),blank=True,null=True)
+    # category_name_sv = models.CharField(max_length=150,verbose_name=_('Category Name Swedish'),blank=True,null=True)
     category_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
 
     category_overview = models.CharField(max_length=150,verbose_name=_('Category Overview'),blank=True,null=True)
@@ -162,6 +164,8 @@ class CourseSubCategoryDetails(models.Model):
     category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Sub Category Name'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('Supplier'),blank=True,limit_choices_to={'user_type_id': 1})
     subcategory_name = models.CharField(max_length=150,verbose_name=_('Sub Category Name'),blank=True,null=True)
+    # subcategory_name_en = models.CharField(max_length=150,verbose_name=_('Sub Category Name English'),blank=True,null=True)
+    # subcategory_name_sv = models.CharField(max_length=150,verbose_name=_('Sub Category Name Swedish'),blank=True,null=True)
     subcategory_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
