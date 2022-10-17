@@ -390,8 +390,8 @@ if env('DJANGO_ENV') == 'production':
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
 
     DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
-    STATICFILES_STORAGE = 'eddi.backend.s3boto3.S3StaticStorage'
-    STATICFILES_STORAGE = 'eddi.backend.s3boto3.S3ManifestStaticStorage'
+    STATICFILES_STORAGE = 'eddi_backend.s3boto3.S3StaticStorage'
+    STATICFILES_STORAGE = 'eddi_backend.s3boto3.S3ManifestStaticStorage'
 
 else:
     STATIC_URL = '/static/'
