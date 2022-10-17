@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rosetta',
     'debug_toolbar',
+    'storages'
 ]
 
 
@@ -231,8 +232,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    "hide_models": production_models,
-    # "hide_models": local_models,
+    # "hide_models": production_models,
+    "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 
@@ -363,7 +364,7 @@ CMS_TEMPLATES = (
 STATIC_URL = '/static/'
 
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+# MEDIA_URL = '/media/'
 
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
@@ -389,3 +390,24 @@ CRONJOBS = [
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance'),
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:8000',
+    }
+}
+
+AWS_ACCESS_KEY_ID = 'AKIA4P73HLGU2NK2AVOS'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'eddi-dev'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+# AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_DEFAULT_ACL = None
+PUBLIC_MEDIA_LOCATION = 'media'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+
+DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
