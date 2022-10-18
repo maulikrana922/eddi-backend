@@ -1,0 +1,254 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+
+  <body data-new-gr-c-s-check-loaded="14.1058.0" data-gr-ext-installed="">
+    <table
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      style="font-family: Arial, Helvetica, sans-serif; font-size: 12px"
+    >
+      <tr>
+        <td width="100%" style="height: 5px"></td>
+      </tr>
+      <tr>
+        <td width="100%">
+          <table width="100%">
+            <tr>
+              <td width="50%" align="left">
+                <table style="font-size: 12px">
+                  <tr>
+                    <td style="font-weight: bold; font-size: 22px">Eddie AB</td>
+                  </tr>
+                  <tr>
+                    <td>1234 State St Sweden, 12345</td>
+                  </tr>
+                </table>
+              </td>
+              <td width="50%" align="right">
+                <table width="100%" style="font-size: 12px">
+                  <tr>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      <strong>Invoice Number</strong>
+                    </td>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      #{{invoice_number}}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      <strong>Date</strong>
+                    </td>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      {{issue_date}}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 20px"></td>
+      </tr>
+      <tr>
+        <td width="100%" style="width: 100%">
+          <table
+            width="100%"
+            style="
+              width: 100%;
+              border: 1px #eee solid;
+              font-size: 14px;
+              padding: 10px;
+            "
+          >
+            <tr>
+              <td width="100%" align="left" style="width: 100%">
+                <b>Student Name :</b> {{student_name}}
+              </td>
+            </tr>
+            <tr>
+              <td
+                width="100%"
+                align="left"
+                style="font-size: 14px; width: 100%"
+              >
+                <b>Student Email :</b> {{student_email}}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 25px"></td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; font-size: 18px; width: 100%">
+          Order Summary
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 10px"></td>
+      </tr>
+      <tr>
+        <td width="100%" align="left">
+          <table
+            width="100%"
+            style="
+              width: 100%;
+              border: 1px #eee solid;
+              font-size: 14px;
+              padding: 10px;
+            "
+          >
+            <tr>
+              <td width="100%" align="left" style="width: 100%">
+                <b>Name of {{product_type}} : </b>  {{course_name}}
+              </td>
+            </tr>
+            <tr>
+              <td width="100%" align="left" style="width: 100%">
+                <b>Amount of {{product_type}} : </b>  {{price}} SEK
+              </td>
+            </tr>
+            <!-- <tr>
+              <td
+                width="100%"
+                align="left"
+                style="font-size: 14px; width: 100%"
+              >
+               
+              </td>
+            </tr> -->
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 15px"></td>
+      </tr>
+      <tr>
+        <td>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td width="50%" align="left">
+                <table width="100%" align="left" style="font-size: 12px">
+                  <tr>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      <strong>Vat Specification</strong>
+                    </td>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      {{vat}}%
+                    </td>
+                  </tr>
+                </table>
+              </td>
+              <td width="50%" align="right">
+                <table width="100%" align="left" style="font-size: 12px">
+                  <tr>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      <strong>Total Amount</strong>
+                    </td>
+                    <td style="border: 1px #eee solid; padding: 10px 8px">
+                      {{total_fees}} SEK
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="height: 20px"></td>
+      </tr>
+      <tr>
+        <td>
+          <table
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="border: 1px #eee solid; padding: 10px"
+          >
+            <td width="25%" align="left">
+              <table width="100%" style="font-size: 12px">
+                <tr>
+                  <td style="font-weight: bold; font-size: 16px">Eddie AB</td>
+                </tr>
+                <tr>
+                  <td>1234 State St Sweden, 12345</td>
+                </tr>
+              </table>
+            </td>
+            <td width="50%" align="center">
+              <table width="100%" style="font-size: 12px; text-align: center">
+                <tr>
+                  <td style="font-weight: bold; font-size: 16px">
+                    Eddie Customer Service
+                  </td>
+                </tr>
+                <tr>
+                  <td>test@gmail.com</td>
+                </tr>
+                <tr>
+                  <td>Phone:076-1112312</td>
+                </tr>
+              </table>
+            </td>
+            <td width="25%" align="left">
+              <table width="100%" style="font-size: 12px">
+                <tr>
+                  <td style="font-weight: bold; font-size: 16px">
+                    Bank Account
+                  </td>
+                </tr>
+                <tr>
+                  <td>XXXXXXXXXX</td>
+                </tr>
+              </table>
+            </td>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 10px"></td>
+      </tr>
+      <tr>
+        <td style="height: 15px"></td>
+      </tr>
+      <tr>
+        <td width="100%" style="font-size: 12px; text-align: center">
+          <table align="center">
+            <tr>
+              <td style="text-align: center">
+                Registerd fot vat : XXXXXXXXXXXXXXX
+              </td>
+            </tr>
+            <tr>
+              <td style="text-align: center">
+                Eddi Ab Organization Number : XXXXXXXXXX
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

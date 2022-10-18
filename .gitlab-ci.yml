@@ -1,0 +1,16 @@
+deploy-job:      
+  stage: deploy  
+  tags:
+    - "eddi-backend"
+  variables:
+    BUILD_DIR: "/var/www/html/builds/Sh1xT3gR/0/e3673di/eddi-backend/"
+    TARGET_DIR: "/var/www/html/eddi-stage-backend"
+  script:
+    - echo "Deploying application..."
+    - rsync -P -av $BUILD_DIR/* $TARGET_DIR
+    - cd $TARGET_DIR
+    - pip3 install -r requirements.txt
+    - echo "Application successfully deployed."
+    - rm -rf /home/admin/n5qVYxG8/
+  only:
+    - staging

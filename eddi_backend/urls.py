@@ -17,8 +17,36 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from rest_framework.schemas import get_schema_view
+from django.views.generic import TemplateView
+from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('eddi_app.urls'))
+   
+    path('',include('eddi_app.urls')),
+    path('rosetta/',include('rosetta.urls')),
+    path("i18n/", include("django.conf.urls.i18n")),
+    path('openapi/', get_schema_view(
+        title="Eddi Api Service",
+        description="API developers hpoing to use our service"
+    ), name='openapi-schema'),
+    path('docs/7e3f7124d67d0b6471842d311388b818/', TemplateView.as_view(
+        template_name='documentation.html',
+        extra_context={'schema_url':'openapi-schema'}
+    ), name ='swagger-ui'),
+    path('__debug__/', include('debug_toolbar.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns +=staticfiles_urlpatterns()
+
+urlpatterns += i18n_patterns(
+    path('admin/', admin.site.urls),
+
+)
+
+
+
+STRIPE_PUBLIC_KEY = 'pk_test_51LT5qWF219DjFxE14L3x0UwNEmGNMDfnTl01wQVgS7ORaVSAl66BHGEoRy8ciUs4TA2FMMIAEp6L7HQtwkaUdfvj00MfVoPYJ7'
+STRIPE_SECRET_KEY = 'sk_test_51LT5qWF219DjFxE1R3LS85B4AMsM1ZJLbogPB0Q3vUfluAa8DRbcqzsWjhZJCm52FQi6jxw4h6vq1N3iRKgtTP4s00UZq8ynLz'
+STRIPE_WEBHOOK_SECRET = ""
