@@ -1,88 +1,14 @@
 from django.db import models
 import uuid
-from django.conf import settings
-from django.core.mail import EmailMessage
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from email.mime.image import MIMEImage
-import os
-import string
 from eddi_app.constants.constants import *
 from eddi_app.constants.table_name import *
-import random
-from django.template.loader import get_template
 from ckeditor.fields import RichTextField
-from eddi_app.constants.constants import *
-from django.contrib.auth.hashers import make_password
 from django.db.models.signals import m2m_changed
 from django.core.exceptions import ValidationError
-from django.conf import settings
 from rest_framework.authtoken.models import Token
-from django.core import mail
-from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
 from django.utils.translation import gettext_lazy as _
-from .notification import send_notification, send_push_notification
-from translate import Translator
+from .master_models import *
 
-
-
-
-otp = ''
-
-
-# Create your models here.
-def PasswordView():
-    global otp
-    context = None
-    digits = f"{str(string.ascii_letters)}{str(string.digits)}!@#$%^&*()"
-    otp = "".join(random.choices(digits, k=6))
-    print(otp)
-    return otp
-
-
-class utl_status(models.Model):
-    value = models.CharField(max_length=60,blank=True, verbose_name=_("Value"))
-
-    created_by = models.CharField(max_length=100,blank=True)
-    created_date_time = models.DateTimeField(auto_now_add=True)
-    modified_by = models.CharField(max_length=100,blank=True)
-    modified_date_time = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = _("Status Table")
-
-
-    def __str__(self):
-        return str(self.value)
-
-class UserType(models.Model):
-    user_type = models.CharField(max_length=60,blank=True, verbose_name=_("User Type"))
-
-    created_by = models.CharField(max_length=100,blank=True)
-    created_date_time = models.DateTimeField(auto_now_add=True)
-    modified_by = models.CharField(max_length=100,blank=True)
-    modified_date_time = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = _("User Type Table")
-
-    def __str__(self):
-        return str(self.user_type)
-
-
-class approval_status(models.Model):
-    value = models.CharField(max_length=60,blank=True, verbose_name=_("Value"))
-    created_by = models.CharField(max_length=100,blank=True)
-    created_date_time = models.DateTimeField(auto_now_add=True)
-    modified_by = models.CharField(max_length=100,blank=True)
-    modified_date_time = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = _("Approval Status Table")
-
-    def __str__(self):
-        return str(self.value)
 
 class UserSignup(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True, verbose_name=_("UUID"))
@@ -103,6 +29,7 @@ class UserSignup(models.Model):
     is_login_from = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Is Login From'))
     is_active = models.BooleanField(default=False, verbose_name=_('Is_active'))
     is_deleted = models.BooleanField(default=False, verbose_name=_('Is_deleted'))
+    is_swedishdefault= models.BooleanField(default=True, verbose_name=_('Is_swedishdefault'))
     is_resetpassword = models.BooleanField(default=True, verbose_name=_('Is_resetpassword'))
     is_approved = models.ForeignKey(approval_status,on_delete=models.CASCADE,verbose_name=_('is_approved'),blank=True,null=True)
     status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True,default=1)
@@ -112,10 +39,6 @@ class UserSignup(models.Model):
     
     def __str__(self):
         return self.email_id
-    
-
-
-
     
 class NonBuiltInUserToken(Token):
     """
@@ -131,12 +54,11 @@ class NonBuiltInUserToken(Token):
     class Meta:
         verbose_name_plural = _('Non BuiltIn User Token')
 
-
-
-
 class CourseCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.CharField(max_length=150,verbose_name=_('Category Name'),blank=True,null=True)
+    # category_name_en = models.CharField(max_length=150,verbose_name=_('Category Name English'),blank=True,null=True)
+    # category_name_sv = models.CharField(max_length=150,verbose_name=_('Category Name Swedish'),blank=True,null=True)
     category_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
 
     category_overview = models.CharField(max_length=150,verbose_name=_('Category Overview'),blank=True,null=True)
@@ -165,13 +87,13 @@ class CourseCategoryDetails(models.Model):
     def __str__(self):
         return self.category_name
     
-
-
 class CourseSubCategoryDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     category_name = models.ForeignKey(CourseCategoryDetails,on_delete=models.CASCADE,verbose_name=_('Sub Category Name'),blank=True,null=True)
     supplier = models.ForeignKey(UserSignup,on_delete=models.CASCADE,null=True,verbose_name=_('Supplier'),blank=True,limit_choices_to={'user_type_id': 1})
     subcategory_name = models.CharField(max_length=150,verbose_name=_('Sub Category Name'),blank=True,null=True)
+    # subcategory_name_en = models.CharField(max_length=150,verbose_name=_('Sub Category Name English'),blank=True,null=True)
+    # subcategory_name_sv = models.CharField(max_length=150,verbose_name=_('Sub Category Name Swedish'),blank=True,null=True)
     subcategory_image = models.FileField(upload_to='category_image/',verbose_name=_('Category Image'),blank=True,null=True)
     created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
     created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
@@ -186,56 +108,6 @@ class CourseSubCategoryDetails(models.Model):
 
     def __str__(self):
         return self.subcategory_name
-
-
-class CourseType(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    type_name = models.CharField(max_length=150,verbose_name=_('Course Type Name'),blank=True,null=True)
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
-
-    class Meta:
-        verbose_name_plural = _("Course Type Table")
-
-    def __str__(self):
-        return self.type_name
-    
-
-class CourseLevel(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    level_name = models.CharField(max_length=150,verbose_name=_('Course Level Name'),blank=True,null=True)
-
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
-
-    class Meta:
-        verbose_name_plural = _("Course Level Table")
-
-class FeeType(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
-    fee_type_name = models.CharField(max_length=150,verbose_name=_('Fee Type Name'),blank=True,null=True)
-
-    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
-    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
-    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
-    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
-
-    status = models.ForeignKey(utl_status,on_delete=models.CASCADE,verbose_name=_('Status'),blank=True,null=True)
-
-    class Meta:
-        verbose_name_plural = _("Fee Type Table")
-
-    def __str__(self):
-        return self.fee_type_name
-    
 
 class InvoiceVATCMS(models.Model):
     vat_value = models.IntegerField(blank=True,null=True,verbose_name=_("VAT Value Percentage"))
@@ -256,6 +128,40 @@ class PlatformFeeCMS(models.Model):
 
     class Meta:
         verbose_name_plural = _("Platform Fee Table")
+
+class EddiLabsCMS(models.Model):
+    title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Title'))
+    banner = models.ImageField(upload_to = 'eddilabs_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Link'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name_plural = _("Eddi Labs Table")
+
+    def __str__(self):
+        return self.title
+
+class EddiLabsCMS_SV(models.Model):
+    title = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Title'))
+    banner = models.ImageField(upload_to = 'eddilabs_banner/', verbose_name=_("Banner Image"))
+    description = RichTextField(verbose_name = _('Description'),blank=True)
+    button_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Text'))
+    button_link = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button Link'))
+    created_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Created By'))
+    created_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Created Date Time'))
+    modified_by = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Modified By'))
+    modified_date_time = models.DateTimeField(auto_now_add=True,verbose_name=_('Modified Date Time'))
+
+    class Meta:
+        verbose_name_plural = _("Eddi Labs Table SV")
+
+    def __str__(self):
+        return self.title
 
 class SupplierOrganizationProfile(models.Model):
     # Organization Information
@@ -294,7 +200,6 @@ class SupplierOrganizationProfile(models.Model):
     def __str__(self):
         return self.supplier_email
     
-
 
 class CourseDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -341,67 +246,6 @@ class CourseDetails(models.Model):
     def __str__(self):
         return str(self.course_name)
     
-@receiver(post_save, sender=CourseDetails)
-def add_organization_domain(sender, instance, created, **kwargs):
-    if created and instance.course_for_organization == True:
-        try:
-            test_str = instance.supplier.email_id
-            res = test_str.split('@')[1]
-            # print(res)
-            CourseDetails.objects.filter(uuid = instance.uuid).update(organization_domain = str(res))
-        except Exception as e:
-            print(e,"essssss")
-
-@receiver(post_save, sender=CourseDetails)
-def bulk_email(sender, instance, created, **kwargs):
-    if instance.course_for_organization == True and instance.is_post == True:
-        connection = mail.get_connection()
-        if instance.target_users != None:
-            try:
-                reciever_list = instance.target_users.split(",")
-            except Exception as ex:
-                reciever_list = instance.target_users.split()
-        else:
-            reciever_list = []
-        try:
-            path = 'eddi_app'
-            img_dir = 'static'
-            image = 'Logo.png'
-            file_path = os.path.join(path,img_dir,image)
-            with open(file_path,'rb') as f:
-                img = MIMEImage(f.read())
-                img.add_header('Content-ID', '<{name}>'.format(name=image))
-                img.add_header('Content-Disposition', 'inline', filename=image)
-            html_path = 'target_users_organization.html'
-            connection.open()
-            email_from = settings.EMAIL_HOST_USER
-            for i in reciever_list:
-                try:
-                    user_detail = UserSignup.objects.get(email_id = i)
-                    username = user_detail.first_name
-                except Exception as ex:
-                    username = None
-                try:
-                    organization_data = instance.supplier_organization.organizational_name
-                except Exception as ex:
-                    print(ex,"exxx")
-                    organization_data = None
-                context_data = {'course_name':instance.course_name, "user_name" : username, "supplier_name" : instance.supplier.first_name, "organization_name" : organization_data, "url":FRONT_URL+f"view-course-details/{instance.uuid}/"  }
-                html_content = render_to_string(html_path, context_data)               
-                text_content = "..."                      
-                receiver = i,
-                msg = EmailMultiAlternatives("Congratulations!!", text_content, email_from, receiver, connection=connection)                                      
-                msg.attach_alternative(html_content, "text/html")
-                msg.attach(img)
-                msg.send()
-            connection.close()
-            instance.is_post = False
-            instance.save()
-        except Exception as ex:
-            print(ex,"exx")
-            pass
-
-
 #############################  CMS  ###################################
 
 class WhatsonEddiCMS(models.Model):
@@ -517,7 +361,6 @@ class ContactFormLead(models.Model):
     class Meta:
         verbose_name_plural = _("Contact Form Lead Table")
 
-
 class ContactFormLead_SV(models.Model):
     fullname = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Full Name'))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
@@ -536,52 +379,6 @@ class ContactFormLead_SV(models.Model):
 
     class Meta:
         verbose_name_plural = _("Contact Form Lead Table SV")
-
-@receiver(post_save, sender=ContactFormLead)
-@receiver(post_save, sender=ContactFormLead_SV)
-def send_contactlead_email(sender, instance, created, **kwargs):
-    if created:
-        html_path = CONTACT_LEAD
-        context_data = {'fullname':instance.fullname, "email":instance.email_id, "phone":instance.phone_number, "msg":instance.message}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = ('jap.d@latitudetechnolabs.com',)
-        email_msg = EmailMessage('General Inquiry from User',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
-
-@receiver(post_save, sender=ContactFormLead)
-@receiver(post_save, sender=ContactFormLead_SV)
-def send_contact_usl(sender, instance, created, **kwargs):
-    if created:
-        html_path = CONTACTUS_USER
-        context_data = {'fullname':instance.fullname}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Inquiry Submitted',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
 
 class BlogDetails(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
@@ -757,11 +554,11 @@ class HomePageCMS(models.Model):
     class Meta:
         verbose_name_plural = _("Home Page")
 
-def regions_changed(sender, **kwargs):
-    if kwargs['instance'].section_5_blog.count() > 4:
-        raise ValidationError("You can't assign more than four regions")
+# def regions_changed(sender, **kwargs):
+#     if kwargs['instance'].section_5_blog.count() > 4:
+#         raise ValidationError("You can't assign more than four regions")
 
-m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
+# m2m_changed.connect(regions_changed, sender=HomePageCMS.section_5_blog.through)
 
 
 class HomePageCMS_SV(models.Model):
@@ -815,7 +612,7 @@ class HomePageCMS_SV(models.Model):
 # m2m_changed.connect(regions_changed, sender=HomePageCMS_SV.section_5_blog.through)
 
 
-class AboutUsPageCMS(models.Model):
+class AboutUsPageCMS(models.Model): 
 
     #section 1
     section_1_image = models.ImageField(upload_to = 'about_us/',blank=True,null=True,verbose_name=_('Banner Image'))
@@ -1206,9 +1003,6 @@ class SupplierProfile(models.Model):
     class Meta:
         verbose_name_plural = _("Supplier Profile")
 
-
-
-    
 class FavouriteCourse(models.Model):
     course_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Name"))
     email_id = models.EmailField(blank=True,null=True,verbose_name=_('Email ID'))
@@ -1220,10 +1014,6 @@ class FavouriteCourse(models.Model):
 
     class Meta:
         verbose_name_plural = _("Favourite Course")
-
-
-    
-
 
 
 class EventAd(models.Model):    
@@ -1265,7 +1055,6 @@ class EventAd(models.Model):
         
     class Meta:
         verbose_name_plural = _("EventAd Table")
-
 
 
 class MaterialVideoMaterial(models.Model):
@@ -1414,7 +1203,6 @@ class EventAdEnroll(models.Model):
     class Meta:
         verbose_name_plural = _("Event Ad Enroll")
     
-
 class UserPaymentDetail(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'))
     course = models.ForeignKey(CourseDetails, on_delete=models.CASCADE, blank=True,null=True, default=None)
@@ -1434,7 +1222,6 @@ class UserPaymentDetail(models.Model):
     def __str__(self):
         return str(self.course.course_name)
 
-    
 class CourseEnroll(models.Model):
     course_category = models.CharField(max_length=100,blank=True,null=True,verbose_name=_("Course Category"))
     supplier_email = models.EmailField(blank=True,null=True,verbose_name=_('supplier email'))
@@ -1449,29 +1236,6 @@ class CourseEnroll(models.Model):
     class Meta:
         verbose_name_plural = _("Course Enroll")  
 
-@receiver(post_save, sender=CourseEnroll)
-def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    if created:
-        html_path = COURSE_ENROLL_HTML_TO_S
-        fullname = f'{instance.user_profile.first_name} {instance.user_profile.last_name}'
-        category = f'{instance.course_category}'
-        context_data = {'fullname':fullname, "course_category":category}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.supplier_email,)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-        print("TRUE")
 
 class Notification(models.Model):
     sender = models.TextField(max_length=5000,blank=True,null=True,verbose_name=_('sender'))
@@ -1510,7 +1274,6 @@ class UserProfileCMS_SV(models.Model):
     button_2_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 2 Text'))
     button_3_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 3 Text'))
     button_4_text = models.CharField(max_length=50,blank=True,null=True,verbose_name=_('Button 4 Text'))
-
 
 
 class PaybyInvoice(models.Model):
@@ -1589,7 +1352,6 @@ class CourseBatch(models.Model):
     class Meta:
         verbose_name_plural = _("Course Batch Table")
 
-   
 class BatchSession(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4,unique=True,verbose_name=_('UUID'),blank=True,null=True)
     session_name = models.CharField(max_length=100,blank=True,null=True,verbose_name=_('Session Name'))
@@ -1611,159 +1373,3 @@ class BatchSession(models.Model):
     
     class Meta:
         verbose_name_plural = _("Batch Session Table")
-
-@receiver(post_save, sender=UserSignup)
-def send_appointment_confirmation_email(sender, instance, created, **kwargs):
-    print("OUTER")
-    if created and instance.user_type.user_type == ADMIN_S:
-        try:
-            record_map = {}
-            record_map = {
-                "supplier_name" : f"{instance.first_name} {instance.last_name}",
-                "supplier_email" : f"{instance.email_id}"
-            }
-            SupplierProfile.objects.update_or_create(**record_map)
-        except Exception as ex:
-            print(ex, "exexexexe")
-        html_path = OTP_EMAIL_HTML
-        otp = PasswordView()
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id,"url":SUPPLIER_URL,"user_type":"admin"}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        data = UserSignup.objects.get(email_id = instance.email_id)
-        data.password = make_password(otp)
-        data.save()
-        record_map = {
-            'supplier' : data,
-        }
-        SupplierAccountDetail.objects.update_or_create(**record_map)
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
-    if created and instance.user_type.user_type == SUPPLIER_S:
-        try:
-            message = f"{instance.first_name}, as a Supplier has been added by the System."
-            # send_notification(sender, receiver, message, sender_type=None, receiver_type=None)
-            data = UserSignup.objects.filter(user_type__user_type = "Admin")
-            receiver = [i.email_id for i in data]
-            receiver_device_token = []
-            for i in data:
-                device_data = UserDeviceToken.objects.filter(user_type=i)
-                for j in device_data:
-                    receiver_device_token.append(j.device_token)
-
-            try:
-                translator= Translator(from_lang='english',to_lang="swedish")
-                message_sv = translator.translate(f"{instance.first_name}, as a Supplier has been added by the System.")
-            except:
-                pass
-            # send_notification(instance.email_id, receiver, message)
-            send_push_notification(receiver_device_token,message)
-            for i in receiver:
-                try:
-                    record_map1 = {}
-                    record_map1 = {
-                        "sender" : instance.email_id,
-                        "receiver" : i,
-                        "message" : message,
-                        "message_sv" : message_sv,
-                    }
-
-                    Notification.objects.update_or_create(**record_map1)
-                except Exception as ex:
-                    print(ex,"exexe")
-                    pass
-        except:
-            pass
-        try:
-            record_map = {}
-            record_map = {
-                "supplier_name" : f"{instance.first_name} {instance.last_name}",
-                "supplier_email" : f"{instance.email_id}"
-            }
-            SupplierProfile.objects.update_or_create(**record_map)
-        except Exception as ex:
-            print(ex, "exexexexe")
-
-        html_path = OTP_EMAIL_HTML
-        otp = PasswordView()
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'final_otp':otp,'fullname':fullname, "email":instance.email_id, "url":SUPPLIER_URL,"user_type":"supplier"}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        data = UserSignup.objects.get(email_id = instance.email_id)
-        data.password = make_password(otp)
-        data.save()
-        email_msg = EmailMessage('Welcome to Eddi',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
-    if created and instance.user_type.user_type == 'User':
-        html_path = VERIFY_EMAIL
-        fullname = f'{instance.first_name} {instance.last_name}'
-        context_data = {'fullname':fullname,"url":FRONT_URL+f"verify-user/{instance.uuid}"}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (instance.email_id,)
-        email_msg = EmailMessage('Please verify your Eddi account',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-
-
-
-
-
-@receiver(post_save, sender=BatchSession)
-def send_session_email(sender, instance, created, **kwargs):
-    print("OUTER")
-    for student in instance.batch.students.all():
-        html_path = SESSION_INVITATION
-        fullname = f'{student.first_name} {student.last_name}'
-        context_data = {'fullname':fullname, "email":student.email_id,"session_name":instance.session_name}
-        email_html_template = get_template(html_path).render(context_data)
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = (student.email_id,)
-        email_msg = EmailMessage('Invitation To Join Session',email_html_template,email_from,recipient_list)
-        email_msg.content_subtype = 'html'
-        path = 'eddi_app'
-        img_dir = 'static'
-        image = 'Logo.png'
-        file_path = os.path.join(path,img_dir,image)
-        with open(file_path,'rb') as f:
-            img = MIMEImage(f.read())
-            img.add_header('Content-ID', '<{name}>'.format(name=image))
-            img.add_header('Content-Disposition', 'inline', filename=image)
-        email_msg.attach(img)
-        email_msg.send(fail_silently=False)
-

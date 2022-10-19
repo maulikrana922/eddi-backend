@@ -24,20 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import os
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['console'],
-#         'level': 'WARNING',
-#     },
-# }
-
 env = environ.Env()
 environ.Env.read_env()
 
@@ -49,8 +35,6 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!!
 DEBUG = env.bool('DEBUG', default=True)
-
-
 
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
@@ -76,10 +60,11 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rosetta',
     'debug_toolbar',
+    'storages',
 ]
 
 
-LOCALE_PATHS = [os. path.join(BASE_DIR, 'locale')]
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 production_models = [
     'eddi_app.HomePageCMSBanner',
@@ -211,6 +196,16 @@ JAZZMIN_SETTINGS = {
             "url": "/admin/eddi_app/termsconditioncms_sv/1/change/", 
             "icon": "fas fa-file-signature",
         },
+        {
+            "name": _("Eddi Labs Page"), 
+            "url": "/admin/eddi_app/eddilabscms/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
+        {
+            "name": _("Eddi Labs Page SV"), 
+            "url": "/admin/eddi_app/eddilabscms_sv/1/change/", 
+            "icon": "fas fa-file-signature",
+        },
         ],
    
        
@@ -221,8 +216,8 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "changeform_format": "collapsible",
 
-    # "hide_models": production_models,
-    "hide_models": local_models,
+    "hide_models": production_models,
+    # "hide_models": local_models,
     "order_with_respect_to": ["eddi_app.HomePageCMS", "eddi_app.AboutUsPageCMS"],
     
 
@@ -282,9 +277,7 @@ REST_FRAMEWORK = {
  # ...
 }
 CKEDITOR_CONFIGS = {
-    'default': {
-        
-        
+    'default': {     
         'width': '100%',
         'toolbarCanCollapse': False,
     },
@@ -350,10 +343,7 @@ CMS_TEMPLATES = (
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
 
-MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
 
 TOKEN_TTL = datetime.timedelta(days=15) #Authentication Token Lifetime
 
@@ -373,9 +363,36 @@ STRIPE_SECRET_KEY='sk_test_51LT5qWF219DjFxE1R3LS85B4AMsM1ZJLbogPB0Q3vUfluAa8DRbc
 STRIPE_WEBHOOK_SECRET = ""
 
 CRONJOBS = [
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
-    # ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_event'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_course'),
+    ('*/1 * * * *', 'eddi_app.cron.my_cron_job_login'),
     ('*/1 * * * *', 'eddi_app.cron.my_cron_job_balance'),
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:8000',
+    }
+}
+
+if env('DJANGO_ENV') == 'production':
+    AWS_ACCESS_KEY_ID = 'AKIA4P73HLGU2NK2AVOS'
+    AWS_SECRET_ACCESS_KEY = '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'
+    AWS_STORAGE_BUCKET_NAME = 'eddi-dev'
+    AWS_S3_REGION_NAME = "us-east-2"
+
+    # AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_DEFAULT_ACL = 'public-read'
+    PUBLIC_MEDIA_LOCATION = 'media'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+    STATIC_URL = '/static/'
+    DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
+
+else:
+    STATIC_URL = '/static/'
+    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = '/media/'

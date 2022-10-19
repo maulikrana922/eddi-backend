@@ -1,4 +1,103 @@
 {% load static %}
+{% if swedish_default %}
+  <table
+    cellpadding="0"
+    cellspacing="0"
+    style="
+      font-family: Arial, Helvetica, sans-serif;
+      max-width: 100%;
+      width: 630px;
+      margin: 0 auto;
+    "
+  >
+    <tr>
+      <td
+        height="70"
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          background-color: #3e8181;
+        "
+      >
+        <img src="cid:Logo.png" style="width: 120px; padding:7px;" />
+      </td>
+    </tr>
+    <tr>
+      <td height="45"></td>
+    </tr>
+    <tr>
+      <td
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          color: #3e3e3e;
+          font-size: 18px;
+        "
+      >
+      Välkommen {{fullname}},
+        
+      </td>
+    </tr>
+    <tr>
+      <td height="25"></td>
+    </tr>
+        <td style="color: #3e3e3e;font-size: 17px;">
+          Grattis, ditt konto hos Eddi har nu verifierats.. Du kan nu skapa din profil,och sedan är du redo att söka nya utbildningar med Eddi. 
+        </td>
+    <tr>
+    <tr>
+      <td height="45"></td>
+    </tr>
+    <tr>
+      <td style="color: #3e3e3e;font-size: 17px;">
+        Välkommen,
+          <br>
+          The Eddi Team.    </td>
+    </tr>
+
+  
+    <tr>
+      <td height="30"></td>
+    </tr>
+    <tr>
+      <td
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: 300;
+          color: #3e3e3e;
+          text-decoration: none;
+          display: grid;
+          font-size: 17px;
+        "
+      >
+      För information eller hjälp, kontakta oss på
+        <a
+          style="
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 300;
+            color: #3e3e3e;
+            text-decoration: none;
+            font-size: 17px;
+          "
+          href="mailto:kundtjanst@eddi.nu"
+        >
+        kundtjanst@eddi.nu</a
+        >
+      </td>
+    </tr>
+    
+    <tr>
+      <td height="45"></td>
+    </tr>
+    <tr>
+      <td
+        height="30"
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          background-color: #3e8181;
+        "
+      ></td>
+    </tr>
+  </table>
+{% else %}
 <table
   cellpadding="0"
   cellspacing="0"
@@ -8,7 +107,7 @@
     width: 630px;
     margin: 0 auto;
   "
->
+  >
   <tr>
     <td
       height="70"
@@ -39,7 +138,7 @@
     <td height="25"></td>
   </tr>
       <td style="color: #3e3e3e;font-size: 17px;">
-        Congratulations, your email has been successfully verified. Now you can login to the Eddi Platform. 
+        Congratulations, your accounthas been successfully verified. ou can now login to the Eddi Platform. 
       </td>
   <tr>
   <tr>
@@ -52,7 +151,7 @@
         The Eddi Team.    </td>
   </tr>
 
- 
+
   <tr>
     <td height="30"></td>
   </tr>
@@ -67,7 +166,7 @@
         font-size: 17px;
       "
     >
-      If you are in need of assistance please contact
+      If you are in need of any assistance please contact
       <a
         style="
           font-family: Arial, Helvetica, sans-serif;
@@ -82,7 +181,7 @@
       >
     </td>
   </tr>
-  
+
   <tr>
     <td height="45"></td>
   </tr>
@@ -95,4 +194,5 @@
       "
     ></td>
   </tr>
-</table>
+  </table>
+{% endif %}

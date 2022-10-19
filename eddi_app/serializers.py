@@ -53,6 +53,7 @@ class SubCategoryDetailsSerializer(DynamicFieldsModelSerializer):
     category_name = CategoryDetailsSerializer(fields=('category_name',))
     status = StatusSerializer(fields=('value',))
     is_approved = ApprovalStatusSerializer(fields=('value',))
+    
     class Meta:
         model = CourseSubCategoryDetails
         depth = 1
@@ -64,6 +65,7 @@ class CourseDetailsSerializer(DynamicFieldsModelSerializer):
     is_approved = ApprovalStatusSerializer(fields=('value',))
     course_category = CategoryDetailsSerializer(fields=('category_name',))
     course_subcategory = SubCategoryDetailsSerializer(fields=('subcategory_name',))
+    
     class Meta:
         model = CourseDetails
         depth = 2
@@ -79,6 +81,7 @@ class UserPaymentSerializer(DynamicFieldsModelSerializer):
     course = CourseDetailsSerializer(fields=('uuid','course_name','supplier','course_image','course_category','course_subcategory','course_starting_date'))
     invoice = InvoiceDataSerializer(fields=('invoice_pdf',))
     is_approved = ApprovalStatusSerializer(fields=('value',))
+    
     class Meta:
         model = UserPaymentDetail
         depth = 2
@@ -89,9 +92,6 @@ class CourseEnrollSerializer(serializers.ModelSerializer):
         model = CourseEnroll
         depth = 2
         fields = '__all__'
-
-
-
 
 class WhatsOnEddiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -105,126 +105,120 @@ class WhatsOnEddiSerializer_sv(serializers.ModelSerializer):
 
 
 class HomePageCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = HomePageCMS
         depth = 2
         fields = '__all__'
 
 class HomePageCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = HomePageCMS_SV
         depth = 2
         fields = '__all__'
 
 class TestinomialsDetailsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TestinomialsDetails
         depth = 1
         fields = '__all__'
 
 class TestinomialsDetailsSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = TestinomialsDetails_SV
         depth = 1
         fields = '__all__'
 
 class Header_FooterCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Header_FooterCMS
         depth = 1
         fields = '__all__'
 
 class Header_FooterCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = Header_FooterCMS_SV
         depth = 1
         fields = '__all__'
 
 class PrivacyPolicyPageCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PrivacyPolicyCMS
         depth = 1
         fields = '__all__'
 
 class PrivacyPolicyPageCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = PrivacyPolicyCMS_SV
         depth = 1
         fields = '__all__'
 
 class PrivacyPolicySupplierPageCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PrivacyPolicyCMS
         depth = 1
         fields = '__all__'
 
 class PrivacyPolicySupplierPageCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = PrivacyPolicyCMS_SV
         depth = 1
         fields = '__all__'
 
 class TermsConditionPageCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TermsConditionCMS
         depth = 1
         fields = '__all__'
 
 class TermsConditionPageCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = TermsConditionCMS_SV
         depth = 1
         fields = '__all__'
 
 class TermsConditionSupplierPageCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TermsConditionCMS
         depth = 1
         fields = '__all__'
 
 class TermsConditionSupplierPageCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = TermsConditionCMS_SV
         depth = 1
         fields = '__all__'
 
 class AboutUsCMSSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = AboutUsPageCMS
         depth = 2
         fields = '__all__'
 
 class AboutUsCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = AboutUsPageCMS_SV
         depth = 2
         fields = '__all__'
 
-class ContactUsCMSSerializer(serializers.ModelSerializer):
+class EddiLabsCMSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EddiLabsCMS
+        depth = 2
+        fields = '__all__'
 
+class EddiLabsCMSSerializer_sv(serializers.ModelSerializer):
+    class Meta:
+        model = EddiLabsCMS_SV
+        depth = 2
+        fields = '__all__'
+
+class ContactUsCMSSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactUsPageCMS
         depth = 1
         fields = '__all__'
 
 class ContactUsCMSSerializer_sv(serializers.ModelSerializer):
-
     class Meta:
         model = ContactUsPageCMS_SV
         depth = 1
@@ -347,7 +341,6 @@ class UserProfileCMS_SVSerializer(serializers.ModelSerializer):
 
 
 class CourseMaterialSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CourseMaterial
         depth = 2
@@ -359,13 +352,6 @@ class FavouriteCourseSerializer(serializers.ModelSerializer):
         model = FavouriteCourse
         depth = 1
         fields = '__all__'
-
-
-# class testSerializer(SupplierProfileSerializer):
-#     class Meta (SupplierProfileSerializer.Meta):
-#         model = SupplierOrganizationProfile
-#         depth = 1
-#         fields = ('organizational_name', 'supplier_name')
 
 class BatchDetailsSerializer(serializers.ModelSerializer):
     class Meta:

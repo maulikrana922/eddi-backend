@@ -44,9 +44,3 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
 
 )
-
-
-
-STRIPE_PUBLIC_KEY = 'pk_test_51LT5qWF219DjFxE14L3x0UwNEmGNMDfnTl01wQVgS7ORaVSAl66BHGEoRy8ciUs4TA2FMMIAEp6L7HQtwkaUdfvj00MfVoPYJ7'
-STRIPE_SECRET_KEY = 'sk_test_51LT5qWF219DjFxE1R3LS85B4AMsM1ZJLbogPB0Q3vUfluAa8DRbcqzsWjhZJCm52FQi6jxw4h6vq1N3iRKgtTP4s00UZq8ynLz'
-STRIPE_WEBHOOK_SECRET = ""

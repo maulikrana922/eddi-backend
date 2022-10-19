@@ -6,6 +6,7 @@ ENV = env('DJANGO_ENV')
 if ENV == 'development':
     FRONT_URL = 'https://eddi-frontend.testyourapp.online/'
     SUPPLIER_URL = 'https://eddi-supplier.testyourapp.online/#/'
+    STRIPE_PROFILE_LINK = 'https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&'
 else:
     FRONT_URL = 'https://eddistaging-frontend.testyourapp.online/'
     SUPPLIER_URL = 'https://eddistaging-supplier.testyourapp.online/#/'
@@ -32,6 +33,7 @@ IS_FIRST_TIME_LOGIN ='is_first_time_login'
 IS_STUDENT = 'is_student'
 IS_SUPPLIER = 'is_supplier'
 IS_ADMIN = 'is_admin'
+IS_SWEDISHDEFAULT = 'is_swedishdefault' 
 MODIFIED_AT = 'modified_date_time'
 MODIFIED_BY = 'modified_by'
 CREATED_AT='created_date_time'
@@ -69,6 +71,7 @@ INACTIVE_COURSE = "inactive_course.html"
 EVENT_ENROLL_HTML = "event_enroll.html"
 COURSE_ENROLL_HTML_TO_U = "course_enroll_to_user.html"
 SESSION_INVITATION = "session_invitation.html"
+SESSION_DELETION = "session_deletion.html"
 INVOICE_HTML = "invoice.html"
 INVOICE_TO_USER = 'invoice-to-user.html'
 VERIFY_EMAIL = 'verify_email.html'

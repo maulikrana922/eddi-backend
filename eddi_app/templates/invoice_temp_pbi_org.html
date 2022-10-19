@@ -20,12 +20,15 @@
             <tr>
               <td width="50%" align="left">
                 <table style="font-size: 12px">
-                  <tr>
+                  <!-- <tr>
                     <td style="font-weight: bold; font-size: 22px">Eddie AB</td>
-                  </tr>
+                  </tr> -->
                   <tr>
-                    <td>1234 State St Sweden, 12345</td>
+                    <td style="font-weight: bold; font-size: 22px"><img src="https://eddi-backend.testyourapp.online/static/eddi_logo.png" style="width: 120px; padding:7px;" /></td>
                   </tr>
+                  <!-- <tr>
+                    <td>1234 State St Sweden, 12345</td>
+                  </tr> -->
                 </table>
               </td>
               <td width="50%" align="right">
@@ -50,13 +53,27 @@
                       width="50%"
                       style="border: 1px #eee solid; padding: 10px 8px"
                     >
-                      <strong>Date</strong>
+                      <strong>Invoice created</strong>
                     </td>
                     <td
                       width="50%"
                       style="border: 1px #eee solid; padding: 10px 8px"
                     >
                       {{issue_date}}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      <strong>Payment terms</strong>
+                    </td>
+                    <td
+                      width="50%"
+                      style="border: 1px #eee solid; padding: 10px 8px"
+                    >
+                      30 days
                     </td>
                   </tr>
                 </table>
@@ -67,6 +84,14 @@
       </tr>
       <tr>
         <td style="height: 20px"></td>
+      </tr>
+      <tr>
+        <td style="font-weight: bold; font-size: 18px; width: 100%">
+          Invoice Recipient
+        </td>
+      </tr>
+      <tr>
+        <td style="height: 10px"></td>
       </tr>
       <tr>
         <td width="100%" style="width: 100%">
@@ -147,74 +172,46 @@
       </tr>
       <tr>
         <td>
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td width="50%" align="left">
-                <table width="100%" align="left" style="font-size: 12px">
-                  <tr>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      <strong>Vat Specification</strong>
-                    </td>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      {{vat}}%
-                    </td>
-                  </tr>
-                </table>
-              </td>
-              <td width="50%" align="right">
-                <table width="100%" align="left" style="font-size: 12px">
-                  <tr>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      <strong>Total Amount</strong>
-                    </td>
-                    <td style="border: 1px #eee solid; padding: 10px 8px">
-                      {{total_fees}} SEK
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-
-      <tr>
-        <td style="height: 20px"></td>
-      </tr>
-      <tr>
-        <td>
           <table
             width="100%"
             cellpadding="0"
             cellspacing="0"
-            style="border: 1px #eee solid; padding: 10px"
+            style="border: 1px #eee; padding: 10px"
           >
-            <td width="25%" align="left">
+            <td width="20%" align="center">
               <table width="100%" style="font-size: 12px">
                 <tr>
                   <td style="font-weight: bold; font-size: 16px">Eddie AB</td>
                 </tr>
                 <tr>
-                  <td>1234 State St Sweden, 12345</td>
+                  <td>BG: 5861-8182</td>
+                </tr>
+                <tr>
+                  <td>Brantingsgatan 19</td>
+                </tr>
+                <tr>
+                  <td>115 35 Stockholm</td>
+                </tr>
+                <tr>
+                  <td>+46 (0)76-006 46 74</td>
                 </tr>
               </table>
             </td>
-            <td width="50%" align="center">
+            <td width="85%" align="left">
               <table width="100%" style="font-size: 12px; text-align: center">
                 <tr>
                   <td style="font-weight: bold; font-size: 16px">
-                    Eddie Customer Service
+                   ORG/VAT:SE559296404201
                   </td>
                 </tr>
                 <tr>
-                  <td>test@gmail.com</td>
-                </tr>
-                <tr>
-                  <td>Phone:076-1112312</td>
+                  <td style="font-size: 16px">
+                   (F-skatt applies )
+                  </td>
                 </tr>
               </table>
             </td>
-            <td width="25%" align="left">
+            <!-- <td width="25%" align="left">
               <table width="100%" style="font-size: 12px">
                 <tr>
                   <td style="font-weight: bold; font-size: 16px">
@@ -225,7 +222,7 @@
                   <td>XXXXXXXXXX</td>
                 </tr>
               </table>
-            </td>
+            </td> -->
           </table>
         </td>
       </tr>
@@ -235,7 +232,7 @@
       <tr>
         <td style="height: 15px"></td>
       </tr>
-      <tr>
+      <!-- <tr>
         <td width="100%" style="font-size: 12px; text-align: center">
           <table align="center">
             <tr>
@@ -250,7 +247,7 @@
             </tr>
           </table>
         </td>
-      </tr>
+      </tr> -->
     </table>
   </body>
 </html>

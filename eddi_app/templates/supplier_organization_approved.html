@@ -1,5 +1,116 @@
 {% load static %}
-<table
+{% if swedish_default%}
+  <table
+    cellpadding="0"
+    cellspacing="0"
+    style="
+      font-family: Arial, Helvetica, sans-serif;
+      max-width: 100%;
+      width: 630px;
+      margin: 0 auto;
+    "
+  >
+    <tr>
+      <td
+        height="70"
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          background-color: #3e8181;
+        "
+      >
+        <img src="cid:Logo.png" style="width: 120px; padding:7px;" />
+      </td>
+    </tr>
+    <tr>
+      <td height="45"></td>
+    </tr>
+    <tr>
+      <td
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          color: #3e3e3e;
+          font-size: 18px;
+        "
+      >
+        Hej, {{fullname}}
+        
+      </td>
+      <br>
+    </tr>
+    <tr>
+      <td height="25"></td>
+    </tr>
+        <td style="color: #3e3e3e;font-size: 17px;">
+          Grattis, ert registrerade konto är nu godkänt av Eddi. Ni kan nu logga in genom att använda informationen nedan.
+        <br>
+        <br>
+        <a href="{{url}}" style=" background-color: #3e8181;color: #fff;font-size: 18px;padding: 5px 20px; border-radius: 30px; text-decoration: none;"> <b>Login</b></a>
+        </td>
+    <tr>
+      <td height="25"></td>
+    </tr>
+        <td style="color: #3e3e3e;font-size: 17px;">
+          För att skapa ett Stripe-konto (rekommenderas), klicka på länken nedan.
+        <br>
+        <br>
+        <a href="https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&state={{uuid}}#/" style=" background-color: #3e8181;color: #fff;font-size: 18px;padding: 5px 20px; border-radius: 30px; text-decoration: none;"> <b>Create Stripe Account</b></a>
+        </td>
+    <tr>
+      <td height="45"></td>
+    </tr>
+    <tr>
+      <td style="color: #3e3e3e;font-size: 17px;">
+        Hälsningar,
+        <br>
+        The Eddi Team.    </td>
+    </tr>
+
+  
+    <tr>
+      <td height="30"></td>
+    </tr>
+    <tr>
+      <td
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: 300;
+          color: #3e3e3e;
+          text-decoration: none;
+          display: grid;
+          font-size: 17px;
+        "
+      >
+      För information eller hjälp, kontakta oss på
+        <a
+          style="
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 300;
+            color: #3e3e3e;
+            text-decoration: none;
+            font-size: 17px;
+          "
+          href="mailto:kontakt@eddi.nu"
+        >
+          kontakt@eddi.nu</a
+        >
+      </td>
+    </tr>
+    
+    <tr>
+      <td height="30"></td>
+    </tr>
+    <tr>
+      <td
+        height="30"
+        style="
+          font-family: Arial, Helvetica, sans-serif;
+          background-color: #3e8181;
+        "
+      ></td>
+    </tr>
+  </table>
+{%else%}
+  <table
   cellpadding="0"
   cellspacing="0"
   style="
@@ -8,7 +119,7 @@
     width: 630px;
     margin: 0 auto;
   "
->
+  >
   <tr>
     <td
       height="70"
@@ -40,7 +151,7 @@
     <td height="25"></td>
   </tr>
       <td style="color: #3e3e3e;font-size: 17px;">
-        Congratulations, your profile has been approved by the admin.You can now login to the Eddi Platform using below login button.
+        Congratulations, your profile has been approved by the Admin.You can now login to the Eddi Platform using the login button below
       <br>
       <br>
       <a href="{{url}}" style=" background-color: #3e8181;color: #fff;font-size: 18px;padding: 5px 20px; border-radius: 30px; text-decoration: none;"> <b>Login</b></a>
@@ -49,7 +160,7 @@
     <td height="25"></td>
   </tr>
       <td style="color: #3e3e3e;font-size: 17px;">
-        For creating stripe account please click on below mention button.
+        For creating a stripe account, please click on the button below.
       <br>
       <br>
       <a href="https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&state={{uuid}}#/" style=" background-color: #3e8181;color: #fff;font-size: 18px;padding: 5px 20px; border-radius: 30px; text-decoration: none;"> <b>Create Stripe Account</b></a>
@@ -64,7 +175,7 @@
       The Eddi Team.    </td>
   </tr>
 
- 
+
   <tr>
     <td height="30"></td>
   </tr>
@@ -94,7 +205,7 @@
       >
     </td>
   </tr>
-  
+
   <tr>
     <td height="30"></td>
   </tr>
@@ -107,4 +218,5 @@
       "
     ></td>
   </tr>
-</table>
+  </table>
+{%endif%}
