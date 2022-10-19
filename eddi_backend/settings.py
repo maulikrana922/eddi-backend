@@ -377,22 +377,22 @@ CACHES = {
     }
 }
 
-# if env('DJANGO_ENV') == 'production':
-AWS_ACCESS_KEY_ID = 'AKIA4P73HLGU2NK2AVOS'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'eddi-dev'
-AWS_S3_REGION_NAME = "us-east-2"
+if env('DJANGO_ENV') == 'production':
+    AWS_ACCESS_KEY_ID = 'AKIA4P73HLGU2NK2AVOS'
+    AWS_SECRET_ACCESS_KEY = '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'
+    AWS_STORAGE_BUCKET_NAME = 'eddi-dev'
+    AWS_S3_REGION_NAME = "us-east-2"
 
-# AWS_S3_SIGNATURE_VERSION = 's3v4'
-AWS_DEFAULT_ACL = 'public-read'
-PUBLIC_MEDIA_LOCATION = 'media'
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
-MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-STATIC_URL = '/static/'
-DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
+    # AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_DEFAULT_ACL = 'public-read'
+    PUBLIC_MEDIA_LOCATION = 'media'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
+    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+    STATIC_URL = '/static/'
+    DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
 
-# else:
-#     STATIC_URL = '/static/'
-#     MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-#     MEDIA_URL = '/media/'
+else:
+    STATIC_URL = '/static/'
+    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = '/media/'
