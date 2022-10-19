@@ -1,3 +1,4 @@
 eddi_backend/.env
 /__pycache__
 **.pyc**
+.gitlab-ci.yml
