@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rosetta',
     'debug_toolbar',
-    'storages'
+    'storages',
 ]
 
 
@@ -394,6 +394,6 @@ STATICFILES_STORAGE = 'eddi.backend.s3boto3.S3StaticStorage'
 STATICFILES_STORAGE = 'eddi.backend.s3boto3.S3ManifestStaticStorage'
 
 # else:
-#     STATIC_URL = '/static/'
-#     MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/'
+# MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 #     MEDIA_URL = '/media/'
