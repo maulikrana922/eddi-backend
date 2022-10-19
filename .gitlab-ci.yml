@@ -1,4 +1,4 @@
-deploy-job:      
+deploy-job:
   stage: deploy  
   tags:
     - "eddi-backend"
