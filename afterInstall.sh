@@ -10,4 +10,4 @@ python3.9 get-pip.py
 echo 'export PATH=~/.local/bin/:$PATH' >> ~/.bashrc
 source ~/.bashrc
 cd /var/www/html/eddi-backend/
-pip3 install requirements.txt
+pip3 install -r requirements.txt
