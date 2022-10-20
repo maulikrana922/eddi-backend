@@ -3,10 +3,11 @@ os: linux
 files:
   - source: /
     destination: /var/www/html/eddi-backend
+    runas: ubuntu
 hooks:
-  BeforeInstall:
-    - location: beforeInstall.sh
-      timeout: 60
+  AfterInstall:
+    - location: afterInstall.sh
+      timeout: 100    
   ApplicationStart:
     - location: applicationStart.sh
       timeout: 100
