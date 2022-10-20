@@ -38,3 +38,4 @@ google-auth-oauthlib==0.5.2
 googleapis-common-protos==1.56.4
 django-debug-toolbar==3.5.0
 django-jazzmin
+mysqlclient
