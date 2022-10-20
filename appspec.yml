@@ -4,6 +4,9 @@ files:
   - source: /
     destination: /var/www/html/eddi-backend
 hooks:
+  BeforeInstall:
+    - location: beforeInstall.sh
+      timeout: 60
   ApplicationStart:
     - location: applicationStart.sh
       timeout: 100
