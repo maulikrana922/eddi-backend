@@ -9,5 +9,12 @@ apt-get install python3.9-distutils -y
 python3.9 get-pip.py
 echo 'export PATH=~/.local/bin/:$PATH' >> ~/.bashrc
 source ~/.bashrc
+apt-get install gcc -y
+apt-get install mysql-client -y
+apt-get install libmysqlclient-dev -y
+pip install django-wkhtmltopdf
+chown -R ubuntu:ubuntu /var/www/html/eddi-backend
+apt-get install libgl -y
+apt-get install mysql-server -y
 cd /var/www/html/eddi-backend/
 pip3 install -r requirements.txt
