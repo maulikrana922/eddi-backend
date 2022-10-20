@@ -14,7 +14,7 @@ apt-get install mysql-client -y
 apt-get install libmysqlclient-dev -y
 pip install django-wkhtmltopdf
 chown -R ubuntu:ubuntu /var/www/html/eddi-backend
-apt-get install libgl -y
+apt-get install libgl1 -y
 apt-get install mysql-server -y
 cd /var/www/html/eddi-backend/
 pip3 install -r requirements.txt
