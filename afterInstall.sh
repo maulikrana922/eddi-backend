@@ -1,3 +1,3 @@
 #!/bin/bash
+python3.9 -V
 cd /var/www/html/eddi-backend/
-pip3 install -r requirements.txt
