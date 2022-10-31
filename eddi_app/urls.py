@@ -42,7 +42,7 @@ urlpatterns = [
     path('get-user-details/',GetUserDetails.as_view()),
 
     # Course
-    path('add-course/',AddCourseView.as_view()), 
+    path('add-course/',AddCourseView.as_view()),
     path('course-rating/<str:uuid>/',CourseRating.as_view(), name="CourseRating"),   
     path('course-rating-admin/',CourseRatingAdmin.as_view(), name="CourseRatingAdmin"),   
     path('course-rating-admin/<str:uuid>/',CourseRatingAdmin.as_view(), name="CourseRatingAdmin"),   
