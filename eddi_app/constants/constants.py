@@ -8,8 +8,9 @@ if ENV == 'development':
     SUPPLIER_URL = 'https://eddi-supplier.testyourapp.online/#/'
     STRIPE_PROFILE_LINK = 'https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&'
 else:
-    FRONT_URL = 'https://eddistaging-frontend.testyourapp.online/'
-    SUPPLIER_URL = 'https://eddistaging-supplier.testyourapp.online/#/'
+    FRONT_URL = 'https://www.eddi.nu/'
+    SUPPLIER_URL = 'https://admin.eddi.nu/'
+    STRIPE_PROFILE_LINK = 'https://connect.stripe.com/express/oauth/authorize?response_type=code&client_id=ca_MBSpisruDRjLebOHkMle2ampUcXauh9n&scope=read_write&'
 
 FIRST_NAME = 'first_name'
 LAST_NAME = 'last_name'

@@ -36,7 +36,6 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!!
 DEBUG = env.bool('DEBUG', default=True)
 
-
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split(",")
 
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS').split(",")
@@ -376,6 +375,9 @@ CACHES = {
         'LOCATION': '127.0.0.1:8000',
     }
 }
+MEDIA_URL = '/media/'
+MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+STATIC_URL = '/static/'
 
 if env('DJANGO_ENV') == 'production':
     AWS_ACCESS_KEY_ID = 'AKIA4P73HLGU2NK2AVOS'
@@ -384,15 +386,8 @@ if env('DJANGO_ENV') == 'production':
     AWS_S3_REGION_NAME = "us-east-2"
 
     # AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_DEFAULT_ACL = 'public-read'
-    PUBLIC_MEDIA_LOCATION = 'media'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/'
-    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-    STATIC_URL = '/static/'
+    AWS_DEFAULT_ACL = None
+   
     DEFAULT_FILE_STORAGE = 'eddi_backend.storage_backend.MediaStorage'
+    CORS_ORIGIN_ALLOW_ALL = True
 
-else:
-    STATIC_URL = '/static/'
-    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-    MEDIA_URL = '/media/'
